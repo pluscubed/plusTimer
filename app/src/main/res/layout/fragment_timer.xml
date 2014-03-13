@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@id/fragment_timer_relative"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@id/scramble_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#ff70dd75"
+        android:gravity="center"
+        android:padding="5dp"
+        android:text="Scrambling!"
+        android:textSize="18dp" />
+
+    <TextView
+        android:id="@id/fragment_timer_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="@string/start"
+        android:textSize="40sp" />
+
+</RelativeLayout>
+    
+
