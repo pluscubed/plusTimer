@@ -13,12 +13,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 import net.gnehzr.tnoodle.scrambles.Puzzle;
 import net.gnehzr.tnoodle.scrambles.PuzzlePlugins;
+
+import java.util.ArrayList;
 
 /**
  * TimerFragment
@@ -29,18 +32,23 @@ public class TimerFragment extends Fragment {
 
     private TextView mTimerTextView;
     private TextView mScrambleText;
-    private RelativeLayout mLayout;
+    private RelativeLayout mTimerRelative;
+    private LinearLayout mSessionScrollLinear;
 
     private long mStartTime;
     private long mEndTime;
 
-
     private boolean mRunning;
+
     private Runnable mTimerRunnable;
+    private GenerateScramblesTask mScrambleTask;
+    private PuzzleType mCurrentPuzzleType;
+    private Session mSession;
 
-    private ScramblingTask mScrambleTask;
 
-    private String mPuzzleType;
+    private boolean mConfigChange;
+    private boolean mStartup;
+
 
     public static String convertNanoToTime(long nano) {
 
@@ -64,6 +72,15 @@ public class TimerFragment extends Fragment {
             return String.format("%d:%d:%.3f", hours, minutes, seconds);
     }
 
+    private void updateScramble() {
+        if (mScrambleTask == null) {
+            mScrambleTask = new GenerateScramblesTask();
+            mScrambleTask.execute();
+        }
+
+
+    }
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
@@ -71,23 +88,24 @@ public class TimerFragment extends Fragment {
 
         Spinner puzzleTypeSpinner = (Spinner) MenuItemCompat.getActionView(menu.findItem(R.id.menu_item_puzzletypespinner));
 
-        ArrayAdapter<PuzzleTypes> puzzleTypeSpinnerAdapter =
-                new ArrayAdapter<PuzzleTypes>(
+        ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter =
+                new ArrayAdapter<PuzzleType>(
                         ((ActionBarActivity) getActivity()).getSupportActionBar().getThemedContext(),
                         android.R.layout.simple_spinner_item,
-                        PuzzleTypes.values()
+                        PuzzleType.values()
                 );
 
         puzzleTypeSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         puzzleTypeSpinner.setAdapter(puzzleTypeSpinnerAdapter);
+        puzzleTypeSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition(mCurrentPuzzleType), false);
         puzzleTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                PuzzleTypes selectedPuzzle = (PuzzleTypes) parent.getItemAtPosition(position);
-                mPuzzleType = selectedPuzzle.getType();
-                if (mScrambleTask == null) {
-                    mScrambleTask = new ScramblingTask();
-                    mScrambleTask.execute(mPuzzleType);
+                mCurrentPuzzleType = (PuzzleType) parent.getItemAtPosition(position);
+
+                if (!mConfigChange) {
+                    mScrambleText.setText(R.string.scrambling);
+                    updateScramble();
                 }
 
             }
@@ -97,26 +115,49 @@ public class TimerFragment extends Fragment {
 
             }
         });
+        mConfigChange = false;
 
-        puzzleTypeSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition(PuzzleTypes.THREE), false);
+
     }
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
         setHasOptionsMenu(true);
+        mRunning = false;
+        mCurrentPuzzleType = PuzzleType.THREE;
+        mStartup = true;
+        mSession = Session.get();
     }
+
+
+    private TextView createSessionTextView(LayoutInflater inflater, String time) {
+
+        TextView temp = (TextView) inflater.inflate(R.layout.scroll_textview, null);
+        temp.setText(time);
+        return temp;
+    }
+
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_timer, container, false);
+        mConfigChange = true;
 
         mTimerTextView = (TextView) v.findViewById(R.id.fragment_timer_text);
-        mLayout = (RelativeLayout) v.findViewById(R.id.fragment_timer_relative);
-        mRunning = false;
+        mTimerRelative = (RelativeLayout) v.findViewById(R.id.fragment_timer_relative);
+        mSessionScrollLinear = (LinearLayout) v.findViewById(R.id.fragment_timer_sessionscrolllinear);
         mScrambleText = (TextView) v.findViewById(R.id.scramble_text);
-        mPuzzleType = PuzzleTypes.THREE.getType();
+
+        if (mSession.getLastSolve() != null && !mRunning) {
+            mScrambleText.setText(mSession.getLastSolve().getScramble());
+            mTimerTextView.setText(mSession.getLastSolve().getTime());
+        } else if (mRunning) {
+            mScrambleText.setText(mSession.getLastSolve().getScramble());
+        }
 
 
         mTimerRunnable = new Runnable() {
@@ -127,32 +168,32 @@ public class TimerFragment extends Fragment {
             }
         };
 
-
-        mLayout.setOnClickListener(new View.OnClickListener() {
+        mTimerRelative.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!mRunning) {
-
                     mStartTime = System.nanoTime();
                     mRunning = true;
                     mTimerTextView.post(mTimerRunnable);
-                    if (mScrambleTask == null) {
-                        mScrambleTask = new ScramblingTask();
-                        mScrambleTask.execute(mPuzzleType);
-                    }
+                    mSession.addSolve(new Solve(mScrambleText.getText().toString(), null, null));
                 }
 
             }
         });
 
-        mLayout.setOnTouchListener(new View.OnTouchListener() {
+        mTimerRelative.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (mRunning) {
                     mEndTime = System.nanoTime();
                     mRunning = false;
                     mTimerTextView.removeCallbacks(mTimerRunnable);
-                    mTimerTextView.setText(convertNanoToTime(mEndTime - mStartTime));
+                    String finalTime = convertNanoToTime(mEndTime - mStartTime);
+                    mSession.getLastSolve().setScramble(mScrambleText.getText().toString());
+                    mSession.getLastSolve().setTime(finalTime);
+                    updateScramble();
+                    mTimerTextView.setText(mSession.getLastSolve().getTime());
+                    mSessionScrollLinear.addView(createSessionTextView(getActivity().getLayoutInflater(), mSession.getLastSolve().getTime()));
                     return true;
                 } else {
                     return false;
@@ -161,17 +202,18 @@ public class TimerFragment extends Fragment {
             }
         });
 
+        if (mStartup)
+            updateScramble();
 
-        mScrambleTask = new ScramblingTask();
-        mScrambleTask.execute(mPuzzleType);
+        mStartup = false;
 
         return v;
     }
 
-    /*onCreate*/
 
-    public enum PuzzleTypes {
-        SQ1("sq1", "Square 1"),
+    public enum PuzzleType {
+        //TODO: find faster square-1 scrambler
+        //SQ1("sq1", "Square 1"),
         SKEWB("skewb", "Skewb"),
         PYRAMINX("pyram", "Pyraminx"),
         MINX("minx", "Megaminx"),
@@ -179,19 +221,21 @@ public class TimerFragment extends Fragment {
         SEVEN("777", "7x7"),
         SIX("666", "6x6"),
         FIVE("555", "5x5"),
-        FOUR("444fast", "4x4"),
+        FOURFAST("444fast", "4x4-fast"),
         THREE("333", "3x3"),
         TWO("222", "2x2");
 
         private String type;
         private String displayName;
+        private ArrayList<String> queuedScrambles;
 
-        PuzzleTypes(String type, String displayName) {
+        PuzzleType(String type, String displayName) {
             this.type = type;
             this.displayName = displayName;
+            queuedScrambles = new ArrayList<String>();
         }
 
-        public String getType() {
+        public String getScrambleType() {
             return type;
         }
 
@@ -199,42 +243,71 @@ public class TimerFragment extends Fragment {
         public String toString() {
             return displayName;
         }
+
+        public void addScramble(String scramble) {
+            queuedScrambles.add(scramble);
+        }
+
+
+        public String getOldestScramble() {
+
+            String s = queuedScrambles.get(0);
+            queuedScrambles.remove(0);
+            return s;
+        }
+
+        public int sizeOfQueuedScrambles() {
+            return queuedScrambles.size();
+        }
     }
 
-    /* onCreateView */
 
-    /*ScramblingTask (AsyncTask) Inner Class*/
-    private class ScramblingTask extends AsyncTask<String, Void, String> {
+    /* (AsyncTask) Inner Class*/
+    private class GenerateScramblesTask extends AsyncTask<Void, Void, Void> {
 
         private Puzzle p;
 
         @Override
         protected void onPreExecute() {
-            mScrambleText.setText("Scrambling!");
         }
 
         @Override
-        protected String doInBackground(String... type) {
-            if (type.length == 1) {
+        protected Void doInBackground(Void... voids) {
+
+            if (mCurrentPuzzleType.sizeOfQueuedScrambles() == 0) {
                 try {
-                    p = PuzzlePlugins.getScramblers().get(type[0]).cachedInstance();
+                    p = PuzzlePlugins.getScramblers().get(mCurrentPuzzleType.getScrambleType()).cachedInstance();
                 } catch (Exception e) {
-                    return null;
+                    e.printStackTrace();
                 }
-                return p.generateScramble();
-            } else {
-                return null;
+                mCurrentPuzzleType.addScramble(p.generateScramble());
             }
 
+            publishProgress();
+            if (p == null) {
+                try {
+                    p = PuzzlePlugins.getScramblers().get(mCurrentPuzzleType.getScrambleType()).cachedInstance();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            mCurrentPuzzleType.addScramble(p.generateScramble());
+
+            return null;
+
         }
 
         @Override
-        protected void onPostExecute(String scramble) {
-            mScrambleText.setText(scramble);
-            mScrambleTask = null;
+        protected void onProgressUpdate(Void... NOTHING) {
+            mScrambleText.setText(mCurrentPuzzleType.getOldestScramble());
+
         }
 
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            mScrambleTask = null;
+        }
     }
-
 
 }

@@ -1,28 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@id/fragment_timer_relative"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    <TextView
-        android:id="@id/scramble_text"
+    <RelativeLayout
+        android:id="@id/fragment_timer_relative"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#ff70dd75"
-        android:gravity="center"
-        android:padding="5dp"
-        android:text="Scrambling!"
-        android:textSize="18dp" />
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
-    <TextView
-        android:id="@id/fragment_timer_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:text="@string/start"
-        android:textSize="40sp" />
+        <TextView
+            android:id="@id/scramble_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff70dd75"
+            android:gravity="center"
+            android:padding="5dp"
+            android:text="@string/scrambling"
+            android:textSize="18sp" />
 
-</RelativeLayout>
-    
+        <TextView
+            android:id="@id/fragment_timer_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="@string/start"
+            android:textSize="50sp" />
 
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="#ff005bdd"
+            android:gravity="center"
+            android:padding="5dp"
+            android:text="@string/details"
+            android:textColor="#ffffffff"
+            android:textSize="15sp" />
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#ff70dd75">
+
+            <LinearLayout
+                android:id="@id/fragment_timer_sessionscrolllinear"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+
+            </LinearLayout>
+
+        </HorizontalScrollView>
+    </LinearLayout>
+
+
+</LinearLayout>
