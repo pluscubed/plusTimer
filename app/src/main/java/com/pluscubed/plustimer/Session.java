@@ -6,36 +6,24 @@ import java.util.ArrayList;
  * Session data
  */
 public class Session {
-    private static Session sSession;
     private ArrayList<Solve> mSolves;
+
 
     public Session() {
         mSolves = new ArrayList<Solve>();
-    }
-
-    public static Session get() {
-        if (sSession == null) {
-            sSession = new Session();
-        }
-
-        return sSession;
     }
 
     public void addSolve(Solve s) {
         mSolves.add(s);
     }
 
-
-    public Solve getLastSolve() {
-        try {
-            return mSolves.get(mSolves.size() - 1);
-        } catch (Exception e) {
-            return null;
-        }
+    public int numberOfSolves() {
+        return mSolves.size();
     }
 
-    public ArrayList<Solve> getSolves() {
-        return mSolves;
+    public String getLatestSolveTime() {
+        return mSolves.get(mSolves.size() - 1).getTime();
     }
+
 
 }

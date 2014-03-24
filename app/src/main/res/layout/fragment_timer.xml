@@ -25,7 +25,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="@string/start"
+            android:text="@string/ready"
             android:textSize="50sp" />
 
     </RelativeLayout>
@@ -35,7 +35,7 @@
         android:layout_height="30dp"
         android:orientation="horizontal">
 
-        <TextView
+        <Button
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:background="#ff005bdd"
@@ -45,21 +45,14 @@
             android:textColor="#ffffffff"
             android:textSize="15sp" />
 
-        <HorizontalScrollView
+        <it.sephiroth.android.library.widget.HListView
+            android:id="@id/fragment_hlistview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#ff70dd75">
-
-            <LinearLayout
-                android:id="@id/fragment_timer_sessionscrolllinear"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
+            android:background="#ff70dd75"
+            android:cacheColorHint="#0000" />
 
 
-            </LinearLayout>
-
-        </HorizontalScrollView>
     </LinearLayout>
 
 

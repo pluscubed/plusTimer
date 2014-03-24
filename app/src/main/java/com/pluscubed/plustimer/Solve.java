@@ -6,12 +6,10 @@ package com.pluscubed.plustimer;
 public class Solve {
     private String scramble;
     private String time;
-    private String penalty;
 
-    public Solve(String scramble, String time, String penalty) {
+    public Solve(String scramble, String time) {
         this.scramble = scramble;
         this.time = time;
-        this.penalty = penalty;
     }
 
     public String getScramble() {
@@ -30,11 +28,4 @@ public class Solve {
         this.time = time;
     }
 
-    public String getPenalty() {
-        return penalty;
-    }
-
-    public void setPenalty(String penalty) {
-        this.penalty = penalty;
-    }
 }

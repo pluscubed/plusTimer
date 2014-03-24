@@ -2,9 +2,9 @@
 <resources>
 
     <string name="app_name">plusTimer</string>
-    <string name="start">Start</string>
+    <string name="ready">Ready</string>
     <string name="action_settings">Settings</string>
     <string name="details">Session</string>
-    <string name="scrambling">Initializing</string>
+    <string name="scrambling">Scrambling...</string>
 
 </resources>
