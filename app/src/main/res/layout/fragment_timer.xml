@@ -50,7 +50,10 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="#ff70dd75"
-            android:cacheColorHint="#0000" />
+            android:cacheColorHint="#0000"
+            android:divider="@null"
+            android:overScrollMode="always"
+            android:scrollbars="none" />
 
 
     </LinearLayout>

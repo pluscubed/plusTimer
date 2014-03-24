@@ -6,4 +6,5 @@
     <item name="activity_timer_frame" type="id" />
     <item name="menu_item_puzzletypespinner" type="id" />
     <item name="fragment_hlistview" type="id" />
+    <item name="fragment_hlistview_text" type="id" />
 </resources>

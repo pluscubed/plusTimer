@@ -1,5 +1,6 @@
 package com.pluscubed.plustimer;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -15,9 +16,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import java.util.List;
 
 import it.sephiroth.android.library.widget.HListView;
 
@@ -69,7 +73,6 @@ public class TimerFragment extends Fragment {
 
     }
 
-
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
@@ -91,7 +94,9 @@ public class TimerFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 mCurrentPuzzleType = (PuzzleType) parent.getItemAtPosition(position);
-                if (!mConfigChange && !mScrambling) {
+                if (!mConfigChange) {
+                    ((SolveAdapter) mHListView.getAdapter()).updateSolvesList();
+
                     mScrambleText.setText(R.string.scrambling);
                     mTimerText.setText(R.string.ready);
                     mActionPuzzleSpinner.setEnabled(false);
@@ -129,7 +134,6 @@ public class TimerFragment extends Fragment {
         mStartup = false;
     }
 
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -143,20 +147,22 @@ public class TimerFragment extends Fragment {
         scramblerThread.start();
         mScramblerThreadHandler = new Handler(scramblerThread.getLooper());
         mMainHandler = new Handler(Looper.getMainLooper());
-
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_timer, container, false);
         mConfigChange = true;
 
+
         mTimerText = (TextView) v.findViewById(R.id.fragment_timer_text);
         mTimerRelative = (RelativeLayout) v.findViewById(R.id.fragment_timer_relative);
         mScrambleText = (TextView) v.findViewById(R.id.scramble_text);
+        mHListView = (HListView) v.findViewById(R.id.fragment_hlistview);
 
 
+        SolveAdapter adapter = new SolveAdapter();
+        mHListView.setAdapter(adapter);
 
         mTimerRunnable = new Runnable() {
             @Override
@@ -197,6 +203,7 @@ public class TimerFragment extends Fragment {
                     mFinalTime = convertNanoToTime(mEndTime - mStartTime);
                     mTimerText.setText(mFinalTime);
                     mCurrentPuzzleType.getSession().addSolve(new Solve(mCurrentScramble, mFinalTime));
+                    ((SolveAdapter) mHListView.getAdapter()).notifyDataSetChanged();
                     if (mScrambling) {
                         mScrambleText.setText(R.string.scrambling);
                         mScramblerThreadHandler.post(new Runnable() {
@@ -260,6 +267,51 @@ public class TimerFragment extends Fragment {
 
 
         return v;
+    }
+
+    private class SolveAdapter extends BaseAdapter {
+
+        private List<Solve> mObjects;
+        private Context mContext;
+        private LayoutInflater mInflater;
+
+        public SolveAdapter() {
+            super();
+            mContext = getActivity();
+            mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            mObjects = mCurrentPuzzleType.getSession().getSolves();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return mObjects.get(position);
+        }
+
+        @Override
+        public int getCount() {
+            return mObjects.size();
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                convertView = mInflater.inflate(R.layout.item_list_item_solve, parent, false);
+            }
+            Solve s = (Solve) getItem(position);
+            TextView time = (TextView) convertView.findViewById(R.id.fragment_hlistview_text);
+            time.setText(s.getTime());
+            return convertView;
+        }
+
+        public void updateSolvesList() {
+            mObjects = mCurrentPuzzleType.getSession().getSolves();
+            notifyDataSetChanged();
+        }
     }
 
 

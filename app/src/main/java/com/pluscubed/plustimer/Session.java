@@ -8,9 +8,12 @@ import java.util.ArrayList;
 public class Session {
     private ArrayList<Solve> mSolves;
 
-
     public Session() {
         mSolves = new ArrayList<Solve>();
+    }
+
+    public ArrayList<Solve> getSolves() {
+        return mSolves;
     }
 
     public void addSolve(Solve s) {
