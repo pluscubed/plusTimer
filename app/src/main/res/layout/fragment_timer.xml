@@ -1,62 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <RelativeLayout
-        android:id="@id/fragment_timer_relative"
+
+    <TextView
+        android:id="@id/scramble_text"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:background="#ffe0e0e0"
+        android:gravity="center"
+        android:padding="5dp"
+        android:text="@string/scrambling"
+        android:textSize="18sp" />
 
-        <TextView
-            android:id="@id/scramble_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="#ff70dd75"
-            android:gravity="center"
-            android:padding="5dp"
-            android:text="@string/scrambling"
-            android:textSize="18sp" />
 
-        <TextView
-            android:id="@id/fragment_timer_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:text="@string/ready"
-            android:textSize="50sp" />
-
-    </RelativeLayout>
+    <TextView
+        android:id="@id/fragment_timer_text"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="@string/ready"
+        android:textSize="50sp" />
 
     <LinearLayout
+        android:id="@id/fragment_bottom_linear"
         android:layout_width="match_parent"
         android:layout_height="30dp"
+        android:layout_alignParentBottom="true"
         android:orientation="horizontal">
+
+        <it.sephiroth.android.library.widget.HListView
+            android:id="@id/fragment_hlistview"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="#ffe0e0e0"
+            android:cacheColorHint="#0000"
+            android:divider="@null"
+            android:overScrollMode="never"
+            android:scrollbars="none" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:background="#ff005bdd"
+            android:background="#ffc9c9c9"
             android:gravity="center"
             android:padding="5dp"
-            android:text="@string/details"
-            android:textColor="#ffffffff"
+            android:text="@string/submit"
             android:textSize="15sp" />
-
-        <it.sephiroth.android.library.widget.HListView
-            android:id="@id/fragment_hlistview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#ff70dd75"
-            android:cacheColorHint="#0000"
-            android:divider="@null"
-            android:overScrollMode="always"
-            android:scrollbars="none" />
 
 
     </LinearLayout>
 
 
-</LinearLayout>
+</RelativeLayout>

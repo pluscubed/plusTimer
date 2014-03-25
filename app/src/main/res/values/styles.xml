@@ -1,21 +1,21 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light">
-        <item name="hlv_listViewStyle">@style/HListView</item>
-        <item name="hlv_absHListViewStyle">@style/AbsHListView</item>
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <item name="hlv_listViewStyle">@style/HListView</item>
+
+
     </style>
 
-    <style name="AbsHListView">
-    </style>
 
-    <style name="HListView" parent="AbsHListView">
-        <item name="hlv_stackFromRight">false</item>
+    <style name="HListView">
+    <item name="hlv_stackFromRight">false</item>
         <item name="hlv_measureWithChild">0</item>
         <item name="hlv_dividerWidth">0dip</item>
         <item name="hlv_headerDividersEnabled">false</item>
         <item name="hlv_footerDividersEnabled">false</item>
         <item name="hlv_transcriptMode">alwaysScroll</item>
     </style>
+
 
 </resources>

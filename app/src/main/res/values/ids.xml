@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item name="scramble_text" type="id" />
-    <item name="fragment_timer_relative" type="id" />
     <item name="fragment_timer_text" type="id" />
     <item name="activity_timer_frame" type="id" />
     <item name="menu_item_puzzletypespinner" type="id" />
     <item name="fragment_hlistview" type="id" />
     <item name="fragment_hlistview_text" type="id" />
+    <item name="fragment_bottom_linear" type="id" />
 </resources>

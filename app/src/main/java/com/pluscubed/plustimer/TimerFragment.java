@@ -34,9 +34,9 @@ public class TimerFragment extends Fragment {
 
     private TextView mTimerText;
     private TextView mScrambleText;
-    private RelativeLayout mTimerRelative;
     private HListView mHListView;
     private Spinner mActionPuzzleSpinner;
+    private RelativeLayout mRootRelative;
 
     private long mStartTime;
     private long mEndTime;
@@ -156,9 +156,9 @@ public class TimerFragment extends Fragment {
 
 
         mTimerText = (TextView) v.findViewById(R.id.fragment_timer_text);
-        mTimerRelative = (RelativeLayout) v.findViewById(R.id.fragment_timer_relative);
         mScrambleText = (TextView) v.findViewById(R.id.scramble_text);
         mHListView = (HListView) v.findViewById(R.id.fragment_hlistview);
+        mRootRelative = (RelativeLayout) v.getRootView();
 
 
         SolveAdapter adapter = new SolveAdapter();
@@ -172,7 +172,7 @@ public class TimerFragment extends Fragment {
             }
         };
 
-        mTimerRelative.setOnClickListener(new View.OnClickListener() {
+        mTimerText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!mRunning && !mScrambling) {
@@ -193,7 +193,7 @@ public class TimerFragment extends Fragment {
             }
         });
 
-        mTimerRelative.setOnTouchListener(new View.OnTouchListener() {
+        mTimerText.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (mRunning) {
