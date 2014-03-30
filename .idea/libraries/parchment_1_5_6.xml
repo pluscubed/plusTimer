@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="parchment-1.5.6">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/app/build/exploded-aar/mobi.parchment/parchment/1.5.6/classes.jar!/" />
+      <root url="file://$PROJECT_DIR$/app/build/exploded-aar/mobi.parchment/parchment/1.5.6/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

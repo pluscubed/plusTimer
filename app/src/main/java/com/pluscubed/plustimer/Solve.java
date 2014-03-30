@@ -5,9 +5,9 @@ package com.pluscubed.plustimer;
  */
 public class Solve {
     private String scramble;
-    private String time;
+    private long time;
 
-    public Solve(String scramble, String time) {
+    public Solve(String scramble, long time) {
         this.scramble = scramble;
         this.time = time;
     }
@@ -20,11 +20,11 @@ public class Solve {
         this.scramble = scramble;
     }
 
-    public String getTime() {
+    public long getTime() {
         return time;
     }
 
-    public void setTime(String time) {
+    public void setTime(long time) {
         this.time = time;
     }
 

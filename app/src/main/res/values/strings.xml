@@ -5,6 +5,9 @@
     <string name="ready">Ready</string>
     <string name="action_settings">Settings</string>
     <string name="submit">Submit</string>
-    <string name="scrambling">Scrambling...</string>
+    <string name="scrambling">Scrambling&#8230;</string>
+    <string name="solves">"Solves: "</string>
+    <string name="ao5">"Average of 5: "</string>
+    <string name="ao12">"Average of 12: "</string>
 
 </resources>

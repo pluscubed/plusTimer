@@ -9,7 +9,8 @@
 
 
     <style name="HListView">
-    <item name="hlv_stackFromRight">false</item>
+        <item name="android:listSelector">@android:drawable/list_selector_background</item>
+        <item name="hlv_stackFromRight">false</item>
         <item name="hlv_measureWithChild">0</item>
         <item name="hlv_dividerWidth">0dip</item>
         <item name="hlv_headerDividersEnabled">false</item>

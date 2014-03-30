@@ -17,7 +17,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
-import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -36,11 +35,10 @@ public class TimerFragment extends Fragment {
     private TextView mScrambleText;
     private HListView mHListView;
     private Spinner mActionPuzzleSpinner;
-    private RelativeLayout mRootRelative;
 
     private long mStartTime;
     private long mEndTime;
-    private String mFinalTime;
+    private long mFinalTime;
 
     private boolean mRunning;
 
@@ -57,6 +55,10 @@ public class TimerFragment extends Fragment {
     private String mCurrentScramble;
     private String mNextScramble;
 
+    private TextView mQuickStatsSolves;
+    private TextView mQuickStatsAo5;
+    private TextView mQuickStatsAo12;
+
 
     public static String convertNanoToTime(long nano) {
         int minutes = (int) ((nano / (60 * 1000000000L)) % 60);
@@ -70,6 +72,22 @@ public class TimerFragment extends Fragment {
         } else {
             return String.format("%.3f", seconds);
         }
+
+    }
+
+    public void updateQuickStats() {
+        mQuickStatsSolves.setText(getString(R.string.solves) + mCurrentPuzzleType.getSession().getNumberOfSolves());
+        if (mCurrentPuzzleType.getSession().getNumberOfSolves() >= 12) {
+            mQuickStatsAo12.setText(getString(R.string.ao12) + convertNanoToTime(mCurrentPuzzleType.getSession().getCurrentAverageOf(12)));
+        } else {
+            mQuickStatsAo12.setText("");
+        }
+        if (mCurrentPuzzleType.getSession().getNumberOfSolves() >= 5) {
+            mQuickStatsAo5.setText(getString(R.string.ao5) + convertNanoToTime(mCurrentPuzzleType.getSession().getCurrentAverageOf(5)));
+        } else {
+            mQuickStatsAo5.setText("");
+        }
+
 
     }
 
@@ -96,6 +114,7 @@ public class TimerFragment extends Fragment {
                 mCurrentPuzzleType = (PuzzleType) parent.getItemAtPosition(position);
                 if (!mConfigChange) {
                     ((SolveAdapter) mHListView.getAdapter()).updateSolvesList();
+                    updateQuickStats();
 
                     mScrambleText.setText(R.string.scrambling);
                     mTimerText.setText(R.string.ready);
@@ -158,8 +177,10 @@ public class TimerFragment extends Fragment {
         mTimerText = (TextView) v.findViewById(R.id.fragment_timer_text);
         mScrambleText = (TextView) v.findViewById(R.id.scramble_text);
         mHListView = (HListView) v.findViewById(R.id.fragment_hlistview);
-        mRootRelative = (RelativeLayout) v.getRootView();
 
+        mQuickStatsAo12 = (TextView) v.findViewById(R.id.fragment_quickstats_ao12_text);
+        mQuickStatsAo5 = (TextView) v.findViewById(R.id.fragment_quickstats_ao5_text);
+        mQuickStatsSolves = (TextView) v.findViewById(R.id.fragment_quickstats_solves_text);
 
         SolveAdapter adapter = new SolveAdapter();
         mHListView.setAdapter(adapter);
@@ -200,10 +221,11 @@ public class TimerFragment extends Fragment {
                     mEndTime = System.nanoTime();
                     mRunning = false;
                     mMainHandler.removeCallbacksAndMessages(null);
-                    mFinalTime = convertNanoToTime(mEndTime - mStartTime);
-                    mTimerText.setText(mFinalTime);
+                    mFinalTime = mEndTime - mStartTime;
+                    mTimerText.setText(convertNanoToTime(mFinalTime));
                     mCurrentPuzzleType.getSession().addSolve(new Solve(mCurrentScramble, mFinalTime));
                     ((SolveAdapter) mHListView.getAdapter()).notifyDataSetChanged();
+                    updateQuickStats();
                     if (mScrambling) {
                         mScrambleText.setText(R.string.scrambling);
                         mScramblerThreadHandler.post(new Runnable() {
@@ -261,10 +283,11 @@ public class TimerFragment extends Fragment {
             mScrambleText.setText(mCurrentScramble);
         }
 
-        if (!mRunning && mCurrentPuzzleType.getSession().numberOfSolves() != 0) {
-            mTimerText.setText(mCurrentPuzzleType.getSession().getLatestSolveTime());
+        if (!mRunning && mCurrentPuzzleType.getSession().getNumberOfSolves() != 0) {
+            mTimerText.setText(convertNanoToTime(mCurrentPuzzleType.getSession().getLatestSolve().getTime()));
         }
 
+        updateQuickStats();
 
         return v;
     }
@@ -304,7 +327,7 @@ public class TimerFragment extends Fragment {
             }
             Solve s = (Solve) getItem(position);
             TextView time = (TextView) convertView.findViewById(R.id.fragment_hlistview_text);
-            time.setText(s.getTime());
+            time.setText(convertNanoToTime(s.getTime()));
             return convertView;
         }
 

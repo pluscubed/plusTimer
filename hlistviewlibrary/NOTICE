@@ -1,0 +1,8 @@
+Original Library:
+https://github.com/sephiroth74/HorizontalVariableListView
+
+Changes made to the library:
+-Replace the EdgeEffect drawables with the KitKat ones
+-Change minimum sdk to 8 (didn't get any warnings, so I'm kind of confused as to why the original author used 9 instead)
+
+This library is distributed under Apache License v2.0: http://www.apache.org/licenses/LICENSE-2.0
