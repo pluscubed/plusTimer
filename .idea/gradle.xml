@@ -9,7 +9,8 @@
           <set>
             <option value="C:\Users\DC\AndroidStudioProjects\plusTimer" />
             <option value="C:\Users\DC\AndroidStudioProjects\plusTimer\app" />
-            <option value="C:\Users\DC\AndroidStudioProjects\plusTimer\hlistviewlibrary" />
+            <option value="C:\Users\DC\AndroidStudioProjects\plusTimer\libraries" />
+            <option value="C:\Users\DC\AndroidStudioProjects\plusTimer\libraries\hlistviewlibrary" />
           </set>
         </option>
       </GradleProjectSettings>

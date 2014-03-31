@@ -2,9 +2,7 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-    <item name="hlv_listViewStyle">@style/HListView</item>
-
-
+        <item name="hlv_listViewStyle">@style/HListView</item>
     </style>
 
 

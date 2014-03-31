@@ -1,10 +1,14 @@
 package com.pluscubed.plustimer;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
@@ -173,7 +177,6 @@ public class TimerFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_timer, container, false);
         mConfigChange = true;
 
-
         mTimerText = (TextView) v.findViewById(R.id.fragment_timer_text);
         mScrambleText = (TextView) v.findViewById(R.id.scramble_text);
         mHListView = (HListView) v.findViewById(R.id.fragment_hlistview);
@@ -184,6 +187,16 @@ public class TimerFragment extends Fragment {
 
         SolveAdapter adapter = new SolveAdapter();
         mHListView.setAdapter(adapter);
+        mHListView.setOnItemClickListener(new it.sephiroth.android.library.widget.AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(it.sephiroth.android.library.widget.AdapterView<?> parent, View view, int position, long id) {
+                Bundle args = new Bundle();
+                args.putInt("position", position);
+                SolveQuickModifyDialog dialog = new SolveQuickModifyDialog();
+                dialog.setArguments(args);
+                dialog.show(getActivity().getSupportFragmentManager(), "modify");
+            }
+        });
 
         mTimerRunnable = new Runnable() {
             @Override
@@ -334,6 +347,29 @@ public class TimerFragment extends Fragment {
         public void updateSolvesList() {
             mObjects = mCurrentPuzzleType.getSession().getSolves();
             notifyDataSetChanged();
+        }
+
+
+    }
+
+    private class SolveQuickModifyDialog extends DialogFragment {
+        private int position;
+
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            position = getArguments().getInt("position");
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setItems(new String[]{getString(R.string.delete)}, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    mCurrentPuzzleType.getSession().deleteSolve(position);
+                    updateQuickStats();
+                    ((SolveAdapter) mHListView.getAdapter()).notifyDataSetChanged();
+                }
+            });
+            return builder.create();
         }
     }
 

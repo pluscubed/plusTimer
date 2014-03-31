@@ -57,4 +57,9 @@ public class Session {
         }
         return sum / mSolves.size();
     }
+
+    public void deleteSolve(int position) {
+        mSolves.remove(position);
+    }
+
 }

@@ -19,10 +19,9 @@ android {
 }
 
 dependencies {
-    compile project(':hlistviewlibrary')
+    compile project(':libraries:hlistviewlibrary')
     compile 'com.android.support:support-v4:19.0.1'
     compile 'com.android.support:appcompat-v7:19.0.1'
     compile 'com.github.cubing:tnoodle-android:+@aar'
-    compile 'mobi.parchment:parchment:1.5.6@aar'
     compile fileTree(dir: 'libs', include: ['*.jar'])
 }
