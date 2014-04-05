@@ -1,12 +1,9 @@
-package it.sephiroth.android.library.util.v11;
+package it.sephiroth.android.library.widget;
 
 import android.annotation.TargetApi;
-import android.os.Build;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
-
-import it.sephiroth.android.library.widget.AbsHListView;
 
 public class MultiChoiceModeWrapper implements MultiChoiceModeListener {
 
@@ -25,7 +22,7 @@ public class MultiChoiceModeWrapper implements MultiChoiceModeListener {
         return mWrapped != null;
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    @TargetApi(11)
     @Override
     public boolean onCreateActionMode(ActionMode mode, Menu menu) {
         if (mWrapped.onCreateActionMode(mode, menu)) {
@@ -35,19 +32,19 @@ public class MultiChoiceModeWrapper implements MultiChoiceModeListener {
         return false;
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    @TargetApi(11)
     @Override
     public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
         return mWrapped.onPrepareActionMode(mode, menu);
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    @TargetApi(11)
     @Override
     public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
         return mWrapped.onActionItemClicked(mode, item);
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    @TargetApi(11)
     @Override
     public void onDestroyActionMode(ActionMode mode) {
         mWrapped.onDestroyActionMode(mode);
@@ -61,7 +58,7 @@ public class MultiChoiceModeWrapper implements MultiChoiceModeListener {
         mView.setLongClickable(true);
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    @TargetApi(11)
     @Override
     public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
         mWrapped.onItemCheckedStateChanged(mode, position, id, checked);

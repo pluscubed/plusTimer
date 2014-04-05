@@ -44,12 +44,10 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
     public static final String LOG_TAG = "AdapterView";
 
     public static final boolean LOG_ENABLED = false;
-
     /**
      * The item view type returned by {@link Adapter#getItemViewType(int)} when the adapter does not want the item's view recycled.
      */
     public static final int ITEM_VIEW_TYPE_IGNORE = -1;
-
     /**
      * The item view type returned by {@link Adapter#getItemViewType(int)} when the item is a header or footer.
      */
@@ -97,10 +95,12 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
      * Sync based on the selected child
      */
     static final int SYNC_SELECTED_POSITION = 0;
+
     /**
      * Sync based on the first child displayed
      */
     static final int SYNC_FIRST_POSITION = 1;
+
     /**
      * Maximum amount of time to spend in {@link #findSyncPosition()}
      */
@@ -111,6 +111,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
      * @hide
      */
     public boolean mDataChanged;
+    protected ViewCompatExt.ViewHelper mViewHelper;
     /**
      * The position of the first child displayed
      */
@@ -189,6 +190,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
 
     public AdapterView(Context context) {
         super(context);
+        mViewHelper = ViewCompatExt.create(this);
     }
 
     public AdapterView(Context context, AttributeSet attrs) {
@@ -199,7 +201,9 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
     public AdapterView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
-        if (android.os.Build.VERSION.SDK_INT >= 16) {
+        mViewHelper = ViewCompatExt.create(this);
+
+        if (ApiHelper.AT_LEAST_16) {
             // If not explicitly specified this view is important for accessibility.
             if (getImportantForAccessibility() == IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
                 setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
@@ -228,7 +232,9 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
     }
 
     /**
-     * Call the OnItemClickListener, if it is defined.
+     * Call the OnItemClickListener, if it is defined. Performs all normal
+     * actions associated with clicking: reporting accessibility event, playing
+     * a sound, etc.
      *
      * @param view     The view within the AdapterView that was clicked.
      * @param position The position of the view in the adapter.
@@ -822,7 +828,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
         // TODO: Hmm, we do not know the old state so this is sub-optimal
 
         // TODO: implement this ( WTF Google, why you use the @hide tag?? )
-        // notifyAccessibilityStateChanged();
+        ViewCompatExt.notifySubtreeAccessibilityStateChangedIfNeeded(this);
     }
 
     protected void checkSelectionChanged() {
