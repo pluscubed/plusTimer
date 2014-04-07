@@ -151,7 +151,6 @@ public class TimerFragment extends Fragment {
         try {
             scrambleAndSvg = new ScrambleAndSvg(scramble, mCurrentPuzzleType.getPuzzle().drawScramble(scramble, null));
         } catch (InvalidScrambleException e) {
-            e.printStackTrace();
         }
         mScrambling = false;
 
@@ -234,7 +233,8 @@ public class TimerFragment extends Fragment {
         menu.findItem(R.id.menu_item_display_scramble_image).setEnabled(mMenuItemsEnabled);
 
         if (mStartup || (mRunning || mScrambling)) {
-            menuItemsEnable(true);
+            menuItemPuzzleSpinner.setEnabled(true);
+            menu.findItem(R.id.menu_item_display_scramble_image).setEnabled(true);
         }
 
         mConfigChange = false;
@@ -377,8 +377,6 @@ public class TimerFragment extends Fragment {
                         public void run() {
                             updateScrambleViewsToCurrent();
                             menuItemsEnable(true);
-
-                            
                         }
                     });
 

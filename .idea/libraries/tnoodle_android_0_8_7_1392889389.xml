@@ -5,6 +5,18 @@
       <root url="jar://$PROJECT_DIR$/app/build/exploded-aar/com.github.cubing/tnoodle-android/0.8.7-1392889389/classes.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="file://$USER_HOME$/Desktop/tnoodle-master/utils/src" />
+      <root url="file://$USER_HOME$/Desktop/tnoodle-master/svglite/src" />
+      <root url="file://$USER_HOME$/Desktop/tnoodle-master/winstone/src" />
+      <root url="file://$USER_HOME$/Desktop/tnoodle-master/min2phase/src" />
+      <root url="file://$USER_HOME$/Desktop/tnoodle-master/scrambles/src" />
+      <root url="file://$USER_HOME$/Desktop/tnoodle-master/sq12phase/src" />
+      <root url="file://$USER_HOME$/Desktop/tnoodle-master/web-utils/src" />
+      <root url="file://$USER_HOME$/Desktop/tnoodle-master/threephase/src" />
+      <root url="file://$USER_HOME$/Desktop/tnoodle-master/webscrambles/src" />
+      <root url="file://$USER_HOME$/Desktop/tnoodle-master/hello-winstone/src" />
+      <root url="file://$USER_HOME$/Desktop/tnoodle-master/tnoodle-android/tnoodle-android-test/src/main/java" />
+    </SOURCES>
   </library>
 </component>
