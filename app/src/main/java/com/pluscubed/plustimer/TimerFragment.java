@@ -5,26 +5,36 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.PictureDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import com.caverock.androidsvg.SVG;
+import com.caverock.androidsvg.SVGParseException;
+
+import net.gnehzr.tnoodle.scrambles.InvalidScrambleException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,13 +52,14 @@ public class TimerFragment extends Fragment {
     private TextView mTimerText;
     private TextView mScrambleText;
     private HListView mHListView;
-    private Spinner mActionPuzzleSpinner;
+    private ImageView mScrambleImage;
+    private TextView mQuickStatsSolves;
+    private TextView mQuickStats;
+
 
     private long mStartTime;
     private long mEndTime;
     private long mFinalTime;
-
-    private boolean mRunning;
 
     private Runnable mTimerRunnable;
     private PuzzleType mCurrentPuzzleType;
@@ -56,17 +67,15 @@ public class TimerFragment extends Fragment {
     private boolean mConfigChange;
     private boolean mStartup;
     private boolean mScrambling;
+    private boolean mRunning;
+    private boolean mScrambleImageDisplay;
+    private boolean mMenuItemsEnabled;
 
     private Handler mScramblerThreadHandler;
-    private Handler mMainHandler;
+    private Handler mUIHandler;
 
-    private String mCurrentScramble;
-    private String mNextScramble;
-
-    private TextView mQuickStatsSolves;
-    private TextView mQuickStatsAo5;
-    private TextView mQuickStatsAo12;
-
+    private ScrambleAndSvg mCurrentScrambleAndSvg;
+    private ScrambleAndSvg mNextScrambleAndSvg;
 
     public static String convertNanoToTime(long nano) {
         int minutes = (int) ((nano / (60 * 1000000000L)) % 60);
@@ -83,83 +92,77 @@ public class TimerFragment extends Fragment {
 
     }
 
-    public void updateQuickStats() {
+    /* Might be useful later
+     public static double convertPxToDp(double px, DisplayMetrics metrics){
+     double dp = px / (metrics.xdpi / (double)DisplayMetrics.DENSITY_DEFAULT);
+     return dp;
+     }
+
+     public static double convertDpToPx(double dp, DisplayMetrics metrics){
+
+     double px = dp * (metrics.xdpi /(double)DisplayMetrics.DENSITY_DEFAULT);
+     return px;
+
+     }
+     */
+
+    void updateQuickStats() {
+        String quickStats = new String();
         mQuickStatsSolves.setText(getString(R.string.solves) + mCurrentPuzzleType.getSession().getNumberOfSolves());
+        if (mCurrentPuzzleType.getSession().getNumberOfSolves() >= 1000) {
+            quickStats += getString(R.string.ao1000) + convertNanoToTime(mCurrentPuzzleType.getSession().getCurrentAverageOf(100)) + "\n";
+        }
+        if (mCurrentPuzzleType.getSession().getNumberOfSolves() >= 100) {
+            quickStats += getString(R.string.ao100) + convertNanoToTime(mCurrentPuzzleType.getSession().getCurrentAverageOf(100)) + "\n";
+        }
         if (mCurrentPuzzleType.getSession().getNumberOfSolves() >= 12) {
-            mQuickStatsAo12.setText(getString(R.string.ao12) + convertNanoToTime(mCurrentPuzzleType.getSession().getCurrentAverageOf(12)));
-        } else {
-            mQuickStatsAo12.setText("");
+            quickStats += getString(R.string.ao12) + convertNanoToTime(mCurrentPuzzleType.getSession().getCurrentAverageOf(12)) + "\n";
         }
         if (mCurrentPuzzleType.getSession().getNumberOfSolves() >= 5) {
-            mQuickStatsAo5.setText(getString(R.string.ao5) + convertNanoToTime(mCurrentPuzzleType.getSession().getCurrentAverageOf(5)));
-        } else {
-            mQuickStatsAo5.setText("");
+            quickStats += getString(R.string.ao5) + convertNanoToTime(mCurrentPuzzleType.getSession().getCurrentAverageOf(5)) + "\n";
         }
-
+        if (mCurrentPuzzleType.getSession().getNumberOfSolves() > 0) {
+            quickStats += getString(R.string.mean) + convertNanoToTime(mCurrentPuzzleType.getSession().getMean());
+        }
+        mQuickStats.setText(quickStats);
+        ((SolveAdapter) mHListView.getAdapter()).updateSolvesList();
 
     }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.fragment_timer_menu, menu);
-
-        mActionPuzzleSpinner = (Spinner) MenuItemCompat.getActionView(menu.findItem(R.id.menu_item_puzzletypespinner));
-
-        ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter =
-                new ArrayAdapter<PuzzleType>(
-                        ((ActionBarActivity) getActivity()).getSupportActionBar().getThemedContext(),
-                        android.R.layout.simple_spinner_item,
-                        PuzzleType.values()
-                );
-
-        puzzleTypeSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        mActionPuzzleSpinner.setAdapter(puzzleTypeSpinnerAdapter);
-        mActionPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition(mCurrentPuzzleType), false);
-        mActionPuzzleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                mCurrentPuzzleType = (PuzzleType) parent.getItemAtPosition(position);
-                if (!mConfigChange) {
-                    ((SolveAdapter) mHListView.getAdapter()).updateSolvesList();
-                    updateQuickStats();
-
-                    mScrambleText.setText(R.string.scrambling);
-                    mTimerText.setText(R.string.ready);
-                    mActionPuzzleSpinner.setEnabled(false);
-                    mScramblerThreadHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mScrambling = true;
-                            mCurrentScramble = mCurrentPuzzleType.getPuzzle().generateScramble();
-                            mScrambling = false;
-                            mMainHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mScrambleText.setText(mCurrentScramble);
-                                    mActionPuzzleSpinner.setEnabled(true);
-                                }
-                            });
-
-                        }
-                    });
-                }
-
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-
-        if (mStartup || (mRunning || mScrambling)) {
-            mActionPuzzleSpinner.setEnabled(false);
+    void updateScrambleViewsToCurrent() {
+        SVG svg = null;
+        try {
+            svg = SVG.getFromString(mCurrentScrambleAndSvg.svgLite.toString());
+        } catch (SVGParseException e) {
+            e.printStackTrace();
         }
+        Drawable drawable = new PictureDrawable(svg.renderToPicture());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+            mScrambleImage.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        mScrambleImage.setImageDrawable(drawable);
 
-        mConfigChange = false;
-        mStartup = false;
+        mScrambleText.setText(mCurrentScrambleAndSvg.scramble);
     }
+
+    ScrambleAndSvg generateScramble() {
+        mScrambling = true;
+        String scramble = mCurrentPuzzleType.getPuzzle().generateScramble();
+        ScrambleAndSvg scrambleAndSvg = null;
+        try {
+            scrambleAndSvg = new ScrambleAndSvg(scramble, mCurrentPuzzleType.getPuzzle().drawScramble(scramble, null));
+        } catch (InvalidScrambleException e) {
+            e.printStackTrace();
+        }
+        mScrambling = false;
+
+        return scrambleAndSvg;
+    }
+
+    void menuItemsEnable(boolean enable) {
+        mMenuItemsEnabled = enable;
+        ActivityCompat.invalidateOptionsMenu(getActivity());
+    }
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -173,29 +176,109 @@ public class TimerFragment extends Fragment {
         HandlerThread scramblerThread = new HandlerThread("ScramblerThread");
         scramblerThread.start();
         mScramblerThreadHandler = new Handler(scramblerThread.getLooper());
-        mMainHandler = new Handler(Looper.getMainLooper());
+        mUIHandler = new Handler(Looper.getMainLooper());
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 0) {
-            mCurrentPuzzleType.getSession().deleteSolve(data.getIntExtra("position", 0));
-            updateQuickStats();
-            ((SolveAdapter) mHListView.getAdapter()).updateSolvesList();
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.fragment_timer_menu, menu);
+
+        Spinner menuItemPuzzleSpinner = (Spinner) MenuItemCompat.getActionView(menu.findItem(R.id.menu_item_puzzletypespinner));
+
+        ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter =
+                new ArrayAdapter<PuzzleType>(
+                        ((ActionBarActivity) getActivity()).getSupportActionBar().getThemedContext(),
+                        android.R.layout.simple_spinner_item,
+                        PuzzleType.values()
+                );
+
+        puzzleTypeSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        menuItemPuzzleSpinner.setAdapter(puzzleTypeSpinnerAdapter);
+        menuItemPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition(mCurrentPuzzleType), false);
+        menuItemPuzzleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (!mConfigChange) {
+                    mCurrentPuzzleType = (PuzzleType) parent.getItemAtPosition(position);
+                    updateQuickStats();
+
+                    mScrambleText.setText(R.string.scrambling);
+                    mTimerText.setText(R.string.ready);
+                    menuItemsEnable(false);
+                    mScrambleImage.setVisibility(View.GONE);
+                    mScrambleImageDisplay = false;
+
+                    mScramblerThreadHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mCurrentScrambleAndSvg = generateScramble();
+                            mUIHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    updateScrambleViewsToCurrent();
+                                    menuItemsEnable(true);
+                                }
+                            });
+
+                        }
+                    });
+                }
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+
+        menuItemPuzzleSpinner.setEnabled(mMenuItemsEnabled);
+        menu.findItem(R.id.menu_item_display_scramble_image).setEnabled(mMenuItemsEnabled);
+
+        if (mStartup || (mRunning || mScrambling)) {
+            menuItemsEnable(true);
+        }
+
+        mConfigChange = false;
+        mStartup = false;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_item_display_scramble_image:
+                if (mScrambleImageDisplay) {
+                    mScrambleImageDisplay = false;
+                    mScrambleImage.setVisibility(View.GONE);
+                } else {
+                    if (!mScrambling) {
+                        mScrambleImageDisplay = true;
+                        mScrambleImage.setVisibility(View.VISIBLE);
+                        mScrambleImage.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                mScrambleImageDisplay = false;
+                                mScrambleImage.setVisibility(View.GONE);
+                            }
+                        });
+                    }
+                }
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_timer, container, false);
+
         mConfigChange = true;
 
         mTimerText = (TextView) v.findViewById(R.id.fragment_timer_text);
         mScrambleText = (TextView) v.findViewById(R.id.scramble_text);
+        mScrambleImage = (ImageView) v.findViewById(R.id.fragment_scramble_image);
         mHListView = (HListView) v.findViewById(R.id.fragment_hlistview);
 
-        mQuickStatsAo12 = (TextView) v.findViewById(R.id.fragment_quickstats_ao12_text);
-        mQuickStatsAo5 = (TextView) v.findViewById(R.id.fragment_quickstats_ao5_text);
+        mQuickStats = (TextView) v.findViewById(R.id.fragment_quickstats_text);
         mQuickStatsSolves = (TextView) v.findViewById(R.id.fragment_quickstats_solves_text);
 
         SolveAdapter adapter = new SolveAdapter();
@@ -216,7 +299,7 @@ public class TimerFragment extends Fragment {
             @Override
             public void run() {
                 mTimerText.setText(convertNanoToTime(System.nanoTime() - mStartTime));
-                mMainHandler.postDelayed(this, 10);
+                mUIHandler.postDelayed(this, 10);
             }
         };
 
@@ -226,14 +309,14 @@ public class TimerFragment extends Fragment {
                 if (!mRunning && !mScrambling) {
                     mStartTime = System.nanoTime();
                     mRunning = true;
-                    mMainHandler.post(mTimerRunnable);
-                    mActionPuzzleSpinner.setEnabled(false);
+                    mUIHandler.post(mTimerRunnable);
+                    menuItemsEnable(false);
+                    mScrambleImage.setVisibility(View.GONE);
+                    mScrambleImageDisplay = false;
                     mScramblerThreadHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            mScrambling = true;
-                            mNextScramble = mCurrentPuzzleType.getPuzzle().generateScramble();
-                            mScrambling = false;
+                            mNextScrambleAndSvg = generateScramble();
                         }
                     });
                 }
@@ -247,33 +330,32 @@ public class TimerFragment extends Fragment {
                 if (mRunning) {
                     mEndTime = System.nanoTime();
                     mRunning = false;
-                    mMainHandler.removeCallbacksAndMessages(null);
+                    mUIHandler.removeCallbacksAndMessages(null);
                     mFinalTime = mEndTime - mStartTime;
                     mTimerText.setText(convertNanoToTime(mFinalTime));
-                    mCurrentPuzzleType.getSession().addSolve(new Solve(mCurrentScramble, mFinalTime));
-                    ((SolveAdapter) mHListView.getAdapter()).updateSolvesList();
+                    mCurrentPuzzleType.getSession().addSolve(new Solve(mCurrentScrambleAndSvg, mFinalTime));
                     updateQuickStats();
                     if (mScrambling) {
                         mScrambleText.setText(R.string.scrambling);
                         mScramblerThreadHandler.post(new Runnable() {
                             @Override
                             public void run() {
-                                mMainHandler.post(new Runnable() {
+                                mUIHandler.post(new Runnable() {
                                     @Override
                                     public void run() {
-                                        mCurrentScramble = mNextScramble;
-                                        mNextScramble = null;
-                                        mScrambleText.setText(mCurrentScramble);
-                                        mActionPuzzleSpinner.setEnabled(true);
+                                        mCurrentScrambleAndSvg = mNextScrambleAndSvg;
+                                        mNextScrambleAndSvg = null;
+                                        updateScrambleViewsToCurrent();
+                                        menuItemsEnable(true);
                                     }
                                 });
                             }
                         });
                     } else {
-                        mCurrentScramble = mNextScramble;
-                        mNextScramble = null;
-                        mScrambleText.setText(mCurrentScramble);
-                        mActionPuzzleSpinner.setEnabled(true);
+                        mCurrentScrambleAndSvg = mNextScrambleAndSvg;
+                        mNextScrambleAndSvg = null;
+                        updateScrambleViewsToCurrent();
+                        menuItemsEnable(true);
                     }
                     return true;
                 } else {
@@ -285,38 +367,67 @@ public class TimerFragment extends Fragment {
 
         if (mStartup) {
             mScrambleText.setText(R.string.scrambling);
+            menuItemsEnable(false);
             mScramblerThreadHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mScrambling = true;
-                    mCurrentScramble = mCurrentPuzzleType.getPuzzle().generateScramble();
-                    mScrambling = false;
-                    mMainHandler.post(new Runnable() {
+                    mCurrentScrambleAndSvg = generateScramble();
+                    mUIHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            mScrambleText.setText(mCurrentScramble);
-                            if (mActionPuzzleSpinner != null) {
-                                mActionPuzzleSpinner.setEnabled(true);
-                            }
+                            updateScrambleViewsToCurrent();
+                            menuItemsEnable(true);
+
+                            
                         }
                     });
+
 
                 }
             });
 
         }
 
+        // On config change: If timer is running, update scramble views to current. If timer is not running and not scrambling, then update scramble views to current.
         if (!mStartup && (mRunning || !mScrambling)) {
-            mScrambleText.setText(mCurrentScramble);
+            updateScrambleViewsToCurrent();
         }
 
         if (!mRunning && mCurrentPuzzleType.getSession().getNumberOfSolves() != 0) {
             mTimerText.setText(convertNanoToTime(mCurrentPuzzleType.getSession().getLatestSolve().getTime()));
+            updateScrambleViewsToCurrent();
+        }
+
+        if (!mRunning) {
+            if (mScrambleImageDisplay) {
+                if (!mScrambling) {
+                    mScrambleImage.setVisibility(View.VISIBLE);
+                    mScrambleImageDisplay = true;
+                    mScrambleImage.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            mScrambleImageDisplay = false;
+                            mScrambleImage.setVisibility(View.GONE);
+                        }
+                    });
+                }
+            } else {
+                mScrambleImage.setVisibility(View.GONE);
+                mScrambleImageDisplay = false;
+            }
         }
 
         updateQuickStats();
 
         return v;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 0) {
+            mCurrentPuzzleType.getSession().deleteSolve(data.getIntExtra("position", 0));
+            updateQuickStats();
+        }
     }
 
     public static class SolveQuickModifyDialog extends DialogFragment {
@@ -344,9 +455,9 @@ public class TimerFragment extends Fragment {
 
     private class SolveAdapter extends BaseAdapter {
 
+        private final Context mContext;
+        private final LayoutInflater mInflater;
         private List<Solve> mObjects;
-        private Context mContext;
-        private LayoutInflater mInflater;
         private ArrayList<Long> mTimes;
         private int indexBest;
         private int indexWorst;
@@ -391,25 +502,21 @@ public class TimerFragment extends Fragment {
             return convertView;
         }
 
-
         public void updateSolvesList() {
             mObjects = mCurrentPuzzleType.getSession().getSolves();
-            mTimes = new ArrayList<Long>();
-            for (Solve i : mObjects) {
-                mTimes.add(i.getTime());
+            if (mObjects.size() > 0) {
+                mTimes = new ArrayList<Long>();
+                for (Solve i : mObjects) {
+                    mTimes.add(i.getTime());
+                }
+                indexBest = mTimes.indexOf(Collections.min(mTimes));
+                indexWorst = mTimes.indexOf(Collections.max(mTimes));
             }
-            indexBest = mTimes.indexOf(Collections.min(mTimes));
-            indexWorst = mTimes.indexOf(Collections.max(mTimes));
-
-            Log.d(TAG, "" + indexWorst);
-            Log.d(TAG, "" + indexBest);
-
             notifyDataSetChanged();
         }
 
 
     }
-
 
 
 }

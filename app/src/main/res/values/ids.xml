@@ -7,8 +7,9 @@
     <item name="fragment_hlistview" type="id" />
     <item name="fragment_hlistview_text" type="id" />
     <item name="fragment_bottom_linear" type="id" />
-    <item name="fragment_quickstats_mean_text" type="id" />
     <item name="fragment_quickstats_solves_text" type="id" />
-    <item name="fragment_quickstats_ao5_text" type="id" />
-    <item name="fragment_quickstats_ao12_text" type="id" />
+    <item name="fragment_quickstats_text" type="id" />
+    <item name="fragment_scramble_image" type="id" />
+    <item name="fragment_rootview" type="id" />
+    <item name="menu_item_display_scramble_image" type="id" />
 </resources>

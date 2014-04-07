@@ -24,6 +24,7 @@ public enum PuzzleType {
     THREE("333", "3x3"),
     TWO("222", "2x2");
 
+
     private final String scramblerSpec;
     private final String displayName;
     private final Session session;

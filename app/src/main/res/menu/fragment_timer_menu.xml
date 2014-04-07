@@ -8,4 +8,10 @@
         plustimer:actionViewClass="android.widget.Spinner"
         plustimer:showAsAction="always" />
 
+    <item
+        android:id="@id/menu_item_display_scramble_image"
+        android:icon="@android:drawable/ic_menu_gallery"
+        android:title="@string/scrambleimage"
+        plustimer:showAsAction="ifRoom|withText" />
+
 </menu>

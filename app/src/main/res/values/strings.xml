@@ -9,6 +9,10 @@
     <string name="solves">"Solves: "</string>
     <string name="ao5">"Current Ao5: "</string>
     <string name="ao12">"Current Ao12: "</string>
+    <string name="ao100">"Current Ao100: "</string>
+    <string name="ao1000">"Current Ao1000: "</string>
+    <string name="mean">"Session Mean: "</string>
     <string name="delete">Delete</string>
+    <string name="scrambleimage">Scramble Image</string>
 
 </resources>

@@ -4,20 +4,16 @@ package com.pluscubed.plustimer;
  * solve times data object
  */
 public class Solve {
-    private String scramble;
+    private ScrambleAndSvg scrambleAndSvg;
     private long time;
 
-    public Solve(String scramble, long time) {
-        this.scramble = scramble;
+    public Solve(ScrambleAndSvg scramble, long time) {
+        this.scrambleAndSvg = scramble;
         this.time = time;
     }
 
-    public String getScramble() {
-        return scramble;
-    }
-
-    public void setScramble(String scramble) {
-        this.scramble = scramble;
+    public ScrambleAndSvg getScrambleAndSvg() {
+        return scrambleAndSvg;
     }
 
     public long getTime() {
@@ -27,5 +23,6 @@ public class Solve {
     public void setTime(long time) {
         this.time = time;
     }
+
 
 }
