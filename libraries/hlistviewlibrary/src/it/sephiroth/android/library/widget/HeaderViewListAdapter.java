@@ -16,6 +16,8 @@
 
 package it.sephiroth.android.library.widget;
 
+import it.sephiroth.android.library.widget.HListView.FixedViewInfo;
+import java.util.ArrayList;
 import android.database.DataSetObserver;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,30 +27,30 @@ import android.widget.Filterable;
 import android.widget.ListAdapter;
 import android.widget.WrapperListAdapter;
 
-import java.util.ArrayList;
-
-import it.sephiroth.android.library.widget.HListView.FixedViewInfo;
-
 /**
  * ListAdapter used when a ListView has header views. This ListAdapter
  * wraps another one and also keeps track of the header views and their
  * associated data objects.
- * <p>This is intended as a base class; you will probably not need to
+ *<p>This is intended as a base class; you will probably not need to
  * use this class directly in your own code.
  */
 public class HeaderViewListAdapter implements WrapperListAdapter, Filterable {
 
-    // Used as a placeholder in case the provided info views are indeed null.
-    // Currently only used by some CTS tests, which may be removed.
-    static final ArrayList<FixedViewInfo> EMPTY_INFO_LIST =
-            new ArrayList<FixedViewInfo>();
     private final ListAdapter mAdapter;
-    private final boolean mIsFilterable;
+
     // These two ArrayList are assumed to NOT be null.
     // They are indeed created when declared in ListView and then shared.
     ArrayList<FixedViewInfo> mHeaderViewInfos;
     ArrayList<FixedViewInfo> mFooterViewInfos;
+
+    // Used as a placeholder in case the provided info views are indeed null.
+    // Currently only used by some CTS tests, which may be removed.
+    static final ArrayList<FixedViewInfo> EMPTY_INFO_LIST =
+        new ArrayList<FixedViewInfo>();
+
     boolean mAreAllFixedViewsSelectable;
+
+    private final boolean mIsFilterable;
 
     public HeaderViewListAdapter(ArrayList<FixedViewInfo> headerViewInfos,
                                  ArrayList<FixedViewInfo> footerViewInfos,
@@ -70,7 +72,7 @@ public class HeaderViewListAdapter implements WrapperListAdapter, Filterable {
 
         mAreAllFixedViewsSelectable =
                 areAllListInfosSelectable(mHeaderViewInfos)
-                        && areAllListInfosSelectable(mFooterViewInfos);
+                && areAllListInfosSelectable(mFooterViewInfos);
     }
 
     public int getHeadersCount() {
@@ -104,7 +106,7 @@ public class HeaderViewListAdapter implements WrapperListAdapter, Filterable {
 
                 mAreAllFixedViewsSelectable =
                         areAllListInfosSelectable(mHeaderViewInfos)
-                                && areAllListInfosSelectable(mFooterViewInfos);
+                        && areAllListInfosSelectable(mFooterViewInfos);
 
                 return true;
             }
@@ -121,7 +123,7 @@ public class HeaderViewListAdapter implements WrapperListAdapter, Filterable {
 
                 mAreAllFixedViewsSelectable =
                         areAllListInfosSelectable(mHeaderViewInfos)
-                                && areAllListInfosSelectable(mFooterViewInfos);
+                        && areAllListInfosSelectable(mFooterViewInfos);
 
                 return true;
             }
@@ -266,7 +268,7 @@ public class HeaderViewListAdapter implements WrapperListAdapter, Filterable {
         }
         return null;
     }
-
+    
     public ListAdapter getWrappedAdapter() {
         return mAdapter;
     }

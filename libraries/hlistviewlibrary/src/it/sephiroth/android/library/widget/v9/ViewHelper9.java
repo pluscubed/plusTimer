@@ -9,18 +9,18 @@ import it.sephiroth.android.library.widget.ViewCompatExt;
  */
 public class ViewHelper9 extends ViewCompatExt.ViewHelper {
 
-    public ViewHelper9(View view) {
-        super(view);
-    }
+	public ViewHelper9( View view ) {
+		super( view );
+	}
 
-    @Override
-    public void postOnAnimation(Runnable action) {
-        view.post(action);
-    }
+	@Override
+	public void postOnAnimation( Runnable action ) {
+		view.post( action );
+	}
 
-    @Override
-    public void setScrollX(int value) {
-        view.scrollTo(value, view.getScrollY());
-    }
+	@Override
+	public void setScrollX( int value ) {
+		view.scrollTo( value, view.getScrollY() );
+	}
 
 }

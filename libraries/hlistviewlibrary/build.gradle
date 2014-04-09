@@ -1,3 +1,8 @@
+/*Modifications to this file by me:
+  Line 13 (originally line 8): compile 'com.android.support:support-v4:19.0.1+' -> compile 'com.android.support:support-v4:+'
+  Line 18 (originally line 13): buildToolsVersion "19.0.1" -> buildToolsVersion "19.0.3"
+  Line 23 (originally line 18): minSdkVersion 9 -> minSdkVersion 8
+*/
 apply plugin: 'android-library'
 apply plugin: 'signing'
 

@@ -9,8 +9,8 @@ import it.sephiroth.android.library.widget.v16.ViewHelper16;
  */
 public class ViewHelper19 extends ViewHelper16 {
 
-    public ViewHelper19(final View view) {
-        super(view);
-    }
+	public ViewHelper19( final View view ) {
+		super( view );
+	}
 
 }

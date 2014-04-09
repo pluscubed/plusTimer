@@ -29,6 +29,10 @@ public class Session {
         return mSolves.get(mSolves.size() - 1);
     }
 
+    public Solve getSolve(int position){
+        return mSolves.get(position);
+    }
+
     public long getCurrentAverageOf(int number) {
         if (number >= 5) {
             long sum = 0;
@@ -48,7 +52,6 @@ public class Session {
         }
         return 0;
     }
-
 
     public long getMean() {
         long sum = 0;

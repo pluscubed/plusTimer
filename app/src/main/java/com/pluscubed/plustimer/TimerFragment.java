@@ -1,5 +1,6 @@
 package com.pluscubed.plustimer;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -17,6 +18,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -37,8 +39,10 @@ import com.caverock.androidsvg.SVGParseException;
 import net.gnehzr.tnoodle.scrambles.InvalidScrambleException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import it.sephiroth.android.library.widget.HListView;
 
@@ -47,7 +51,7 @@ import it.sephiroth.android.library.widget.HListView;
  */
 
 public class TimerFragment extends Fragment {
-    private static final String TAG = "TIMER";
+    public static final String TAG = "TIMER";
 
     private TextView mTimerText;
     private TextView mScrambleText;
@@ -64,8 +68,8 @@ public class TimerFragment extends Fragment {
     private Runnable mTimerRunnable;
     private PuzzleType mCurrentPuzzleType;
 
-    private boolean mConfigChange;
-    private boolean mStartup;
+    private boolean mOnCreateViewCalled;
+    private boolean mOnCreateCalled;
     private boolean mScrambling;
     private boolean mRunning;
     private boolean mScrambleImageDisplay;
@@ -73,6 +77,8 @@ public class TimerFragment extends Fragment {
 
     private Handler mScramblerThreadHandler;
     private Handler mUIHandler;
+
+    private ActionBarActivity mActivity;
 
     private ScrambleAndSvg mCurrentScrambleAndSvg;
     private ScrambleAndSvg mNextScrambleAndSvg;
@@ -106,24 +112,24 @@ public class TimerFragment extends Fragment {
      }
      */
 
+    String buildQuickStats(Integer ... currentAverages){
+        Arrays.sort(currentAverages, Collections.reverseOrder());
+        String s=null;
+        for(int i:currentAverages){
+            if(mCurrentPuzzleType.getSession().getNumberOfSolves()>=i){
+                s+=getString(R.string.ao)+i+": "+convertNanoToTime(mCurrentPuzzleType.getSession().getCurrentAverageOf(i))+"\n";
+            }
+        }
+        if (mCurrentPuzzleType.getSession().getNumberOfSolves() > 0) {
+            s += getString(R.string.mean) + convertNanoToTime(mCurrentPuzzleType.getSession().getMean());
+        }
+        return s;
+    }
+
     void updateQuickStats() {
         String quickStats = new String();
         mQuickStatsSolves.setText(getString(R.string.solves) + mCurrentPuzzleType.getSession().getNumberOfSolves());
-        if (mCurrentPuzzleType.getSession().getNumberOfSolves() >= 1000) {
-            quickStats += getString(R.string.ao1000) + convertNanoToTime(mCurrentPuzzleType.getSession().getCurrentAverageOf(100)) + "\n";
-        }
-        if (mCurrentPuzzleType.getSession().getNumberOfSolves() >= 100) {
-            quickStats += getString(R.string.ao100) + convertNanoToTime(mCurrentPuzzleType.getSession().getCurrentAverageOf(100)) + "\n";
-        }
-        if (mCurrentPuzzleType.getSession().getNumberOfSolves() >= 12) {
-            quickStats += getString(R.string.ao12) + convertNanoToTime(mCurrentPuzzleType.getSession().getCurrentAverageOf(12)) + "\n";
-        }
-        if (mCurrentPuzzleType.getSession().getNumberOfSolves() >= 5) {
-            quickStats += getString(R.string.ao5) + convertNanoToTime(mCurrentPuzzleType.getSession().getCurrentAverageOf(5)) + "\n";
-        }
-        if (mCurrentPuzzleType.getSession().getNumberOfSolves() > 0) {
-            quickStats += getString(R.string.mean) + convertNanoToTime(mCurrentPuzzleType.getSession().getMean());
-        }
+        buildQuickStats(5,12,100,1000);
         mQuickStats.setText(quickStats);
         ((SolveAdapter) mHListView.getAdapter()).updateSolvesList();
 
@@ -151,6 +157,7 @@ public class TimerFragment extends Fragment {
         try {
             scrambleAndSvg = new ScrambleAndSvg(scramble, mCurrentPuzzleType.getPuzzle().drawScramble(scramble, null));
         } catch (InvalidScrambleException e) {
+            e.printStackTrace();
         }
         mScrambling = false;
 
@@ -159,23 +166,52 @@ public class TimerFragment extends Fragment {
 
     void menuItemsEnable(boolean enable) {
         mMenuItemsEnabled = enable;
-        ActivityCompat.invalidateOptionsMenu(getActivity());
+        ActivityCompat.invalidateOptionsMenu(mActivity);
     }
 
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        mActivity=(ActionBarActivity)getActivity();
+        Log.d(TAG,"attach");
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
         setHasOptionsMenu(true);
-        mRunning = false;
-        mCurrentPuzzleType = PuzzleType.THREE;
-        mStartup = true;
+
+        mCurrentPuzzleType=PuzzleType.THREE;
+        mCurrentPuzzleType.resetSession();
 
         HandlerThread scramblerThread = new HandlerThread("ScramblerThread");
         scramblerThread.start();
         mScramblerThreadHandler = new Handler(scramblerThread.getLooper());
         mUIHandler = new Handler(Looper.getMainLooper());
+
+        mOnCreateCalled = true;
+
+        Log.e(TAG, "onCREATE of fragment");
+        Log.e(TAG, ""+mCurrentPuzzleType.getSession().getNumberOfSolves());
+
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mScramblerThreadHandler.removeCallbacksAndMessages(null);
+        mScramblerThreadHandler.getLooper().quit();
+        mUIHandler.removeCallbacksAndMessages(null);
+
+        Log.d(TAG, "onDestroy, thread stopped : "+mCurrentPuzzleType.getSession().getNumberOfSolves());
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mOnCreateViewCalled = false;
+        mOnCreateCalled = false;
     }
 
     @Override
@@ -187,7 +223,7 @@ public class TimerFragment extends Fragment {
 
         ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter =
                 new ArrayAdapter<PuzzleType>(
-                        ((ActionBarActivity) getActivity()).getSupportActionBar().getThemedContext(),
+                        mActivity.getSupportActionBar().getThemedContext(),
                         android.R.layout.simple_spinner_item,
                         PuzzleType.values()
                 );
@@ -198,7 +234,7 @@ public class TimerFragment extends Fragment {
         menuItemPuzzleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (!mConfigChange) {
+                if (!mOnCreateViewCalled) {
                     mCurrentPuzzleType = (PuzzleType) parent.getItemAtPosition(position);
                     updateQuickStats();
 
@@ -228,17 +264,14 @@ public class TimerFragment extends Fragment {
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
-
-        menuItemPuzzleSpinner.setEnabled(mMenuItemsEnabled);
-        menu.findItem(R.id.menu_item_display_scramble_image).setEnabled(mMenuItemsEnabled);
-
-        if (mStartup || (mRunning || mScrambling)) {
-            menuItemPuzzleSpinner.setEnabled(true);
-            menu.findItem(R.id.menu_item_display_scramble_image).setEnabled(true);
+        if (mRunning || mScrambling) {
+            menuItemPuzzleSpinner.setEnabled(false);
+            menu.findItem(R.id.menu_item_display_scramble_image).setEnabled(false);
+        }else {
+            menuItemPuzzleSpinner.setEnabled(mMenuItemsEnabled);
+            menu.findItem(R.id.menu_item_display_scramble_image).setEnabled(mMenuItemsEnabled);
         }
 
-        mConfigChange = false;
-        mStartup = false;
     }
 
     @Override
@@ -271,7 +304,7 @@ public class TimerFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_timer, container, false);
 
-        mConfigChange = true;
+        mOnCreateViewCalled = true;
 
         mTimerText = (TextView) v.findViewById(R.id.fragment_timer_text);
         mScrambleText = (TextView) v.findViewById(R.id.scramble_text);
@@ -288,10 +321,11 @@ public class TimerFragment extends Fragment {
             public void onItemClick(it.sephiroth.android.library.widget.AdapterView<?> parent, View view, int position, long id) {
                 Bundle args = new Bundle();
                 args.putInt("position", position);
+                args.putLong("time", mCurrentPuzzleType.getSession().getSolve(position).getTime());
                 SolveQuickModifyDialog dialog = new SolveQuickModifyDialog();
                 dialog.setTargetFragment(TimerFragment.this, 0);
                 dialog.setArguments(args);
-                dialog.show(getActivity().getSupportFragmentManager(), "modify");
+                dialog.show(mActivity.getSupportFragmentManager(), "modify");
             }
         });
 
@@ -365,7 +399,7 @@ public class TimerFragment extends Fragment {
             }
         });
 
-        if (mStartup) {
+        if (mOnCreateCalled) {
             mScrambleText.setText(R.string.scrambling);
             menuItemsEnable(false);
             mScramblerThreadHandler.post(new Runnable() {
@@ -387,7 +421,7 @@ public class TimerFragment extends Fragment {
         }
 
         // On config change: If timer is running, update scramble views to current. If timer is not running and not scrambling, then update scramble views to current.
-        if (!mStartup && (mRunning || !mScrambling)) {
+        if (!mOnCreateCalled && (mRunning || !mScrambling)) {
             updateScrambleViewsToCurrent();
         }
 
@@ -430,10 +464,12 @@ public class TimerFragment extends Fragment {
 
     public static class SolveQuickModifyDialog extends DialogFragment {
         private int position;
+        private long time;
 
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             position = getArguments().getInt("position");
+            time=getArguments().getLong("time");
 
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder.setItems(new String[]{getString(R.string.delete)}, new DialogInterface.OnClickListener() {
@@ -446,7 +482,7 @@ public class TimerFragment extends Fragment {
                     i.putExtra("position", position);
                     getTargetFragment().onActivityResult(getTargetRequestCode(), 0, i);
                 }
-            });
+            }).setTitle(convertNanoToTime(time));
             return builder.create();
         }
     }
@@ -462,7 +498,7 @@ public class TimerFragment extends Fragment {
 
         public SolveAdapter() {
             super();
-            mContext = getActivity();
+            mContext = mActivity;
             mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             mObjects = mCurrentPuzzleType.getSession().getSolves();
         }

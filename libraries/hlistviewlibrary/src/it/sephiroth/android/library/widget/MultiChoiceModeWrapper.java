@@ -7,65 +7,65 @@ import android.view.MenuItem;
 
 public class MultiChoiceModeWrapper implements MultiChoiceModeListener {
 
-    private MultiChoiceModeListener mWrapped;
-    private AbsHListView mView;
+	private MultiChoiceModeListener mWrapped;
+	private AbsHListView mView;
 
-    public MultiChoiceModeWrapper(AbsHListView view) {
-        mView = view;
-    }
+	public MultiChoiceModeWrapper( AbsHListView view ) {
+		mView = view;
+	}
 
-    public void setWrapped(MultiChoiceModeListener wrapped) {
-        mWrapped = wrapped;
-    }
+	public void setWrapped( MultiChoiceModeListener wrapped ) {
+		mWrapped = wrapped;
+	}
 
-    public boolean hasWrappedCallback() {
-        return mWrapped != null;
-    }
+	public boolean hasWrappedCallback() {
+		return mWrapped != null;
+	}
 
-    @TargetApi(11)
-    @Override
-    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-        if (mWrapped.onCreateActionMode(mode, menu)) {
-            mView.setLongClickable(false);
-            return true;
-        }
-        return false;
-    }
+	@TargetApi(11)
+	@Override
+	public boolean onCreateActionMode( ActionMode mode, Menu menu ) {
+		if( mWrapped.onCreateActionMode( mode, menu ) ) {
+			mView.setLongClickable( false );
+			return true;
+		}
+		return false;
+	}
 
-    @TargetApi(11)
-    @Override
-    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-        return mWrapped.onPrepareActionMode(mode, menu);
-    }
+	@TargetApi(11)
+	@Override
+	public boolean onPrepareActionMode( ActionMode mode, Menu menu ) {
+		return mWrapped.onPrepareActionMode( mode, menu );
+	}
 
-    @TargetApi(11)
-    @Override
-    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-        return mWrapped.onActionItemClicked(mode, item);
-    }
+	@TargetApi(11)
+	@Override
+	public boolean onActionItemClicked( ActionMode mode, MenuItem item ) {
+		return mWrapped.onActionItemClicked( mode, item );
+	}
 
-    @TargetApi(11)
-    @Override
-    public void onDestroyActionMode(ActionMode mode) {
-        mWrapped.onDestroyActionMode(mode);
-        mView.mChoiceActionMode = null;
+	@TargetApi(11)
+	@Override
+	public void onDestroyActionMode( ActionMode mode ) {
+		mWrapped.onDestroyActionMode( mode );
+		mView.mChoiceActionMode = null;
 
-        // Ending selection mode means deselecting everything.
-        mView.clearChoices();
-        mView.mDataChanged = true;
-        mView.rememberSyncState();
-        mView.requestLayout();
-        mView.setLongClickable(true);
-    }
+		// Ending selection mode means deselecting everything.
+		mView.clearChoices();
+		mView.mDataChanged = true;
+		mView.rememberSyncState();
+		mView.requestLayout();
+		mView.setLongClickable( true );
+	}
 
-    @TargetApi(11)
-    @Override
-    public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
-        mWrapped.onItemCheckedStateChanged(mode, position, id, checked);
+	@TargetApi(11)
+	@Override
+	public void onItemCheckedStateChanged( ActionMode mode, int position, long id, boolean checked ) {
+		mWrapped.onItemCheckedStateChanged( mode, position, id, checked );
 
-        // If there are no items selected we no longer need the selection mode.
-        if (mView.getCheckedItemCount() == 0) {
-            mode.finish();
-        }
-    }
+		// If there are no items selected we no longer need the selection mode.
+		if( mView.getCheckedItemCount() == 0 ) {
+			mode.finish();
+		}
+	}
 }
