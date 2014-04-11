@@ -7,8 +7,8 @@ android {
     defaultConfig {
         minSdkVersion 8
         targetSdkVersion 19
-        versionCode 2
-        versionName "0.0.2"
+        versionCode 3
+        versionName "0.0.3"
     }
 
     signingConfigs {
@@ -36,6 +36,7 @@ android {
 
 dependencies {
     compile project(':libraries:hlistviewlibrary')
+    compile 'ch.acra:acra:+'
     compile 'com.android.support:support-v4:+'
     compile 'com.android.support:appcompat-v7:+'
     compile 'com.github.cubing:tnoodle-android:+@aar'

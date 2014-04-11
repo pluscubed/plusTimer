@@ -73,6 +73,7 @@
     <orderEntry type="library" exported="" name="appcompat-v7-19.1.0" level="project" />
     <orderEntry type="library" exported="" name="support-v4-19.1.0" level="project" />
     <orderEntry type="library" exported="" name="androidsvg-1.2.1" level="project" />
+    <orderEntry type="library" exported="" name="acra-4.5.0" level="project" />
     <orderEntry type="library" exported="" name="tnoodle-android-0.8.7-1392889389" level="project" />
     <orderEntry type="module" module-name="hlistviewlibrary" exported="" />
   </component>
