@@ -112,7 +112,7 @@ public class TimerFragment extends Fragment {
 
     String buildQuickStats(Integer... currentAverages) {
         Arrays.sort(currentAverages, Collections.reverseOrder());
-        String s = null;
+        String s = "";
         for (int i : currentAverages) {
             if (mCurrentPuzzleType.getSession().getNumberOfSolves() >= i) {
                 s += getString(R.string.ao) + i + ": " + convertNanoToTime(mCurrentPuzzleType.getSession().getCurrentAverageOf(i)) + "\n";
@@ -125,10 +125,8 @@ public class TimerFragment extends Fragment {
     }
 
     void updateQuickStats() {
-        String quickStats = new String();
         mQuickStatsSolves.setText(getString(R.string.solves) + mCurrentPuzzleType.getSession().getNumberOfSolves());
-        buildQuickStats(5, 12, 100, 1000);
-        mQuickStats.setText(quickStats);
+        mQuickStats.setText(buildQuickStats(5, 12, 100, 1000));
         ((SolveAdapter) mHListView.getAdapter()).updateSolvesList();
 
     }

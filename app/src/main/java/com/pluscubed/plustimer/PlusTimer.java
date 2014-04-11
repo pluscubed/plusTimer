@@ -22,12 +22,12 @@ public class PlusTimer extends Application {
          *
          * Changed the string reference name
          */
-
+/*
         if (!BuildConfig.DEBUG) {
             ACRAConfiguration config=ACRA.getNewDefaultConfig(this);
             config.setFormUri(getString(R.string.bugsense_form_uri));
             ACRA.setConfig(config);
             ACRA.init(this);
-        }
+        }*/
     }
 }
