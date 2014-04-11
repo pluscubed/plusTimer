@@ -29,7 +29,7 @@ public class Session {
         return mSolves.get(mSolves.size() - 1);
     }
 
-    public Solve getSolve(int position){
+    public Solve getSolve(int position) {
         return mSolves.get(position);
     }
 

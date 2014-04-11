@@ -3,12 +3,9 @@ package com.pluscubed.plustimer;
 import net.gnehzr.tnoodle.scrambles.Puzzle;
 import net.gnehzr.tnoodle.scrambles.PuzzlePlugins;
 import net.gnehzr.tnoodle.utils.BadLazyClassDescriptionException;
-import net.gnehzr.tnoodle.utils.LazyInstantiator;
 import net.gnehzr.tnoodle.utils.LazyInstantiatorException;
 
 import java.io.IOException;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 /**
  * Puzzle type enum
@@ -56,20 +53,19 @@ public enum PuzzleType {
     }
 
 
-
     @Override
     public String toString() {
         return displayName;
     }
 
-    public Session getSession(){
-        if(session==null)
-            session=new Session();
+    public Session getSession() {
+        if (session == null)
+            session = new Session();
         return session;
     }
 
-    public void resetSession(){
-        session=null;
+    public void resetSession() {
+        session = null;
     }
 
 }

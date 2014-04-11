@@ -13,7 +13,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.MenuItemCompat;
@@ -42,7 +41,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
 import it.sephiroth.android.library.widget.HListView;
 
@@ -60,6 +58,8 @@ public class TimerFragment extends Fragment {
     private TextView mQuickStatsSolves;
     private TextView mQuickStats;
 
+    private Spinner mMenuPuzzleSpinner;
+    private MenuItem mMenuDisplayScramble;
 
     private long mStartTime;
     private long mEndTime;
@@ -68,12 +68,10 @@ public class TimerFragment extends Fragment {
     private Runnable mTimerRunnable;
     private PuzzleType mCurrentPuzzleType;
 
-    private boolean mOnCreateViewCalled;
     private boolean mOnCreateCalled;
     private boolean mScrambling;
     private boolean mRunning;
     private boolean mScrambleImageDisplay;
-    private boolean mMenuItemsEnabled;
 
     private Handler mScramblerThreadHandler;
     private Handler mUIHandler;
@@ -112,12 +110,12 @@ public class TimerFragment extends Fragment {
      }
      */
 
-    String buildQuickStats(Integer ... currentAverages){
+    String buildQuickStats(Integer... currentAverages) {
         Arrays.sort(currentAverages, Collections.reverseOrder());
-        String s=null;
-        for(int i:currentAverages){
-            if(mCurrentPuzzleType.getSession().getNumberOfSolves()>=i){
-                s+=getString(R.string.ao)+i+": "+convertNanoToTime(mCurrentPuzzleType.getSession().getCurrentAverageOf(i))+"\n";
+        String s = null;
+        for (int i : currentAverages) {
+            if (mCurrentPuzzleType.getSession().getNumberOfSolves() >= i) {
+                s += getString(R.string.ao) + i + ": " + convertNanoToTime(mCurrentPuzzleType.getSession().getCurrentAverageOf(i)) + "\n";
             }
         }
         if (mCurrentPuzzleType.getSession().getNumberOfSolves() > 0) {
@@ -129,7 +127,7 @@ public class TimerFragment extends Fragment {
     void updateQuickStats() {
         String quickStats = new String();
         mQuickStatsSolves.setText(getString(R.string.solves) + mCurrentPuzzleType.getSession().getNumberOfSolves());
-        buildQuickStats(5,12,100,1000);
+        buildQuickStats(5, 12, 100, 1000);
         mQuickStats.setText(quickStats);
         ((SolveAdapter) mHListView.getAdapter()).updateSolvesList();
 
@@ -165,15 +163,15 @@ public class TimerFragment extends Fragment {
     }
 
     void menuItemsEnable(boolean enable) {
-        mMenuItemsEnabled = enable;
-        ActivityCompat.invalidateOptionsMenu(mActivity);
+        Log.e(TAG, "menuitemsenable");
+        mMenuPuzzleSpinner.setEnabled(enable);
+        mMenuDisplayScramble.setEnabled(enable);
     }
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        mActivity=(ActionBarActivity)getActivity();
-        Log.d(TAG,"attach");
+        mActivity = (ActionBarActivity) getActivity();
     }
 
     @Override
@@ -192,9 +190,6 @@ public class TimerFragment extends Fragment {
 
         mOnCreateCalled = true;
 
-        Log.e(TAG, "onCREATE of fragment");
-        Log.e(TAG, ""+mCurrentPuzzleType.getSession().getNumberOfSolves());
-
     }
 
     @Override
@@ -203,14 +198,11 @@ public class TimerFragment extends Fragment {
         mScramblerThreadHandler.removeCallbacksAndMessages(null);
         mScramblerThreadHandler.getLooper().quit();
         mUIHandler.removeCallbacksAndMessages(null);
-
-        Log.d(TAG, "onDestroy, thread stopped : "+mCurrentPuzzleType.getSession().getNumberOfSolves());
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        mOnCreateViewCalled = false;
         mOnCreateCalled = false;
     }
 
@@ -218,10 +210,12 @@ public class TimerFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.fragment_timer_menu, menu);
+        Log.e(TAG, "oncreateoptiosnmenu");
 
-        Spinner menuItemPuzzleSpinner = (Spinner) MenuItemCompat.getActionView(menu.findItem(R.id.menu_item_puzzletypespinner));
+        mMenuPuzzleSpinner = (Spinner) MenuItemCompat.getActionView(menu.findItem(R.id.menu_item_puzzletypespinner));
+        mMenuDisplayScramble = menu.findItem(R.id.menu_item_display_scramble_image);
 
-        ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter =
+        final ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter =
                 new ArrayAdapter<PuzzleType>(
                         mActivity.getSupportActionBar().getThemedContext(),
                         android.R.layout.simple_spinner_item,
@@ -229,12 +223,14 @@ public class TimerFragment extends Fragment {
                 );
 
         puzzleTypeSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        menuItemPuzzleSpinner.setAdapter(puzzleTypeSpinnerAdapter);
-        menuItemPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition(mCurrentPuzzleType), false);
-        menuItemPuzzleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        mMenuPuzzleSpinner.setAdapter(puzzleTypeSpinnerAdapter);
+
+        mMenuPuzzleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (!mOnCreateViewCalled) {
+                Log.e(TAG, "onitemselected" + mMenuPuzzleSpinner.getSelectedItemPosition());
+                if (mMenuPuzzleSpinner.getSelectedItemPosition() != puzzleTypeSpinnerAdapter.getPosition(mCurrentPuzzleType)) {
+
                     mCurrentPuzzleType = (PuzzleType) parent.getItemAtPosition(position);
                     updateQuickStats();
 
@@ -259,19 +255,27 @@ public class TimerFragment extends Fragment {
                         }
                     });
                 }
+                Log.e(TAG, "onitemselectedstop");
             }
+
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
-        if (mRunning || mScrambling) {
-            menuItemPuzzleSpinner.setEnabled(false);
-            menu.findItem(R.id.menu_item_display_scramble_image).setEnabled(false);
-        }else {
-            menuItemPuzzleSpinner.setEnabled(mMenuItemsEnabled);
-            menu.findItem(R.id.menu_item_display_scramble_image).setEnabled(mMenuItemsEnabled);
+        mMenuPuzzleSpinner.post(new Runnable() {
+            @Override
+            public void run() {
+                mMenuPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition(mCurrentPuzzleType), true);
+            }
+        });
+
+
+        if (mOnCreateCalled || mRunning || mScrambling) {
+            menuItemsEnable(false);
         }
 
+
+        Log.e(TAG, "oncreateoptionsmenufinished");
     }
 
     @Override
@@ -304,7 +308,7 @@ public class TimerFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_timer, container, false);
 
-        mOnCreateViewCalled = true;
+        Log.e(TAG, "oncreateview");
 
         mTimerText = (TextView) v.findViewById(R.id.fragment_timer_text);
         mScrambleText = (TextView) v.findViewById(R.id.scramble_text);
@@ -401,7 +405,6 @@ public class TimerFragment extends Fragment {
 
         if (mOnCreateCalled) {
             mScrambleText.setText(R.string.scrambling);
-            menuItemsEnable(false);
             mScramblerThreadHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -427,7 +430,6 @@ public class TimerFragment extends Fragment {
 
         if (!mRunning && mCurrentPuzzleType.getSession().getNumberOfSolves() != 0) {
             mTimerText.setText(convertNanoToTime(mCurrentPuzzleType.getSession().getLatestSolve().getTime()));
-            updateScrambleViewsToCurrent();
         }
 
         if (!mRunning) {
@@ -450,6 +452,8 @@ public class TimerFragment extends Fragment {
         }
 
         updateQuickStats();
+
+        Log.e(TAG, "oncreateviewfinished");
 
         return v;
     }
