@@ -16,5 +16,6 @@
         <item name="hlv_transcriptMode">alwaysScroll</item>
     </style>
 
+    <style name="ACRADialogTheme" parent="@android:style/Theme.Dialog"/>
 
 </resources>
