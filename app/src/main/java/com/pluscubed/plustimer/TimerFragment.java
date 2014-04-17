@@ -115,11 +115,11 @@ public class TimerFragment extends Fragment {
         String s = "";
         for (int i : currentAverages) {
             if (mCurrentPuzzleType.getSession().getNumberOfSolves() >= i) {
-                s += getString(R.string.ao) + i + ": " + convertNanoToTime(mCurrentPuzzleType.getSession().getCurrentAverageOf(i)) + "\n";
+                s += getString(R.string.ao) + i + ": " + mCurrentPuzzleType.getSession().getStringCurrentAverageOf(i) + "\n";
             }
         }
         if (mCurrentPuzzleType.getSession().getNumberOfSolves() > 0) {
-            s += getString(R.string.mean) + convertNanoToTime(mCurrentPuzzleType.getSession().getMean());
+            s += getString(R.string.mean) + mCurrentPuzzleType.getSession().getMean();
         }
         return s;
     }
@@ -427,7 +427,7 @@ public class TimerFragment extends Fragment {
         }
 
         if (!mRunning && mCurrentPuzzleType.getSession().getNumberOfSolves() != 0) {
-            mTimerText.setText(convertNanoToTime(mCurrentPuzzleType.getSession().getLatestSolve().getTime()));
+            mTimerText.setText(mCurrentPuzzleType.getSession().getLatestSolve().getTimeString());
         }
 
         if (!mRunning) {
@@ -459,9 +459,25 @@ public class TimerFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 0) {
-            mCurrentPuzzleType.getSession().deleteSolve(data.getIntExtra("position", 0));
-            updateQuickStats();
+            switch(data.getIntExtra("which", 0)){
+                case 0:
+                    mCurrentPuzzleType.getSession().deleteSolve(data.getIntExtra("position", 0));
+                    break;
+                case 1:
+                    mCurrentPuzzleType.getSession().getSolve(data.getIntExtra("position", 0)).setDnf(false);
+                    mCurrentPuzzleType.getSession().getSolve(data.getIntExtra("position", 0)).setPlusTwo(false);
+                    break;
+                case 2:
+                    mCurrentPuzzleType.getSession().getSolve(data.getIntExtra("position", 0)).setDnf(true);
+                    mCurrentPuzzleType.getSession().getSolve(data.getIntExtra("position", 0)).setPlusTwo(false);
+                    break;
+                case 3:
+                    mCurrentPuzzleType.getSession().getSolve(data.getIntExtra("position", 0)).setDnf(false);
+                    mCurrentPuzzleType.getSession().getSolve(data.getIntExtra("position", 0)).setPlusTwo(true);
+                    break;
+            }
         }
+        updateQuickStats();
     }
 
     public static class SolveQuickModifyDialog extends DialogFragment {
@@ -474,7 +490,7 @@ public class TimerFragment extends Fragment {
             time=getArguments().getLong("time");
 
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            builder.setItems(new String[]{getString(R.string.delete)}, new DialogInterface.OnClickListener() {
+            builder.setItems(new String[]{getString(R.string.delete), "No penalty", "DNF", "+2"}, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     if (getTargetFragment() == null) {
@@ -482,9 +498,10 @@ public class TimerFragment extends Fragment {
                     }
                     Intent i = new Intent();
                     i.putExtra("position", position);
+                    i.putExtra("which", which);
                     getTargetFragment().onActivityResult(getTargetRequestCode(), 0, i);
                 }
-            }).setTitle(convertNanoToTime(time));
+            }).setTitle(convertNanoToTime(time)); //TODO:use solve instead
             return builder.create();
         }
     }
@@ -494,9 +511,7 @@ public class TimerFragment extends Fragment {
         private final Context mContext;
         private final LayoutInflater mInflater;
         private List<Solve> mObjects;
-        private ArrayList<Long> mTimes;
-        private int indexBest;
-        private int indexWorst;
+        private ArrayList<Solve> mBestWorstSolves;
 
         public SolveAdapter() {
             super();
@@ -528,11 +543,16 @@ public class TimerFragment extends Fragment {
             Solve s = (Solve) getItem(position);
             TextView time = (TextView) convertView.findViewById(R.id.fragment_hlistview_text);
 
+            time.setText("");
 
-            if (position == indexBest || position == indexWorst) {
-                time.setText("(" + convertNanoToTime(s.getTime()) + ")");
-            } else {
-                time.setText(convertNanoToTime(s.getTime()));
+            for(Solve a: mBestWorstSolves){
+                if(a.equals(s)){
+                    time.setText("(" + s.getTimeString() + ")");
+                }
+            }
+
+            if(time.getText()==""){
+                time.setText( s.getTimeString() );
             }
 
             return convertView;
@@ -540,13 +560,9 @@ public class TimerFragment extends Fragment {
 
         public void updateSolvesList() {
             mObjects = mCurrentPuzzleType.getSession().getSolves();
-            if (mObjects.size() > 0) {
-                mTimes = new ArrayList<Long>();
-                for (Solve i : mObjects) {
-                    mTimes.add(i.getTime());
-                }
-                indexBest = mTimes.indexOf(Collections.min(mTimes));
-                indexWorst = mTimes.indexOf(Collections.max(mTimes));
+            mBestWorstSolves =mCurrentPuzzleType.getSession().getBestWorstDNFSolves((ArrayList<Solve>) (mObjects));
+            for(Solve i:mBestWorstSolves){
+                Log.e(TAG, i.getTimeString());
             }
             notifyDataSetChanged();
         }
