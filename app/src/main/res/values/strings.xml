@@ -14,7 +14,6 @@
     <string name="scrambleimage">Scramble Image</string>
     <string name="acra_crash_dialog_title">plusTimer has crashed</string>
     <string name="acra_crash_dialog_text">If you would like to submit a bug report to help fix this issue, touch OK.</string>
-    <string name="acra_crash_dialog_prompt">Add details to the bug report here (optional):</string>
 
     <string-array name="penalty_array">
         <item>None</item>

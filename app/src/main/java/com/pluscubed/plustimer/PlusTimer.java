@@ -37,7 +37,6 @@ public class PlusTimer extends Application {
                 e.printStackTrace();
             }
             config.setResDialogText(R.string.acra_crash_dialog_text);
-            config.setResDialogCommentPrompt(R.string.acra_crash_dialog_prompt);
             config.setResDialogTitle(R.string.acra_crash_dialog_title);
             ACRA.setConfig(config);
             ACRA.init(this);
