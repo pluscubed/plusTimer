@@ -25,12 +25,31 @@ public class Session {
         return mSolves.size();
     }
 
+    public ArrayList<Long> getListTimeTwoNdnf(){
+        ArrayList<Long> timeTwo=new ArrayList<Long>();
+        for(Solve i:mSolves){
+            if(!i.isDnf())
+                timeTwo.add(i.getTimeTwo());
+        }
+        return timeTwo;
+    }
+
     public Solve getLatestSolve() {
         return mSolves.get(mSolves.size() - 1);
     }
 
-    public Solve getSolve(int position) {
+    public Solve getSolveByPosition(int position) {
         return mSolves.get(position);
+    }
+
+    public ArrayList<Solve> getNdnfSolvesWithTimeTwo(long time){
+        ArrayList<Solve> solves=new ArrayList<Solve>();
+        for (Solve i:mSolves){
+            if(!i.isDnf()&&time==i.getTimeTwo()){
+                solves.add(i);
+            }
+        }
+        return solves;
     }
 
     public String getStringCurrentAverageOf(int number) {
@@ -49,12 +68,12 @@ public class Session {
             }
 
             if (dnfcount<2){
-                ArrayList<Solve> invalid= getBestWorstDNFSolves(solves);
+                ArrayList<Solve> invalid= getBestAndWorstSolves(solves);
                 solves.removeAll(invalid);
                 for (Solve i : solves) {
-                    sum += i.getTime();
+                    sum += i.getTimeTwo();
                 }
-                return TimerFragment.convertNanoToTime(sum / (number - 2L));
+                return Solve.timeStringFromLong(sum / (number - 2L));
             }else{
                 return "DNF";
             }
@@ -62,27 +81,29 @@ public class Session {
         return "";
     }
 
-    public ArrayList<Solve> getBestWorstDNFSolves(ArrayList<Solve> solveList){
+    public ArrayList<Solve> getBestAndWorstSolves(ArrayList<Solve> solveList){
         ArrayList<Solve> best = new ArrayList<Solve>();
         ArrayList<Solve> worst = new ArrayList<Solve>();
-        ArrayList<Long> times = new ArrayList<Long>();
+        ArrayList<Long> times = getListTimeTwoNdnf();
         for (Solve i : solveList) {
-            if (!i.isDnf())
-                times.add(i.getTime());
-            else
-                worst.add(i);
+            if (i.isDnf()) {
+                if(worst.size()==0)
+                    worst.add(i);
+                else
+                    worst.set(0, i);
+            }
         }
         if(times.size()>0) {
             long tempWorst = Collections.max(times);
             long tempBest = Collections.min(times);
             for (Solve i : solveList) {
-                if (!i.isDnf()&&i.getTime() == tempBest)
+                if (!i.isDnf()&&i.getTimeTwo() == tempBest)
                     best.add(i);
             }
 
             if (worst.size() == 0) {
                 for (Solve i : solveList) {
-                    if (i.getTime() == tempWorst)
+                    if (i.getTimeTwo() == tempWorst)
                         worst.add(i);
                 }
             }
@@ -91,12 +112,12 @@ public class Session {
         return best;
     }
 
-    public String getMean() {
+    public String getStringMean() {
         long sum = 0;
         for (Solve i : mSolves) {
-            sum += i.getTime();
+            sum += i.getTimeTwo();
         }
-        return TimerFragment.convertNanoToTime( sum / mSolves.size());
+        return Solve.timeStringFromLong(sum / mSolves.size());
     }
 
     public void deleteSolve(int position) {

@@ -41,5 +41,6 @@ dependencies {
     compile 'com.android.support:appcompat-v7:+'
     compile 'com.github.cubing:tnoodle-android:+@aar'
     compile 'com.caverock:androidsvg:+'
+    compile 'com.android.support:support-annotations:+'
     compile fileTree(dir: 'libs', include: ['*.jar'])
 }

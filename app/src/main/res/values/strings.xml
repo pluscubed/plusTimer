@@ -10,9 +10,16 @@
     <string name="ao">"Current Ao"</string>
     <string name="mean">"Session Mean: "</string>
     <string name="delete">Delete</string>
+    <string name="penalty">Penalty:</string>
     <string name="scrambleimage">Scramble Image</string>
     <string name="acra_crash_dialog_title">plusTimer has crashed</string>
     <string name="acra_crash_dialog_text">If you would like to submit a bug report to help fix this issue, touch OK.</string>
     <string name="acra_crash_dialog_prompt">Add details to the bug report here (optional):</string>
+
+    <string-array name="penalty_array">
+        <item>None</item>
+        <item>+2</item>
+        <item>DNF</item>
+    </string-array>
 
 </resources>

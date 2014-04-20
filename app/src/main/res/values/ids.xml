@@ -11,5 +11,6 @@
     <item name="fragment_quickstats_text" type="id" />
     <item name="fragment_scramble_image" type="id" />
     <item name="fragment_rootview" type="id" />
+    <item name="dialog_modify_penalty_spinner" type="id"/>
     <item name="menu_item_display_scramble_image" type="id" />
 </resources>

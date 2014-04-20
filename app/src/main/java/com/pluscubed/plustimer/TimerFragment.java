@@ -17,7 +17,6 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -28,6 +27,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -50,6 +50,17 @@ import it.sephiroth.android.library.widget.HListView;
 
 public class TimerFragment extends Fragment {
     public static final String TAG = "TIMER";
+    public static final String DIALOG_BUNDLEKEY_TIMESTRING="TIMESTRING";
+    public static final String DIALOG_BUNDLEKEY_SOLVE_POSITION ="POSITION";
+    public static final String DIALOG_BUNDLEKEY_PENALTY ="PENALTY";
+    public static final String DIALOG_INTENT_EXTRA_SOLVE_POSITION ="BACKTOFRAGMENTPOSITION";
+    public static final String DIALOG_INTENT_EXTRA_SELECTION ="BACKTOFRAGMENTSELECTION";
+    public static final String DIALOG_TAG="MODIFY_DIALOG";
+    public static final int DIALOG_REQUEST_CODE =0;
+    public static final int DIALOG_RESULT_DELETE=4;
+    public static final int DIALOG_RESULT_PENALTY_NONE=0;
+    public static final int DIALOG_RESULT_PENALTY_PLUSTWO=1;
+    public static final int DIALOG_RESULT_PENALTY_DNF=2;
 
     private TextView mTimerText;
     private TextView mScrambleText;
@@ -81,20 +92,6 @@ public class TimerFragment extends Fragment {
     private ScrambleAndSvg mCurrentScrambleAndSvg;
     private ScrambleAndSvg mNextScrambleAndSvg;
 
-    public static String convertNanoToTime(long nano) {
-        int minutes = (int) ((nano / (60 * 1000000000L)) % 60);
-        int hours = (int) ((nano / (3600 * 1000000000L)) % 24);
-        float seconds = (nano / 1000000000F) % 60;
-
-        if (hours != 0) {
-            return String.format("%d:%02d:%06.3f", hours, minutes, seconds);
-        } else if (minutes != 0) {
-            return String.format("%d:%06.3f", minutes, seconds);
-        } else {
-            return String.format("%.3f", seconds);
-        }
-
-    }
 
     /* Might be useful later
      public static double convertPxToDp(double px, DisplayMetrics metrics){
@@ -119,7 +116,7 @@ public class TimerFragment extends Fragment {
             }
         }
         if (mCurrentPuzzleType.getSession().getNumberOfSolves() > 0) {
-            s += getString(R.string.mean) + mCurrentPuzzleType.getSession().getMean();
+            s += getString(R.string.mean) + mCurrentPuzzleType.getSession().getStringMean();
         }
         return s;
     }
@@ -127,7 +124,7 @@ public class TimerFragment extends Fragment {
     void updateQuickStats() {
         mQuickStatsSolves.setText(getString(R.string.solves) + mCurrentPuzzleType.getSession().getNumberOfSolves());
         mQuickStats.setText(buildQuickStats(5, 12, 100, 1000));
-        ((SolveAdapter) mHListView.getAdapter()).updateSolvesList();
+        ((SolveHListViewAdapter) mHListView.getAdapter()).updateSolvesList();
 
     }
 
@@ -161,7 +158,6 @@ public class TimerFragment extends Fragment {
     }
 
     void menuItemsEnable(boolean enable) {
-        Log.e(TAG, "menuitemsenable");
         mMenuPuzzleSpinner.setEnabled(enable);
         mMenuDisplayScramble.setEnabled(enable);
     }
@@ -208,7 +204,6 @@ public class TimerFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.fragment_timer_menu, menu);
-        Log.e(TAG, "oncreateoptiosnmenu");
 
         mMenuPuzzleSpinner = (Spinner) MenuItemCompat.getActionView(menu.findItem(R.id.menu_item_puzzletypespinner));
         mMenuDisplayScramble = menu.findItem(R.id.menu_item_display_scramble_image);
@@ -226,7 +221,6 @@ public class TimerFragment extends Fragment {
         mMenuPuzzleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Log.e(TAG, "onitemselected" + mMenuPuzzleSpinner.getSelectedItemPosition());
                 if (mMenuPuzzleSpinner.getSelectedItemPosition() != puzzleTypeSpinnerAdapter.getPosition(mCurrentPuzzleType)) {
 
                     mCurrentPuzzleType = (PuzzleType) parent.getItemAtPosition(position);
@@ -253,7 +247,6 @@ public class TimerFragment extends Fragment {
                         }
                     });
                 }
-                Log.e(TAG, "onitemselectedstop");
             }
 
             @Override
@@ -271,9 +264,6 @@ public class TimerFragment extends Fragment {
         if (mOnCreateCalled || mRunning || mScrambling) {
             menuItemsEnable(false);
         }
-
-
-        Log.e(TAG, "oncreateoptionsmenufinished");
     }
 
     @Override
@@ -306,8 +296,6 @@ public class TimerFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_timer, container, false);
 
-        Log.e(TAG, "oncreateview");
-
         mTimerText = (TextView) v.findViewById(R.id.fragment_timer_text);
         mScrambleText = (TextView) v.findViewById(R.id.scramble_text);
         mScrambleImage = (ImageView) v.findViewById(R.id.fragment_scramble_image);
@@ -316,25 +304,28 @@ public class TimerFragment extends Fragment {
         mQuickStats = (TextView) v.findViewById(R.id.fragment_quickstats_text);
         mQuickStatsSolves = (TextView) v.findViewById(R.id.fragment_quickstats_solves_text);
 
-        SolveAdapter adapter = new SolveAdapter();
+        final SolveHListViewAdapter adapter = new SolveHListViewAdapter();
         mHListView.setAdapter(adapter);
         mHListView.setOnItemClickListener(new it.sephiroth.android.library.widget.AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(it.sephiroth.android.library.widget.AdapterView<?> parent, View view, int position, long id) {
-                Bundle args = new Bundle();
-                args.putInt("position", position);
-                args.putLong("time", mCurrentPuzzleType.getSession().getSolve(position).getTime());
-                SolveQuickModifyDialog dialog = new SolveQuickModifyDialog();
-                dialog.setTargetFragment(TimerFragment.this, 0);
-                dialog.setArguments(args);
-                dialog.show(mActivity.getSupportFragmentManager(), "modify");
+                int penalty;
+                if(((Solve)parent.getItemAtPosition(position)).isDnf())
+                    penalty=DIALOG_RESULT_PENALTY_DNF;
+                else if(((Solve)parent.getItemAtPosition(position)).isPlusTwo())
+                    penalty=DIALOG_RESULT_PENALTY_PLUSTWO;
+                else
+                    penalty=DIALOG_RESULT_PENALTY_NONE;
+                SolveQuickModifyDialog d=SolveQuickModifyDialog.newInstance((Solve) parent.getItemAtPosition(position), position,penalty);
+                d.setTargetFragment(TimerFragment.this, DIALOG_REQUEST_CODE);
+                d.show(mActivity.getSupportFragmentManager(), DIALOG_TAG);
             }
         });
 
         mTimerRunnable = new Runnable() {
             @Override
             public void run() {
-                mTimerText.setText(convertNanoToTime(System.nanoTime() - mStartTime));
+                mTimerText.setText(Solve.timeStringFromLong(System.nanoTime() - mStartTime));
                 mUIHandler.postDelayed(this, 10);
             }
         };
@@ -368,7 +359,7 @@ public class TimerFragment extends Fragment {
                     mRunning = false;
                     mUIHandler.removeCallbacksAndMessages(null);
                     mFinalTime = mEndTime - mStartTime;
-                    mTimerText.setText(convertNanoToTime(mFinalTime));
+                    mTimerText.setText(Solve.timeStringFromLong(mFinalTime));
                     mCurrentPuzzleType.getSession().addSolve(new Solve(mCurrentScrambleAndSvg, mFinalTime));
                     updateQuickStats();
                     if (mScrambling) {
@@ -451,29 +442,26 @@ public class TimerFragment extends Fragment {
 
         updateQuickStats();
 
-        Log.e(TAG, "oncreateviewfinished");
-
         return v;
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 0) {
-            switch(data.getIntExtra("which", 0)){
-                case 0:
-                    mCurrentPuzzleType.getSession().deleteSolve(data.getIntExtra("position", 0));
+        if (requestCode == DIALOG_REQUEST_CODE) {
+            Solve solve=mCurrentPuzzleType.getSession().getSolveByPosition(data.getIntExtra(DIALOG_INTENT_EXTRA_SOLVE_POSITION, 0));
+            switch(data.getIntExtra(DIALOG_INTENT_EXTRA_SELECTION,0)){
+                case DIALOG_RESULT_PENALTY_NONE:
+                    solve.setPlusTwo(false);
+                    solve.setDnf(false);
                     break;
-                case 1:
-                    mCurrentPuzzleType.getSession().getSolve(data.getIntExtra("position", 0)).setDnf(false);
-                    mCurrentPuzzleType.getSession().getSolve(data.getIntExtra("position", 0)).setPlusTwo(false);
+                case DIALOG_RESULT_PENALTY_PLUSTWO:
+                    solve.setPlusTwo(true);
                     break;
-                case 2:
-                    mCurrentPuzzleType.getSession().getSolve(data.getIntExtra("position", 0)).setDnf(true);
-                    mCurrentPuzzleType.getSession().getSolve(data.getIntExtra("position", 0)).setPlusTwo(false);
+                case DIALOG_RESULT_PENALTY_DNF:
+                    solve.setDnf(true);
                     break;
-                case 3:
-                    mCurrentPuzzleType.getSession().getSolve(data.getIntExtra("position", 0)).setDnf(false);
-                    mCurrentPuzzleType.getSession().getSolve(data.getIntExtra("position", 0)).setPlusTwo(true);
+                case DIALOG_RESULT_DELETE:
+                    mCurrentPuzzleType.getSession().deleteSolve(data.getIntExtra(DIALOG_INTENT_EXTRA_SOLVE_POSITION, 0));
                     break;
             }
         }
@@ -481,53 +469,98 @@ public class TimerFragment extends Fragment {
     }
 
     public static class SolveQuickModifyDialog extends DialogFragment {
+        private String timeString;
         private int position;
-        private long time;
+        private int selection=0;
+
+        @Override
+        public void onDismiss(DialogInterface dialog) {
+            super.onDismiss(dialog);
+            if(!(getTargetFragment()==null)) {
+                Intent i=new Intent();
+                i.putExtra(DIALOG_INTENT_EXTRA_SOLVE_POSITION, position);
+                i.putExtra(DIALOG_INTENT_EXTRA_SELECTION, selection);
+                getTargetFragment().onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, i);
+            }
+        }
 
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
-            position = getArguments().getInt("position");
-            time=getArguments().getLong("time");
+            position = getArguments().getInt(DIALOG_BUNDLEKEY_SOLVE_POSITION);
+            timeString= getArguments().getString(DIALOG_BUNDLEKEY_TIMESTRING);
+
+            LayoutInflater inflater=getActivity().getLayoutInflater();
+            View v=inflater.inflate(R.layout.dialog_solve, null);
+
+            Spinner penaltySpinner= (Spinner) v.findViewById(R.id.dialog_modify_penalty_spinner);
+
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
+                    R.array.penalty_array, android.R.layout.simple_spinner_item);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            penaltySpinner.setAdapter(adapter);
+
+            penaltySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int selectedPosition, long id) {
+                    selection=selectedPosition;
+                }
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+
+                }
+            });
+            penaltySpinner.setSelection(getArguments().getInt(DIALOG_BUNDLEKEY_PENALTY));
 
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            builder.setItems(new String[]{getString(R.string.delete), "No penalty", "DNF", "+2"}, new DialogInterface.OnClickListener() {
+            builder.setTitle(timeString)
+                    .setView(v)
+            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    if (getTargetFragment() == null) {
-                        return;
-                    }
-                    Intent i = new Intent();
-                    i.putExtra("position", position);
-                    i.putExtra("which", which);
-                    getTargetFragment().onActivityResult(getTargetRequestCode(), 0, i);
                 }
-            }).setTitle(convertNanoToTime(time)); //TODO:use solve instead
+            })
+            .setNegativeButton(R.string.delete, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    selection=DIALOG_RESULT_DELETE;
+                }
+            });
             return builder.create();
+        }
+
+        static SolveQuickModifyDialog newInstance(Solve i, int position, int penalty){
+            SolveQuickModifyDialog d=new SolveQuickModifyDialog();
+            Bundle args = new Bundle();
+            args.putString(DIALOG_BUNDLEKEY_TIMESTRING, i.getTimeString());
+            args.putInt(DIALOG_BUNDLEKEY_SOLVE_POSITION, position);
+            args.putInt(DIALOG_BUNDLEKEY_PENALTY, penalty);
+            d.setArguments(args);
+            return d;
         }
     }
 
-    private class SolveAdapter extends BaseAdapter {
+    private class SolveHListViewAdapter extends BaseAdapter {
 
         private final Context mContext;
         private final LayoutInflater mInflater;
-        private List<Solve> mObjects;
-        private ArrayList<Solve> mBestWorstSolves;
+        private List<Solve> mSolves;
+        private ArrayList<Solve> mBestAndWorstSolves;
 
-        public SolveAdapter() {
+        public SolveHListViewAdapter() {
             super();
             mContext = mActivity;
             mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            mObjects = mCurrentPuzzleType.getSession().getSolves();
+            mSolves = mCurrentPuzzleType.getSession().getSolves();
         }
 
         @Override
         public Object getItem(int position) {
-            return mObjects.get(position);
+            return mSolves.get(position);
         }
 
         @Override
         public int getCount() {
-            return mObjects.size();
+            return mSolves.size();
         }
 
         @Override
@@ -545,7 +578,7 @@ public class TimerFragment extends Fragment {
 
             time.setText("");
 
-            for(Solve a: mBestWorstSolves){
+            for(Solve a: mBestAndWorstSolves){
                 if(a.equals(s)){
                     time.setText("(" + s.getTimeString() + ")");
                 }
@@ -559,11 +592,8 @@ public class TimerFragment extends Fragment {
         }
 
         public void updateSolvesList() {
-            mObjects = mCurrentPuzzleType.getSession().getSolves();
-            mBestWorstSolves =mCurrentPuzzleType.getSession().getBestWorstDNFSolves((ArrayList<Solve>) (mObjects));
-            for(Solve i:mBestWorstSolves){
-                Log.e(TAG, i.getTimeString());
-            }
+            mSolves = mCurrentPuzzleType.getSession().getSolves();
+            mBestAndWorstSolves =mCurrentPuzzleType.getSession().getBestAndWorstSolves((ArrayList<Solve>) (mSolves));
             notifyDataSetChanged();
         }
 
