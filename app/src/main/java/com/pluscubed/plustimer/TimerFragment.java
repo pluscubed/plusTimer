@@ -17,6 +17,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -531,7 +532,7 @@ public class TimerFragment extends Fragment {
         static SolveQuickModifyDialog newInstance(Solve i, int position, int penalty){
             SolveQuickModifyDialog d=new SolveQuickModifyDialog();
             Bundle args = new Bundle();
-            args.putString(DIALOG_BUNDLEKEY_TIMESTRING, i.getTimeString());
+            args.putString(DIALOG_BUNDLEKEY_TIMESTRING, i.getDescriptiveTimeString());
             args.putInt(DIALOG_BUNDLEKEY_SOLVE_POSITION, position);
             args.putInt(DIALOG_BUNDLEKEY_PENALTY, penalty);
             d.setArguments(args);
@@ -579,7 +580,7 @@ public class TimerFragment extends Fragment {
             time.setText("");
 
             for(Solve a: mBestAndWorstSolves){
-                if(a.equals(s)){
+                if(a==s){
                     time.setText("(" + s.getTimeString() + ")");
                 }
             }
@@ -593,7 +594,9 @@ public class TimerFragment extends Fragment {
 
         public void updateSolvesList() {
             mSolves = mCurrentPuzzleType.getSession().getSolves();
-            mBestAndWorstSolves =mCurrentPuzzleType.getSession().getBestAndWorstSolves((ArrayList<Solve>) (mSolves));
+            mBestAndWorstSolves = new ArrayList<Solve>();
+            mBestAndWorstSolves.add(mCurrentPuzzleType.getSession().getBestSolve(new ArrayList<Solve>(mSolves)));
+            mBestAndWorstSolves.add(mCurrentPuzzleType.getSession().getWorstSolve(new ArrayList<Solve>(mSolves)));
             notifyDataSetChanged();
         }
 

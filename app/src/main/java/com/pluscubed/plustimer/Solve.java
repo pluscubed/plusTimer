@@ -51,6 +51,14 @@ public class Solve {
         return timeStringFromLong(mRawTime);
     }
 
+    public String getDescriptiveTimeString(){
+        if(dnf)
+            return "DNF("+timeStringFromLong(mRawTime)+")";
+        if(plusTwo)
+            return timeStringFromLong(mRawTime)+"+2";
+        return timeStringFromLong(mRawTime);
+    }
+
     public void setRawTime(long time) {
         this.mRawTime = time;
     }

@@ -1,5 +1,8 @@
 package com.pluscubed.plustimer;
 
+import android.util.Log;
+
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -25,9 +28,9 @@ public class Session {
         return mSolves.size();
     }
 
-    public ArrayList<Long> getListTimeTwoNdnf(){
+    public ArrayList<Long> getListTimeTwoNdnf(ArrayList<Solve> solveList){
         ArrayList<Long> timeTwo=new ArrayList<Long>();
-        for(Solve i:mSolves){
+        for(Solve i:solveList){
             if(!i.isDnf())
                 timeTwo.add(i.getTimeTwo());
         }
@@ -42,34 +45,25 @@ public class Session {
         return mSolves.get(position);
     }
 
-    public ArrayList<Solve> getNdnfSolvesWithTimeTwo(long time){
-        ArrayList<Solve> solves=new ArrayList<Solve>();
-        for (Solve i:mSolves){
-            if(!i.isDnf()&&time==i.getTimeTwo()){
-                solves.add(i);
-            }
-        }
-        return solves;
-    }
-
     public String getStringCurrentAverageOf(int number) {
         if (number >= 5) {
             long sum = 0;
             ArrayList<Solve> solves = new ArrayList<Solve>();
 
-            int dnfcount=0;
+            int dnfcount = 0;
 
             for (int i = 1; i < number + 1; i++) {
-                Solve x=mSolves.get(mSolves.size() - i);
-                if(!x.isDnf())
-                    solves.add(x);
-                else
+                Solve x = mSolves.get(mSolves.size() - i);
+                solves.add(x);
+                if(x.isDnf())
                     dnfcount++;
             }
 
-            if (dnfcount<2){
-                ArrayList<Solve> invalid= getBestAndWorstSolves(solves);
-                solves.removeAll(invalid);
+            Log.e(TimerFragment.TAG, "" + solves.size());
+
+            if(dnfcount<2){
+                solves.remove(getBestSolve(solves));
+                solves.remove(getWorstSolve(solves));
                 for (Solve i : solves) {
                     sum += i.getTimeTwo();
                 }
@@ -81,43 +75,56 @@ public class Session {
         return "";
     }
 
-    public ArrayList<Solve> getBestAndWorstSolves(ArrayList<Solve> solveList){
-        ArrayList<Solve> best = new ArrayList<Solve>();
-        ArrayList<Solve> worst = new ArrayList<Solve>();
-        ArrayList<Long> times = getListTimeTwoNdnf();
-        for (Solve i : solveList) {
-            if (i.isDnf()) {
-                if(worst.size()==0)
-                    worst.add(i);
-                else
-                    worst.set(0, i);
+    public Solve getBestSolve(ArrayList<Solve> solveList){
+        if (solveList.size() > 0) {
+            Collections.reverse(solveList);
+            ArrayList<Long> times = getListTimeTwoNdnf(solveList);
+            if (times.size() > 0) {
+                long bestTimeTwo = Collections.min(times);
+                for (Solve i : solveList) {
+                    if (!i.isDnf() && i.getTimeTwo() == bestTimeTwo)
+                        return i;
+                }
+
             }
         }
-        if(times.size()>0) {
-            long tempWorst = Collections.max(times);
-            long tempBest = Collections.min(times);
-            for (Solve i : solveList) {
-                if (!i.isDnf()&&i.getTimeTwo() == tempBest)
-                    best.add(i);
-            }
+        return null;
+    }
 
-            if (worst.size() == 0) {
+    public Solve getWorstSolve(ArrayList<Solve> solveList) {
+        if (solveList.size() > 0) {
+            Collections.reverse(solveList);
+            for(Solve i:solveList){
+                if(i.isDnf()) {
+                    return i;
+                }
+            }
+            ArrayList<Long> times = getListTimeTwoNdnf(solveList);
+            if (times.size() > 0) {
+                long worstTimeTwo = Collections.max(times);
                 for (Solve i : solveList) {
-                    if (i.getTimeTwo() == tempWorst)
-                        worst.add(i);
+                    if (i.getTimeTwo() == worstTimeTwo)
+                        return i;
                 }
             }
         }
-        best.addAll(worst);
-        return best;
+        return null;
     }
 
     public String getStringMean() {
         long sum = 0;
+        boolean dnf=false;
         for (Solve i : mSolves) {
-            sum += i.getTimeTwo();
+            if(!i.isDnf()) {
+                sum += i.getTimeTwo();
+            }
+            else
+               dnf=true;
         }
-        return Solve.timeStringFromLong(sum / mSolves.size());
+        if(!dnf)
+            return Solve.timeStringFromLong(sum / mSolves.size());
+        else
+            return "DNF";
     }
 
     public void deleteSolve(int position) {
