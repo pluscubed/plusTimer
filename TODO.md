@@ -1,5 +1,7 @@
 TODO (not in order)
 =========
+~~Strikeout~~ = Added
+
 - Settings
     - Prevent sleep
     - Hide timer option
@@ -7,15 +9,17 @@ TODO (not in order)
 - Timer
     - Inspection time
     - Hold to start
+    - Drop to stop
 
 - Scrambles
-    - Scramble Image
-    - New scramble
+    - ~~Scramble Image~~
+    - Manual new scramble
 
-- Sessions - fix bugs
+- Sessions
     - Backup function
     - Scrambles
-    - Avg/means/other stats
-    - Penalty
+    - ~~Avg/means/other stats~~
+    - ~~Penalty~~
     - Share
-    - Add/Delete solve
+    - Add/~~Delete~~ solve
+    - Reset
