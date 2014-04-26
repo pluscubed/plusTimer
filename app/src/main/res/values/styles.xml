@@ -13,9 +13,8 @@
         <item name="hlv_dividerWidth">0dip</item>
         <item name="hlv_headerDividersEnabled">false</item>
         <item name="hlv_footerDividersEnabled">false</item>
-        <item name="hlv_transcriptMode">alwaysScroll</item>
     </style>
 
-    <style name="ACRADialogTheme" parent="@android:style/Theme.Dialog"/>
+    <style name="ACRADialogTheme" parent="@android:style/Theme.Dialog" />
 
 </resources>

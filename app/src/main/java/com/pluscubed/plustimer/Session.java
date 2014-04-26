@@ -2,7 +2,6 @@ package com.pluscubed.plustimer;
 
 import android.util.Log;
 
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -17,7 +16,7 @@ public class Session {
     }
 
     public ArrayList<Solve> getSolves() {
-        return mSolves;
+        return new ArrayList<Solve>(mSolves);
     }
 
     public void addSolve(Solve s) {
@@ -28,10 +27,10 @@ public class Session {
         return mSolves.size();
     }
 
-    public ArrayList<Long> getListTimeTwoNdnf(ArrayList<Solve> solveList){
-        ArrayList<Long> timeTwo=new ArrayList<Long>();
-        for(Solve i:solveList){
-            if(!i.isDnf())
+    public ArrayList<Long> getListTimeTwoNdnf(ArrayList<Solve> solveList) {
+        ArrayList<Long> timeTwo = new ArrayList<Long>();
+        for (Solve i : solveList) {
+            if (!i.isDnf())
                 timeTwo.add(i.getTimeTwo());
         }
         return timeTwo;
@@ -55,27 +54,27 @@ public class Session {
             for (int i = 1; i < number + 1; i++) {
                 Solve x = mSolves.get(mSolves.size() - i);
                 solves.add(x);
-                if(x.isDnf())
+                if (x.isDnf())
                     dnfcount++;
             }
 
             Log.e(TimerFragment.TAG, "" + solves.size());
 
-            if(dnfcount<2){
+            if (dnfcount < 2) {
                 solves.remove(getBestSolve(solves));
                 solves.remove(getWorstSolve(solves));
                 for (Solve i : solves) {
                     sum += i.getTimeTwo();
                 }
                 return Solve.timeStringFromLong(sum / (number - 2L));
-            }else{
+            } else {
                 return "DNF";
             }
         }
         return "";
     }
 
-    public Solve getBestSolve(ArrayList<Solve> solveList){
+    public Solve getBestSolve(ArrayList<Solve> solveList) {
         if (solveList.size() > 0) {
             Collections.reverse(solveList);
             ArrayList<Long> times = getListTimeTwoNdnf(solveList);
@@ -94,8 +93,8 @@ public class Session {
     public Solve getWorstSolve(ArrayList<Solve> solveList) {
         if (solveList.size() > 0) {
             Collections.reverse(solveList);
-            for(Solve i:solveList){
-                if(i.isDnf()) {
+            for (Solve i : solveList) {
+                if (i.isDnf()) {
                     return i;
                 }
             }
@@ -113,15 +112,14 @@ public class Session {
 
     public String getStringMean() {
         long sum = 0;
-        boolean dnf=false;
+        boolean dnf = false;
         for (Solve i : mSolves) {
-            if(!i.isDnf()) {
+            if (!i.isDnf()) {
                 sum += i.getTimeTwo();
-            }
-            else
-               dnf=true;
+            } else
+                dnf = true;
         }
-        if(!dnf)
+        if (!dnf)
             return Solve.timeStringFromLong(sum / mSolves.size());
         else
             return "DNF";

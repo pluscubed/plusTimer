@@ -10,6 +10,13 @@ public class Solve {
     private boolean dnf;
     private boolean plusTwo;
 
+    public Solve(ScrambleAndSvg scramble, long time) {
+        this.mScrambleAndSvg = scramble;
+        this.mRawTime = time;
+        dnf = false;
+        plusTwo = false;
+    }
+
     public static String timeStringFromLong(long nano) {
         int minutes = (int) ((nano / (60 * 1000000000L)) % 60);
         int hours = (int) ((nano / (3600 * 1000000000L)) % 24);
@@ -25,37 +32,30 @@ public class Solve {
 
     }
 
-    public Solve(ScrambleAndSvg scramble, long time) {
-        this.mScrambleAndSvg = scramble;
-        this.mRawTime = time;
-        dnf=false;
-        plusTwo=false;
-    }
-
     public ScrambleAndSvg getScrambleAndSvg() {
         return mScrambleAndSvg;
     }
 
     public long getTimeTwo() {
-        if(plusTwo){
-            return mRawTime +2000000000L;
+        if (plusTwo) {
+            return mRawTime + 2000000000L;
         }
         return mRawTime;
     }
 
-    public String getTimeString(){
-        if(dnf)
+    public String getTimeString() {
+        if (dnf)
             return "DNF";
-        if(plusTwo)
-            return timeStringFromLong(mRawTime+2000000000L)+"+";
+        if (plusTwo)
+            return timeStringFromLong(mRawTime + 2000000000L) + "+";
         return timeStringFromLong(mRawTime);
     }
 
-    public String getDescriptiveTimeString(){
-        if(dnf)
-            return "DNF("+timeStringFromLong(mRawTime)+")";
-        if(plusTwo)
-            return timeStringFromLong(mRawTime)+"+2";
+    public String getDescriptiveTimeString() {
+        if (dnf)
+            return "DNF(" + timeStringFromLong(mRawTime) + ")";
+        if (plusTwo)
+            return timeStringFromLong(mRawTime) + "+2";
         return timeStringFromLong(mRawTime);
     }
 
@@ -63,24 +63,24 @@ public class Solve {
         this.mRawTime = time;
     }
 
-    public void setDnf(boolean dnf) {
-        if(dnf)
-            this.plusTwo=false;
-        this.dnf = dnf;
-    }
-
     public boolean isPlusTwo() {
         return plusTwo;
+    }
+
+    public void setPlusTwo(boolean plusTwo) {
+        if (plusTwo)
+            this.dnf = false;
+        this.plusTwo = plusTwo;
     }
 
     public boolean isDnf() {
         return dnf;
     }
 
-    public void setPlusTwo(boolean plusTwo){
-        if(plusTwo)
-            this.dnf=false;
-        this.plusTwo=plusTwo;
+    public void setDnf(boolean dnf) {
+        if (dnf)
+            this.plusTwo = false;
+        this.dnf = dnf;
     }
 
 }

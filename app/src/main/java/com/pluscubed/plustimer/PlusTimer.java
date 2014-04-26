@@ -29,7 +29,7 @@ public class PlusTimer extends Application {
          */
 
         if (!BuildConfig.DEBUG) {
-            ACRAConfiguration config=ACRA.getNewDefaultConfig(this);
+            ACRAConfiguration config = ACRA.getNewDefaultConfig(this);
             config.setFormUri(getString(R.string.bugsense_form_uri));
             try {
                 config.setMode(ReportingInteractionMode.DIALOG);

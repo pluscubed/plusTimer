@@ -3,7 +3,7 @@ package com.pluscubed.plustimer;
 import net.gnehzr.tnoodle.svglite.Svg;
 
 /**
- * Created by DC on 4/5/2014.
+ * Scramble and Svg
  */
 
 public class ScrambleAndSvg {

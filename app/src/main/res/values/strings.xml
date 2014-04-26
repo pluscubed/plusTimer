@@ -6,6 +6,7 @@
     <string name="action_settings">Settings</string>
     <string name="submit">Submit</string>
     <string name="scrambling">Scrambling&#8230;</string>
+    <string name="puzzle_selection">Puzzle Selection</string>
     <string name="solves">"Solves: "</string>
     <string name="ao">"Current Ao"</string>
     <string name="mean">"Session Mean: "</string>

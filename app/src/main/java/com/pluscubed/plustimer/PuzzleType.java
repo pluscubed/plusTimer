@@ -25,8 +25,8 @@ public enum PuzzleType {
     TWO("222", "2x2");
 
 
-    public final String scramblerSpec;
-    public final String displayName;
+    private final String scramblerSpec;
+    private final String displayName;
     private Session session;
     private Puzzle puzzle;
 
