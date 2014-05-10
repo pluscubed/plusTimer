@@ -1,5 +1,6 @@
 package com.pluscubed.plustimer;
 
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
@@ -8,8 +9,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 
+import java.sql.Time;
 import java.util.ArrayList;
 
 
@@ -35,6 +38,49 @@ public class SessionListFragment extends ListFragment {
             mQuickStats.append("\n");
         }
         mQuickStats.append(getString(R.string.solves) + PuzzleType.sCurrentPuzzleType.getSession().getNumberOfSolves());
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == TimerFragment.DIALOG_REQUEST_CODE) {
+            Solve solve = PuzzleType.sCurrentPuzzleType.getSession().getSolveByPosition(data.getIntExtra(TimerFragment.EXTRA_DIALOG_FINISH_SOLVE_INDEX, 0));
+            switch (data.getIntExtra(TimerFragment.EXTRA_DIALOG_FINISH_SELECTION, 0)) {
+                case TimerFragment.DIALOG_PENALTY_NONE:
+                    solve.setPenalty(Solve.Penalty.NONE);
+                    break;
+                case TimerFragment.DIALOG_PENALTY_PLUSTWO:
+                    solve.setPenalty(Solve.Penalty.PLUSTWO);
+                    break;
+                case TimerFragment.DIALOG_PENALTY_DNF:
+                    solve.setPenalty(Solve.Penalty.DNF);
+                    break;
+                case TimerFragment.DIALOG_RESULT_DELETE:
+                    PuzzleType.sCurrentPuzzleType.getSession().deleteSolve(data.getIntExtra(TimerFragment.EXTRA_DIALOG_FINISH_SOLVE_INDEX, 0));
+                    break;
+            }
+        }
+        updateQuickStats();
+        ((SolveListAdapter)getListAdapter()).updateSolvesList(PuzzleType.sCurrentPuzzleType);
+    }
+
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        super.onListItemClick(l, v, position, id);
+        int penalty;
+        switch (((Solve) getListAdapter().getItem(position)).getPenalty()) {
+            case DNF:
+                penalty = TimerFragment.DIALOG_PENALTY_DNF;
+                break;
+            case PLUSTWO:
+                penalty = TimerFragment.DIALOG_PENALTY_PLUSTWO;
+                break;
+            case NONE:
+            default:
+                penalty = TimerFragment.DIALOG_PENALTY_NONE;
+        }
+        SolveQuickModifyDialog d = SolveQuickModifyDialog.newInstance((Solve) getListAdapter().getItem(position), position, penalty);
+        d.setTargetFragment(this, TimerFragment.DIALOG_REQUEST_CODE);
+        d.show(getActivity().getSupportFragmentManager(), TimerFragment.DIALOG_FRAGMENT_TAG);
     }
 
     @Override
