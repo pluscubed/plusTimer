@@ -70,7 +70,7 @@ public class Solve {
     }
 
     public long getTimeTwo() {
-        if (mPenalty == Penalty.NONE) {
+        if (mPenalty == Penalty.PLUSTWO) {
             return mRawTime + 2000000000L;
         }
         return mRawTime;
