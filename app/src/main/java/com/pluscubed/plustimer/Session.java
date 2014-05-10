@@ -1,7 +1,5 @@
 package com.pluscubed.plustimer;
 
-import android.util.Log;
-
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -30,7 +28,7 @@ public class Session {
     public ArrayList<Long> getListTimeTwoNdnf(ArrayList<Solve> solveList) {
         ArrayList<Long> timeTwo = new ArrayList<Long>();
         for (Solve i : solveList) {
-            if (!i.isDnf())
+            if (!(i.getPenalty() == Solve.Penalty.DNF))
                 timeTwo.add(i.getTimeTwo());
         }
         return timeTwo;
@@ -54,11 +52,9 @@ public class Session {
             for (int i = 1; i < number + 1; i++) {
                 Solve x = mSolves.get(mSolves.size() - i);
                 solves.add(x);
-                if (x.isDnf())
+                if (x.getPenalty() == Solve.Penalty.DNF)
                     dnfcount++;
             }
-
-            Log.e(TimerFragment.TAG, "" + solves.size());
 
             if (dnfcount < 2) {
                 solves.remove(getBestSolve(solves));
@@ -81,7 +77,7 @@ public class Session {
             if (times.size() > 0) {
                 long bestTimeTwo = Collections.min(times);
                 for (Solve i : solveList) {
-                    if (!i.isDnf() && i.getTimeTwo() == bestTimeTwo)
+                    if (!(i.getPenalty() == Solve.Penalty.DNF) && i.getTimeTwo() == bestTimeTwo)
                         return i;
                 }
 
@@ -94,7 +90,7 @@ public class Session {
         if (solveList.size() > 0) {
             Collections.reverse(solveList);
             for (Solve i : solveList) {
-                if (i.isDnf()) {
+                if (i.getPenalty() == Solve.Penalty.DNF) {
                     return i;
                 }
             }
@@ -114,7 +110,7 @@ public class Session {
         long sum = 0;
         boolean dnf = false;
         for (Solve i : mSolves) {
-            if (!i.isDnf()) {
+            if (!(i.getPenalty() == Solve.Penalty.DNF)) {
                 sum += i.getTimeTwo();
             } else
                 dnf = true;

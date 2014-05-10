@@ -23,8 +23,7 @@ public enum PuzzleType {
     FOURFAST("444fast", "4x4-fast"),
     THREE("333", "3x3"),
     TWO("222", "2x2");
-
-
+    public static PuzzleType sCurrentPuzzleType = PuzzleType.THREE;
     private final String scramblerSpec;
     private final String displayName;
     private Session session;

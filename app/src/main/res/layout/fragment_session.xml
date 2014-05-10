@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.pluscubed.plustimer.TimerActivity">
+
+    <TextView
+        android:id="@id/session_quickstats"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#ffe0e0e0"
+        android:padding="4dp" />
+
+    <ListView
+        android:id="@id/android:list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:footerDividersEnabled="true" />
+
+    <Button
+        android:id="@id/session_reset"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/reset" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/submit"
+        android:visibility="gone" />
+
+
+</LinearLayout>

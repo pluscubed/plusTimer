@@ -2,50 +2,81 @@ package com.pluscubed.plustimer;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 
 
 public class TimerActivity extends ActionBarActivity {
 
+    private static final String STATE_SELECTED_TAB = "selected_tab";
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(STATE_SELECTED_TAB, getSupportActionBar()
+                .getSelectedNavigationIndex());
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_timer);
-        FragmentManager fm = getSupportFragmentManager();
-        Fragment fragment = fm.findFragmentById(R.id.activity_timer_frame);
-        if (fragment == null) {
-            fragment = new TimerFragment();
-            fm.beginTransaction().add(R.id.activity_timer_frame, fragment).commit();
+
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+
+        actionBar.addTab(
+                actionBar
+                        .newTab()
+                        .setText(R.string.timer_tab)
+                        .setTabListener(new TabListener<TimerFragment>(this, "timer", TimerFragment.class))
+        );
+
+        actionBar.addTab(
+                actionBar
+                        .newTab()
+                        .setText(R.string.session_tab)
+                        .setTabListener(new TabListener<SessionListFragment>(this, "session", SessionListFragment.class))
+        );
+
+        if (savedInstanceState != null) {
+            actionBar.setSelectedNavigationItem(savedInstanceState.getInt(STATE_SELECTED_TAB));
+        }
+    }
+
+
+    public static class TabListener<T extends Fragment> implements ActionBar.TabListener {
+        private final ActionBarActivity mActivity;
+        private final String mTag;
+        private final Class<T> mClass;
+        private Fragment mFragment;
+
+        public TabListener(ActionBarActivity activity, String tag, Class<T> clz) {
+            mActivity = activity;
+            mTag = tag;
+            mClass = clz;
         }
 
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-    }
-
-/*
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.timer, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
+        @Override
+        public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+            mFragment = mActivity.getSupportFragmentManager().findFragmentByTag(mTag);
+            if (mFragment == null) {
+                mFragment = Fragment.instantiate(mActivity, mClass.getName());
+                fragmentTransaction.add(android.R.id.content, mFragment, mTag);
+            } else {
+                fragmentTransaction.attach(mFragment);
+            }
         }
-        return super.onOptionsItemSelected(item);
-    }
-*/
 
+        @Override
+        public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+            if (mFragment != null)
+                fragmentTransaction.detach(mFragment);
+        }
+
+        @Override
+        public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+
+        }
+    }
 }

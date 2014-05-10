@@ -2,15 +2,26 @@
 <resources>
     <item name="scramble_text" type="id" />
     <item name="fragment_timer_text" type="id" />
-    <item name="activity_timer_frame" type="id" />
     <item name="menu_item_puzzletypespinner" type="id" />
+
     <item name="fragment_hlistview" type="id" />
     <item name="fragment_hlistview_text" type="id" />
+
     <item name="fragment_bottom_linear" type="id" />
+
     <item name="fragment_quickstats_solves_text" type="id" />
     <item name="fragment_quickstats_text" type="id" />
+
     <item name="fragment_scramble_image" type="id" />
-    <item name="fragment_rootview" type="id" />
-    <item name="dialog_modify_penalty_spinner" type="id"/>
+
+    <item name="dialog_timestamp" type="id" />
+    <item name="dialog_scramble" type="id" />
+    <item name="dialog_modify_penalty_spinner" type="id" />
     <item name="menu_item_display_scramble_image" type="id" />
+
+    <item name="session_list_item_title" type="id" />
+    <item name="session_list_item_desc" type="id" />
+    <item name="session_quickstats" type="id" />
+    <item name="session_reset" type="id" />
+
 </resources>

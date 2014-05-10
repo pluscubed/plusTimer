@@ -1,8 +1,8 @@
 <component name="libraryTable">
   <library name="tnoodle-android-0.8.7-1392889389">
     <CLASSES>
-      <root url="file://$PROJECT_DIR$/app/build/exploded-aar/com.github.cubing/tnoodle-android/0.8.7-1392889389/res" />
-      <root url="jar://$PROJECT_DIR$/app/build/exploded-aar/com.github.cubing/tnoodle-android/0.8.7-1392889389/classes.jar!/" />
+      <root url="jar://$PROJECT_DIR$/build/exploded-aar/com.github.cubing/tnoodle-android/0.8.7-1392889389/classes.jar!/" />
+      <root url="file://$PROJECT_DIR$/build/exploded-aar/com.github.cubing/tnoodle-android/0.8.7-1392889389/res" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
