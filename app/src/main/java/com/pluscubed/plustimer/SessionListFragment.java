@@ -135,7 +135,7 @@ public class SessionListFragment extends ListFragment {
                 time.setText(s.getDescriptiveTimeString());
             }
 
-            desc.setText(Solve.timeDateStringFromTimestamp(getActivity().getApplicationContext(), s.getTimestamp()));
+            desc.setText(s.getScrambleAndSvg().scramble);
 
             return convertView;
         }
