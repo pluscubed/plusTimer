@@ -5,7 +5,7 @@
     <string name="ready">Ready</string>
     <string name="action_settings">Settings</string>
     <string name="submit">Submit Session</string>
-    <string name="scrambling">Scrambling&#8230;</string>
+    <string name="scrambling">Scrambling…</string>
     <string name="timer_tab">Timer</string>
     <string name="session_tab">Session</string>
     <string name="puzzle_selection">Puzzle Selection</string>
@@ -23,6 +23,13 @@
         <item>None</item>
         <item>+2</item>
         <item>DNF</item>
+    </string-array>
+
+    <string-array name="drawer_array">
+        <item>Current Session</item>
+        <item>History</item>
+        <item>Settings</item>
+        <item>Help</item>
     </string-array>
 
 </resources>

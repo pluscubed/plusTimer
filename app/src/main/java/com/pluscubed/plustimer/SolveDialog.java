@@ -17,7 +17,7 @@ import android.widget.TextView;
 /**
  * Solve modify dialog
  */
-public class SolveQuickModifyDialog extends DialogFragment {
+public class SolveDialog extends DialogFragment {
 
     public static final String BUNDLEKEY_DIALOG_INIT_TIMESTRING = "timestring";
     public static final String BUNDLEKEY_DIALOG_INIT_SOLVE_INDEX = "index";
@@ -28,8 +28,8 @@ public class SolveQuickModifyDialog extends DialogFragment {
     private int mPosition;
     private int mSelection;
 
-    static SolveQuickModifyDialog newInstance(Solve i, int position, int penalty) {
-        SolveQuickModifyDialog d = new SolveQuickModifyDialog();
+    static SolveDialog newInstance(Solve i, int position, int penalty) {
+        SolveDialog d = new SolveDialog();
         Bundle args = new Bundle();
         args.putString(BUNDLEKEY_DIALOG_INIT_TIMESTRING, i.getDescriptiveTimeString());
         args.putInt(BUNDLEKEY_DIALOG_INIT_SOLVE_INDEX, position);

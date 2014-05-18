@@ -12,14 +12,13 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.sql.Time;
 import java.util.ArrayList;
 
 
 /**
  * Session tab
  */
-public class SessionListFragment extends ListFragment {
+public class SessionDetailsListFragment extends ListFragment {
 
     private TextView mQuickStats;
     private Button mReset;
@@ -34,7 +33,7 @@ public class SessionListFragment extends ListFragment {
 
     public void updateQuickStats() {
         mQuickStats.setText(TimerFragment.buildQuickStatsWithAveragesOf(getActivity(), 5, 12, 50, 100, 1000));
-        if(!TimerFragment.buildQuickStatsWithAveragesOf(getActivity(), 5, 12, 50, 100, 1000).equals("")){
+        if (!TimerFragment.buildQuickStatsWithAveragesOf(getActivity(), 5, 12, 50, 100, 1000).equals("")) {
             mQuickStats.append("\n");
         }
         mQuickStats.append(getString(R.string.solves) + PuzzleType.sCurrentPuzzleType.getSession().getNumberOfSolves());
@@ -60,7 +59,7 @@ public class SessionListFragment extends ListFragment {
             }
         }
         updateQuickStats();
-        ((SolveListAdapter)getListAdapter()).updateSolvesList(PuzzleType.sCurrentPuzzleType);
+        ((SolveListAdapter) getListAdapter()).updateSolvesList(PuzzleType.sCurrentPuzzleType);
     }
 
     @Override
@@ -78,7 +77,7 @@ public class SessionListFragment extends ListFragment {
             default:
                 penalty = TimerFragment.DIALOG_PENALTY_NONE;
         }
-        SolveQuickModifyDialog d = SolveQuickModifyDialog.newInstance((Solve) getListAdapter().getItem(position), position, penalty);
+        SolveDialog d = SolveDialog.newInstance((Solve) getListAdapter().getItem(position), position, penalty);
         d.setTargetFragment(this, TimerFragment.DIALOG_REQUEST_CODE);
         d.show(getActivity().getSupportFragmentManager(), TimerFragment.DIALOG_FRAGMENT_TAG);
     }
@@ -87,7 +86,6 @@ public class SessionListFragment extends ListFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_session, container, false);
         mQuickStats = (TextView) v.findViewById(R.id.session_quickstats);
-        updateQuickStats();
         mReset = (Button) v.findViewById(R.id.session_reset);
         mReset.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -100,6 +98,15 @@ public class SessionListFragment extends ListFragment {
         ((SolveListAdapter) getListAdapter()).updateSolvesList(PuzzleType.sCurrentPuzzleType);
         updateQuickStats();
         return v;
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser) {
+            ((SolveListAdapter) getListAdapter()).updateSolvesList(PuzzleType.sCurrentPuzzleType);
+            updateQuickStats();
+        }
     }
 
     public class SolveListAdapter extends ArrayAdapter<Solve> {

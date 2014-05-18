@@ -319,7 +319,7 @@ public class TimerFragment extends Fragment {
                     default:
                         penalty = DIALOG_PENALTY_NONE;
                 }
-                SolveQuickModifyDialog d = SolveQuickModifyDialog.newInstance((Solve) parent.getItemAtPosition(position), position, penalty);
+                SolveDialog d = SolveDialog.newInstance((Solve) parent.getItemAtPosition(position), position, penalty);
                 d.setTargetFragment(TimerFragment.this, DIALOG_REQUEST_CODE);
                 d.show(mActivity.getSupportFragmentManager(), DIALOG_FRAGMENT_TAG);
             }

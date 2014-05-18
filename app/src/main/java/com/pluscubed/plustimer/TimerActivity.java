@@ -36,7 +36,7 @@ public class TimerActivity extends ActionBarActivity {
                 actionBar
                         .newTab()
                         .setText(R.string.session_tab)
-                        .setTabListener(new TabListener<SessionListFragment>(this, "session", SessionListFragment.class))
+                        .setTabListener(new TabListener<SessionDetailsListFragment>(this, "session", SessionDetailsListFragment.class))
         );
 
         if (savedInstanceState != null) {

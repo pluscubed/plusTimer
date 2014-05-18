@@ -24,4 +24,11 @@
     <item name="session_quickstats" type="id" />
     <item name="session_reset" type="id" />
 
+    <item name="drawer_layout" type="id" />
+    <item name="content_frame" type="id" />
+    <item name="drawer_listview" type="id" />
+
+    <item name="current_session_sliding_tabs" type="id" />
+    <item name="current_session_viewpager" type="id" />
+
 </resources>
