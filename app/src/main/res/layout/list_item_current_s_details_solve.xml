@@ -6,7 +6,7 @@
     android:orientation="vertical">
 
     <TextView
-        android:id="@id/session_list_item_title"
+        android:id="@id/list_item_current_s_details_solve_title_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingLeft="4dp"
@@ -15,7 +15,7 @@
         android:textStyle="bold" />
 
     <TextView
-        android:id="@id/session_list_item_desc"
+        android:id="@id/list_item_current_s_details_solve_desc_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingBottom="4dp"

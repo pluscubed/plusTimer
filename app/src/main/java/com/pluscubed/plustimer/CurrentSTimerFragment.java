@@ -41,7 +41,7 @@ import it.sephiroth.android.library.widget.HListView;
  * TimerFragment
  */
 
-public class TimerFragment extends Fragment {
+public class CurrentSTimerFragment extends Fragment {
     public static final String TAG = "TIMER";
 
     public static final String EXTRA_DIALOG_FINISH_SOLVE_INDEX = "com.pluscubed.plustimer.EXTRA_DIALOG_FINISH_SOLVE_INDEX";
@@ -169,7 +169,6 @@ public class TimerFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRetainInstance(true);
         setHasOptionsMenu(true);
 
         PuzzleType.sCurrentPuzzleType = PuzzleType.THREE;
@@ -200,10 +199,10 @@ public class TimerFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.fragment_timer_menu, menu);
+        inflater.inflate(R.menu.menu_current_s, menu);
 
-        mMenuPuzzleSpinner = (Spinner) MenuItemCompat.getActionView(menu.findItem(R.id.menu_item_puzzletypespinner));
-        mMenuDisplayScramble = menu.findItem(R.id.menu_item_display_scramble_image);
+        mMenuPuzzleSpinner = (Spinner) MenuItemCompat.getActionView(menu.findItem(R.id.menu_current_s_puzzletype_spinner));
+        mMenuDisplayScramble = menu.findItem(R.id.menu_current_s_toggle_scramble_image_action);
 
         final ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter =
                 new ArrayAdapter<PuzzleType>(
@@ -267,7 +266,7 @@ public class TimerFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.menu_item_display_scramble_image:
+            case R.id.menu_current_s_toggle_scramble_image_action:
                 if (mScrambleImageDisplay) {
                     mScrambleImageDisplay = false;
                     mScrambleImage.setVisibility(View.GONE);
@@ -292,15 +291,15 @@ public class TimerFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_timer, container, false);
+        View v = inflater.inflate(R.layout.fragment_current_s_timer, container, false);
 
-        mTimerText = (TextView) v.findViewById(R.id.fragment_timer_text);
-        mScrambleText = (TextView) v.findViewById(R.id.scramble_text);
-        mScrambleImage = (ImageView) v.findViewById(R.id.fragment_scramble_image);
-        mHListView = (HListView) v.findViewById(R.id.fragment_hlistview);
+        mTimerText = (TextView) v.findViewById(R.id.fragment_current_s_timer_time_textview);
+        mScrambleText = (TextView) v.findViewById(R.id.fragment_current_s_timer_scramble_textview);
+        mScrambleImage = (ImageView) v.findViewById(R.id.fragment_current_s_timer_scramble_imageview);
+        mHListView = (HListView) v.findViewById(R.id.fragment_current_s_timer_bottom_hlistview);
 
-        mQuickStats = (TextView) v.findViewById(R.id.fragment_quickstats_text);
-        mQuickStatsSolves = (TextView) v.findViewById(R.id.fragment_quickstats_solves_text);
+        mQuickStats = (TextView) v.findViewById(R.id.fragment_current_s_timer_quickstats_textview);
+        mQuickStatsSolves = (TextView) v.findViewById(R.id.fragment_current_s_timer_quickstats_solves_number_textview);
 
         final SolveHListViewAdapter adapter = new SolveHListViewAdapter();
         mHListView.setAdapter(adapter);
@@ -320,7 +319,7 @@ public class TimerFragment extends Fragment {
                         penalty = DIALOG_PENALTY_NONE;
                 }
                 SolveDialog d = SolveDialog.newInstance((Solve) parent.getItemAtPosition(position), position, penalty);
-                d.setTargetFragment(TimerFragment.this, DIALOG_REQUEST_CODE);
+                d.setTargetFragment(CurrentSTimerFragment.this, DIALOG_REQUEST_CODE);
                 d.show(mActivity.getSupportFragmentManager(), DIALOG_FRAGMENT_TAG);
             }
         });
@@ -343,6 +342,7 @@ public class TimerFragment extends Fragment {
                     menuItemsEnable(false);
                     mScrambleImage.setVisibility(View.GONE);
                     mScrambleImageDisplay = false;
+                    ((MainActivity) mActivity).lockOrientation(true);
                     mScramblerThreadHandler.post(new Runnable() {
                         @Override
                         public void run() {
@@ -364,6 +364,7 @@ public class TimerFragment extends Fragment {
                     mFinalTime = mEndTime - mStartTime;
                     mTimerText.setText(Solve.timeStringFromLong(mFinalTime));
                     PuzzleType.sCurrentPuzzleType.getSession().addSolve(new Solve(mCurrentScrambleAndSvg, mFinalTime));
+                    ((MainActivity) mActivity).lockOrientation(false);
                     updateQuickStats();
                     updateSolveHListView(false);
                     if (mScrambling) {
@@ -486,10 +487,10 @@ public class TimerFragment extends Fragment {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
-                convertView = mActivity.getLayoutInflater().inflate(R.layout.item_list_item_solve, parent, false);
+                convertView = mActivity.getLayoutInflater().inflate(R.layout.hlist_item_solve, parent, false);
             }
             Solve s = getItem(position);
-            TextView time = (TextView) convertView.findViewById(R.id.fragment_hlistview_text);
+            TextView time = (TextView) convertView.findViewById(R.id.hlist_item_solve_textview);
 
             time.setText("");
 

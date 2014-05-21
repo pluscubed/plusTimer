@@ -1,32 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item name="scramble_text" type="id" />
-    <item name="fragment_timer_text" type="id" />
-    <item name="menu_item_puzzletypespinner" type="id" />
+    <item name="fragment_current_s_timer_scramble_textview" type="id" />
+    <item name="fragment_current_s_timer_time_textview" type="id" />
+    <item name="menu_current_s_puzzletype_spinner" type="id" />
 
-    <item name="fragment_hlistview" type="id" />
-    <item name="fragment_hlistview_text" type="id" />
+    <item name="fragment_current_s_timer_bottom_hlistview" type="id" />
+    <item name="hlist_item_solve_textview" type="id" />
 
-    <item name="fragment_bottom_linear" type="id" />
+    <item name="fragment_current_s_timer_bottom_linearlayout" type="id" />
 
-    <item name="fragment_quickstats_solves_text" type="id" />
-    <item name="fragment_quickstats_text" type="id" />
+    <item name="fragment_current_s_timer_quickstats_solves_number_textview" type="id" />
+    <item name="fragment_current_s_timer_quickstats_textview" type="id" />
 
-    <item name="fragment_scramble_image" type="id" />
+    <item name="fragment_current_s_timer_scramble_imageview" type="id" />
 
-    <item name="dialog_timestamp" type="id" />
-    <item name="dialog_scramble" type="id" />
-    <item name="dialog_modify_penalty_spinner" type="id" />
-    <item name="menu_item_display_scramble_image" type="id" />
+    <item name="dialog_solve_timestamp_textview" type="id" />
+    <item name="dialog_solve_scramble_textview" type="id" />
+    <item name="dialog_solve_modify_penalty_spinner" type="id" />
+    <item name="menu_current_s_toggle_scramble_image_action" type="id" />
 
-    <item name="session_list_item_title" type="id" />
-    <item name="session_list_item_desc" type="id" />
-    <item name="session_quickstats" type="id" />
-    <item name="session_reset" type="id" />
+    <item name="list_item_current_s_details_solve_title_textview" type="id" />
+    <item name="list_item_current_s_details_solve_desc_textview" type="id" />
+    <item name="fragment_current_s_details_stats_textview" type="id" />
+    <item name="fragment_current_s_details_reset_button" type="id" />
 
-    <item name="drawer_layout" type="id" />
-    <item name="content_frame" type="id" />
-    <item name="drawer_listview" type="id" />
+    <item name="activity_main_drawerlayout" type="id" />
+    <item name="activity_main_content_framelayout" type="id" />
+    <item name="activity_main_drawer_listview" type="id" />
 
     <item name="current_session_sliding_tabs" type="id" />
     <item name="current_session_viewpager" type="id" />

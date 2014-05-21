@@ -18,7 +18,7 @@ import java.util.ArrayList;
 /**
  * Session tab
  */
-public class SessionDetailsListFragment extends ListFragment {
+public class CurrentSDetailsListFragment extends ListFragment {
 
     private TextView mQuickStats;
     private Button mReset;
@@ -27,13 +27,12 @@ public class SessionDetailsListFragment extends ListFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRetainInstance(true);
         setListAdapter(new SolveListAdapter(PuzzleType.sCurrentPuzzleType));
     }
 
     public void updateQuickStats() {
-        mQuickStats.setText(TimerFragment.buildQuickStatsWithAveragesOf(getActivity(), 5, 12, 50, 100, 1000));
-        if (!TimerFragment.buildQuickStatsWithAveragesOf(getActivity(), 5, 12, 50, 100, 1000).equals("")) {
+        mQuickStats.setText(CurrentSTimerFragment.buildQuickStatsWithAveragesOf(getActivity(), 5, 12, 50, 100, 1000));
+        if (!CurrentSTimerFragment.buildQuickStatsWithAveragesOf(getActivity(), 5, 12, 50, 100, 1000).equals("")) {
             mQuickStats.append("\n");
         }
         mQuickStats.append(getString(R.string.solves) + PuzzleType.sCurrentPuzzleType.getSession().getNumberOfSolves());
@@ -41,20 +40,20 @@ public class SessionDetailsListFragment extends ListFragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == TimerFragment.DIALOG_REQUEST_CODE) {
-            Solve solve = PuzzleType.sCurrentPuzzleType.getSession().getSolveByPosition(data.getIntExtra(TimerFragment.EXTRA_DIALOG_FINISH_SOLVE_INDEX, 0));
-            switch (data.getIntExtra(TimerFragment.EXTRA_DIALOG_FINISH_SELECTION, 0)) {
-                case TimerFragment.DIALOG_PENALTY_NONE:
+        if (requestCode == CurrentSTimerFragment.DIALOG_REQUEST_CODE) {
+            Solve solve = PuzzleType.sCurrentPuzzleType.getSession().getSolveByPosition(data.getIntExtra(CurrentSTimerFragment.EXTRA_DIALOG_FINISH_SOLVE_INDEX, 0));
+            switch (data.getIntExtra(CurrentSTimerFragment.EXTRA_DIALOG_FINISH_SELECTION, 0)) {
+                case CurrentSTimerFragment.DIALOG_PENALTY_NONE:
                     solve.setPenalty(Solve.Penalty.NONE);
                     break;
-                case TimerFragment.DIALOG_PENALTY_PLUSTWO:
+                case CurrentSTimerFragment.DIALOG_PENALTY_PLUSTWO:
                     solve.setPenalty(Solve.Penalty.PLUSTWO);
                     break;
-                case TimerFragment.DIALOG_PENALTY_DNF:
+                case CurrentSTimerFragment.DIALOG_PENALTY_DNF:
                     solve.setPenalty(Solve.Penalty.DNF);
                     break;
-                case TimerFragment.DIALOG_RESULT_DELETE:
-                    PuzzleType.sCurrentPuzzleType.getSession().deleteSolve(data.getIntExtra(TimerFragment.EXTRA_DIALOG_FINISH_SOLVE_INDEX, 0));
+                case CurrentSTimerFragment.DIALOG_RESULT_DELETE:
+                    PuzzleType.sCurrentPuzzleType.getSession().deleteSolve(data.getIntExtra(CurrentSTimerFragment.EXTRA_DIALOG_FINISH_SOLVE_INDEX, 0));
                     break;
             }
         }
@@ -68,25 +67,25 @@ public class SessionDetailsListFragment extends ListFragment {
         int penalty;
         switch (((Solve) getListAdapter().getItem(position)).getPenalty()) {
             case DNF:
-                penalty = TimerFragment.DIALOG_PENALTY_DNF;
+                penalty = CurrentSTimerFragment.DIALOG_PENALTY_DNF;
                 break;
             case PLUSTWO:
-                penalty = TimerFragment.DIALOG_PENALTY_PLUSTWO;
+                penalty = CurrentSTimerFragment.DIALOG_PENALTY_PLUSTWO;
                 break;
             case NONE:
             default:
-                penalty = TimerFragment.DIALOG_PENALTY_NONE;
+                penalty = CurrentSTimerFragment.DIALOG_PENALTY_NONE;
         }
         SolveDialog d = SolveDialog.newInstance((Solve) getListAdapter().getItem(position), position, penalty);
-        d.setTargetFragment(this, TimerFragment.DIALOG_REQUEST_CODE);
-        d.show(getActivity().getSupportFragmentManager(), TimerFragment.DIALOG_FRAGMENT_TAG);
+        d.setTargetFragment(this, CurrentSTimerFragment.DIALOG_REQUEST_CODE);
+        d.show(getActivity().getSupportFragmentManager(), CurrentSTimerFragment.DIALOG_FRAGMENT_TAG);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_session, container, false);
-        mQuickStats = (TextView) v.findViewById(R.id.session_quickstats);
-        mReset = (Button) v.findViewById(R.id.session_reset);
+        View v = inflater.inflate(R.layout.fragment_current_s_details, container, false);
+        mQuickStats = (TextView) v.findViewById(R.id.fragment_current_s_details_stats_textview);
+        mReset = (Button) v.findViewById(R.id.fragment_current_s_details_reset_button);
         mReset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -123,11 +122,11 @@ public class SessionDetailsListFragment extends ListFragment {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
-                convertView = getActivity().getLayoutInflater().inflate(R.layout.item_sessionlist_solve, parent, false);
+                convertView = getActivity().getLayoutInflater().inflate(R.layout.list_item_current_s_details_solve, parent, false);
             }
             Solve s = getItem(position);
-            TextView time = (TextView) convertView.findViewById(R.id.session_list_item_title);
-            TextView desc = (TextView) convertView.findViewById(R.id.session_list_item_desc);
+            TextView time = (TextView) convertView.findViewById(R.id.list_item_current_s_details_solve_title_textview);
+            TextView desc = (TextView) convertView.findViewById(R.id.list_item_current_s_details_solve_desc_textview);
 
 
             time.setText("");

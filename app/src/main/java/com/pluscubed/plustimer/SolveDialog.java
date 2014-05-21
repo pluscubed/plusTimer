@@ -45,8 +45,8 @@ public class SolveDialog extends DialogFragment {
         super.onDismiss(dialog);
         if (!(getTargetFragment() == null)) {
             Intent i = new Intent();
-            i.putExtra(TimerFragment.EXTRA_DIALOG_FINISH_SOLVE_INDEX, mPosition);
-            i.putExtra(TimerFragment.EXTRA_DIALOG_FINISH_SELECTION, mSelection);
+            i.putExtra(CurrentSTimerFragment.EXTRA_DIALOG_FINISH_SOLVE_INDEX, mPosition);
+            i.putExtra(CurrentSTimerFragment.EXTRA_DIALOG_FINISH_SELECTION, mSelection);
             getTargetFragment().onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, i);
         }
     }
@@ -62,9 +62,9 @@ public class SolveDialog extends DialogFragment {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View v = inflater.inflate(R.layout.dialog_solve, null);
 
-        Spinner penaltySpinner = (Spinner) v.findViewById(R.id.dialog_modify_penalty_spinner);
-        final TextView scrambleTextView = (TextView) v.findViewById(R.id.dialog_scramble);
-        TextView timestampTextView = (TextView) v.findViewById(R.id.dialog_timestamp);
+        Spinner penaltySpinner = (Spinner) v.findViewById(R.id.dialog_solve_modify_penalty_spinner);
+        final TextView scrambleTextView = (TextView) v.findViewById(R.id.dialog_solve_scramble_textview);
+        TextView timestampTextView = (TextView) v.findViewById(R.id.dialog_solve_timestamp_textview);
 
         scrambleTextView.setText(scramble);
 
@@ -99,7 +99,7 @@ public class SolveDialog extends DialogFragment {
                 .setNegativeButton(R.string.delete, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        mSelection = TimerFragment.DIALOG_RESULT_DELETE;
+                        mSelection = CurrentSTimerFragment.DIALOG_RESULT_DELETE;
                     }
                 });
         return builder.create();

@@ -4,13 +4,13 @@
     xmlns:plustimer="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@id/menu_item_puzzletypespinner"
+        android:id="@id/menu_current_s_puzzletype_spinner"
         android:title="@string/puzzle_selection"
         plustimer:actionViewClass="android.widget.Spinner"
         plustimer:showAsAction="always" />
 
     <item
-        android:id="@id/menu_item_display_scramble_image"
+        android:id="@id/menu_current_s_toggle_scramble_image_action"
         android:icon="@android:drawable/ic_menu_gallery"
         android:title="@string/scrambleimage"
         plustimer:showAsAction="ifRoom|withText" />

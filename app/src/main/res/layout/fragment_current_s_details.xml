@@ -5,10 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.pluscubed.plustimer.TimerActivity">
+    tools:context="com.pluscubed.plustimer.OldTimerActivity">
 
     <TextView
-        android:id="@id/session_quickstats"
+        android:id="@id/fragment_current_s_details_stats_textview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#ffe0e0e0"
@@ -22,7 +22,7 @@
         android:footerDividersEnabled="true" />
 
     <Button
-        android:id="@id/session_reset"
+        android:id="@id/fragment_current_s_details_reset_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/reset" />

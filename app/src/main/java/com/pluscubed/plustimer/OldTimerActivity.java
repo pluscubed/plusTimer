@@ -7,7 +7,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 
 
-public class TimerActivity extends ActionBarActivity {
+public class OldTimerActivity extends ActionBarActivity {
 
     private static final String STATE_SELECTED_TAB = "selected_tab";
 
@@ -29,14 +29,14 @@ public class TimerActivity extends ActionBarActivity {
                 actionBar
                         .newTab()
                         .setText(R.string.timer_tab)
-                        .setTabListener(new TabListener<TimerFragment>(this, "timer", TimerFragment.class))
+                        .setTabListener(new TabListener<CurrentSTimerFragment>(this, "timer", CurrentSTimerFragment.class))
         );
 
         actionBar.addTab(
                 actionBar
                         .newTab()
                         .setText(R.string.session_tab)
-                        .setTabListener(new TabListener<SessionDetailsListFragment>(this, "session", SessionDetailsListFragment.class))
+                        .setTabListener(new TabListener<CurrentSDetailsListFragment>(this, "session", CurrentSDetailsListFragment.class))
         );
 
         if (savedInstanceState != null) {
