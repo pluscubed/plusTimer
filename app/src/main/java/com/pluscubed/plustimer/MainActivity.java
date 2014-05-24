@@ -24,32 +24,49 @@ import android.widget.ListView;
  * Main Activity
  */
 public class MainActivity extends ActionBarActivity {
+    private static final String STATE_SELECTED_POSITION = "selected_navigation_drawer_position";
+
     private String[] mFragmentTitles;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerListView;
-    private CharSequence mTitle;
+    private CharSequence mCurrentTitle;
     private ActionBarDrawerToggle mDrawerToggle;
-    ;
     private CharSequence mDrawerTitle;
+    private int mCurrentSelectedPosition=0;
 
     @Override
     public void setTitle(CharSequence title) {
-        mTitle = title;
-        getSupportActionBar().setTitle(mTitle);
+        mCurrentTitle = title;
+        getSupportActionBar().setTitle(mCurrentTitle);
     }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         // If the nav drawer is open, hide action items related to the content view
         boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerListView);
+        if(menu.findItem(R.id.menu_current_s_puzzletype_spinner)!=null)
+            menu.findItem(R.id.menu_current_s_puzzletype_spinner).setVisible(!drawerOpen);
+        if(menu.findItem(R.id.menu_current_s_toggle_scramble_image_action)!=null){
+            menu.findItem(R.id.menu_current_s_toggle_scramble_image_action).setVisible(!drawerOpen);
+        }
 
         return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(STATE_SELECTED_POSITION, mCurrentSelectedPosition);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if(savedInstanceState!=null){
+            mCurrentSelectedPosition=savedInstanceState.getInt(STATE_SELECTED_POSITION);
+        }
 
         mFragmentTitles = getResources().getStringArray(R.array.drawer_array);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.activity_main_drawerlayout);
@@ -73,7 +90,7 @@ public class MainActivity extends ActionBarActivity {
             /** Called when a drawer has settled in a completely closed state. */
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
-                getSupportActionBar().setTitle(mTitle);
+                getSupportActionBar().setTitle(mCurrentTitle);
                 supportInvalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
 
@@ -91,7 +108,7 @@ public class MainActivity extends ActionBarActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
-        selectItem(0);
+        selectItem(mCurrentSelectedPosition);
     }
 
     @Override
@@ -121,23 +138,22 @@ public class MainActivity extends ActionBarActivity {
 
 
     void selectItem(int pos) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
         switch (pos) {
             case 0:
                 // Insert the fragment by replacing any existing fragment
-                FragmentManager fragmentManager = getSupportFragmentManager();
                 Fragment fragment = fragmentManager.findFragmentByTag("CurrentSession");
                 if (fragment == null)
                     fragment = new CurrentSFragment();
                 fragmentManager.beginTransaction()
                         .replace(R.id.activity_main_content_framelayout, fragment, "CurrentSession")
                         .commit();
-
-                // Highlight the selected item, update the title, and close the drawer
-                mDrawerListView.setItemChecked(pos, true);
-                setTitle(mFragmentTitles[pos]);
-                mDrawerLayout.closeDrawer(mDrawerListView);
                 break;
         }
+        mCurrentSelectedPosition=pos;
+        mDrawerListView.setItemChecked(pos, true);
+        setTitle(mFragmentTitles[pos]);
+        mDrawerLayout.closeDrawer(mDrawerListView);
     }
 
     public void lockOrientation(boolean lock) {

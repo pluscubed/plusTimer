@@ -16,8 +16,8 @@ public class CurrentSFragment extends Fragment {
     private SlidingTabLayout mSlidingTabLayout;
     private ViewPager mViewPager;
 
-    private static String makeFragmentName(int viewId, int index) {
-        return "android:switcher:" + viewId + ":" + index;
+    public void updateSession(){
+        
     }
 
     @Override
