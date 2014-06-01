@@ -12,7 +12,6 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -178,7 +177,6 @@ public class CurrentSTimerFragment extends Fragment {
     public void updateSession() {
         updateQuickStats();
         ((SolveHListViewAdapter) mHListView.getAdapter()).updateSolvesList();
-        mHListView.setSelection(mHListView.getCount() - 1);
     }
 
     public void onPuzzleTypeChanged() {
