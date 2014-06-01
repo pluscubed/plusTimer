@@ -25,19 +25,18 @@ public class PlusTimer extends Application {
          * Copyright © 2010-2013 CommonsWare, LLC
          * Used under the Creative Commons Attribution Non-Commercial Share Alike 3.0 License: http://creativecommons.org/licenses/by-nc-sa/3.0/
          *
-         * Changed the string reference name & added dialog settings
+         * Changed the string reference name & added toast settings
          */
 
         if (!BuildConfig.DEBUG) {
             ACRAConfiguration config = ACRA.getNewDefaultConfig(this);
             config.setFormUri(getString(R.string.bugsense_form_uri));
             try {
-                config.setMode(ReportingInteractionMode.DIALOG);
+                config.setMode(ReportingInteractionMode.TOAST);
             } catch (ACRAConfigurationException e) {
                 e.printStackTrace();
             }
-            config.setResDialogText(R.string.acra_crash_dialog_text);
-            config.setResDialogTitle(R.string.acra_crash_dialog_title);
+            config.setResToastText(R.string.acra_crash_toast_text);
             ACRA.setConfig(config);
             ACRA.init(this);
         }
