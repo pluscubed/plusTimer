@@ -12,6 +12,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -177,6 +178,7 @@ public class CurrentSTimerFragment extends Fragment {
     public void updateSession() {
         updateQuickStats();
         ((SolveHListViewAdapter) mHListView.getAdapter()).updateSolvesList();
+        mHListView.setSelection(mHListView.getCount() - 1);
     }
 
     public void onPuzzleTypeChanged() {
@@ -205,7 +207,7 @@ public class CurrentSTimerFragment extends Fragment {
     }
 
     public void initializeOptionsMenu() {
-        if (mOnCreateCalled || mRunning || mScrambling) {
+        if (mOnCreateCalled || mScrambling) {
             ((CurrentSFragment) getParentFragment()).menuItemsEnable(false);
         }
     }
@@ -309,6 +311,7 @@ public class CurrentSTimerFragment extends Fragment {
                     PuzzleType.sCurrentPuzzleType.getSession().addSolve(new Solve(mCurrentScrambleAndSvg, mFinalTime));
                     ((MainActivity) mActivity).lockOrientation(false);
                     ((CurrentSFragment) getParentFragment()).updateFragments();
+
                     if (mScrambling) {
                         mScrambleText.setText(R.string.scrambling);
                         mScramblerThreadHandler.post(new Runnable() {
@@ -364,28 +367,28 @@ public class CurrentSTimerFragment extends Fragment {
             updateScrambleViewsToCurrent();
         }
 
-        if (!mRunning && PuzzleType.sCurrentPuzzleType.getSession().getNumberOfSolves() != 0) {
+        if (PuzzleType.sCurrentPuzzleType.getSession().getNumberOfSolves() != 0) {
             mTimerText.setText(PuzzleType.sCurrentPuzzleType.getSession().getLatestSolve().getTimeString());
         }
 
-        if (!mRunning) {
-            if (mScrambleImageDisplay) {
-                if (!mScrambling) {
-                    mScrambleImage.setVisibility(View.VISIBLE);
-                    mScrambleImageDisplay = true;
-                    mScrambleImage.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            mScrambleImageDisplay = false;
-                            mScrambleImage.setVisibility(View.GONE);
-                        }
-                    });
-                }
-            } else {
-                mScrambleImage.setVisibility(View.GONE);
-                mScrambleImageDisplay = false;
+
+        if (mScrambleImageDisplay) {
+            if (!mScrambling) {
+                mScrambleImage.setVisibility(View.VISIBLE);
+                mScrambleImageDisplay = true;
+                mScrambleImage.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mScrambleImageDisplay = false;
+                        mScrambleImage.setVisibility(View.GONE);
+                    }
+                });
             }
+        } else {
+            mScrambleImage.setVisibility(View.GONE);
+            mScrambleImageDisplay = false;
         }
+
 
         updateQuickStats();
 
@@ -411,7 +414,8 @@ public class CurrentSTimerFragment extends Fragment {
                     break;
             }
         }
-        ((CurrentSFragment) getParentFragment()).updateFragments();
+        updateQuickStats();
+        ((SolveHListViewAdapter) mHListView.getAdapter()).updateSolvesList();
     }
 
     public class SolveHListViewAdapter extends ArrayAdapter<Solve> {
