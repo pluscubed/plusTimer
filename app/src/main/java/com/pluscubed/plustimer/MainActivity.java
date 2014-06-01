@@ -19,6 +19,7 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 /**
  * Main Activity
@@ -32,7 +33,7 @@ public class MainActivity extends ActionBarActivity {
     private CharSequence mCurrentTitle;
     private ActionBarDrawerToggle mDrawerToggle;
     private CharSequence mDrawerTitle;
-    private int mCurrentSelectedPosition=0;
+    private int mCurrentSelectedPosition = 0;
 
     @Override
     public void setTitle(CharSequence title) {
@@ -44,9 +45,9 @@ public class MainActivity extends ActionBarActivity {
     public boolean onPrepareOptionsMenu(Menu menu) {
         // If the nav drawer is open, hide action items related to the content view
         boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerListView);
-        if(menu.findItem(R.id.menu_current_s_puzzletype_spinner)!=null)
+        if (menu.findItem(R.id.menu_current_s_puzzletype_spinner) != null)
             menu.findItem(R.id.menu_current_s_puzzletype_spinner).setVisible(!drawerOpen);
-        if(menu.findItem(R.id.menu_current_s_toggle_scramble_image_action)!=null){
+        if (menu.findItem(R.id.menu_current_s_toggle_scramble_image_action) != null) {
             menu.findItem(R.id.menu_current_s_toggle_scramble_image_action).setVisible(!drawerOpen);
         }
 
@@ -64,8 +65,8 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if(savedInstanceState!=null){
-            mCurrentSelectedPosition=savedInstanceState.getInt(STATE_SELECTED_POSITION);
+        if (savedInstanceState != null) {
+            mCurrentSelectedPosition = savedInstanceState.getInt(STATE_SELECTED_POSITION);
         }
 
         mFragmentTitles = getResources().getStringArray(R.array.drawer_array);
@@ -148,12 +149,15 @@ public class MainActivity extends ActionBarActivity {
                 fragmentManager.beginTransaction()
                         .replace(R.id.activity_main_content_framelayout, fragment, "CurrentSession")
                         .commit();
+                mCurrentSelectedPosition = pos;
+                mDrawerListView.setItemChecked(pos, true);
+                setTitle(mFragmentTitles[pos]);
+                mDrawerLayout.closeDrawer(mDrawerListView);
                 break;
+            default:
+                Toast.makeText(getApplicationContext(), "Work in Progress", Toast.LENGTH_SHORT).show();
         }
-        mCurrentSelectedPosition=pos;
-        mDrawerListView.setItemChecked(pos, true);
-        setTitle(mFragmentTitles[pos]);
-        mDrawerLayout.closeDrawer(mDrawerListView);
+
     }
 
     public void lockOrientation(boolean lock) {

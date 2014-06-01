@@ -57,8 +57,7 @@ public class CurrentSDetailsListFragment extends ListFragment {
                     break;
             }
         }
-        updateQuickStats();
-        ((SolveListAdapter) getListAdapter()).updateSolvesList(PuzzleType.sCurrentPuzzleType);
+        ((CurrentSFragment) getParentFragment()).updateFragments();
     }
 
     @Override
@@ -90,22 +89,16 @@ public class CurrentSDetailsListFragment extends ListFragment {
             @Override
             public void onClick(View v) {
                 PuzzleType.sCurrentPuzzleType.resetSession();
-                ((SolveListAdapter) getListAdapter()).updateSolvesList(PuzzleType.sCurrentPuzzleType);
-                updateQuickStats();
+                ((CurrentSFragment) getParentFragment()).updateFragments();
             }
         });
-        ((SolveListAdapter) getListAdapter()).updateSolvesList(PuzzleType.sCurrentPuzzleType);
-        updateQuickStats();
+        updateSession();
         return v;
     }
 
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        if (isVisibleToUser) {
-            ((SolveListAdapter) getListAdapter()).updateSolvesList(PuzzleType.sCurrentPuzzleType);
-            updateQuickStats();
-        }
+    public void updateSession() {
+        ((SolveListAdapter) getListAdapter()).updateSolvesList(PuzzleType.sCurrentPuzzleType);
+        updateQuickStats();
     }
 
     public class SolveListAdapter extends ArrayAdapter<Solve> {

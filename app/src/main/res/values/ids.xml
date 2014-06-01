@@ -28,7 +28,7 @@
     <item name="activity_main_content_framelayout" type="id" />
     <item name="activity_main_drawer_listview" type="id" />
 
-    <item name="current_session_sliding_tabs" type="id" />
-    <item name="current_session_viewpager" type="id" />
+    <item name="fragment_current_s_slidingtablayout" type="id" />
+    <item name="fragment_current_s_viewpager" type="id" />
 
 </resources>

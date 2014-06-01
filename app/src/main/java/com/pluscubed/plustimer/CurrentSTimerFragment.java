@@ -11,19 +11,13 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.caverock.androidsvg.SVG;
@@ -62,9 +56,6 @@ public class CurrentSTimerFragment extends Fragment {
     private ImageView mScrambleImage;
     private TextView mQuickStatsSolves;
     private TextView mQuickStats;
-
-    private Spinner mMenuPuzzleSpinner;
-    private MenuItem mMenuDisplayScramble;
 
     private long mStartTime;
     private long mEndTime;
@@ -119,12 +110,6 @@ public class CurrentSTimerFragment extends Fragment {
         mQuickStats.setText(buildQuickStatsWithAveragesOf(mActivity, 5, 12, 100));
     }
 
-    void updateSolveHListView(boolean savePosition) {
-        ((SolveHListViewAdapter) mHListView.getAdapter()).updateSolvesList();
-        if (!savePosition) {
-            mHListView.setSelection(mHListView.getCount() - 1);
-        }
-    }
 
     void updateScrambleViewsToCurrent() {
         SVG svg = null;
@@ -155,10 +140,6 @@ public class CurrentSTimerFragment extends Fragment {
         return scrambleAndSvg;
     }
 
-    void menuItemsEnable(boolean enable) {
-        mMenuPuzzleSpinner.setEnabled(enable);
-        mMenuDisplayScramble.setEnabled(enable);
-    }
 
     @Override
     public void onAttach(Activity activity) {
@@ -169,10 +150,7 @@ public class CurrentSTimerFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
 
-        PuzzleType.sCurrentPuzzleType = PuzzleType.THREE;
-        PuzzleType.sCurrentPuzzleType.resetSession();
 
         HandlerThread scramblerThread = new HandlerThread("ScramblerThread");
         scramblerThread.start();
@@ -196,98 +174,61 @@ public class CurrentSTimerFragment extends Fragment {
         mOnCreateCalled = false;
     }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.menu_current_s, menu);
+    public void updateSession() {
+        updateQuickStats();
+        ((SolveHListViewAdapter) mHListView.getAdapter()).updateSolvesList();
+    }
 
-        mMenuPuzzleSpinner = (Spinner) MenuItemCompat.getActionView(menu.findItem(R.id.menu_current_s_puzzletype_spinner));
-        mMenuDisplayScramble = menu.findItem(R.id.menu_current_s_toggle_scramble_image_action);
+    public void onPuzzleTypeChanged() {
+        ((CurrentSFragment) getParentFragment()).updateFragments();
 
-        final ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter =
-                new ArrayAdapter<PuzzleType>(
-                        mActivity.getSupportActionBar().getThemedContext(),
-                        android.R.layout.simple_spinner_item,
-                        PuzzleType.values()
-                );
+        mScrambleText.setText(R.string.scrambling);
+        mTimerText.setText(R.string.ready);
+        ((CurrentSFragment) getParentFragment()).menuItemsEnable(false);
+        mScrambleImage.setVisibility(View.GONE);
+        mScrambleImageDisplay = false;
 
-        puzzleTypeSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        mMenuPuzzleSpinner.setAdapter(puzzleTypeSpinnerAdapter);
-
-        mMenuPuzzleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (mMenuPuzzleSpinner.getSelectedItemPosition() != puzzleTypeSpinnerAdapter.getPosition(PuzzleType.sCurrentPuzzleType)) {
-
-                    PuzzleType.sCurrentPuzzleType = (PuzzleType) parent.getItemAtPosition(position);
-                    updateQuickStats();
-                    updateSolveHListView(false);
-
-                    mScrambleText.setText(R.string.scrambling);
-                    mTimerText.setText(R.string.ready);
-                    menuItemsEnable(false);
-                    mScrambleImage.setVisibility(View.GONE);
-                    mScrambleImageDisplay = false;
-
-                    mScramblerThreadHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mCurrentScrambleAndSvg = generateScramble();
-                            mUIHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    updateScrambleViewsToCurrent();
-                                    menuItemsEnable(true);
-                                }
-                            });
-
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });
-        mMenuPuzzleSpinner.post(new Runnable() {
+        mScramblerThreadHandler.post(new Runnable() {
             @Override
             public void run() {
-                mMenuPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition(PuzzleType.sCurrentPuzzleType), true);
+                mCurrentScrambleAndSvg = generateScramble();
+                mUIHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        updateScrambleViewsToCurrent();
+                        ((CurrentSFragment) getParentFragment()).menuItemsEnable(true);
+                    }
+                });
+
             }
         });
+    }
 
-
+    public void initializeOptionsMenu() {
         if (mOnCreateCalled || mRunning || mScrambling) {
-            menuItemsEnable(false);
+            ((CurrentSFragment) getParentFragment()).menuItemsEnable(false);
         }
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_current_s_toggle_scramble_image_action:
-                if (mScrambleImageDisplay) {
-                    mScrambleImageDisplay = false;
-                    mScrambleImage.setVisibility(View.GONE);
-                } else {
-                    if (!mScrambling) {
-                        mScrambleImageDisplay = true;
-                        mScrambleImage.setVisibility(View.VISIBLE);
-                        mScrambleImage.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                mScrambleImageDisplay = false;
-                                mScrambleImage.setVisibility(View.GONE);
-                            }
-                        });
+    public void toggleScrambleImage() {
+        if (mScrambleImageDisplay) {
+            mScrambleImageDisplay = false;
+            mScrambleImage.setVisibility(View.GONE);
+        } else {
+            if (!mScrambling) {
+                mScrambleImageDisplay = true;
+                mScrambleImage.setVisibility(View.VISIBLE);
+                mScrambleImage.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mScrambleImageDisplay = false;
+                        mScrambleImage.setVisibility(View.GONE);
                     }
-                }
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+                });
+            }
         }
     }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -339,7 +280,7 @@ public class CurrentSTimerFragment extends Fragment {
                     mStartTime = System.nanoTime();
                     mRunning = true;
                     mUIHandler.post(mTimerRunnable);
-                    menuItemsEnable(false);
+                    ((CurrentSFragment) getParentFragment()).menuItemsEnable(false);
                     mScrambleImage.setVisibility(View.GONE);
                     mScrambleImageDisplay = false;
                     ((MainActivity) mActivity).lockOrientation(true);
@@ -361,12 +302,13 @@ public class CurrentSTimerFragment extends Fragment {
                     mEndTime = System.nanoTime();
                     mRunning = false;
                     mUIHandler.removeCallbacksAndMessages(null);
+
                     mFinalTime = mEndTime - mStartTime;
                     mTimerText.setText(Solve.timeStringFromLong(mFinalTime));
+
                     PuzzleType.sCurrentPuzzleType.getSession().addSolve(new Solve(mCurrentScrambleAndSvg, mFinalTime));
                     ((MainActivity) mActivity).lockOrientation(false);
-                    updateQuickStats();
-                    updateSolveHListView(false);
+                    ((CurrentSFragment) getParentFragment()).updateFragments();
                     if (mScrambling) {
                         mScrambleText.setText(R.string.scrambling);
                         mScramblerThreadHandler.post(new Runnable() {
@@ -378,7 +320,7 @@ public class CurrentSTimerFragment extends Fragment {
                                         mCurrentScrambleAndSvg = mNextScrambleAndSvg;
                                         mNextScrambleAndSvg = null;
                                         updateScrambleViewsToCurrent();
-                                        menuItemsEnable(true);
+                                        ((CurrentSFragment) getParentFragment()).menuItemsEnable(true);
                                     }
                                 });
                             }
@@ -387,7 +329,7 @@ public class CurrentSTimerFragment extends Fragment {
                         mCurrentScrambleAndSvg = mNextScrambleAndSvg;
                         mNextScrambleAndSvg = null;
                         updateScrambleViewsToCurrent();
-                        menuItemsEnable(true);
+                        ((CurrentSFragment) getParentFragment()).menuItemsEnable(true);
                     }
                     return true;
                 } else {
@@ -407,7 +349,7 @@ public class CurrentSTimerFragment extends Fragment {
                         @Override
                         public void run() {
                             updateScrambleViewsToCurrent();
-                            menuItemsEnable(true);
+                            ((CurrentSFragment) getParentFragment()).menuItemsEnable(true);
                         }
                     });
 
@@ -469,8 +411,7 @@ public class CurrentSTimerFragment extends Fragment {
                     break;
             }
         }
-        updateQuickStats();
-        updateSolveHListView(true);
+        ((CurrentSFragment) getParentFragment()).updateFragments();
     }
 
     public class SolveHListViewAdapter extends ArrayAdapter<Solve> {
