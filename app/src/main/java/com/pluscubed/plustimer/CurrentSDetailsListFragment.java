@@ -77,7 +77,7 @@ public class CurrentSDetailsListFragment extends ListFragment {
         }
         SolveDialog d = SolveDialog.newInstance((Solve) getListAdapter().getItem(position), position, penalty);
         d.setTargetFragment(this, CurrentSTimerFragment.DIALOG_REQUEST_CODE);
-        d.show(getParentFragment().getChildFragmentManager(), CurrentSTimerFragment.DIALOG_FRAGMENT_TAG);
+        d.show(getParentFragment().getActivity().getSupportFragmentManager(), CurrentSTimerFragment.DIALOG_FRAGMENT_TAG);
     }
 
     @Override

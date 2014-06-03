@@ -261,7 +261,7 @@ public class CurrentSTimerFragment extends Fragment {
                 }
                 SolveDialog d = SolveDialog.newInstance((Solve) parent.getItemAtPosition(position), position, penalty);
                 d.setTargetFragment(CurrentSTimerFragment.this, DIALOG_REQUEST_CODE);
-                d.show(getParentFragment().getChildFragmentManager(), DIALOG_FRAGMENT_TAG);
+                d.show(getParentFragment().getActivity().getSupportFragmentManager(), DIALOG_FRAGMENT_TAG);
             }
         });
 

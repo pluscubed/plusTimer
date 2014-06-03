@@ -37,6 +37,7 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     public void setTitle(CharSequence title) {
+        super.setTitle(title);
         mCurrentTitle = title;
         getSupportActionBar().setTitle(mCurrentTitle);
     }
@@ -144,11 +145,12 @@ public class MainActivity extends ActionBarActivity {
             case 0:
                 // Insert the fragment by replacing any existing fragment
                 Fragment fragment = fragmentManager.findFragmentByTag("CurrentSession");
-                if (fragment == null)
+                if (fragment == null) {
                     fragment = new CurrentSFragment();
-                fragmentManager.beginTransaction()
-                        .replace(R.id.activity_main_content_framelayout, fragment, "CurrentSession")
-                        .commit();
+                    fragmentManager.beginTransaction()
+                            .replace(R.id.activity_main_content_framelayout, fragment, "CurrentSession")
+                            .commit();
+                }
                 mCurrentSelectedPosition = pos;
                 mDrawerListView.setItemChecked(pos, true);
                 setTitle(mFragmentTitles[pos]);
