@@ -127,7 +127,6 @@ public class CurrentSTimerFragment extends Fragment {
     }
 
     ScrambleAndSvg generateScramble() {
-        mScrambling = true;
         String scramble = PuzzleType.sCurrentPuzzleType.getPuzzle().generateScramble();
         ScrambleAndSvg scrambleAndSvg = null;
         try {
@@ -135,7 +134,6 @@ public class CurrentSTimerFragment extends Fragment {
         } catch (InvalidScrambleException e) {
             e.printStackTrace();
         }
-        mScrambling = false;
 
         return scrambleAndSvg;
     }
@@ -180,11 +178,11 @@ public class CurrentSTimerFragment extends Fragment {
     }
 
     public void onPuzzleTypeChanged() {
-        ((CurrentSFragment) getParentFragment()).updateFragments();
-
+        getCurrentSFragment().updateFragments();
+        mScrambling = true;
         mScrambleText.setText(R.string.scrambling);
         mTimerText.setText(R.string.ready);
-        ((CurrentSFragment) getParentFragment()).menuItemsEnable(false);
+        updateOptionsMenu();
         mScrambleImage.setVisibility(View.GONE);
         mScrambleImageDisplay = false;
 
@@ -192,11 +190,13 @@ public class CurrentSTimerFragment extends Fragment {
             @Override
             public void run() {
                 mCurrentScrambleAndSvg = generateScramble();
+                mScrambling = false;
                 mUIHandler.post(new Runnable() {
                     @Override
                     public void run() {
+
                         updateScrambleViewsToCurrent();
-                        ((CurrentSFragment) getParentFragment()).menuItemsEnable(true);
+                        updateOptionsMenu();
                     }
                 });
 
@@ -204,10 +204,16 @@ public class CurrentSTimerFragment extends Fragment {
         });
     }
 
-    public void initializeOptionsMenu() {
-        if (mOnCreateCalled || mScrambling) {
-            ((CurrentSFragment) getParentFragment()).menuItemsEnable(false);
+    public void updateOptionsMenu() {
+        if (mOnCreateCalled || mScrambling || mRunning) {
+            getCurrentSFragment().menuItemsEnable(false);
+        } else {
+            getCurrentSFragment().menuItemsEnable(true);
         }
+    }
+
+    private CurrentSFragment getCurrentSFragment() {
+        return ((CurrentSFragment) getParentFragment());
     }
 
     public void toggleScrambleImage() {
@@ -280,14 +286,16 @@ public class CurrentSTimerFragment extends Fragment {
                     mStartTime = System.nanoTime();
                     mRunning = true;
                     mUIHandler.post(mTimerRunnable);
-                    ((CurrentSFragment) getParentFragment()).menuItemsEnable(false);
+                    updateOptionsMenu();
                     mScrambleImage.setVisibility(View.GONE);
                     mScrambleImageDisplay = false;
                     ((MainActivity) mActivity).lockOrientation(true);
                     mScramblerThreadHandler.post(new Runnable() {
                         @Override
                         public void run() {
+                            mScrambling = true;
                             mNextScrambleAndSvg = generateScramble();
+                            mScrambling = false;
                         }
                     });
                 }
@@ -308,7 +316,7 @@ public class CurrentSTimerFragment extends Fragment {
 
                     PuzzleType.sCurrentPuzzleType.getSession().addSolve(new Solve(mCurrentScrambleAndSvg, mFinalTime));
                     ((MainActivity) mActivity).lockOrientation(false);
-                    ((CurrentSFragment) getParentFragment()).updateFragments();
+                    getCurrentSFragment().updateFragments();
 
                     if (mScrambling) {
                         mScrambleText.setText(R.string.scrambling);
@@ -321,7 +329,7 @@ public class CurrentSTimerFragment extends Fragment {
                                         mCurrentScrambleAndSvg = mNextScrambleAndSvg;
                                         mNextScrambleAndSvg = null;
                                         updateScrambleViewsToCurrent();
-                                        ((CurrentSFragment) getParentFragment()).menuItemsEnable(true);
+                                        updateOptionsMenu();
                                     }
                                 });
                             }
@@ -330,7 +338,7 @@ public class CurrentSTimerFragment extends Fragment {
                         mCurrentScrambleAndSvg = mNextScrambleAndSvg;
                         mNextScrambleAndSvg = null;
                         updateScrambleViewsToCurrent();
-                        ((CurrentSFragment) getParentFragment()).menuItemsEnable(true);
+                        updateOptionsMenu();
                     }
                     return true;
                 } else {
@@ -341,20 +349,21 @@ public class CurrentSTimerFragment extends Fragment {
         });
 
         if (mOnCreateCalled) {
+            mScrambling = true;
+            updateOptionsMenu();
             mScrambleText.setText(R.string.scrambling);
             mScramblerThreadHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     mCurrentScrambleAndSvg = generateScramble();
+                    mScrambling = false;
                     mUIHandler.post(new Runnable() {
                         @Override
                         public void run() {
                             updateScrambleViewsToCurrent();
-                            ((CurrentSFragment) getParentFragment()).menuItemsEnable(true);
+                            updateOptionsMenu();
                         }
                     });
-
-
                 }
             });
 

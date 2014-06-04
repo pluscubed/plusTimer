@@ -23,8 +23,7 @@ import android.widget.Spinner;
 public class CurrentSFragment extends Fragment {
     private SlidingTabLayout mSlidingTabLayout;
     private ViewPager mViewPager;
-    private Spinner mMenuPuzzleSpinner;
-    private MenuItem mMenuDisplayScramble;
+    private boolean mMenuItemsEnable;
 
     private static String makeFragmentName(int viewId, int index) {
         return "android:switcher:" + viewId + ":" + index;
@@ -35,8 +34,7 @@ public class CurrentSFragment extends Fragment {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.menu_current_s, menu);
 
-        mMenuPuzzleSpinner = (Spinner) MenuItemCompat.getActionView(menu.findItem(R.id.menu_current_s_puzzletype_spinner));
-        mMenuDisplayScramble = menu.findItem(R.id.menu_current_s_toggle_scramble_image_action);
+        final Spinner menuPuzzleSpinner = (Spinner) MenuItemCompat.getActionView(menu.findItem(R.id.menu_current_s_puzzletype_spinner));
 
         final ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter =
                 new ArrayAdapter<PuzzleType>(
@@ -46,32 +44,42 @@ public class CurrentSFragment extends Fragment {
                 );
 
         puzzleTypeSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        mMenuPuzzleSpinner.setAdapter(puzzleTypeSpinnerAdapter);
+        menuPuzzleSpinner.setAdapter(puzzleTypeSpinnerAdapter);
 
-        mMenuPuzzleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (mMenuPuzzleSpinner.getSelectedItemPosition() != puzzleTypeSpinnerAdapter.getPosition(PuzzleType.sCurrentPuzzleType)) {
 
-                    PuzzleType.sCurrentPuzzleType = (PuzzleType) parent.getItemAtPosition(position);
-                    ((CurrentSTimerFragment) getViewPagerFragment(0)).onPuzzleTypeChanged();
-                    ((CurrentSDetailsListFragment) getViewPagerFragment(1)).updateSession();
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });
-        mMenuPuzzleSpinner.post(new Runnable() {
+        menuPuzzleSpinner.post(new Runnable() {
             @Override
             public void run() {
-                mMenuPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition(PuzzleType.sCurrentPuzzleType), true);
+                menuPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition(PuzzleType.sCurrentPuzzleType), true);
+                menuPuzzleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        if (menuPuzzleSpinner.getSelectedItemPosition() != puzzleTypeSpinnerAdapter.getPosition(PuzzleType.sCurrentPuzzleType)) {
+
+                            PuzzleType.sCurrentPuzzleType = (PuzzleType) parent.getItemAtPosition(position);
+                            ((CurrentSTimerFragment) getViewPagerFragment(0)).onPuzzleTypeChanged();
+                            ((CurrentSDetailsListFragment) getViewPagerFragment(1)).updateSession();
+                        }
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+                    }
+                });
             }
         });
 
+    }
 
-        ((CurrentSTimerFragment) getViewPagerFragment(0)).initializeOptionsMenu();
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        Spinner menuPuzzleSpinner = (Spinner) MenuItemCompat.getActionView(menu.findItem(R.id.menu_current_s_puzzletype_spinner));
+        MenuItem menuDisplayScramble = menu.findItem(R.id.menu_current_s_toggle_scramble_image_action);
+        if (menuPuzzleSpinner != null && menuDisplayScramble != null) {
+            menuPuzzleSpinner.setEnabled(mMenuItemsEnable);
+            menuDisplayScramble.setEnabled(mMenuItemsEnable);
+        }
     }
 
     public Fragment getViewPagerFragment(int position) {
@@ -106,8 +114,8 @@ public class CurrentSFragment extends Fragment {
     }
 
     public void menuItemsEnable(boolean enable) {
-        mMenuPuzzleSpinner.setEnabled(enable);
-        mMenuDisplayScramble.setEnabled(enable);
+        mMenuItemsEnable = enable;
+        getActivity().supportInvalidateOptionsMenu();
     }
 
     @Override

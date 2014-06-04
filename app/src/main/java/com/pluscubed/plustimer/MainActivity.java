@@ -141,12 +141,12 @@ public class MainActivity extends ActionBarActivity {
 
     void selectItem(int pos) {
         FragmentManager fragmentManager = getSupportFragmentManager();
-        String tag="";
-        Class fragmentClass=null;
+        String tag = "";
+        Class fragmentClass = null;
         switch (pos) {
             case 0:
-                tag="CurrentSFragment";
-                fragmentClass=CurrentSFragment.class;
+                tag = "CurrentSFragment";
+                fragmentClass = CurrentSFragment.class;
                 break;
             default:
                 Toast.makeText(getApplicationContext(), "Work in Progress", Toast.LENGTH_SHORT).show();
@@ -154,7 +154,7 @@ public class MainActivity extends ActionBarActivity {
         }
         Fragment fragment = fragmentManager.findFragmentByTag(tag);
         if (fragment == null) {
-            if(fragmentClass!=null)
+            if (fragmentClass != null)
                 try {
                     fragment = (Fragment) fragmentClass.newInstance();
                 } catch (InstantiationException e) {
