@@ -141,24 +141,35 @@ public class MainActivity extends ActionBarActivity {
 
     void selectItem(int pos) {
         FragmentManager fragmentManager = getSupportFragmentManager();
+        String tag="";
+        Class fragmentClass=null;
         switch (pos) {
             case 0:
-                // Insert the fragment by replacing any existing fragment
-                Fragment fragment = fragmentManager.findFragmentByTag("CurrentSession");
-                if (fragment == null) {
-                    fragment = new CurrentSFragment();
-                    fragmentManager.beginTransaction()
-                            .replace(R.id.activity_main_content_framelayout, fragment, "CurrentSession")
-                            .commit();
-                }
-                mCurrentSelectedPosition = pos;
-                mDrawerListView.setItemChecked(pos, true);
-                setTitle(mFragmentTitles[pos]);
-                mDrawerLayout.closeDrawer(mDrawerListView);
+                tag="CurrentSFragment";
+                fragmentClass=CurrentSFragment.class;
                 break;
             default:
                 Toast.makeText(getApplicationContext(), "Work in Progress", Toast.LENGTH_SHORT).show();
+                return;
         }
+        Fragment fragment = fragmentManager.findFragmentByTag(tag);
+        if (fragment == null) {
+            if(fragmentClass!=null)
+                try {
+                    fragment = (Fragment) fragmentClass.newInstance();
+                } catch (InstantiationException e) {
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            fragmentManager.beginTransaction()
+                    .replace(R.id.activity_main_content_framelayout, fragment, tag)
+                    .commit();
+        }
+        mCurrentSelectedPosition = pos;
+        mDrawerListView.setItemChecked(pos, true);
+        setTitle(mFragmentTitles[pos]);
+        mDrawerLayout.closeDrawer(mDrawerListView);
 
     }
 
