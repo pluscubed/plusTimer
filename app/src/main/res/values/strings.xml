@@ -25,7 +25,7 @@
     </string-array>
 
     <string-array name="drawer_array">
-        <item>Current Session</item>
+        <item>Current</item>
         <item>History</item>
         <item>Settings</item>
         <item>Help</item>
