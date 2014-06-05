@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
@@ -28,7 +29,10 @@ import android.widget.Toast;
 public class MainActivity extends ActionBarActivity implements SolveDialog.SolveDialogListener {
     public static final String DIALOG_FRAGMENT_TAG = "MODIFY_DIALOG";
     private static final String STATE_SELECTED_POSITION = "selected_navigation_drawer_position";
+    private static final String PREF_USER_LEARNED_DRAWER = "navigation_drawer_learned";
     private static final String CURRENT_S_TAG = "CURRENT_S_FRAGMENT";
+    private boolean mUserLearnedDrawer;
+    private boolean mFromSavedInstanceState;
     private String[] mFragmentTitles;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerListView;
@@ -90,7 +94,10 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
 
         if (savedInstanceState != null) {
             mCurrentSelectedPosition = savedInstanceState.getInt(STATE_SELECTED_POSITION);
+            mFromSavedInstanceState = true;
         }
+
+        mUserLearnedDrawer = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PREF_USER_LEARNED_DRAWER, false);
 
         mFragmentTitles = getResources().getStringArray(R.array.drawer_array);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.activity_main_drawerlayout);
@@ -121,18 +128,29 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
             /** Called when a drawer has settled in a completely open state. */
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
+                if (!mUserLearnedDrawer) {
+                    // The user manually opened the drawer; store this flag to prevent auto-showing
+                    // the navigation drawer automatically in the future.
+                    mUserLearnedDrawer = true;
+                    PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putBoolean(PREF_USER_LEARNED_DRAWER, true).commit();
+                }
                 getSupportActionBar().setTitle(mDrawerTitle);
                 supportInvalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
         };
+
+        selectItem(mCurrentSelectedPosition);
+
+        if (!mUserLearnedDrawer && !mFromSavedInstanceState) {
+            mDrawerLayout.openDrawer(mDrawerListView);
+            getSupportActionBar().setTitle(mDrawerTitle);
+        }
 
         // Set the drawer toggle as the DrawerListener
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
-
-        selectItem(mCurrentSelectedPosition);
     }
 
     @Override
@@ -192,7 +210,6 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
         mDrawerListView.setItemChecked(pos, true);
         setTitle(mFragmentTitles[pos]);
         mDrawerLayout.closeDrawer(mDrawerListView);
-
     }
 
     public void lockOrientation(boolean lock) {
