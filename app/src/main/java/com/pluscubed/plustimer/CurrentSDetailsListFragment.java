@@ -1,6 +1,5 @@
 package com.pluscubed.plustimer;
 
-import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
@@ -31,53 +30,21 @@ public class CurrentSDetailsListFragment extends ListFragment {
     }
 
     public void updateQuickStats() {
-        mQuickStats.setText(CurrentSTimerFragment.buildQuickStatsWithAveragesOf(getActivity(), 5, 12, 50, 100, 1000));
-        if (!CurrentSTimerFragment.buildQuickStatsWithAveragesOf(getActivity(), 5, 12, 50, 100, 1000).equals("")) {
+        mQuickStats.setText(CurrentSTimerFragment.buildQuickStatsWithAveragesOf(getMainActivity(), 5, 12, 50, 100, 1000));
+        if (!CurrentSTimerFragment.buildQuickStatsWithAveragesOf(getMainActivity(), 5, 12, 50, 100, 1000).equals("")) {
             mQuickStats.append("\n");
         }
         mQuickStats.append(getString(R.string.solves) + PuzzleType.sCurrentPuzzleType.getSession().getNumberOfSolves());
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == CurrentSTimerFragment.DIALOG_REQUEST_CODE) {
-            Solve solve = PuzzleType.sCurrentPuzzleType.getSession().getSolveByPosition(data.getIntExtra(CurrentSTimerFragment.EXTRA_DIALOG_FINISH_SOLVE_INDEX, 0));
-            switch (data.getIntExtra(CurrentSTimerFragment.EXTRA_DIALOG_FINISH_SELECTION, 0)) {
-                case CurrentSTimerFragment.DIALOG_PENALTY_NONE:
-                    solve.setPenalty(Solve.Penalty.NONE);
-                    break;
-                case CurrentSTimerFragment.DIALOG_PENALTY_PLUSTWO:
-                    solve.setPenalty(Solve.Penalty.PLUSTWO);
-                    break;
-                case CurrentSTimerFragment.DIALOG_PENALTY_DNF:
-                    solve.setPenalty(Solve.Penalty.DNF);
-                    break;
-                case CurrentSTimerFragment.DIALOG_RESULT_DELETE:
-                    PuzzleType.sCurrentPuzzleType.getSession().deleteSolve(data.getIntExtra(CurrentSTimerFragment.EXTRA_DIALOG_FINISH_SOLVE_INDEX, 0));
-                    break;
-            }
-        }
-        ((CurrentSFragment) getParentFragment()).updateFragments();
+    public MainActivity getMainActivity() {
+        return ((MainActivity) getParentFragment().getActivity());
     }
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
-        int penalty;
-        switch (((Solve) getListAdapter().getItem(position)).getPenalty()) {
-            case DNF:
-                penalty = CurrentSTimerFragment.DIALOG_PENALTY_DNF;
-                break;
-            case PLUSTWO:
-                penalty = CurrentSTimerFragment.DIALOG_PENALTY_PLUSTWO;
-                break;
-            case NONE:
-            default:
-                penalty = CurrentSTimerFragment.DIALOG_PENALTY_NONE;
-        }
-        SolveDialog d = SolveDialog.newInstance((Solve) getListAdapter().getItem(position), position, penalty);
-        d.setTargetFragment(this, CurrentSTimerFragment.DIALOG_REQUEST_CODE);
-        d.show(getParentFragment().getActivity().getSupportFragmentManager(), CurrentSTimerFragment.DIALOG_FRAGMENT_TAG);
+        getMainActivity().showCurrentSolveDialog(position);
     }
 
     @Override
@@ -106,7 +73,7 @@ public class CurrentSDetailsListFragment extends ListFragment {
         private ArrayList<Solve> mBestAndWorstSolves;
 
         public SolveListAdapter(PuzzleType currentPuzzleType) {
-            super(getActivity(), 0, currentPuzzleType.getSession().getSolves());
+            super(getMainActivity(), 0, currentPuzzleType.getSession().getSolves());
             mBestAndWorstSolves = new ArrayList<Solve>();
             mBestAndWorstSolves.add(currentPuzzleType.getSession().getBestSolve(currentPuzzleType.getSession().getSolves()));
             mBestAndWorstSolves.add(currentPuzzleType.getSession().getWorstSolve(currentPuzzleType.getSession().getSolves()));
@@ -115,7 +82,7 @@ public class CurrentSDetailsListFragment extends ListFragment {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
-                convertView = getActivity().getLayoutInflater().inflate(R.layout.list_item_current_s_details_solve, parent, false);
+                convertView = getMainActivity().getLayoutInflater().inflate(R.layout.list_item_current_s_details_solve, parent, false);
             }
             Solve s = getItem(position);
             TextView time = (TextView) convertView.findViewById(R.id.list_item_current_s_details_solve_title_textview);

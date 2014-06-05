@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
@@ -19,45 +18,67 @@ import android.widget.TextView;
  */
 public class SolveDialog extends DialogFragment {
 
-    public static final String BUNDLEKEY_DIALOG_INIT_TIMESTRING = "timestring";
     public static final String BUNDLEKEY_DIALOG_INIT_SOLVE_INDEX = "index";
-    public static final String BUNDLEKEY_DIALOG_INIT_PENALTY = "penalty";
-    public static final String BUNDLEKEY_DIALOG_INIT_SCRAMBLE = "scramble";
-    public static final String BUNDLEKEY_DIALOG_INIT_TIMESTAMP = "timestamp";
+
+
+    public static final int DIALOG_PENALTY_NONE = 0;
+    public static final int DIALOG_PENALTY_PLUSTWO = 1;
+    public static final int DIALOG_PENALTY_DNF = 2;
+    public static final int DIALOG_RESULT_DELETE = 3;
 
     private int mPosition;
     private int mSelection;
 
-    static SolveDialog newInstance(Solve i, int position, int penalty) {
+    private SolveDialogListener mListener;
+
+    static SolveDialog newInstance(int position) {
         SolveDialog d = new SolveDialog();
         Bundle args = new Bundle();
-        args.putString(BUNDLEKEY_DIALOG_INIT_TIMESTRING, i.getDescriptiveTimeString());
         args.putInt(BUNDLEKEY_DIALOG_INIT_SOLVE_INDEX, position);
-        args.putInt(BUNDLEKEY_DIALOG_INIT_PENALTY, penalty);
-        args.putString(BUNDLEKEY_DIALOG_INIT_SCRAMBLE, i.getScrambleAndSvg().scramble);
-        args.putLong(BUNDLEKEY_DIALOG_INIT_TIMESTAMP, i.getTimestamp());
         d.setArguments(args);
         return d;
     }
 
     @Override
-    public void onDismiss(DialogInterface dialog) {
-        super.onDismiss(dialog);
-        if (!(getTargetFragment() == null)) {
-            Intent i = new Intent();
-            i.putExtra(CurrentSTimerFragment.EXTRA_DIALOG_FINISH_SOLVE_INDEX, mPosition);
-            i.putExtra(CurrentSTimerFragment.EXTRA_DIALOG_FINISH_SELECTION, mSelection);
-            getTargetFragment().onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, i);
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mListener = (SolveDialogListener) activity;
+        } catch (ClassCastException e) {
+            // The activity doesn't implement the interface, throw exception
+            throw new ClassCastException(activity.toString()
+                    + " must implement SolveDialogListener");
         }
     }
 
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        super.onDismiss(dialog);
+
+        mListener.onDialogDismissed(mPosition, mSelection);
+
+    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+
         mPosition = getArguments().getInt(BUNDLEKEY_DIALOG_INIT_SOLVE_INDEX);
-        String timeString = getArguments().getString(BUNDLEKEY_DIALOG_INIT_TIMESTRING);
-        String scramble = getArguments().getString(BUNDLEKEY_DIALOG_INIT_SCRAMBLE);
-        long timestamp = getArguments().getLong(BUNDLEKEY_DIALOG_INIT_TIMESTAMP);
+        Solve solve = PuzzleType.sCurrentPuzzleType.getSession().getSolveByPosition(mPosition);
+        String timeString = solve.getDescriptiveTimeString();
+        String scramble = solve.getScrambleAndSvg().scramble;
+        long timestamp = solve.getTimestamp();
+        int penalty;
+        switch (solve.getPenalty()) {
+            case DNF:
+                penalty = DIALOG_PENALTY_DNF;
+                break;
+            case PLUSTWO:
+                penalty = DIALOG_PENALTY_PLUSTWO;
+                break;
+            case NONE:
+            default:
+                penalty = DIALOG_PENALTY_NONE;
+        }
 
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View v = inflater.inflate(R.layout.dialog_solve, null);
@@ -86,7 +107,7 @@ public class SolveDialog extends DialogFragment {
 
             }
         });
-        penaltySpinner.setSelection(getArguments().getInt(BUNDLEKEY_DIALOG_INIT_PENALTY));
+        penaltySpinner.setSelection(penalty);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(timeString)
@@ -99,9 +120,14 @@ public class SolveDialog extends DialogFragment {
                 .setNegativeButton(R.string.delete, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        mSelection = CurrentSTimerFragment.DIALOG_RESULT_DELETE;
+                        mSelection = DIALOG_RESULT_DELETE;
                     }
                 });
         return builder.create();
+    }
+
+
+    public interface SolveDialogListener {
+        public void onDialogDismissed(int position, int penalty);
     }
 }

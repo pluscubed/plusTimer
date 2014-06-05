@@ -5,6 +5,7 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
@@ -24,9 +25,10 @@ import android.widget.Toast;
 /**
  * Main Activity
  */
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements SolveDialog.SolveDialogListener {
+    public static final String DIALOG_FRAGMENT_TAG = "MODIFY_DIALOG";
     private static final String STATE_SELECTED_POSITION = "selected_navigation_drawer_position";
-
+    private static final String CURRENT_S_TAG = "CURRENT_S_FRAGMENT";
     private String[] mFragmentTitles;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerListView;
@@ -34,6 +36,26 @@ public class MainActivity extends ActionBarActivity {
     private ActionBarDrawerToggle mDrawerToggle;
     private CharSequence mDrawerTitle;
     private int mCurrentSelectedPosition = 0;
+
+    @Override
+    public void onDialogDismissed(int position, int penalty) {
+        Solve solve = PuzzleType.sCurrentPuzzleType.getSession().getSolveByPosition(position);
+        switch (penalty) {
+            case SolveDialog.DIALOG_PENALTY_NONE:
+                solve.setPenalty(Solve.Penalty.NONE);
+                break;
+            case SolveDialog.DIALOG_PENALTY_PLUSTWO:
+                solve.setPenalty(Solve.Penalty.PLUSTWO);
+                break;
+            case SolveDialog.DIALOG_PENALTY_DNF:
+                solve.setPenalty(Solve.Penalty.DNF);
+                break;
+            case SolveDialog.DIALOG_RESULT_DELETE:
+                PuzzleType.sCurrentPuzzleType.getSession().deleteSolve(position);
+                break;
+        }
+        ((CurrentSFragment) getSupportFragmentManager().findFragmentByTag(CURRENT_S_TAG)).updateFragments();
+    }
 
     @Override
     public void setTitle(CharSequence title) {
@@ -145,7 +167,7 @@ public class MainActivity extends ActionBarActivity {
         Class fragmentClass = null;
         switch (pos) {
             case 0:
-                tag = "CurrentSFragment";
+                tag = CURRENT_S_TAG;
                 fragmentClass = CurrentSFragment.class;
                 break;
             default:
@@ -195,6 +217,14 @@ public class MainActivity extends ActionBarActivity {
             setRequestedOrientation(orientation);
         } else {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        }
+    }
+
+    public void showCurrentSolveDialog(int position) {
+        DialogFragment dialog = (DialogFragment) getSupportFragmentManager().findFragmentByTag(DIALOG_FRAGMENT_TAG);
+        if (dialog == null) {
+            SolveDialog d = SolveDialog.newInstance(position);
+            d.show(getSupportFragmentManager(), DIALOG_FRAGMENT_TAG);
         }
     }
 }

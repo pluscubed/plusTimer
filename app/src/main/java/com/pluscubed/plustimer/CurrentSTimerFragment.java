@@ -2,7 +2,6 @@ package com.pluscubed.plustimer;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PictureDrawable;
 import android.os.Build;
@@ -11,7 +10,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -38,18 +36,6 @@ import it.sephiroth.android.library.widget.HListView;
 public class CurrentSTimerFragment extends Fragment {
     public static final String TAG = "TIMER";
 
-    public static final String EXTRA_DIALOG_FINISH_SOLVE_INDEX = "com.pluscubed.plustimer.EXTRA_DIALOG_FINISH_SOLVE_INDEX";
-    public static final String EXTRA_DIALOG_FINISH_SELECTION = "com.pluscubed.plustimer.EXTRA_DIALOG_FINISH_SELECTION";
-
-    public static final String DIALOG_FRAGMENT_TAG = "MODIFY_DIALOG";
-
-    public static final int DIALOG_REQUEST_CODE = 0;
-
-    public static final int DIALOG_PENALTY_NONE = 0;
-    public static final int DIALOG_PENALTY_PLUSTWO = 1;
-    public static final int DIALOG_PENALTY_DNF = 2;
-    public static final int DIALOG_RESULT_DELETE = 3;
-
     private TextView mTimerText;
     private TextView mScrambleText;
     private HListView mHListView;
@@ -70,8 +56,6 @@ public class CurrentSTimerFragment extends Fragment {
 
     private Handler mScramblerThreadHandler;
     private Handler mUIHandler;
-
-    private ActionBarActivity mActivity;
 
     private ScrambleAndSvg mCurrentScrambleAndSvg;
     private ScrambleAndSvg mNextScrambleAndSvg;
@@ -107,7 +91,7 @@ public class CurrentSTimerFragment extends Fragment {
 
     void updateQuickStats() {
         mQuickStatsSolves.setText(getString(R.string.solves) + PuzzleType.sCurrentPuzzleType.getSession().getNumberOfSolves());
-        mQuickStats.setText(buildQuickStatsWithAveragesOf(mActivity, 5, 12, 100));
+        mQuickStats.setText(buildQuickStatsWithAveragesOf(getMainActivity(), 5, 12, 100));
     }
 
 
@@ -142,7 +126,10 @@ public class CurrentSTimerFragment extends Fragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        mActivity = (ActionBarActivity) getActivity();
+    }
+
+    public MainActivity getMainActivity() {
+        return ((MainActivity) getParentFragment().getActivity());
     }
 
     @Override
@@ -253,21 +240,7 @@ public class CurrentSTimerFragment extends Fragment {
         mHListView.setOnItemClickListener(new it.sephiroth.android.library.widget.AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(it.sephiroth.android.library.widget.AdapterView<?> parent, View view, int position, long id) {
-                int penalty;
-                switch (((Solve) parent.getItemAtPosition(position)).getPenalty()) {
-                    case DNF:
-                        penalty = DIALOG_PENALTY_DNF;
-                        break;
-                    case PLUSTWO:
-                        penalty = DIALOG_PENALTY_PLUSTWO;
-                        break;
-                    case NONE:
-                    default:
-                        penalty = DIALOG_PENALTY_NONE;
-                }
-                SolveDialog d = SolveDialog.newInstance((Solve) parent.getItemAtPosition(position), position, penalty);
-                d.setTargetFragment(CurrentSTimerFragment.this, DIALOG_REQUEST_CODE);
-                d.show(getParentFragment().getActivity().getSupportFragmentManager(), DIALOG_FRAGMENT_TAG);
+                getMainActivity().showCurrentSolveDialog(position);
             }
         });
 
@@ -289,7 +262,7 @@ public class CurrentSTimerFragment extends Fragment {
                     updateOptionsMenu();
                     mScrambleImage.setVisibility(View.GONE);
                     mScrambleImageDisplay = false;
-                    ((MainActivity) mActivity).lockOrientation(true);
+                    getMainActivity().lockOrientation(true);
                     mScramblerThreadHandler.post(new Runnable() {
                         @Override
                         public void run() {
@@ -315,7 +288,7 @@ public class CurrentSTimerFragment extends Fragment {
                     mTimerText.setText(Solve.timeStringFromLong(mFinalTime));
 
                     PuzzleType.sCurrentPuzzleType.getSession().addSolve(new Solve(mCurrentScrambleAndSvg, mFinalTime));
-                    ((MainActivity) mActivity).lockOrientation(false);
+                    getMainActivity().lockOrientation(false);
                     getCurrentSFragment().updateFragments();
 
                     if (mScrambling) {
@@ -402,35 +375,12 @@ public class CurrentSTimerFragment extends Fragment {
         return v;
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == DIALOG_REQUEST_CODE) {
-            Solve solve = PuzzleType.sCurrentPuzzleType.getSession().getSolveByPosition(data.getIntExtra(EXTRA_DIALOG_FINISH_SOLVE_INDEX, 0));
-            switch (data.getIntExtra(EXTRA_DIALOG_FINISH_SELECTION, 0)) {
-                case DIALOG_PENALTY_NONE:
-                    solve.setPenalty(Solve.Penalty.NONE);
-                    break;
-                case DIALOG_PENALTY_PLUSTWO:
-                    solve.setPenalty(Solve.Penalty.PLUSTWO);
-                    break;
-                case DIALOG_PENALTY_DNF:
-                    solve.setPenalty(Solve.Penalty.DNF);
-                    break;
-                case DIALOG_RESULT_DELETE:
-                    PuzzleType.sCurrentPuzzleType.getSession().deleteSolve(data.getIntExtra(EXTRA_DIALOG_FINISH_SOLVE_INDEX, 0));
-                    break;
-            }
-        }
-        updateQuickStats();
-        ((SolveHListViewAdapter) mHListView.getAdapter()).updateSolvesList();
-    }
-
     public class SolveHListViewAdapter extends ArrayAdapter<Solve> {
 
         private ArrayList<Solve> mBestAndWorstSolves;
 
         public SolveHListViewAdapter() {
-            super(mActivity, 0, PuzzleType.sCurrentPuzzleType.getSession().getSolves());
+            super(getMainActivity(), 0, PuzzleType.sCurrentPuzzleType.getSession().getSolves());
             mBestAndWorstSolves = new ArrayList<Solve>();
             mBestAndWorstSolves.add(PuzzleType.sCurrentPuzzleType.getSession().getBestSolve(PuzzleType.sCurrentPuzzleType.getSession().getSolves()));
             mBestAndWorstSolves.add(PuzzleType.sCurrentPuzzleType.getSession().getWorstSolve(PuzzleType.sCurrentPuzzleType.getSession().getSolves()));
@@ -439,7 +389,7 @@ public class CurrentSTimerFragment extends Fragment {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
-                convertView = mActivity.getLayoutInflater().inflate(R.layout.hlist_item_solve, parent, false);
+                convertView = getMainActivity().getLayoutInflater().inflate(R.layout.hlist_item_solve, parent, false);
             }
             Solve s = getItem(position);
             TextView time = (TextView) convertView.findViewById(R.id.hlist_item_solve_textview);
