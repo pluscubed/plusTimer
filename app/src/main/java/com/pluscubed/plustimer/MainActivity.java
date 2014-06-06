@@ -34,6 +34,7 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
     private boolean mUserLearnedDrawer;
     private boolean mFromSavedInstanceState;
     private String[] mFragmentTitles;
+    private String[] mFragmentActionBarTitles;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerListView;
     private CharSequence mCurrentTitle;
@@ -100,6 +101,7 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
         mUserLearnedDrawer = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PREF_USER_LEARNED_DRAWER, false);
 
         mFragmentTitles = getResources().getStringArray(R.array.drawer_array);
+        mFragmentActionBarTitles=getResources().getStringArray(R.array.drawer_actionbar_array);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.activity_main_drawerlayout);
         mDrawerListView = (ListView) findViewById(R.id.activity_main_drawer_listview);
         mDrawerTitle = getResources().getString(R.string.app_name);
@@ -208,7 +210,7 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
         }
         mCurrentSelectedPosition = pos;
         mDrawerListView.setItemChecked(pos, true);
-        setTitle(mFragmentTitles[pos]);
+        setTitle(mFragmentActionBarTitles[pos]);
         mDrawerLayout.closeDrawer(mDrawerListView);
     }
 
