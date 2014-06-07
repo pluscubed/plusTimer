@@ -143,7 +143,7 @@ uploadArchives {
 
 task sourcesJar(type: Jar) {
     classifier = 'sources'
-    from android.sourceSets.main.allSource
+    from android.sourceSets.main.java, android.sourceSets.main.resources
 }
 
 signing {

@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -256,6 +257,7 @@ public class CurrentSTimerFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (!mRunning && !mScrambling) {
+                    getMainActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                     mStartTime = System.nanoTime();
                     mRunning = true;
                     mUIHandler.post(mTimerRunnable);
@@ -280,6 +282,7 @@ public class CurrentSTimerFragment extends Fragment {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (mRunning) {
+                    getMainActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                     mEndTime = System.nanoTime();
                     mRunning = false;
                     mUIHandler.removeCallbacksAndMessages(null);

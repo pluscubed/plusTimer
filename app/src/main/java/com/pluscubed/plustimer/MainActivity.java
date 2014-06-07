@@ -101,7 +101,7 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
         mUserLearnedDrawer = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PREF_USER_LEARNED_DRAWER, false);
 
         mFragmentTitles = getResources().getStringArray(R.array.drawer_array);
-        mFragmentActionBarTitles=getResources().getStringArray(R.array.drawer_actionbar_array);
+        mFragmentActionBarTitles = getResources().getStringArray(R.array.drawer_actionbar_array);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.activity_main_drawerlayout);
         mDrawerListView = (ListView) findViewById(R.id.activity_main_drawer_listview);
         mDrawerTitle = getResources().getString(R.string.app_name);
