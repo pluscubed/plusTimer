@@ -1,6 +1,5 @@
 package com.pluscubed.plustimer;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PictureDrawable;
@@ -34,7 +33,7 @@ import it.sephiroth.android.library.widget.HListView;
  * TimerFragment
  */
 
-public class CurrentSTimerFragment extends Fragment {
+public class CurrentSTimerFragment extends Fragment implements CurrentSFragment.CurrentSFragmentListener {
     public static final String TAG = "TIMER";
 
     private TextView mTimerText;
@@ -123,12 +122,6 @@ public class CurrentSTimerFragment extends Fragment {
         return scrambleAndSvg;
     }
 
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-    }
-
     public MainActivity getMainActivity() {
         return ((MainActivity) getParentFragment().getActivity());
     }
@@ -160,12 +153,12 @@ public class CurrentSTimerFragment extends Fragment {
         mOnCreateCalled = false;
     }
 
-    public void updateSession() {
+    public void onSessionSolvesChanged() {
         updateQuickStats();
         ((SolveHListViewAdapter) mHListView.getAdapter()).updateSolvesList();
     }
 
-    public void onPuzzleTypeChanged() {
+    public void onSessionChanged() {
         getCurrentSFragment().updateFragments();
         mScrambling = true;
         mScrambleText.setText(R.string.scrambling);

@@ -15,15 +15,13 @@ dependencies {
 
 android {
     compileSdkVersion 19
-    buildToolsVersion "19.1.0"
-
+    buildToolsVersion '19.1.0'
     defaultConfig {
         versionCode 1
         versionName version
         minSdkVersion 9
         targetSdkVersion 19
     }
-
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
@@ -34,6 +32,10 @@ android {
             res.srcDirs = ['res']
             assets.srcDirs = ['assets']
         }
+    }
+    productFlavors {
+    }
+    buildTypes {
     }
 }
 

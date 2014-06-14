@@ -17,7 +17,7 @@ import java.util.ArrayList;
 /**
  * Session tab
  */
-public class CurrentSDetailsListFragment extends ListFragment {
+public class CurrentSDetailsListFragment extends ListFragment implements CurrentSFragment.CurrentSFragmentListener {
 
     private TextView mQuickStats;
     private Button mReset;
@@ -59,13 +59,17 @@ public class CurrentSDetailsListFragment extends ListFragment {
                 ((CurrentSFragment) getParentFragment()).updateFragments();
             }
         });
-        updateSession();
+        onSessionSolvesChanged();
         return v;
     }
 
-    public void updateSession() {
+    public void onSessionSolvesChanged() {
         ((SolveListAdapter) getListAdapter()).updateSolvesList(PuzzleType.sCurrentPuzzleType);
         updateQuickStats();
+    }
+
+    public void onSessionChanged() {
+        onSessionSolvesChanged();
     }
 
     public class SolveListAdapter extends ArrayAdapter<Solve> {

@@ -37,7 +37,7 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
     private String[] mFragmentActionBarTitles;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerListView;
-    private CharSequence mCurrentTitle;
+    private CharSequence mCurrentFragmentTitle;
     private ActionBarDrawerToggle mDrawerToggle;
     private CharSequence mDrawerTitle;
     private int mCurrentSelectedPosition = 0;
@@ -65,8 +65,8 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
     @Override
     public void setTitle(CharSequence title) {
         super.setTitle(title);
-        mCurrentTitle = title;
-        getSupportActionBar().setTitle(mCurrentTitle);
+        mCurrentFragmentTitle = title;
+        getSupportActionBar().setTitle(mCurrentFragmentTitle);
     }
 
     @Override
@@ -123,7 +123,7 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
             /** Called when a drawer has settled in a completely closed state. */
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
-                getSupportActionBar().setTitle(mCurrentTitle);
+                getSupportActionBar().setTitle(mCurrentFragmentTitle);
                 supportInvalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
 

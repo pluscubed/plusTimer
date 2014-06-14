@@ -17,6 +17,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
+import java.util.ArrayList;
+
 /**
  * Current Session Fragment
  */
@@ -57,8 +59,9 @@ public class CurrentSFragment extends Fragment {
                         if (menuPuzzleSpinner.getSelectedItemPosition() != puzzleTypeSpinnerAdapter.getPosition(PuzzleType.sCurrentPuzzleType)) {
 
                             PuzzleType.sCurrentPuzzleType = (PuzzleType) parent.getItemAtPosition(position);
-                            ((CurrentSTimerFragment) getViewPagerFragment(0)).onPuzzleTypeChanged();
-                            ((CurrentSDetailsListFragment) getViewPagerFragment(1)).updateSession();
+                            for (CurrentSFragmentListener i : getViewPagerFragments()) {
+                                i.onSessionChanged();
+                            }
                         }
                     }
 
@@ -82,16 +85,24 @@ public class CurrentSFragment extends Fragment {
         }
     }
 
-    public Fragment getViewPagerFragment(int position) {
-        String name = makeFragmentName(R.id.fragment_current_s_viewpager, position);
-        return getChildFragmentManager().findFragmentByTag(name);
+    public ArrayList<CurrentSFragmentListener> getViewPagerFragments() {
+        ArrayList<CurrentSFragmentListener> listeners = new ArrayList<CurrentSFragmentListener>();
+        for (int i = 0; ; i++) {
+            CurrentSFragmentListener listener = (CurrentSFragmentListener) getChildFragmentManager().findFragmentByTag(makeFragmentName(R.id.fragment_current_s_viewpager, i));
+            if (listener != null) {
+                listeners.add(listener);
+                continue;
+            }
+            break;
+        }
+        return listeners;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_current_s_toggle_scramble_image_action:
-                ((CurrentSTimerFragment) getViewPagerFragment(0)).toggleScrambleImage();
+                ((CurrentSTimerFragment) getViewPagerFragments().get(0)).toggleScrambleImage();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -99,8 +110,9 @@ public class CurrentSFragment extends Fragment {
     }
 
     public void updateFragments() {
-        ((CurrentSTimerFragment) getViewPagerFragment(0)).updateSession();
-        ((CurrentSDetailsListFragment) getViewPagerFragment(1)).updateSession();
+        for (CurrentSFragmentListener i : getViewPagerFragments()) {
+            i.onSessionSolvesChanged();
+        }
     }
 
     @Override
@@ -127,16 +139,26 @@ public class CurrentSFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         mViewPager = (ViewPager) view.findViewById(R.id.fragment_current_s_viewpager);
-        mViewPager.setAdapter(new CurrentSessionPagerAdapter(getChildFragmentManager()));
+        mViewPager.setAdapter(new CurrentSessionPagerAdapter(getChildFragmentManager(), getResources().getStringArray(R.array.current_s_page_titles)));
         mSlidingTabLayout = (SlidingTabLayout) view.findViewById(R.id.fragment_current_s_slidingtablayout);
         mSlidingTabLayout.setViewPager(mViewPager);
         mViewPager.setCurrentItem(0);
     }
 
-    public static class CurrentSessionPagerAdapter extends FragmentPagerAdapter {
+    public interface CurrentSFragmentListener {
 
-        public CurrentSessionPagerAdapter(FragmentManager fm) {
+        public void onSessionSolvesChanged();
+
+        public void onSessionChanged();
+
+    }
+
+    public static class CurrentSessionPagerAdapter extends FragmentPagerAdapter {
+        private String[] mPageTitles;
+
+        public CurrentSessionPagerAdapter(FragmentManager fm, String[] pageTitles) {
             super(fm);
+            mPageTitles = pageTitles;
         }
 
         @Override
@@ -157,12 +179,8 @@ public class CurrentSFragment extends Fragment {
 
         @Override
         public CharSequence getPageTitle(int position) {
-            switch (position) {
-                case 0:
-                    return "Timer";
-                case 1:
-                    return "Session Details";
-            }
+            if (mPageTitles.length == 2)
+                return mPageTitles[position];
             return null;
         }
     }

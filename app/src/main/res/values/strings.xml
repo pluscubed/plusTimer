@@ -6,8 +6,6 @@
     <string name="action_settings">Settings</string>
     <string name="submit">Submit Session</string>
     <string name="scrambling">Scrambling…</string>
-    <string name="timer_tab">Timer</string>
-    <string name="session_tab">Session</string>
     <string name="puzzle_selection">Puzzle Selection</string>
     <string name="solves">"Solves: "</string>
     <string name="ao">"Current Ao"</string>
@@ -36,6 +34,11 @@
         <item>History</item>
         <item>Settings</item>
         <item>Help</item>
+    </string-array>
+
+    <string-array name="current_s_page_titles">
+        <item>Timer</item>
+        <item>Session Details</item>
     </string-array>
 
     <string name="drawer_open">Open navigation drawer</string>
