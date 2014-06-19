@@ -1,11 +1,12 @@
 package com.pluscubed.plustimer;
 
+import android.app.Activity;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -17,34 +18,25 @@ import java.util.ArrayList;
 /**
  * Session tab
  */
-public class CurrentSDetailsListFragment extends ListFragment implements CurrentSFragment.CurrentSFragmentListener {
+public class CurrentSDetailsListFragment extends CurrentSBaseFragment implements CurrentSFragment.CurrentSFragmentsCallback {
 
     private TextView mQuickStats;
     private Button mReset;
+    private ListView mListView;
 
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setListAdapter(new SolveListAdapter(PuzzleType.sCurrentPuzzleType));
-    }
 
     public void updateQuickStats() {
-        mQuickStats.setText(CurrentSTimerFragment.buildQuickStatsWithAveragesOf(getMainActivity(), 5, 12, 50, 100, 1000));
-        if (!CurrentSTimerFragment.buildQuickStatsWithAveragesOf(getMainActivity(), 5, 12, 50, 100, 1000).equals("")) {
+        mQuickStats.setText(CurrentSTimerFragment.buildQuickStatsWithAveragesOf(getAttachedActivity(), 5, 12, 50, 100, 1000));
+        if (!CurrentSTimerFragment.buildQuickStatsWithAveragesOf(getAttachedActivity(), 5, 12, 50, 100, 1000).equals("")) {
             mQuickStats.append("\n");
         }
         mQuickStats.append(getString(R.string.solves) + PuzzleType.sCurrentPuzzleType.getSession().getNumberOfSolves());
     }
 
-    public MainActivity getMainActivity() {
-        return ((MainActivity) getParentFragment().getActivity());
-    }
-
-    @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        super.onListItemClick(l, v, position, id);
-        getMainActivity().showCurrentSolveDialog(position);
+    public Activity getAttachedActivity() {
+        if (getParentFragment() != null)
+            return getParentFragment().getActivity();
+        return getActivity();
     }
 
     @Override
@@ -59,12 +51,20 @@ public class CurrentSDetailsListFragment extends ListFragment implements Current
                 ((CurrentSFragment) getParentFragment()).updateFragments();
             }
         });
+        mListView = (ListView) v.findViewById(android.R.id.list);
+        mListView.setAdapter(new SolveListAdapter(PuzzleType.sCurrentPuzzleType));
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                onSolveItemClick(position);
+            }
+        });
         onSessionSolvesChanged();
         return v;
     }
 
     public void onSessionSolvesChanged() {
-        ((SolveListAdapter) getListAdapter()).updateSolvesList(PuzzleType.sCurrentPuzzleType);
+        ((SolveListAdapter) mListView.getAdapter()).updateSolvesList(PuzzleType.sCurrentPuzzleType);
         updateQuickStats();
     }
 
@@ -77,7 +77,7 @@ public class CurrentSDetailsListFragment extends ListFragment implements Current
         private ArrayList<Solve> mBestAndWorstSolves;
 
         public SolveListAdapter(PuzzleType currentPuzzleType) {
-            super(getMainActivity(), 0, currentPuzzleType.getSession().getSolves());
+            super(getAttachedActivity(), 0, currentPuzzleType.getSession().getSolves());
             mBestAndWorstSolves = new ArrayList<Solve>();
             mBestAndWorstSolves.add(currentPuzzleType.getSession().getBestSolve(currentPuzzleType.getSession().getSolves()));
             mBestAndWorstSolves.add(currentPuzzleType.getSession().getWorstSolve(currentPuzzleType.getSession().getSolves()));
@@ -86,7 +86,7 @@ public class CurrentSDetailsListFragment extends ListFragment implements Current
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
-                convertView = getMainActivity().getLayoutInflater().inflate(R.layout.list_item_current_s_details_solve, parent, false);
+                convertView = getAttachedActivity().getLayoutInflater().inflate(R.layout.list_item_current_s_details_solve, parent, false);
             }
             Solve s = getItem(position);
             TextView time = (TextView) convertView.findViewById(R.id.list_item_current_s_details_solve_title_textview);

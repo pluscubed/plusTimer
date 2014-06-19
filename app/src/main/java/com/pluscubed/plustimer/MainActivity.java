@@ -26,7 +26,7 @@ import android.widget.Toast;
 /**
  * Main Activity
  */
-public class MainActivity extends ActionBarActivity implements SolveDialog.SolveDialogListener {
+public class MainActivity extends ActionBarActivity implements SolveDialog.SolveDialogListener, CurrentSBaseFragment.CurrentSessionActivityCallback {
     public static final String DIALOG_FRAGMENT_TAG = "MODIFY_DIALOG";
     private static final String STATE_SELECTED_POSITION = "selected_navigation_drawer_position";
     private static final String PREF_USER_LEARNED_DRAWER = "navigation_drawer_learned";
@@ -42,7 +42,7 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
     private CharSequence mDrawerTitle;
     private int mCurrentSelectedPosition = 0;
 
-    @Override
+
     public void onDialogDismissed(int position, int penalty) {
         Solve solve = PuzzleType.sCurrentPuzzleType.getSession().getSolveByPosition(position);
         switch (penalty) {
@@ -219,7 +219,7 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
             Display display = ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
             int rotation = display.getRotation();
             int tempOrientation = getResources().getConfiguration().orientation;
-            int orientation = 0;
+            int orientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
             switch (tempOrientation) {
                 case Configuration.ORIENTATION_LANDSCAPE:
                     if (rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_90)

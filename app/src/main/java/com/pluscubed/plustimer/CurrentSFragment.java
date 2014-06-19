@@ -59,7 +59,7 @@ public class CurrentSFragment extends Fragment {
                         if (menuPuzzleSpinner.getSelectedItemPosition() != puzzleTypeSpinnerAdapter.getPosition(PuzzleType.sCurrentPuzzleType)) {
 
                             PuzzleType.sCurrentPuzzleType = (PuzzleType) parent.getItemAtPosition(position);
-                            for (CurrentSFragmentListener i : getViewPagerFragments()) {
+                            for (CurrentSFragmentsCallback i : getFragmentCallbacks()) {
                                 i.onSessionChanged();
                             }
                         }
@@ -85,24 +85,24 @@ public class CurrentSFragment extends Fragment {
         }
     }
 
-    public ArrayList<CurrentSFragmentListener> getViewPagerFragments() {
-        ArrayList<CurrentSFragmentListener> listeners = new ArrayList<CurrentSFragmentListener>();
+    public ArrayList<CurrentSFragmentsCallback> getFragmentCallbacks() {
+        ArrayList<CurrentSFragmentsCallback> callbacks = new ArrayList<CurrentSFragmentsCallback>();
         for (int i = 0; ; i++) {
-            CurrentSFragmentListener listener = (CurrentSFragmentListener) getChildFragmentManager().findFragmentByTag(makeFragmentName(R.id.fragment_current_s_viewpager, i));
-            if (listener != null) {
-                listeners.add(listener);
+            CurrentSFragmentsCallback callback = (CurrentSFragmentsCallback) getChildFragmentManager().findFragmentByTag(makeFragmentName(R.id.fragment_current_s_viewpager, i));
+            if (callback != null) {
+                callbacks.add(callback);
                 continue;
             }
             break;
         }
-        return listeners;
+        return callbacks;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_current_s_toggle_scramble_image_action:
-                ((CurrentSTimerFragment) getViewPagerFragments().get(0)).toggleScrambleImage();
+                ((CurrentSTimerFragment) getFragmentCallbacks().get(0)).toggleScrambleImage();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -110,7 +110,7 @@ public class CurrentSFragment extends Fragment {
     }
 
     public void updateFragments() {
-        for (CurrentSFragmentListener i : getViewPagerFragments()) {
+        for (CurrentSFragmentsCallback i : getFragmentCallbacks()) {
             i.onSessionSolvesChanged();
         }
     }
@@ -145,7 +145,7 @@ public class CurrentSFragment extends Fragment {
         mViewPager.setCurrentItem(0);
     }
 
-    public interface CurrentSFragmentListener {
+    public interface CurrentSFragmentsCallback {
 
         public void onSessionSolvesChanged();
 

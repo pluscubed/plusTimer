@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -33,7 +32,7 @@ import it.sephiroth.android.library.widget.HListView;
  * TimerFragment
  */
 
-public class CurrentSTimerFragment extends Fragment implements CurrentSFragment.CurrentSFragmentListener {
+public class CurrentSTimerFragment extends CurrentSBaseFragment implements CurrentSFragment.CurrentSFragmentsCallback {
     public static final String TAG = "TIMER";
 
     private TextView mTimerText;
@@ -91,7 +90,7 @@ public class CurrentSTimerFragment extends Fragment implements CurrentSFragment.
 
     void updateQuickStats() {
         mQuickStatsSolves.setText(getString(R.string.solves) + PuzzleType.sCurrentPuzzleType.getSession().getNumberOfSolves());
-        mQuickStats.setText(buildQuickStatsWithAveragesOf(getMainActivity(), 5, 12, 100));
+        mQuickStats.setText(buildQuickStatsWithAveragesOf(getAttachedActivity(), 5, 12, 100));
     }
 
 
@@ -122,9 +121,6 @@ public class CurrentSTimerFragment extends Fragment implements CurrentSFragment.
         return scrambleAndSvg;
     }
 
-    public MainActivity getMainActivity() {
-        return ((MainActivity) getParentFragment().getActivity());
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -234,7 +230,7 @@ public class CurrentSTimerFragment extends Fragment implements CurrentSFragment.
         mHListView.setOnItemClickListener(new it.sephiroth.android.library.widget.AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(it.sephiroth.android.library.widget.AdapterView<?> parent, View view, int position, long id) {
-                getMainActivity().showCurrentSolveDialog(position);
+                onSolveItemClick(position);
             }
         });
 
@@ -250,14 +246,21 @@ public class CurrentSTimerFragment extends Fragment implements CurrentSFragment.
             @Override
             public void onClick(View v) {
                 if (!mRunning && !mScrambling) {
-                    getMainActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                    getAttachedActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                     mStartTime = System.nanoTime();
                     mRunning = true;
                     mUIHandler.post(mTimerRunnable);
                     updateOptionsMenu();
                     mScrambleImage.setVisibility(View.GONE);
                     mScrambleImageDisplay = false;
-                    getMainActivity().lockOrientation(true);
+                    CurrentSessionActivityCallback callback;
+                    try {
+                        callback = (CurrentSessionActivityCallback) getAttachedActivity();
+                    } catch (ClassCastException e) {
+                        throw new ClassCastException(getAttachedActivity().toString()
+                                + " must implement CurrentSessionActivityCallback");
+                    }
+                    callback.lockOrientation(true);
                     mScramblerThreadHandler.post(new Runnable() {
                         @Override
                         public void run() {
@@ -275,7 +278,7 @@ public class CurrentSTimerFragment extends Fragment implements CurrentSFragment.
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (mRunning) {
-                    getMainActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                    getAttachedActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                     mEndTime = System.nanoTime();
                     mRunning = false;
                     mUIHandler.removeCallbacksAndMessages(null);
@@ -284,7 +287,14 @@ public class CurrentSTimerFragment extends Fragment implements CurrentSFragment.
                     mTimerText.setText(Solve.timeStringFromLong(mFinalTime));
 
                     PuzzleType.sCurrentPuzzleType.getSession().addSolve(new Solve(mCurrentScrambleAndSvg, mFinalTime));
-                    getMainActivity().lockOrientation(false);
+                    CurrentSessionActivityCallback callback;
+                    try {
+                        callback = (CurrentSessionActivityCallback) getAttachedActivity();
+                    } catch (ClassCastException e) {
+                        throw new ClassCastException(getAttachedActivity().toString()
+                                + " must implement CurrentSessionActivityCallback");
+                    }
+                    callback.lockOrientation(false);
                     getCurrentSFragment().updateFragments();
 
                     if (mScrambling) {
@@ -376,7 +386,7 @@ public class CurrentSTimerFragment extends Fragment implements CurrentSFragment.
         private ArrayList<Solve> mBestAndWorstSolves;
 
         public SolveHListViewAdapter() {
-            super(getMainActivity(), 0, PuzzleType.sCurrentPuzzleType.getSession().getSolves());
+            super(getAttachedActivity(), 0, PuzzleType.sCurrentPuzzleType.getSession().getSolves());
             mBestAndWorstSolves = new ArrayList<Solve>();
             mBestAndWorstSolves.add(PuzzleType.sCurrentPuzzleType.getSession().getBestSolve(PuzzleType.sCurrentPuzzleType.getSession().getSolves()));
             mBestAndWorstSolves.add(PuzzleType.sCurrentPuzzleType.getSession().getWorstSolve(PuzzleType.sCurrentPuzzleType.getSession().getSolves()));
@@ -385,7 +395,7 @@ public class CurrentSTimerFragment extends Fragment implements CurrentSFragment.
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
-                convertView = getMainActivity().getLayoutInflater().inflate(R.layout.hlist_item_solve, parent, false);
+                convertView = getAttachedActivity().getLayoutInflater().inflate(R.layout.hlist_item_solve, parent, false);
             }
             Solve s = getItem(position);
             TextView time = (TextView) convertView.findViewById(R.id.hlist_item_solve_textview);
