@@ -1,6 +1,5 @@
 package com.pluscubed.plustimer;
 
-import android.app.Activity;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -18,7 +17,7 @@ import java.util.ArrayList;
 /**
  * Session tab
  */
-public class CurrentSDetailsListFragment extends CurrentSBaseFragment implements CurrentSFragment.CurrentSFragmentsCallback {
+public class CurrentSDetailsListFragment extends CurrentSBaseFragment {
 
     private TextView mQuickStats;
     private Button mReset;
@@ -33,12 +32,6 @@ public class CurrentSDetailsListFragment extends CurrentSBaseFragment implements
         mQuickStats.append(getString(R.string.solves) + PuzzleType.sCurrentPuzzleType.getSession().getNumberOfSolves());
     }
 
-    public Activity getAttachedActivity() {
-        if (getParentFragment() != null)
-            return getParentFragment().getActivity();
-        return getActivity();
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_current_s_details, container, false);
@@ -48,7 +41,7 @@ public class CurrentSDetailsListFragment extends CurrentSBaseFragment implements
             @Override
             public void onClick(View v) {
                 PuzzleType.sCurrentPuzzleType.resetSession();
-                ((CurrentSFragment) getParentFragment()).updateFragments();
+                onSessionSolvesChanged();
             }
         });
         mListView = (ListView) v.findViewById(android.R.id.list);
@@ -63,11 +56,13 @@ public class CurrentSDetailsListFragment extends CurrentSBaseFragment implements
         return v;
     }
 
+    @Override
     public void onSessionSolvesChanged() {
         ((SolveListAdapter) mListView.getAdapter()).updateSolvesList(PuzzleType.sCurrentPuzzleType);
         updateQuickStats();
     }
 
+    @Override
     public void onSessionChanged() {
         onSessionSolvesChanged();
     }

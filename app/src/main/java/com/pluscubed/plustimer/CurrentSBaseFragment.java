@@ -6,7 +6,7 @@ import android.support.v4.app.Fragment;
 /**
  * Created by DC on 6/18/2014.
  */
-public class CurrentSBaseFragment extends Fragment {
+public abstract class CurrentSBaseFragment extends Fragment {
 
     public Activity getAttachedActivity() {
         if (getParentFragment() != null)
@@ -15,19 +15,21 @@ public class CurrentSBaseFragment extends Fragment {
     }
 
     public void onSolveItemClick(int position) {
-        CurrentSessionActivityCallback callback;
+        OnSolveItemClickListener listener;
         try {
-            callback = (CurrentSessionActivityCallback) getAttachedActivity();
+            listener = (OnSolveItemClickListener) getAttachedActivity();
         } catch (ClassCastException e) {
             throw new ClassCastException(getAttachedActivity().toString()
-                    + " must implement CurrentSessionActivityCallback");
+                    + " must implement OnSolveItemClickListener");
         }
-        callback.showCurrentSolveDialog(position);
+        listener.showCurrentSolveDialog(position);
     }
 
-    public interface CurrentSessionActivityCallback {
-        public void showCurrentSolveDialog(int position);
+    abstract void onSessionSolvesChanged();
 
-        public void lockOrientation(boolean lock);
+    abstract void onSessionChanged();
+
+    public interface OnSolveItemClickListener {
+        public void showCurrentSolveDialog(int position);
     }
 }

@@ -1,7 +1,5 @@
 package com.pluscubed.plustimer;
 
-import android.content.Context;
-import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -12,12 +10,9 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
-import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.Surface;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -26,7 +21,7 @@ import android.widget.Toast;
 /**
  * Main Activity
  */
-public class MainActivity extends ActionBarActivity implements SolveDialog.SolveDialogListener, CurrentSBaseFragment.CurrentSessionActivityCallback {
+public class MainActivity extends ActionBarActivity implements SolveDialog.SolveDialogListener, CurrentSBaseFragment.OnSolveItemClickListener {
     public static final String DIALOG_FRAGMENT_TAG = "MODIFY_DIALOG";
     private static final String STATE_SELECTED_POSITION = "selected_navigation_drawer_position";
     private static final String PREF_USER_LEARNED_DRAWER = "navigation_drawer_learned";
@@ -42,7 +37,7 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
     private CharSequence mDrawerTitle;
     private int mCurrentSelectedPosition = 0;
 
-
+    @Override
     public void onDialogDismissed(int position, int penalty) {
         Solve solve = PuzzleType.sCurrentPuzzleType.getSession().getSolveByPosition(position);
         switch (penalty) {
@@ -59,7 +54,7 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
                 PuzzleType.sCurrentPuzzleType.getSession().deleteSolve(position);
                 break;
         }
-        ((CurrentSFragment) getSupportFragmentManager().findFragmentByTag(CURRENT_S_TAG)).updateFragments();
+        ((CurrentSFragment) getSupportFragmentManager().findFragmentByTag(CURRENT_S_TAG)).updateSessionsToCurrent();
     }
 
     @Override
@@ -214,31 +209,7 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
         mDrawerLayout.closeDrawer(mDrawerListView);
     }
 
-    public void lockOrientation(boolean lock) {
-        if (lock) {
-            Display display = ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-            int rotation = display.getRotation();
-            int tempOrientation = getResources().getConfiguration().orientation;
-            int orientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-            switch (tempOrientation) {
-                case Configuration.ORIENTATION_LANDSCAPE:
-                    if (rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_90)
-                        orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-                    else
-                        orientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
-                    break;
-                case Configuration.ORIENTATION_PORTRAIT:
-                    if (rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_270)
-                        orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-                    else
-                        orientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
-            }
-            setRequestedOrientation(orientation);
-        } else {
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-        }
-    }
-
+    @Override
     public void showCurrentSolveDialog(int position) {
         DialogFragment dialog = (DialogFragment) getSupportFragmentManager().findFragmentByTag(DIALOG_FRAGMENT_TAG);
         if (dialog == null) {

@@ -32,7 +32,7 @@ import it.sephiroth.android.library.widget.HListView;
  * TimerFragment
  */
 
-public class CurrentSTimerFragment extends CurrentSBaseFragment implements CurrentSFragment.CurrentSFragmentsCallback {
+public class CurrentSTimerFragment extends CurrentSBaseFragment {
     public static final String TAG = "TIMER";
 
     private TextView mTimerText;
@@ -149,13 +149,15 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
         mOnCreateCalled = false;
     }
 
+    @Override
     public void onSessionSolvesChanged() {
         updateQuickStats();
         ((SolveHListViewAdapter) mHListView.getAdapter()).updateSolvesList();
     }
 
+    @Override
     public void onSessionChanged() {
-        getCurrentSFragment().updateFragments();
+        onSessionSolvesChanged();
         mScrambling = true;
         mScrambleText.setText(R.string.scrambling);
         mTimerText.setText(R.string.ready);
@@ -182,16 +184,20 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
     }
 
     public void updateOptionsMenu() {
+        MenuItemsEnableListener listener;
+        try {
+            listener = (MenuItemsEnableListener) getParentFragment();
+        } catch (ClassCastException e) {
+            throw new ClassCastException(getParentFragment().toString()
+                    + " must implement MenuItemsEnableListener");
+        }
         if (mOnCreateCalled || mScrambling || mRunning) {
-            getCurrentSFragment().menuItemsEnable(false);
+            listener.menuItemsEnable(false);
         } else {
-            getCurrentSFragment().menuItemsEnable(true);
+            listener.menuItemsEnable(true);
         }
     }
 
-    private CurrentSFragment getCurrentSFragment() {
-        return ((CurrentSFragment) getParentFragment());
-    }
 
     public void toggleScrambleImage() {
         if (mScrambleImageDisplay) {
@@ -253,14 +259,6 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
                     updateOptionsMenu();
                     mScrambleImage.setVisibility(View.GONE);
                     mScrambleImageDisplay = false;
-                    CurrentSessionActivityCallback callback;
-                    try {
-                        callback = (CurrentSessionActivityCallback) getAttachedActivity();
-                    } catch (ClassCastException e) {
-                        throw new ClassCastException(getAttachedActivity().toString()
-                                + " must implement CurrentSessionActivityCallback");
-                    }
-                    callback.lockOrientation(true);
                     mScramblerThreadHandler.post(new Runnable() {
                         @Override
                         public void run() {
@@ -287,15 +285,7 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
                     mTimerText.setText(Solve.timeStringFromLong(mFinalTime));
 
                     PuzzleType.sCurrentPuzzleType.getSession().addSolve(new Solve(mCurrentScrambleAndSvg, mFinalTime));
-                    CurrentSessionActivityCallback callback;
-                    try {
-                        callback = (CurrentSessionActivityCallback) getAttachedActivity();
-                    } catch (ClassCastException e) {
-                        throw new ClassCastException(getAttachedActivity().toString()
-                                + " must implement CurrentSessionActivityCallback");
-                    }
-                    callback.lockOrientation(false);
-                    getCurrentSFragment().updateFragments();
+                    onSessionSolvesChanged();
 
                     if (mScrambling) {
                         mScrambleText.setText(R.string.scrambling);
@@ -379,6 +369,10 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
         updateQuickStats();
 
         return v;
+    }
+
+    public interface MenuItemsEnableListener {
+        public void menuItemsEnable(boolean enable);
     }
 
     public class SolveHListViewAdapter extends ArrayAdapter<Solve> {

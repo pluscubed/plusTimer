@@ -22,7 +22,7 @@ import java.util.ArrayList;
 /**
  * Current Session Fragment
  */
-public class CurrentSFragment extends Fragment {
+public class CurrentSFragment extends Fragment implements CurrentSTimerFragment.MenuItemsEnableListener {
     private SlidingTabLayout mSlidingTabLayout;
     private ViewPager mViewPager;
     private boolean mMenuItemsEnable;
@@ -59,7 +59,7 @@ public class CurrentSFragment extends Fragment {
                         if (menuPuzzleSpinner.getSelectedItemPosition() != puzzleTypeSpinnerAdapter.getPosition(PuzzleType.sCurrentPuzzleType)) {
 
                             PuzzleType.sCurrentPuzzleType = (PuzzleType) parent.getItemAtPosition(position);
-                            for (CurrentSFragmentsCallback i : getFragmentCallbacks()) {
+                            for (CurrentSBaseFragment i : getChildFragments()) {
                                 i.onSessionChanged();
                             }
                         }
@@ -85,32 +85,35 @@ public class CurrentSFragment extends Fragment {
         }
     }
 
-    public ArrayList<CurrentSFragmentsCallback> getFragmentCallbacks() {
-        ArrayList<CurrentSFragmentsCallback> callbacks = new ArrayList<CurrentSFragmentsCallback>();
+
+    public ArrayList<CurrentSBaseFragment> getChildFragments() {
+        ArrayList<CurrentSBaseFragment> fragments = new ArrayList<CurrentSBaseFragment>();
         for (int i = 0; ; i++) {
-            CurrentSFragmentsCallback callback = (CurrentSFragmentsCallback) getChildFragmentManager().findFragmentByTag(makeFragmentName(R.id.fragment_current_s_viewpager, i));
-            if (callback != null) {
-                callbacks.add(callback);
+            CurrentSBaseFragment fragment = (CurrentSBaseFragment) getChildFragmentManager().findFragmentByTag(makeFragmentName(R.id.fragment_current_s_viewpager, i));
+            if (fragment != null) {
+                fragments.add(fragment);
                 continue;
             }
             break;
         }
-        return callbacks;
+        return fragments;
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            //TODO: Move scramble toggle to timer page
             case R.id.menu_current_s_toggle_scramble_image_action:
-                ((CurrentSTimerFragment) getFragmentCallbacks().get(0)).toggleScrambleImage();
+                ((CurrentSTimerFragment) getChildFragments().get(0)).toggleScrambleImage();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
-    public void updateFragments() {
-        for (CurrentSFragmentsCallback i : getFragmentCallbacks()) {
+    void updateSessionsToCurrent() {
+        for (CurrentSBaseFragment i : getChildFragments()) {
             i.onSessionSolvesChanged();
         }
     }
@@ -125,6 +128,8 @@ public class CurrentSFragment extends Fragment {
         PuzzleType.sCurrentPuzzleType.resetSession();
     }
 
+
+    @Override
     public void menuItemsEnable(boolean enable) {
         mMenuItemsEnable = enable;
         getActivity().supportInvalidateOptionsMenu();
@@ -143,14 +148,24 @@ public class CurrentSFragment extends Fragment {
         mSlidingTabLayout = (SlidingTabLayout) view.findViewById(R.id.fragment_current_s_slidingtablayout);
         mSlidingTabLayout.setViewPager(mViewPager);
         mViewPager.setCurrentItem(0);
-    }
+        mSlidingTabLayout.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
-    public interface CurrentSFragmentsCallback {
+            }
 
-        public void onSessionSolvesChanged();
+            @Override
+            public void onPageSelected(int position) {
 
-        public void onSessionChanged();
+            }
 
+            @Override
+            public void onPageScrollStateChanged(int state) {
+                if (state == ViewPager.SCROLL_STATE_DRAGGING) {
+                    updateSessionsToCurrent();
+                }
+            }
+        });
     }
 
     public static class CurrentSessionPagerAdapter extends FragmentPagerAdapter {
