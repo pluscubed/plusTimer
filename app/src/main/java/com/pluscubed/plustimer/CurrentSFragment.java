@@ -26,6 +26,7 @@ public class CurrentSFragment extends Fragment implements CurrentSTimerFragment.
     private SlidingTabLayout mSlidingTabLayout;
     private ViewPager mViewPager;
     private boolean mMenuItemsEnable;
+    private boolean mScrambleToggleVisible;
 
     private static String makeFragmentName(int viewId, int index) {
         return "android:switcher:" + viewId + ":" + index;
@@ -82,6 +83,7 @@ public class CurrentSFragment extends Fragment implements CurrentSTimerFragment.
         if (menuPuzzleSpinner != null && menuDisplayScramble != null) {
             menuPuzzleSpinner.setEnabled(mMenuItemsEnable);
             menuDisplayScramble.setEnabled(mMenuItemsEnable);
+            menuDisplayScramble.setVisible(mScrambleToggleVisible);
         }
     }
 
@@ -103,7 +105,6 @@ public class CurrentSFragment extends Fragment implements CurrentSTimerFragment.
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            //TODO: Move scramble toggle to timer page
             case R.id.menu_current_s_toggle_scramble_image_action:
                 ((CurrentSTimerFragment) getChildFragments().get(0)).toggleScrambleImage();
                 return true;
@@ -142,7 +143,7 @@ public class CurrentSFragment extends Fragment implements CurrentSTimerFragment.
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(View view, final Bundle savedInstanceState) {
         mViewPager = (ViewPager) view.findViewById(R.id.fragment_current_s_viewpager);
         mViewPager.setAdapter(new CurrentSessionPagerAdapter(getChildFragmentManager(), getResources().getStringArray(R.array.current_s_page_titles)));
         mSlidingTabLayout = (SlidingTabLayout) view.findViewById(R.id.fragment_current_s_slidingtablayout);
@@ -156,7 +157,17 @@ public class CurrentSFragment extends Fragment implements CurrentSTimerFragment.
 
             @Override
             public void onPageSelected(int position) {
-
+                switch (position) {
+                    case 0:
+                        mScrambleToggleVisible = true;
+                        break;
+                    case 1:
+                        mScrambleToggleVisible = false;
+                        break;
+                    default:
+                        return;
+                }
+                getActivity().supportInvalidateOptionsMenu();
             }
 
             @Override
