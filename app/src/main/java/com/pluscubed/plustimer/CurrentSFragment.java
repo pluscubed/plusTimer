@@ -7,6 +7,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -83,7 +84,15 @@ public class CurrentSFragment extends Fragment implements CurrentSTimerFragment.
         if (menuPuzzleSpinner != null && menuDisplayScramble != null) {
             menuPuzzleSpinner.setEnabled(mMenuItemsEnable);
             menuDisplayScramble.setEnabled(mMenuItemsEnable);
-            menuDisplayScramble.setVisible(mScrambleToggleVisible);
+            DrawerOpenedBooleanListener listener;
+            try {
+                listener = (DrawerOpenedBooleanListener) getActivity();
+            } catch (ClassCastException e) {
+                // The activity doesn't implement the interface, throw exception
+                throw new ClassCastException(getActivity().toString()
+                        + " must implement DrawerOpenedBooleanListener");
+            }
+            menuDisplayScramble.setVisible(mScrambleToggleVisible&&!listener.isDrawerOpen());
         }
     }
 
@@ -127,6 +136,7 @@ public class CurrentSFragment extends Fragment implements CurrentSTimerFragment.
 
         PuzzleType.sCurrentPuzzleType = PuzzleType.THREE;
         PuzzleType.sCurrentPuzzleType.resetSession();
+        mScrambleToggleVisible=true;
     }
 
 
@@ -177,6 +187,10 @@ public class CurrentSFragment extends Fragment implements CurrentSTimerFragment.
                 }
             }
         });
+    }
+
+    public interface DrawerOpenedBooleanListener{
+        public boolean isDrawerOpen();
     }
 
     public static class CurrentSessionPagerAdapter extends FragmentPagerAdapter {

@@ -21,7 +21,7 @@ import android.widget.Toast;
 /**
  * Main Activity
  */
-public class MainActivity extends ActionBarActivity implements SolveDialog.SolveDialogListener, CurrentSBaseFragment.OnSolveItemClickListener {
+public class MainActivity extends ActionBarActivity implements SolveDialog.SolveDialogListener, CurrentSBaseFragment.OnSolveItemClickListener, CurrentSFragment.DrawerOpenedBooleanListener {
     public static final String DIALOG_FRAGMENT_TAG = "MODIFY_DIALOG";
     private static final String STATE_SELECTED_POSITION = "selected_navigation_drawer_position";
     private static final String PREF_USER_LEARNED_DRAWER = "navigation_drawer_learned";
@@ -65,9 +65,14 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
     }
 
     @Override
+    public boolean isDrawerOpen(){
+        return mDrawerLayout.isDrawerOpen(mDrawerListView);
+    }
+
+    @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         // If the nav drawer is open, hide action items related to the content view
-        boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerListView);
+        boolean drawerOpen =isDrawerOpen();
         if (menu.findItem(R.id.menu_current_s_puzzletype_spinner) != null)
             menu.findItem(R.id.menu_current_s_puzzletype_spinner).setVisible(!drawerOpen);
         if (menu.findItem(R.id.menu_current_s_toggle_scramble_image_action) != null) {
