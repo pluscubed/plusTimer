@@ -1,23 +1,24 @@
 Open Source Licenses
 
+Full text of AL2.0 is at the end of this file.
+
 CONTAINS SOURCE CODE - HorizontalVariableListView under /libraries/hlistviewlibrary/:
-https://github.com/sephiroth74/HorizontalVariableListView
+https://github.com/sephiroth74/HorizontalVariableListView/tree/development
     This library is distributed under Apache License 2.0 by Alessandro Crugnola
     http://www.apache.org/licenses/LICENSE-2.0
-    (Full text of the AL2.0 is at the end of this file)
 
     Modifications made to the library by me:
-        -Replace the EdgeEffect drawables with the KitKat ones (also added drawable-xxdpi)
-        -Changes in build.gradle (refer to comments there)
+        -Replace the EdgeEffect pngs with the KitKat ones (also added drawable-xxdpi)
+        -Changes in build.gradle and AndroidManifest.xml (refer to comments in files)
 
 
-JAR - androidsvg-1.2.1.jar:
+JAR - AndroidSVG:
 https://code.google.com/p/androidsvg/
     This library is distributed under Apache License 2.0 by Paul Lebeau
     http://www.apache.org/licenses/LICENSE-2.0
-    (Full text of the AL2.0 is at the end of this file)
 
-JAR - support-v4-19.1.0.jar and android-support-v7-appcompat.jar:
+AAR - support-v4, appcompat-v7 libraries:
+JAR - support-annotations:
 
     Notice for all the files in this folder.
     ------------------------------------------------------------
@@ -33,17 +34,17 @@ JAR - support-v4-19.1.0.jar and android-support-v7-appcompat.jar:
        See the License for the specific language governing permissions and
        limitations under the License.
 
-JAR - acra-4.5.0.jar:
+JAR - ACRA:
 http://acra.ch
     Application Crash Reporting for Android
     Copyright (c) 2013 Kevin Gaudin
     http://acra.ch
 
-    This product is licensed under the terms of the Apache Software License 2.0. (Full text of the AL2.0 is at the end of this file)
+    This product is licensed under the terms of the Apache Software License 2.0.
 
     This product includes software (package org.acra.jraf.android.util.activitylifecyclecallbackscompat) developed at JRAF, Copyright (C) 2013 Benoit 'BoD' Lubek (BoD@JRAF.org), ASL 2.0.
 
-AAR - tnoodle-android-0.8.7-1392889389.aar:
+AAR - tnoodle-android:
 https://github.com/cubing/tnoodle/tree/master/tnoodle-android/tnoodle-android
     Written permission from developers (thanks!)
 
