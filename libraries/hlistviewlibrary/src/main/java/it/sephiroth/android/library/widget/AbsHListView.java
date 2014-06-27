@@ -446,6 +446,7 @@ public abstract class AbsHListView extends AdapterView<ListAdapter> implements V
 	private int mLastScrollState = OnScrollListener.SCROLL_STATE_IDLE;
 
 	private int mTouchSlop;
+	private float mDensityScale;
 
 	private Runnable mClearScrollingCache;
 	protected Runnable mPositionScrollAfterLayout;
@@ -678,6 +679,8 @@ public abstract class AbsHListView extends AdapterView<ListAdapter> implements V
 		mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
 		mOverscrollDistance = configuration.getScaledOverscrollDistance();
 		mOverflingDistance = configuration.getScaledOverflingDistance();
+
+		mDensityScale = getContext().getResources().getDisplayMetrics().density;
 	}
 
 	@Override
@@ -909,23 +912,20 @@ public abstract class AbsHListView extends AdapterView<ListAdapter> implements V
 				if( mCheckedIdStates != null && mAdapter.hasStableIds() ) {
 					if( checked ) {
 						mCheckedIdStates.put( mAdapter.getItemId( position ), position );
-					}
-					else {
+					} else {
 						mCheckedIdStates.delete( mAdapter.getItemId( position ) );
 					}
 				}
 				if( checked ) {
 					mCheckedItemCount++;
-				}
-				else {
+				} else {
 					mCheckedItemCount--;
 				}
-
 				if( mChoiceActionMode != null ) {
-					( (MultiChoiceModeWrapper) mMultiChoiceModeCallback ).onItemCheckedStateChanged( (ActionMode) mChoiceActionMode, position, id, checked );
+					( (MultiChoiceModeWrapper) mMultiChoiceModeCallback ).onItemCheckedStateChanged( (ActionMode) mChoiceActionMode,
+					                                                                                 position, id, checked );
 					dispatchItemClick = false;
 				}
-
 				checkedStateChanged = true;
 			}
 			else if( mChoiceMode == ListView.CHOICE_MODE_SINGLE ) {
@@ -938,8 +938,7 @@ public abstract class AbsHListView extends AdapterView<ListAdapter> implements V
 						mCheckedIdStates.put( mAdapter.getItemId( position ), position );
 					}
 					mCheckedItemCount = 1;
-				}
-				else if( mCheckStates.size() == 0 || ! mCheckStates.valueAt( 0 ) ) {
+				} else if( mCheckStates.size() == 0 || ! mCheckStates.valueAt( 0 ) ) {
 					mCheckedItemCount = 0;
 				}
 				checkedStateChanged = true;
@@ -2478,9 +2477,12 @@ public abstract class AbsHListView extends AdapterView<ListAdapter> implements V
 		return new AdapterContextMenuInfo( view, position, id );
 	}
 
+	@TargetApi(19)
 	@Override
 	public void onCancelPendingInputEvents() {
-		super.onCancelPendingInputEvents();
+		if(ApiHelper.AT_LEAST_19) {
+			super.onCancelPendingInputEvents();
+		}
 		if( mPerformClick != null ) {
 			removeCallbacks( mPerformClick );
 		}
@@ -3756,14 +3758,14 @@ public abstract class AbsHListView extends AdapterView<ListAdapter> implements V
 			mScroller.setInterpolator( null );
 			mScroller.fling( initialX, 0, initialVelocity, 0, 0, Integer.MAX_VALUE, 0, Integer.MAX_VALUE );
 			mTouchMode = TOUCH_MODE_FLING;
-			mViewHelper.postOnAnimation( this );
+			ViewCompat.postOnAnimation(AbsHListView.this, this);
 		}
 
 		void startSpringback() {
 			if( mScroller.springBack( getScrollX(), 0, 0, 0, 0, 0 ) ) {
 				mTouchMode = TOUCH_MODE_OVERFLING;
 				invalidate();
-				mViewHelper.postOnAnimation( this );
+				ViewCompat.postOnAnimation(AbsHListView.this, this);
 			}
 			else {
 				mTouchMode = TOUCH_MODE_REST;
@@ -3776,7 +3778,7 @@ public abstract class AbsHListView extends AdapterView<ListAdapter> implements V
 			mScroller.fling( getScrollX(), 0, initialVelocity, 0, Integer.MIN_VALUE, Integer.MAX_VALUE, 0, 0, getWidth(), 0 );
 			mTouchMode = TOUCH_MODE_OVERFLING;
 			invalidate();
-			mViewHelper.postOnAnimation( this );
+			ViewCompat.postOnAnimation(AbsHListView.this, this);
 		}
 
 		void edgeReached( int delta ) {
@@ -3799,7 +3801,7 @@ public abstract class AbsHListView extends AdapterView<ListAdapter> implements V
 				}
 			}
 			invalidate();
-			mViewHelper.postOnAnimation( this );
+			ViewCompat.postOnAnimation(AbsHListView.this, this);
 		}
 
 		void startScroll( int distance, int duration, boolean linear ) {
@@ -3808,7 +3810,7 @@ public abstract class AbsHListView extends AdapterView<ListAdapter> implements V
 			mScroller.setInterpolator( linear ? sLinearInterpolator : null );
 			mScroller.startScroll( initialX, 0, distance, 0, duration );
 			mTouchMode = TOUCH_MODE_FLING;
-			mViewHelper.postOnAnimation( this );
+			ViewCompat.postOnAnimation(AbsHListView.this, this);
 		}
 
 		void endFling() {
@@ -3906,7 +3908,7 @@ public abstract class AbsHListView extends AdapterView<ListAdapter> implements V
 					if( more && ! atEnd ) {
 						if( atEdge ) invalidate();
 						mLastFlingX = x;
-						mViewHelper.postOnAnimation( this );
+						ViewCompat.postOnAnimation(AbsHListView.this, this);
 					}
 					else {
 						endFling();
@@ -3938,7 +3940,7 @@ public abstract class AbsHListView extends AdapterView<ListAdapter> implements V
 						}
 						else {
 							invalidate();
-							mViewHelper.postOnAnimation( this );
+							ViewCompat.postOnAnimation(AbsHListView.this, this);
 						}
 					}
 					else {
@@ -4022,7 +4024,7 @@ public abstract class AbsHListView extends AdapterView<ListAdapter> implements V
 			mBoundPos = INVALID_POSITION;
 			mLastSeenPos = INVALID_POSITION;
 
-			mViewHelper.postOnAnimation( this );
+			ViewCompat.postOnAnimation(AbsHListView.this, this);
 		}
 
 		void start( final int position, final int boundPosition ) {
@@ -4107,7 +4109,7 @@ public abstract class AbsHListView extends AdapterView<ListAdapter> implements V
 			mBoundPos = boundPosition;
 			mLastSeenPos = INVALID_POSITION;
 
-			mViewHelper.postOnAnimation( this );
+			ViewCompat.postOnAnimation(AbsHListView.this, this);
 		}
 
 		void startWithOffset( int position, int offset ) {
@@ -4166,7 +4168,7 @@ public abstract class AbsHListView extends AdapterView<ListAdapter> implements V
 			mScrollDuration = screenTravelCount < 1 ? duration : (int) ( duration / screenTravelCount );
 			mLastSeenPos = INVALID_POSITION;
 
-			mViewHelper.postOnAnimation( this );
+			ViewCompat.postOnAnimation(AbsHListView.this, this);
 		}
 
 		/**
@@ -4244,7 +4246,7 @@ public abstract class AbsHListView extends AdapterView<ListAdapter> implements V
 
 					if( lastPos == mLastSeenPos ) {
 						// No new views, let things keep going.
-						mViewHelper.postOnAnimation( this );
+						ViewCompat.postOnAnimation(AbsHListView.this, this);
 						return;
 					}
 
@@ -4259,7 +4261,7 @@ public abstract class AbsHListView extends AdapterView<ListAdapter> implements V
 
 					mLastSeenPos = lastPos;
 					if( lastPos < mTargetPos ) {
-						mViewHelper.postOnAnimation( this );
+						ViewCompat.postOnAnimation(AbsHListView.this, this);
 					}
 					break;
 				}
@@ -4275,7 +4277,7 @@ public abstract class AbsHListView extends AdapterView<ListAdapter> implements V
 
 					if( nextPos == mLastSeenPos ) {
 						// No new views, let things keep going.
-						mViewHelper.postOnAnimation( this );
+						ViewCompat.postOnAnimation(AbsHListView.this, this);
 						return;
 					}
 
@@ -4288,7 +4290,7 @@ public abstract class AbsHListView extends AdapterView<ListAdapter> implements V
 
 						mLastSeenPos = nextPos;
 
-						mViewHelper.postOnAnimation( this );
+						ViewCompat.postOnAnimation(AbsHListView.this, this);
 					}
 					else {
 						if( nextViewLeft > extraScroll ) {
@@ -4301,7 +4303,7 @@ public abstract class AbsHListView extends AdapterView<ListAdapter> implements V
 				case MOVE_UP_POS: {
 					if( firstPos == mLastSeenPos ) {
 						// No new views, let things keep going.
-						mViewHelper.postOnAnimation( this );
+						ViewCompat.postOnAnimation(AbsHListView.this, this);
 						return;
 					}
 
@@ -4317,7 +4319,7 @@ public abstract class AbsHListView extends AdapterView<ListAdapter> implements V
 					mLastSeenPos = firstPos;
 
 					if( firstPos > mTargetPos ) {
-						mViewHelper.postOnAnimation( this );
+						ViewCompat.postOnAnimation(AbsHListView.this, this);
 					}
 					break;
 				}
@@ -4331,7 +4333,7 @@ public abstract class AbsHListView extends AdapterView<ListAdapter> implements V
 
 					if( lastPos == mLastSeenPos ) {
 						// No new views, let things keep going.
-						mViewHelper.postOnAnimation( this );
+						ViewCompat.postOnAnimation(AbsHListView.this, this);
 						return;
 					}
 
@@ -4343,7 +4345,7 @@ public abstract class AbsHListView extends AdapterView<ListAdapter> implements V
 					mLastSeenPos = lastPos;
 					if( lastPos > mBoundPos ) {
 						smoothScrollBy( - ( lastViewPixelsShowing - extraScroll ), mScrollDuration, true );
-						mViewHelper.postOnAnimation( this );
+						ViewCompat.postOnAnimation(AbsHListView.this, this);
 					}
 					else {
 						final int right = listWidth - extraScroll;
@@ -4358,7 +4360,7 @@ public abstract class AbsHListView extends AdapterView<ListAdapter> implements V
 				case MOVE_OFFSET: {
 					if( mLastSeenPos == firstPos ) {
 						// No new views, let things keep going.
-						mViewHelper.postOnAnimation( this );
+						ViewCompat.postOnAnimation(AbsHListView.this, this);
 						return;
 					}
 
@@ -4384,13 +4386,13 @@ public abstract class AbsHListView extends AdapterView<ListAdapter> implements V
 						final int distance = (int) ( - getWidth() * modifier );
 						final int duration = (int) ( mScrollDuration * modifier );
 						smoothScrollBy( distance, duration, true );
-						mViewHelper.postOnAnimation( this );
+						ViewCompat.postOnAnimation(AbsHListView.this, this);
 					}
 					else if( position > lastPos ) {
 						final int distance = (int) ( getWidth() * modifier );
 						final int duration = (int) ( mScrollDuration * modifier );
 						smoothScrollBy( distance, duration, true );
-						mViewHelper.postOnAnimation( this );
+						ViewCompat.postOnAnimation(AbsHListView.this, this);
 					}
 					else {
 						// On-screen, just scroll.

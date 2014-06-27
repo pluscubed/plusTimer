@@ -1,4 +1,4 @@
-apply plugin: 'android'
+apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 19
@@ -33,11 +33,11 @@ android {
 
 dependencies {
     compile project(':libraries:hlistviewlibrary')
-    compile 'ch.acra:acra:+'
-    compile 'com.android.support:support-v4:+'
-    compile 'com.android.support:appcompat-v7:+'
-    compile 'com.github.cubing:tnoodle-android:+@aar'
-    compile 'com.caverock:androidsvg:+'
-    compile 'com.android.support:support-annotations:+'
+    compile 'ch.acra:acra:4.5.+'
+    compile 'com.android.support:support-v4:19.1.+'
+    compile 'com.android.support:appcompat-v7:19.1.+'
+    compile 'com.github.cubing:tnoodle-android:0.8.+@aar'
+    compile 'com.caverock:androidsvg:1.2.+'
+    compile 'com.android.support:support-annotations:19.1.+'
     compile fileTree(dir: 'libs', include: ['*.jar'])
 }

@@ -1,0 +1,3 @@
+<!-- Modified: Remove unnecessary stuff that's already declared in build.gradle -->
+
+<manifest package="it.sephiroth.android.library"/>

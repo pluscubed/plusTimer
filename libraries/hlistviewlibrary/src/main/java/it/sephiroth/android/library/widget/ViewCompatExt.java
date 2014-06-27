@@ -1,6 +1,8 @@
 package it.sephiroth.android.library.widget;
 
 import android.annotation.TargetApi;
+import android.support.v4.view.ViewCompat;
+import android.util.Log;
 import android.view.View;
 
 import it.sephiroth.android.library.widget.v14.ViewHelper14;
@@ -19,8 +21,6 @@ public class ViewCompatExt {
 		protected ViewHelper( View view ) {
 			this.view = view;
 		}
-
-		public abstract void postOnAnimation( Runnable action );
 
 		public abstract void setScrollX( int value );
 	}
