@@ -3,6 +3,8 @@ package com.pluscubed.plustimer;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -23,10 +25,23 @@ public class CurrentSDetailsListFragment extends CurrentSBaseFragment {
     private Button mReset;
     private ListView mListView;
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_current_s_detailslist, menu);
+
+        setUpPuzzleSpinner(menu);
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
 
     public void updateQuickStats() {
-        mQuickStats.setText(CurrentSTimerFragment.buildQuickStatsWithAveragesOf(getAttachedActivity(), 5, 12, 50, 100, 1000));
-        if (!CurrentSTimerFragment.buildQuickStatsWithAveragesOf(getAttachedActivity(), 5, 12, 50, 100, 1000).equals("")) {
+        mQuickStats.setText(CurrentSTimerFragment.buildStatsWithAveragesOf(getAttachedActivity(), 5, 12, 50, 100, 1000));
+        if (!CurrentSTimerFragment.buildStatsWithAveragesOf(getAttachedActivity(), 5, 12, 50, 100, 1000).equals("")) {
             mQuickStats.append("\n");
         }
         mQuickStats.append(getString(R.string.solves) + PuzzleType.sCurrentPuzzleType.getSession().getNumberOfSolves());

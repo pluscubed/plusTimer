@@ -18,14 +18,17 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
+
 /**
  * Main Activity
  */
-public class MainActivity extends ActionBarActivity implements SolveDialog.SolveDialogListener, CurrentSBaseFragment.OnSolveItemClickListener, CurrentSFragment.DrawerOpenedBooleanListener {
+public class MainActivity extends ActionBarActivity implements SolveDialog.SolveDialogListener, CurrentSBaseFragment.OnSolveItemClickListener, CurrentSTimerFragment.GetRetainedFragmentCallback {
     public static final String DIALOG_FRAGMENT_TAG = "MODIFY_DIALOG";
     private static final String STATE_SELECTED_POSITION = "selected_navigation_drawer_position";
     private static final String PREF_USER_LEARNED_DRAWER = "navigation_drawer_learned";
     private static final String CURRENT_S_TAG = "CURRENT_S_FRAGMENT";
+    private static final String CURRENT_S_TIMER_RETAINED_TAG = "CURRENT_S_TIMER_RETAINED";
     private boolean mUserLearnedDrawer;
     private boolean mFromSavedInstanceState;
     private String[] mFragmentTitles;
@@ -54,7 +57,9 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
                 PuzzleType.sCurrentPuzzleType.getSession().deleteSolve(position);
                 break;
         }
-        ((CurrentSFragment) getSupportFragmentManager().findFragmentByTag(CURRENT_S_TAG)).updateSessionsToCurrent();
+        if (getSupportFragmentManager().findFragmentByTag(CURRENT_S_TAG) != null) {
+            ((CurrentSFragment) getSupportFragmentManager().findFragmentByTag(CURRENT_S_TAG)).updateSessionsToCurrent();
+        }
     }
 
     @Override
@@ -64,15 +69,11 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
         getSupportActionBar().setTitle(mCurrentFragmentTitle);
     }
 
-    @Override
-    public boolean isDrawerOpen(){
-        return mDrawerLayout.isDrawerOpen(mDrawerListView);
-    }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         // If the nav drawer is open, hide action items related to the content view
-        boolean drawerOpen =isDrawerOpen();
+        boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerListView);
         if (menu.findItem(R.id.menu_current_s_puzzletype_spinner) != null)
             menu.findItem(R.id.menu_current_s_puzzletype_spinner).setVisible(!drawerOpen);
         if (menu.findItem(R.id.menu_current_s_toggle_scramble_image_action) != null) {
@@ -92,6 +93,19 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if (!BuildConfig.DEBUG)
+            Crashlytics.start(this);
+
+        FragmentManager fm = getSupportFragmentManager();
+        Fragment currentSRetainedFragment = fm.findFragmentByTag(CURRENT_S_TIMER_RETAINED_TAG);
+
+        // If the Fragment is non-null, then it is currently being
+        // retained across a configuration change.
+        if (currentSRetainedFragment == null) {
+            currentSRetainedFragment = new CurrentSTimerRetainedFragment();
+            fm.beginTransaction().add(currentSRetainedFragment, CURRENT_S_TIMER_RETAINED_TAG).commit();
+        }
 
         if (savedInstanceState != null) {
             mCurrentSelectedPosition = savedInstanceState.getInt(STATE_SELECTED_POSITION);
@@ -221,5 +235,10 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
             SolveDialog d = SolveDialog.newInstance(position);
             d.show(getSupportFragmentManager(), DIALOG_FRAGMENT_TAG);
         }
+    }
+
+    @Override
+    public Fragment getCurrentSTimerRetainedFragment() {
+        return getSupportFragmentManager().findFragmentByTag(CURRENT_S_TIMER_RETAINED_TAG);
     }
 }

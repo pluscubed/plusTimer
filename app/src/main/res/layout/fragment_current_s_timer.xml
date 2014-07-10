@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".TimerActivity">
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:context=".TimerActivity">
 
     <TextView
         android:id="@id/fragment_current_s_timer_time_textview"
@@ -12,7 +12,7 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:text="@string/ready"
-        android:textSize="50sp" />
+        android:textSize="50sp"/>
 
     <TextView
         android:id="@id/fragment_current_s_timer_scramble_textview"
@@ -22,7 +22,7 @@
         android:gravity="center_horizontal"
         android:padding="6dp"
         android:text="@string/scrambling"
-        android:textSize="18sp" />
+        android:textSize="18sp"/>
 
 
     <TextView
@@ -34,7 +34,7 @@
         android:paddingBottom="5dp"
         android:paddingLeft="7dp"
         android:paddingTop="5dp"
-        android:textSize="16sp" />
+        android:textSize="16sp"/>
 
 
     <TextView
@@ -47,7 +47,7 @@
         android:paddingLeft="5dp"
         android:paddingRight="7dp"
         android:text="@string/solves"
-        android:textSize="16sp" />
+        android:textSize="16sp"/>
 
     <LinearLayout
         android:id="@id/fragment_current_s_timer_bottom_linearlayout"
@@ -64,7 +64,7 @@
             android:layout_weight="1"
             android:background="#ffb0b0b0"
             android:overScrollMode="always"
-            app:hlv_transcriptMode="normal" />
+            app:hlv_transcriptMode="normal"/>
         <!--
                 <Button
                     android:layout_width="wrap_content"
@@ -84,7 +84,7 @@
         android:layout_height="match_parent"
         android:layout_margin="8dp"
         android:contentDescription="@string/scrambleimage"
-        android:visibility="gone" />
+        android:visibility="gone"/>
 
 
 </RelativeLayout>

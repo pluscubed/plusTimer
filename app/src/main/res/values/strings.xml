@@ -14,7 +14,6 @@
     <string name="penalty">Penalty:</string>
     <string name="reset">Reset Session</string>
     <string name="scrambleimage">Scramble Image</string>
-    <string name="acra_crash_toast_text">plusTimer has crashed. A bug report has been sent to the developer to help fix this problem.</string>
 
     <string-array name="penalty_array">
         <item>None</item>

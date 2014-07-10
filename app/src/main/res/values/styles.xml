@@ -15,6 +15,4 @@
         <item name="hlv_footerDividersEnabled">false</item>
     </style>
 
-    <style name="ACRADialogTheme" parent="@android:style/Theme.Dialog" />
-
 </resources>

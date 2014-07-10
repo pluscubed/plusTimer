@@ -1,1 +1,4 @@
 /build
+
+#Crashlytics api secret
+crashlytics.properties
