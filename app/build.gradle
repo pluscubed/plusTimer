@@ -41,9 +41,19 @@ android {
         debug {
             applicationIdSuffix '.debug'
             versionNameSuffix '-DEBUG'
+            buildConfigField "boolean", "USE_CRASHLYTICS", "false"
+            ext.enableCrashlytics = false
         }
     }
     productFlavors {
+        crashlytics {
+            buildConfigField "boolean", "USE_CRASHLYTICS", "true"
+        }
+        noCrashlytics {
+            versionName = android.defaultConfig.versionName + "-NOCRASHLYTICS"
+            buildConfigField "boolean", "USE_CRASHLYTICS", "false"
+            ext.enableCrashlytics = false
+        }
     }
 }
 

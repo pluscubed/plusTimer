@@ -94,7 +94,7 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (!BuildConfig.DEBUG)
+        if (BuildConfig.USE_CRASHLYTICS)
             Crashlytics.start(this);
 
         FragmentManager fm = getSupportFragmentManager();
