@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical"
-              tools:context="com.pluscubed.plustimer.OldTimerActivity">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.pluscubed.plustimer.OldTimerActivity">
 
     <TextView
         android:id="@id/fragment_current_s_details_stats_textview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#ffe0e0e0"
-        android:padding="4dp"/>
+        android:padding="4dp" />
 
     <ListView
         android:id="@id/android:list"
@@ -20,19 +20,19 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:footerDividersEnabled="true"
-        android:transcriptMode="normal"/>
+        android:transcriptMode="normal" />
 
     <Button
         android:id="@id/fragment_current_s_details_reset_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/reset"/>
+        android:text="@string/reset" />
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/submit"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
 
 </LinearLayout>

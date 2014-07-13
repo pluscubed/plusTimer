@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <android.support.v4.widget.DrawerLayout
-    android:id="@id/activity_main_drawerlayout"
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@id/activity_main_drawerlayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <!-- The main content view -->
     <FrameLayout
         android:id="@id/activity_main_content_framelayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
     <!-- The navigation drawer -->
     <ListView
         android:id="@id/activity_main_drawer_listview"
@@ -19,6 +19,6 @@
         android:background="#fffafafa"
         android:choiceMode="singleChoice"
         android:divider="@android:color/transparent"
-        android:dividerHeight="0dp"/>
+        android:dividerHeight="0dp" />
 
 </android.support.v4.widget.DrawerLayout>

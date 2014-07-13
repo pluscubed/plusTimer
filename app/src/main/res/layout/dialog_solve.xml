@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:fadeScrollbars="false">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fadeScrollbars="false">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -17,14 +17,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            android:gravity="center_horizontal"/>
+            android:gravity="center_horizontal" />
 
         <TextView
             android:id="@id/dialog_solve_scramble_textview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            android:gravity="center_horizontal"/>
+            android:gravity="center_horizontal" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -36,13 +36,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:gravity="center_vertical"
-                android:text="@string/penalty"/>
+                android:text="@string/penalty" />
 
             <Spinner
                 android:id="@id/dialog_solve_modify_penalty_spinner"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"/>
+                android:layout_weight="1" />
         </LinearLayout>
 
 
