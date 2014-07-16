@@ -8,7 +8,7 @@ import android.support.v4.app.Fragment;
 import net.gnehzr.tnoodle.scrambles.InvalidScrambleException;
 
 /**
- * Created by dc on 7/6/2014.
+ * Retained fragment alongside CurrentSTimerFragment
  */
 public class CurrentSTimerRetainedFragment extends Fragment implements CurrentSTimerFragment.RetainedFragmentCallback {
     Handler mScramblerThreadHandler;

@@ -5,10 +5,10 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:orientation="vertical"
-              tools:context="com.pluscubed.plustimer.OldTimerActivity">
+              tools:context=".MainActivity">
 
     <TextView
-        android:id="@id/fragment_current_s_details_stats_textview"
+        android:id="@id/fragment_session_list_stats_textview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#ffe0e0e0"
@@ -22,17 +22,28 @@
         android:footerDividersEnabled="true"
         android:transcriptMode="normal"/>
 
-    <Button
-        android:id="@id/fragment_current_s_details_reset_button"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/reset"/>
+        android:orientation="horizontal">
 
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/submit"
-        android:visibility="gone"/>
+        <Button
+            android:id="@id/fragment_current_s_details_reset_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/reset"
+            android:visibility="gone"/>
+
+        <Button
+            android:id="@id/fragment_current_s_details_submit_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/submit"
+            android:visibility="gone"/>
+
+    </LinearLayout>
 
 
 </LinearLayout>

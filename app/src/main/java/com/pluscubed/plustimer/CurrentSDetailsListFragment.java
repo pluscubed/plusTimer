@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 
@@ -22,7 +23,6 @@ import java.util.ArrayList;
 public class CurrentSDetailsListFragment extends CurrentSBaseFragment {
 
     private TextView mQuickStats;
-    private Button mReset;
     private ListView mListView;
 
     @Override
@@ -44,21 +44,35 @@ public class CurrentSDetailsListFragment extends CurrentSBaseFragment {
         if (!CurrentSTimerFragment.buildStatsWithAveragesOf(getAttachedActivity(), 5, 12, 50, 100, 1000).equals("")) {
             mQuickStats.append("\n");
         }
-        mQuickStats.append(getString(R.string.solves) + PuzzleType.sCurrentPuzzleType.getSession().getNumberOfSolves());
+        mQuickStats.append(getString(R.string.solves) + PuzzleType.sCurrentPuzzleType.getCurrentSession().getNumberOfSolves());
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_current_s_details, container, false);
-        mQuickStats = (TextView) v.findViewById(R.id.fragment_current_s_details_stats_textview);
-        mReset = (Button) v.findViewById(R.id.fragment_current_s_details_reset_button);
-        mReset.setOnClickListener(new View.OnClickListener() {
+        View v = inflater.inflate(R.layout.fragment_session_list, container, false);
+        mQuickStats = (TextView) v.findViewById(R.id.fragment_session_list_stats_textview);
+        Button reset = (Button) v.findViewById(R.id.fragment_current_s_details_reset_button);
+        reset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                PuzzleType.sCurrentPuzzleType.resetSession();
+                PuzzleType.sCurrentPuzzleType.resetCurrentSession();
                 onSessionSolvesChanged();
             }
         });
+        reset.setVisibility(View.VISIBLE);
+        Button submit = (Button) v.findViewById(R.id.fragment_current_s_details_submit_button);
+        submit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    PuzzleType.sCurrentPuzzleType.submitCurrentSession(getAttachedActivity());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                onSessionSolvesChanged();
+            }
+        });
+        submit.setVisibility(View.VISIBLE);
         mListView = (ListView) v.findViewById(android.R.id.list);
         mListView.setAdapter(new SolveListAdapter(PuzzleType.sCurrentPuzzleType));
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -87,20 +101,20 @@ public class CurrentSDetailsListFragment extends CurrentSBaseFragment {
         private ArrayList<Solve> mBestAndWorstSolves;
 
         public SolveListAdapter(PuzzleType currentPuzzleType) {
-            super(getAttachedActivity(), 0, currentPuzzleType.getSession().getSolves());
+            super(getAttachedActivity(), 0, currentPuzzleType.getCurrentSession().getSolves());
             mBestAndWorstSolves = new ArrayList<Solve>();
-            mBestAndWorstSolves.add(currentPuzzleType.getSession().getBestSolve(currentPuzzleType.getSession().getSolves()));
-            mBestAndWorstSolves.add(currentPuzzleType.getSession().getWorstSolve(currentPuzzleType.getSession().getSolves()));
+            mBestAndWorstSolves.add(currentPuzzleType.getCurrentSession().getBestSolve(currentPuzzleType.getCurrentSession().getSolves()));
+            mBestAndWorstSolves.add(currentPuzzleType.getCurrentSession().getWorstSolve(currentPuzzleType.getCurrentSession().getSolves()));
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
-                convertView = getAttachedActivity().getLayoutInflater().inflate(R.layout.list_item_current_s_details_solve, parent, false);
+                convertView = getAttachedActivity().getLayoutInflater().inflate(R.layout.list_item_session_list_solve, parent, false);
             }
             Solve s = getItem(position);
-            TextView time = (TextView) convertView.findViewById(R.id.list_item_current_s_details_solve_title_textview);
-            TextView desc = (TextView) convertView.findViewById(R.id.list_item_current_s_details_solve_desc_textview);
+            TextView time = (TextView) convertView.findViewById(R.id.list_item_session_list_solve_title_textview);
+            TextView desc = (TextView) convertView.findViewById(R.id.list_item_session_list_solve_desc_textview);
 
 
             time.setText("");
@@ -123,16 +137,16 @@ public class CurrentSDetailsListFragment extends CurrentSBaseFragment {
         public void updateSolvesList(PuzzleType puzzleType) {
             clear();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
-                addAll(puzzleType.getSession().getSolves());
+                addAll(puzzleType.getCurrentSession().getSolves());
             else {
-                for (Solve i : puzzleType.getSession().getSolves()) {
+                for (Solve i : puzzleType.getCurrentSession().getSolves()) {
                     add(i);
                 }
             }
 
             mBestAndWorstSolves = new ArrayList<Solve>();
-            mBestAndWorstSolves.add(puzzleType.getSession().getBestSolve(puzzleType.getSession().getSolves()));
-            mBestAndWorstSolves.add(puzzleType.getSession().getWorstSolve(puzzleType.getSession().getSolves()));
+            mBestAndWorstSolves.add(puzzleType.getCurrentSession().getBestSolve(puzzleType.getCurrentSession().getSolves()));
+            mBestAndWorstSolves.add(puzzleType.getCurrentSession().getWorstSolve(puzzleType.getCurrentSession().getSolves()));
             notifyDataSetChanged();
         }
 

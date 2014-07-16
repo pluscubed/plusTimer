@@ -39,7 +39,7 @@ android {
             signingConfig signingConfigs.release
         }
         debug {
-            runProguard true
+            runProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
             applicationIdSuffix '.debug'
             versionNameSuffix '-DEBUG'
@@ -68,4 +68,5 @@ dependencies {
     compile 'com.android.support:support-annotations:20.+'
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.crashlytics.android:crashlytics:1.+'
+    compile 'com.google.code.gson:gson:2.+'
 }

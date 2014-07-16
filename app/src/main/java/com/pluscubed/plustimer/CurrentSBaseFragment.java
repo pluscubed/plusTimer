@@ -13,7 +13,7 @@ import android.widget.Spinner;
 import java.util.ArrayList;
 
 /**
- * Created by DC on 6/18/2014.
+ * Abstract class
  */
 public abstract class CurrentSBaseFragment extends Fragment {
 

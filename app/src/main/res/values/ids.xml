@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--CurrentSTimerFragment-->
     <item name="fragment_current_s_timer_scramble_textview" type="id"/>
     <item name="fragment_current_s_timer_time_textview" type="id"/>
     <item name="menu_current_s_puzzletype_spinner" type="id"/>
@@ -14,21 +15,31 @@
 
     <item name="fragment_current_s_timer_scramble_imageview" type="id"/>
 
+    <!--SolveDialog-->
     <item name="dialog_solve_timestamp_textview" type="id"/>
     <item name="dialog_solve_scramble_textview" type="id"/>
     <item name="dialog_solve_modify_penalty_spinner" type="id"/>
+
+    <!--ActionBar-->
     <item name="menu_current_s_toggle_scramble_image_action" type="id"/>
 
-    <item name="list_item_current_s_details_solve_title_textview" type="id"/>
-    <item name="list_item_current_s_details_solve_desc_textview" type="id"/>
-    <item name="fragment_current_s_details_stats_textview" type="id"/>
+    <!--CurrentSDetailsListFragment-->
+    <item name="list_item_session_list_solve_title_textview" type="id"/>
+    <item name="list_item_session_list_solve_desc_textview" type="id"/>
+    <item name="fragment_session_list_stats_textview" type="id"/>
     <item name="fragment_current_s_details_reset_button" type="id"/>
+    <item name="fragment_current_s_details_submit_button" type="id"/>
 
+    <!--MainActivity-->
     <item name="activity_main_drawerlayout" type="id"/>
     <item name="activity_main_content_framelayout" type="id"/>
     <item name="activity_main_drawer_listview" type="id"/>
 
+    <!--CurrentSFragment-->
     <item name="fragment_current_s_slidingtablayout" type="id"/>
     <item name="fragment_current_s_viewpager" type="id"/>
+
+    <!--HistorySessionActivity-->
+    <item name="activity_history_session_framelayout" type="id"/>
 
 </resources>

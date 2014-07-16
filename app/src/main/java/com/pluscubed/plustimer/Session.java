@@ -1,5 +1,7 @@
 package com.pluscubed.plustimer;
 
+import android.content.Context;
+
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -34,7 +36,7 @@ public class Session {
         return timeTwo;
     }
 
-    public Solve getLatestSolve() {
+    public Solve getLastSolve() {
         return mSolves.get(mSolves.size() - 1);
     }
 
@@ -119,6 +121,10 @@ public class Session {
             return Solve.timeStringFromLong(sum / mSolves.size());
         else
             return "DNF";
+    }
+
+    public String getTimestampStringOfLastSolve(Context context) {
+        return Solve.timeDateStringFromTimestamp(context, getLastSolve().getTimestamp());
     }
 
     public void deleteSolve(int position) {

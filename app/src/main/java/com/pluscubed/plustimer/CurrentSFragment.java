@@ -37,10 +37,11 @@ public class CurrentSFragment extends Fragment implements CurrentSBaseFragment.G
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
-        Spinner menuPuzzleSpinner = (Spinner) MenuItemCompat.getActionView(menu.findItem(R.id.menu_current_s_puzzletype_spinner));
+        MenuItem menuPuzzleMenuItem = menu.findItem(R.id.menu_current_s_puzzletype_spinner);
         MenuItem menuDisplayScramble = menu.findItem(R.id.menu_current_s_toggle_scramble_image_action);
 
-        if (menuPuzzleSpinner != null) {
+        if (menuPuzzleMenuItem != null) {
+            Spinner menuPuzzleSpinner = (Spinner) MenuItemCompat.getActionView(menuPuzzleMenuItem);
             menuPuzzleSpinner.setEnabled(mMenuItemsEnable);
         }
         if (menuDisplayScramble != null) {
@@ -76,7 +77,7 @@ public class CurrentSFragment extends Fragment implements CurrentSBaseFragment.G
 
         if (savedInstanceState == null) {
             PuzzleType.sCurrentPuzzleType = PuzzleType.THREE;
-            PuzzleType.sCurrentPuzzleType.resetSession();
+            PuzzleType.sCurrentPuzzleType.resetCurrentSession();
         } else {
             mMenuItemsEnable = savedInstanceState.getBoolean(STATE_MENU_ITEMS_ENABLE_BOOLEAN);
         }

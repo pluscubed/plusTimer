@@ -63,7 +63,7 @@ public class SolveDialog extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
         mPosition = getArguments().getInt(BUNDLEKEY_DIALOG_INIT_SOLVE_INDEX);
-        Solve solve = PuzzleType.sCurrentPuzzleType.getSession().getSolveByPosition(mPosition);
+        Solve solve = PuzzleType.sCurrentPuzzleType.getCurrentSession().getSolveByPosition(mPosition);
         String timeString = solve.getDescriptiveTimeString();
         String scramble = solve.getScrambleAndSvg().scramble;
         long timestamp = solve.getTimestamp();

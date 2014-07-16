@@ -28,6 +28,7 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
     private static final String STATE_SELECTED_POSITION = "selected_navigation_drawer_position";
     private static final String PREF_USER_LEARNED_DRAWER = "navigation_drawer_learned";
     private static final String CURRENT_S_TAG = "CURRENT_S_FRAGMENT";
+    private static final String HISTORY_TAG = "HISTORY_FRAGMENT";
     private static final String CURRENT_S_TIMER_RETAINED_TAG = "CURRENT_S_TIMER_RETAINED";
     private boolean mUserLearnedDrawer;
     private boolean mFromSavedInstanceState;
@@ -42,7 +43,7 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
 
     @Override
     public void onDialogDismissed(int position, int penalty) {
-        Solve solve = PuzzleType.sCurrentPuzzleType.getSession().getSolveByPosition(position);
+        Solve solve = PuzzleType.sCurrentPuzzleType.getCurrentSession().getSolveByPosition(position);
         switch (penalty) {
             case SolveDialog.DIALOG_PENALTY_NONE:
                 solve.setPenalty(Solve.Penalty.NONE);
@@ -54,7 +55,7 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
                 solve.setPenalty(Solve.Penalty.DNF);
                 break;
             case SolveDialog.DIALOG_RESULT_DELETE:
-                PuzzleType.sCurrentPuzzleType.getSession().deleteSolve(position);
+                PuzzleType.sCurrentPuzzleType.getCurrentSession().deleteSolve(position);
                 break;
         }
         if (getSupportFragmentManager().findFragmentByTag(CURRENT_S_TAG) != null) {
@@ -203,6 +204,10 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
             case 0:
                 tag = CURRENT_S_TAG;
                 fragmentClass = CurrentSFragment.class;
+                break;
+            case 1:
+                tag = HISTORY_TAG;
+                fragmentClass = HistoryFragment.class;
                 break;
             default:
                 Toast.makeText(getApplicationContext(), "Work in Progress", Toast.LENGTH_SHORT).show();
