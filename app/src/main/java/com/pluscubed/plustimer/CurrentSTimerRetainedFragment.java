@@ -18,11 +18,11 @@ public class CurrentSTimerRetainedFragment extends Fragment implements CurrentST
 
     private boolean mScrambling;
 
-    private CurrentSTimerFragment mCurrentSTimerFragment;
+    private CurrentSTimerFragmentCallback mCallback;
 
     @Override
-    public void setTimerFragmentCallback(CurrentSTimerFragment fragment) {
-        mCurrentSTimerFragment = fragment;
+    public void setTimerFragmentCallback(CurrentSTimerFragmentCallback fragment) {
+        mCallback = fragment;
     }
 
     @Override
@@ -51,12 +51,12 @@ public class CurrentSTimerRetainedFragment extends Fragment implements CurrentST
             public void run() {
                 mCurrentScrambleAndSvg = mNextScrambleAndSvg;
                 mNextScrambleAndSvg = null;
-                if (mCurrentSTimerFragment != null) {
-                    mCurrentSTimerFragment.getUiHandler().post(new Runnable() {
+                if (mCallback != null) {
+                    mCallback.getUiHandler().post(new Runnable() {
                         @Override
                         public void run() {
-                            mCurrentSTimerFragment.updateScrambleTextAndImageToCurrent();
-                            mCurrentSTimerFragment.enableOptionsMenu(true);
+                            mCallback.updateScrambleTextAndImageToCurrent();
+                            mCallback.enableOptionsMenu(true);
                         }
                     });
                 }

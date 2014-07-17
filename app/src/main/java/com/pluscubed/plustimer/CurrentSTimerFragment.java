@@ -33,7 +33,7 @@ import it.sephiroth.android.library.widget.HListView;
  * TimerFragment
  */
 
-public class CurrentSTimerFragment extends CurrentSBaseFragment {
+public class CurrentSTimerFragment extends CurrentSBaseFragment implements CurrentSTimerFragmentCallback {
     public static final String TAG = "TIMER";
 
     private static final String STATE_IMAGE_DISPLAYED = "scramble_image_displayed_boolean";
@@ -106,7 +106,8 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment {
     }
 
     //Set scramble text and scramble image to current ones
-    void updateScrambleTextAndImageToCurrent() {
+    @Override
+    public void updateScrambleTextAndImageToCurrent() {
         SVG svg = null;
         try {
             svg = SVG.getFromString(mRetainedFragment.getCurrentScrambleAndSvg().svgLite.toString());
@@ -228,6 +229,7 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment {
 
     }
 
+    @Override
     public void enableOptionsMenu(boolean enable) {
         //Get the parent fragment and enable/disable the options menu depending if the app is initializing, scrambling, or running
         MenuItemsEnableListener listener;
@@ -387,7 +389,7 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment {
         return v;
     }
 
-
+    @Override
     public Handler getUiHandler() {
         return mUiHandler;
     }
@@ -406,7 +408,7 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment {
 
         void generateNextScramble();
 
-        void setTimerFragmentCallback(CurrentSTimerFragment fragment);
+        void setTimerFragmentCallback(CurrentSTimerFragmentCallback fragment);
 
         void updateViews();
 
