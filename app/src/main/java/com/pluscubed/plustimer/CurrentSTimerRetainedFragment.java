@@ -91,13 +91,13 @@ public class CurrentSTimerRetainedFragment extends Fragment implements CurrentST
 
     }
 
-    private void startScramblerThread(){
+    private void startScramblerThread() {
         mScramblerThread = new HandlerThread("ScramblerThread");
         mScramblerThread.start();
         mScramblerThreadHandler = new Handler(mScramblerThread.getLooper());
     }
 
-    private void stopScramblerThread(){
+    private void stopScramblerThread() {
         if (mScramblerThread != null) {
             mScramblerThread.quit();
             mScramblerThread = null;
@@ -106,12 +106,12 @@ public class CurrentSTimerRetainedFragment extends Fragment implements CurrentST
     }
 
     @Override
-    public void resetScramblerThread(){
+    public void resetScramblerThread() {
         stopScramblerThread();
         startScramblerThread();
         mScrambling = false;
-        mCurrentScrambleAndSvg=null;
-        mNextScrambleAndSvg=null;
+        mCurrentScrambleAndSvg = null;
+        mNextScrambleAndSvg = null;
     }
 
     @Override

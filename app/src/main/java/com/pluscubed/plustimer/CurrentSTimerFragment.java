@@ -59,7 +59,7 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
     private long mEndTime;
     private long mFinalTime;
 
-    private boolean mInitializing;
+    private boolean mFromSavedInstanceState;
 
     private boolean mRunning;
 
@@ -138,9 +138,9 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
             mScrambleImageDisplay = savedInstanceState.getBoolean(STATE_IMAGE_DISPLAYED);
             mStartTime = savedInstanceState.getLong(STATE_START_TIME);
             mRunning = savedInstanceState.getBoolean(STATE_RUNNING);
-            mInitializing = false;
+            mFromSavedInstanceState = true;
         } else {
-            mInitializing = true;
+            mFromSavedInstanceState = false;
         }
     }
 
@@ -150,13 +150,6 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
         //When destroyed, stop timer runnable
         mUiHandler.removeCallbacksAndMessages(null);
         mRetainedFragment.setTimerFragmentCallback(null);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        //Set initialization flag to false
-        mInitializing = false;
     }
 
     @Override
@@ -344,8 +337,7 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
 
         //When the application is initializing, disable action bar and generate a scramble.
 
-        if (mInitializing) {
-            mRetainedFragment.resetScramblerThread();
+        if (!mFromSavedInstanceState) {
             enableOptionsMenu(false);
             mScrambleText.setText(R.string.scrambling);
             mRetainedFragment.generateNextScramble();
@@ -357,6 +349,9 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
             if (mRunning || !getRetainedFragment().isScrambling()) {
                 // If timer is running, then update text/image to current. If timer is not running and not scrambling, then update scramble views to current.
                 updateScrambleTextAndImageToCurrent();
+                if (!getRetainedFragment().isScrambling()) {
+                    enableOptionsMenu(true);
+                }
             } else {
                 mScrambleText.setText(R.string.scrambling);
             }

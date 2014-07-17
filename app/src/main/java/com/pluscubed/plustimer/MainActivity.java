@@ -26,6 +26,7 @@ import com.crashlytics.android.Crashlytics;
 public class MainActivity extends ActionBarActivity implements SolveDialog.SolveDialogListener, CurrentSBaseFragment.OnSolveItemClickListener, CurrentSTimerFragment.GetRetainedFragmentCallback {
     public static final String DIALOG_FRAGMENT_TAG = "MODIFY_DIALOG";
     private static final String STATE_SELECTED_POSITION = "selected_navigation_drawer_position";
+    private static final String STATE_FRAGMENT_SAVED_STATE = "fragment_saved_state";
     private static final String PREF_USER_LEARNED_DRAWER = "navigation_drawer_learned";
     private static final String CURRENT_S_TAG = "CURRENT_S_FRAGMENT";
     private static final String HISTORY_TAG = "HISTORY_FRAGMENT";
@@ -40,6 +41,7 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
     private ActionBarDrawerToggle mDrawerToggle;
     private CharSequence mDrawerTitle;
     private int mCurrentSelectedPosition = 0;
+    private Fragment.SavedState mSavedState;
 
     @Override
     public void onDialogDismissed(int position, int penalty) {
@@ -90,6 +92,7 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(STATE_SELECTED_POSITION, mCurrentSelectedPosition);
+        outState.putParcelable(STATE_FRAGMENT_SAVED_STATE, mSavedState);
     }
 
     @Override
@@ -112,6 +115,7 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
 
         if (savedInstanceState != null) {
             mCurrentSelectedPosition = savedInstanceState.getInt(STATE_SELECTED_POSITION);
+            mSavedState = savedInstanceState.getParcelable(STATE_FRAGMENT_SAVED_STATE);
             mFromSavedInstanceState = true;
         }
 
@@ -128,7 +132,7 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
         mDrawerListView.setOnItemClickListener(new ListView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                selectItem(position);
+                selectItem(false, position);
             }
         });
 
@@ -157,7 +161,7 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
             }
         };
 
-        selectItem(mCurrentSelectedPosition);
+        selectItem(true, mCurrentSelectedPosition);
 
         if (!mUserLearnedDrawer && !mFromSavedInstanceState) {
             mDrawerLayout.openDrawer(mDrawerListView);
@@ -197,38 +201,51 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
     }
 
 
-    void selectItem(int pos) {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        String tag = "";
-        Class fragmentClass = null;
-        switch (pos) {
-            case 0:
-                tag = CURRENT_S_TAG;
-                fragmentClass = CurrentSFragment.class;
-                break;
-            case 1:
-                tag = HISTORY_TAG;
-                fragmentClass = HistoryFragment.class;
-                break;
-            default:
-                Toast.makeText(getApplicationContext(), "Work in Progress", Toast.LENGTH_SHORT).show();
-                return;
-        }
-        Fragment fragment = fragmentManager.findFragmentByTag(tag);
-        if (fragment == null) {
-            if (fragmentClass != null)
-                try {
-                    fragment = (Fragment) fragmentClass.newInstance();
-                } catch (InstantiationException e) {
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
+    void selectItem(boolean initialize, int pos) {
+        if (initialize || mCurrentSelectedPosition != pos) {
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            Fragment.SavedState tempSavedState = null;
+            if (mCurrentSelectedPosition != pos) {
+                Fragment currentFragment = fragmentManager.findFragmentById(R.id.activity_main_content_framelayout);
+                tempSavedState = fragmentManager.saveFragmentInstanceState(currentFragment);
+            }
+            String tag = "";
+            Class fragmentClass = null;
+            switch (pos) {
+                case 0:
+                    tag = CURRENT_S_TAG;
+                    fragmentClass = CurrentSFragment.class;
+                    break;
+                case 1:
+                    tag = HISTORY_TAG;
+                    fragmentClass = HistoryFragment.class;
+                    break;
+                default:
+                    Toast.makeText(getApplicationContext(), "Work in Progress", Toast.LENGTH_SHORT).show();
+                    return;
+            }
+            Fragment fragment = fragmentManager.findFragmentByTag(tag);
+            if (fragment == null) {
+                if (fragmentClass != null) {
+                    try {
+                        fragment = (Fragment) fragmentClass.newInstance();
+                        if (mSavedState != null) {
+                            fragment.setInitialSavedState(mSavedState);
+                            mSavedState = null;
+                        }
+                    } catch (InstantiationException e) {
+                        e.printStackTrace();
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
                 }
-            fragmentManager.beginTransaction()
-                    .replace(R.id.activity_main_content_framelayout, fragment, tag)
-                    .commit();
+                fragmentManager.beginTransaction()
+                        .replace(R.id.activity_main_content_framelayout, fragment, tag)
+                        .commit();
+                mCurrentSelectedPosition = pos;
+            }
+            if (tempSavedState != null) mSavedState = tempSavedState;
         }
-        mCurrentSelectedPosition = pos;
         mDrawerListView.setItemChecked(pos, true);
         setTitle(mFragmentActionBarTitles[pos]);
         mDrawerLayout.closeDrawer(mDrawerListView);
