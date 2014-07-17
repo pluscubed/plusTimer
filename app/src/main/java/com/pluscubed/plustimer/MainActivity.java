@@ -67,9 +67,7 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
     public void setTitle(CharSequence title) {
         super.setTitle(title);
         mCurrentFragmentTitle = title;
-        getSupportActionBar().setTitle(mCurrentFragmentTitle);
     }
-
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
@@ -80,7 +78,11 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
         if (menu.findItem(R.id.menu_current_s_toggle_scramble_image_action) != null) {
             menu.findItem(R.id.menu_current_s_toggle_scramble_image_action).setVisible(!drawerOpen);
         }
-
+        if (drawerOpen) {
+            getSupportActionBar().setTitle(mDrawerTitle);
+        } else {
+            getSupportActionBar().setTitle(mCurrentFragmentTitle);
+        }
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -138,7 +140,6 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
             /** Called when a drawer has settled in a completely closed state. */
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
-                getSupportActionBar().setTitle(mCurrentFragmentTitle);
                 supportInvalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
 
@@ -151,7 +152,7 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
                     mUserLearnedDrawer = true;
                     PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putBoolean(PREF_USER_LEARNED_DRAWER, true).commit();
                 }
-                getSupportActionBar().setTitle(mDrawerTitle);
+
                 supportInvalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
         };
