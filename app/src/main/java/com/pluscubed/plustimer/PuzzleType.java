@@ -44,6 +44,7 @@ public enum PuzzleType {
     static {
         sSessionArrayListType = new TypeToken<ArrayList<Session>>() {
         }.getType();
+        sCurrentPuzzleType=PuzzleType.THREE;
     }
 
     public static PuzzleType sCurrentPuzzleType;

@@ -345,6 +345,7 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
         //When the application is initializing, disable action bar and generate a scramble.
 
         if (mInitializing) {
+            mRetainedFragment.resetScramblerThread();
             enableOptionsMenu(false);
             mScrambleText.setText(R.string.scrambling);
             mRetainedFragment.generateNextScramble();
@@ -359,8 +360,6 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
             } else {
                 mScrambleText.setText(R.string.scrambling);
             }
-
-            onSessionSolvesChanged();
         }
 
 
@@ -385,6 +384,8 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
             mScrambleImage.setVisibility(View.GONE);
             mScrambleImageDisplay = false;
         }
+
+        onSessionSolvesChanged();
 
         return v;
     }
@@ -411,6 +412,8 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
         void setTimerFragmentCallback(CurrentSTimerFragmentCallback fragment);
 
         void updateViews();
+
+        void resetScramblerThread();
 
     }
 

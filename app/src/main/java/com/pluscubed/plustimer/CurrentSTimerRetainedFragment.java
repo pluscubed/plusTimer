@@ -91,23 +91,40 @@ public class CurrentSTimerRetainedFragment extends Fragment implements CurrentST
 
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setRetainInstance(true);
-
+    private void startScramblerThread(){
         mScramblerThread = new HandlerThread("ScramblerThread");
         mScramblerThread.start();
         mScramblerThreadHandler = new Handler(mScramblerThread.getLooper());
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
+    private void stopScramblerThread(){
         if (mScramblerThread != null) {
             mScramblerThread.quit();
             mScramblerThread = null;
             mScramblerThreadHandler = null;
         }
+    }
+
+    @Override
+    public void resetScramblerThread(){
+        stopScramblerThread();
+        startScramblerThread();
+        mScrambling = false;
+        mCurrentScrambleAndSvg=null;
+        mNextScrambleAndSvg=null;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+
+        startScramblerThread();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        stopScramblerThread();
     }
 }

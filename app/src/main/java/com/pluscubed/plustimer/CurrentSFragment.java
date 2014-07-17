@@ -75,10 +75,7 @@ public class CurrentSFragment extends Fragment implements CurrentSBaseFragment.G
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-        if (savedInstanceState == null) {
-            PuzzleType.sCurrentPuzzleType = PuzzleType.THREE;
-            PuzzleType.sCurrentPuzzleType.resetCurrentSession();
-        } else {
+        if (savedInstanceState != null) {
             mMenuItemsEnable = savedInstanceState.getBoolean(STATE_MENU_ITEMS_ENABLE_BOOLEAN);
         }
 
