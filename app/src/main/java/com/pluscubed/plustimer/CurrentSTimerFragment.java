@@ -97,6 +97,13 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
      }
      */
 
+    public static CurrentSTimerFragment newInstance(SavedState savedState) {
+        CurrentSTimerFragment fragment = new CurrentSTimerFragment();
+        fragment.setInitialSavedState(savedState);
+        return fragment;
+    }
+
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -338,6 +345,7 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
         //When the application is initializing, disable action bar and generate a scramble.
 
         if (!mFromSavedInstanceState) {
+            mRetainedFragment.resetScramblerThread();
             enableOptionsMenu(false);
             mScrambleText.setText(R.string.scrambling);
             mRetainedFragment.generateNextScramble();

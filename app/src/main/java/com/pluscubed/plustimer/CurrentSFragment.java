@@ -20,12 +20,22 @@ import java.util.ArrayList;
  */
 public class CurrentSFragment extends Fragment implements CurrentSBaseFragment.GetChildFragmentsListener, CurrentSTimerFragment.MenuItemsEnableListener {
     private static final String STATE_MENU_ITEMS_ENABLE_BOOLEAN = "menu_items_enable_boolean";
+    private static final String ARG_CURRENT_S_TIMER_STATE = "state";
     private SlidingTabLayout mSlidingTabLayout;
     private ViewPager mViewPager;
     private boolean mMenuItemsEnable;
 
     private static String makeFragmentName(int viewId, int index) {
         return "android:switcher:" + viewId + ":" + index;
+    }
+
+
+    public static CurrentSFragment newInstance(SavedState state) {
+        CurrentSFragment fragment = new CurrentSFragment();
+        Bundle args = new Bundle();
+        args.putParcelable(ARG_CURRENT_S_TIMER_STATE, state);
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
@@ -96,7 +106,11 @@ public class CurrentSFragment extends Fragment implements CurrentSBaseFragment.G
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         mViewPager = (ViewPager) view.findViewById(R.id.fragment_current_s_viewpager);
-        mViewPager.setAdapter(new CurrentSessionPagerAdapter(getChildFragmentManager(), getResources().getStringArray(R.array.current_s_page_titles)));
+        SavedState savedState = null;
+        if (getArguments() != null) {
+            savedState = getArguments().getParcelable(ARG_CURRENT_S_TIMER_STATE);
+        }
+        mViewPager.setAdapter(new CurrentSessionPagerAdapter(savedState, getChildFragmentManager(), getResources().getStringArray(R.array.current_s_page_titles)));
         mSlidingTabLayout = (SlidingTabLayout) view.findViewById(R.id.fragment_current_s_slidingtablayout);
         mSlidingTabLayout.setViewPager(mViewPager);
         mViewPager.setCurrentItem(0);
@@ -119,18 +133,25 @@ public class CurrentSFragment extends Fragment implements CurrentSBaseFragment.G
         });
     }
 
-    public static class CurrentSessionPagerAdapter extends FragmentPagerAdapter {
+    public class CurrentSessionPagerAdapter extends FragmentPagerAdapter {
         private String[] mPageTitles;
+        private SavedState mTimerSavedState;
 
-        public CurrentSessionPagerAdapter(FragmentManager fm, String[] pageTitles) {
+        public CurrentSessionPagerAdapter(SavedState savedState, FragmentManager fm, String[] pageTitles) {
             super(fm);
             mPageTitles = pageTitles;
+            mTimerSavedState = savedState;
         }
 
         @Override
         public Fragment getItem(int position) {
             switch (position) {
                 case 0:
+                    if (mTimerSavedState != null) {
+                        CurrentSTimerFragment fragment = CurrentSTimerFragment.newInstance(mTimerSavedState);
+                        mTimerSavedState = null;
+                        return fragment;
+                    }
                     return new CurrentSTimerFragment();
                 case 1:
                     return new CurrentSDetailsListFragment();

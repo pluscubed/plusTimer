@@ -26,7 +26,7 @@ import com.crashlytics.android.Crashlytics;
 public class MainActivity extends ActionBarActivity implements SolveDialog.SolveDialogListener, CurrentSBaseFragment.OnSolveItemClickListener, CurrentSTimerFragment.GetRetainedFragmentCallback {
     public static final String DIALOG_FRAGMENT_TAG = "MODIFY_DIALOG";
     private static final String STATE_SELECTED_POSITION = "selected_navigation_drawer_position";
-    private static final String STATE_FRAGMENT_SAVED_STATE = "fragment_saved_state";
+    private static final String STATE_CURRENT_S_TIMER_FRAGMENT_SAVED_STATE = "fragment_saved_state";
     private static final String PREF_USER_LEARNED_DRAWER = "navigation_drawer_learned";
     private static final String CURRENT_S_TAG = "CURRENT_S_FRAGMENT";
     private static final String HISTORY_TAG = "HISTORY_FRAGMENT";
@@ -41,7 +41,7 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
     private ActionBarDrawerToggle mDrawerToggle;
     private CharSequence mDrawerTitle;
     private int mCurrentSelectedPosition = 0;
-    private Fragment.SavedState mSavedState;
+    private Fragment.SavedState mCurrentSTimerSavedState;
 
     @Override
     public void onDialogDismissed(int position, int penalty) {
@@ -92,7 +92,7 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(STATE_SELECTED_POSITION, mCurrentSelectedPosition);
-        outState.putParcelable(STATE_FRAGMENT_SAVED_STATE, mSavedState);
+        outState.putParcelable(STATE_CURRENT_S_TIMER_FRAGMENT_SAVED_STATE, mCurrentSTimerSavedState);
     }
 
     @Override
@@ -115,7 +115,7 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
 
         if (savedInstanceState != null) {
             mCurrentSelectedPosition = savedInstanceState.getInt(STATE_SELECTED_POSITION);
-            mSavedState = savedInstanceState.getParcelable(STATE_FRAGMENT_SAVED_STATE);
+            mCurrentSTimerSavedState = savedInstanceState.getParcelable(STATE_CURRENT_S_TIMER_FRAGMENT_SAVED_STATE);
             mFromSavedInstanceState = true;
         }
 
@@ -204,13 +204,13 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
     void selectItem(boolean initialize, int pos) {
         if (initialize || mCurrentSelectedPosition != pos) {
             FragmentManager fragmentManager = getSupportFragmentManager();
-            Fragment.SavedState tempSavedState = null;
-            if (mCurrentSelectedPosition != pos) {
-                Fragment currentFragment = fragmentManager.findFragmentById(R.id.activity_main_content_framelayout);
-                tempSavedState = fragmentManager.saveFragmentInstanceState(currentFragment);
-            }
             String tag = "";
             Class fragmentClass = null;
+            if (mCurrentSelectedPosition != pos) {
+                Fragment currentFragment = fragmentManager.findFragmentById(R.id.activity_main_content_framelayout);
+                if (currentFragment instanceof CurrentSFragment)
+                    mCurrentSTimerSavedState = currentFragment.getChildFragmentManager().saveFragmentInstanceState(((CurrentSFragment) currentFragment).getChildFragments().get(0));
+            }
             switch (pos) {
                 case 0:
                     tag = CURRENT_S_TAG;
@@ -228,11 +228,13 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
             if (fragment == null) {
                 if (fragmentClass != null) {
                     try {
-                        fragment = (Fragment) fragmentClass.newInstance();
-                        if (mSavedState != null) {
-                            fragment.setInitialSavedState(mSavedState);
-                            mSavedState = null;
+                        if (fragmentClass == CurrentSFragment.class) {
+                            fragment = CurrentSFragment.newInstance(mCurrentSTimerSavedState);
+                            mCurrentSTimerSavedState = null;
+                        } else {
+                            fragment = (Fragment) fragmentClass.newInstance();
                         }
+
                     } catch (InstantiationException e) {
                         e.printStackTrace();
                     } catch (IllegalAccessException e) {
@@ -244,7 +246,6 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
                         .commit();
                 mCurrentSelectedPosition = pos;
             }
-            if (tempSavedState != null) mSavedState = tempSavedState;
         }
         mDrawerListView.setItemChecked(pos, true);
         setTitle(mFragmentActionBarTitles[pos]);
