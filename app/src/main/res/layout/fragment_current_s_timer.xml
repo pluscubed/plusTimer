@@ -15,17 +15,6 @@
         android:textSize="50sp"/>
 
     <TextView
-        android:id="@id/fragment_current_s_timer_scramble_textview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#ffe0e0e0"
-        android:gravity="center_horizontal"
-        android:padding="6dp"
-        android:text="@string/scrambling"
-        android:textSize="18sp"/>
-
-
-    <TextView
         android:id="@id/fragment_current_s_timer_quickstats_textview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -77,6 +66,17 @@
         -->
 
     </LinearLayout>
+
+    <TextView
+        android:id="@id/fragment_current_s_timer_scramble_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#ffe0e0e0"
+        android:gravity="center_horizontal"
+        android:padding="6dp"
+        android:text="@string/scrambling"
+        android:textSize="18sp"/>
+
 
     <ImageView
         android:id="@id/fragment_current_s_timer_scramble_imageview"
