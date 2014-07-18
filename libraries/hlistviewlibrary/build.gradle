@@ -5,13 +5,13 @@ group 'it.sephiroth.android.library.horizontallistview'
 version '2.0.0-SNAPSHOT'
 
 android {
-    compileSdkVersion 19
+    compileSdkVersion 20
     /* Modified: Change to version 20.0.0 from 19.0.3*/
     buildToolsVersion "20.0.0"
 
     defaultConfig {
         minSdkVersion 9
-        targetSdkVersion 19
+        targetSdkVersion 20
         versionCode 1
         versionName version
     }
