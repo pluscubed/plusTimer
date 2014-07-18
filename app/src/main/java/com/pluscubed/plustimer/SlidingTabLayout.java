@@ -172,6 +172,8 @@ public class SlidingTabLayout extends HorizontalScrollView {
 
         int padding = (int) (TAB_VIEW_PADDING_DIPS * getResources().getDisplayMetrics().density);
         textView.setPadding(padding, padding, padding, padding);
+
+        //Added by plusCubed: set layoutparams to have weight=1
         textView.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
 
         return textView;
