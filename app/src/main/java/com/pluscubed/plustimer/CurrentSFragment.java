@@ -1,5 +1,6 @@
 package com.pluscubed.plustimer;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -131,6 +132,7 @@ public class CurrentSFragment extends Fragment implements CurrentSBaseFragment.G
                 }
             }
         });
+        mSlidingTabLayout.setSelectedIndicatorColors(Color.parseColor("#2d2d2d"));
     }
 
     public class CurrentSessionPagerAdapter extends FragmentPagerAdapter {
