@@ -92,11 +92,8 @@ public class Solve {
         switch (mPenalty) {
             case DNF:
                 return "DNF (" + timeStringFromLong(mRawTime) + ")";
-            case PLUSTWO:
-                return timeStringFromLong(mRawTime) + " +2";
-            case NONE:
             default:
-                return timeStringFromLong(mRawTime);
+                return getTimeString();
         }
     }
 
