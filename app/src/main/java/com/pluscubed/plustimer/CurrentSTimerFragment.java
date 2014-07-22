@@ -97,12 +97,6 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
      }
      */
 
-    public static CurrentSTimerFragment newInstance(SavedState savedState) {
-        CurrentSTimerFragment fragment = new CurrentSTimerFragment();
-        fragment.setInitialSavedState(savedState);
-        return fragment;
-    }
-
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
