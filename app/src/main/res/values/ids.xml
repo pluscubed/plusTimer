@@ -8,8 +8,6 @@
     <item name="fragment_current_s_timer_bottom_hlistview" type="id"/>
     <item name="hlist_item_solve_textview" type="id"/>
 
-    <item name="fragment_current_s_timer_bottom_linearlayout" type="id"/>
-
     <item name="fragment_current_s_timer_quickstats_solves_number_textview" type="id"/>
     <item name="fragment_current_s_timer_quickstats_textview" type="id"/>
 
