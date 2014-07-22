@@ -132,7 +132,7 @@ public class CurrentSFragment extends Fragment implements CurrentSBaseFragment.G
                 }
             }
         });
-        mSlidingTabLayout.setSelectedIndicatorColors(Color.parseColor("#2d2d2d"));
+        mSlidingTabLayout.setSelectedIndicatorColors(Color.parseColor("#424242"));
     }
 
     public class CurrentSessionPagerAdapter extends FragmentPagerAdapter {
