@@ -72,12 +72,12 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
         Arrays.sort(currentAverages, Collections.reverseOrder());
         String s = "";
         for (int i : currentAverages) {
-            if (PuzzleType.sCurrentPuzzleType.getCurrentSession().getNumberOfSolves() >= i) {
-                s += context.getString(R.string.ao) + i + ": " + PuzzleType.sCurrentPuzzleType.getCurrentSession().getStringCurrentAverageOf(i) + "\n";
+            if (PuzzleType.sCurrentPuzzleType.getSession(PuzzleType.CURRENT_SESSION).getNumberOfSolves() >= i) {
+                s += context.getString(R.string.cao) + i + ": " + PuzzleType.sCurrentPuzzleType.getSession(PuzzleType.CURRENT_SESSION).getStringCurrentAverageOf(i) + "\n";
             }
         }
-        if (PuzzleType.sCurrentPuzzleType.getCurrentSession().getNumberOfSolves() > 0) {
-            s += context.getString(R.string.mean) + PuzzleType.sCurrentPuzzleType.getCurrentSession().getStringMean();
+        if (PuzzleType.sCurrentPuzzleType.getSession(PuzzleType.CURRENT_SESSION).getNumberOfSolves() > 0) {
+            s += context.getString(R.string.mean) + PuzzleType.sCurrentPuzzleType.getSession(PuzzleType.CURRENT_SESSION).getStringMean();
         }
         return s;
     }
@@ -156,7 +156,7 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
     @Override
     public void onSessionSolvesChanged() {
         //Update stats
-        mQuickStatsSolves.setText(getString(R.string.solves) + PuzzleType.sCurrentPuzzleType.getCurrentSession().getNumberOfSolves());
+        mQuickStatsSolves.setText(getString(R.string.solves) + PuzzleType.sCurrentPuzzleType.getSession(PuzzleType.CURRENT_SESSION).getNumberOfSolves());
         mQuickStats.setText(buildStatsWithAveragesOf(getAttachedActivity(), 5, 12, 100));
         //Update HListView
         ((SolveHListViewAdapter) mHListView.getAdapter()).updateSolvesList();
@@ -318,7 +318,7 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
                     mTimerText.setText(Solve.timeStringFromLong(mFinalTime));
 
                     //Add the solve to the current session with the current scramble/scramble image and time
-                    PuzzleType.sCurrentPuzzleType.getCurrentSession().addSolve(new Solve(mRetainedFragment.getCurrentScrambleAndSvg(), mFinalTime));
+                    PuzzleType.sCurrentPuzzleType.getSession(PuzzleType.CURRENT_SESSION).addSolve(new Solve(mRetainedFragment.getCurrentScrambleAndSvg(), mFinalTime));
 
                     //Update stats and HListView
                     onSessionSolvesChanged();
@@ -361,8 +361,8 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
 
 
         //If the current session has solves recorded, set the timer text to the latest solve's time.
-        if (PuzzleType.sCurrentPuzzleType.getCurrentSession().getNumberOfSolves() != 0) {
-            mTimerText.setText(PuzzleType.sCurrentPuzzleType.getCurrentSession().getLastSolve().getTimeString());
+        if (PuzzleType.sCurrentPuzzleType.getSession(PuzzleType.CURRENT_SESSION).getNumberOfSolves() != 0) {
+            mTimerText.setText(PuzzleType.sCurrentPuzzleType.getSession(PuzzleType.CURRENT_SESSION).getLastSolve().getTimeString());
         }
 
         //If the scramble image is currently displayed and it is not scrambling, then make sure it is set to visible and that the OnClickListener is set to toggling it; otherwise, set to gone.
@@ -423,10 +423,10 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
         private ArrayList<Solve> mBestAndWorstSolves;
 
         public SolveHListViewAdapter() {
-            super(getAttachedActivity(), 0, PuzzleType.sCurrentPuzzleType.getCurrentSession().getSolves());
+            super(getAttachedActivity(), 0, PuzzleType.sCurrentPuzzleType.getSession(PuzzleType.CURRENT_SESSION).getSolves());
             mBestAndWorstSolves = new ArrayList<Solve>();
-            mBestAndWorstSolves.add(PuzzleType.sCurrentPuzzleType.getCurrentSession().getBestSolve(PuzzleType.sCurrentPuzzleType.getCurrentSession().getSolves()));
-            mBestAndWorstSolves.add(PuzzleType.sCurrentPuzzleType.getCurrentSession().getWorstSolve(PuzzleType.sCurrentPuzzleType.getCurrentSession().getSolves()));
+            mBestAndWorstSolves.add(Session.getBestSolve(PuzzleType.sCurrentPuzzleType.getSession(PuzzleType.CURRENT_SESSION).getSolves()));
+            mBestAndWorstSolves.add(Session.getWorstSolve(PuzzleType.sCurrentPuzzleType.getSession(PuzzleType.CURRENT_SESSION).getSolves()));
         }
 
         @Override
@@ -455,16 +455,16 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
         public void updateSolvesList() {
             clear();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
-                addAll(PuzzleType.sCurrentPuzzleType.getCurrentSession().getSolves());
+                addAll(PuzzleType.sCurrentPuzzleType.getSession(PuzzleType.CURRENT_SESSION).getSolves());
             else {
-                for (Solve i : PuzzleType.sCurrentPuzzleType.getCurrentSession().getSolves()) {
+                for (Solve i : PuzzleType.sCurrentPuzzleType.getSession(PuzzleType.CURRENT_SESSION).getSolves()) {
                     add(i);
                 }
             }
 
             mBestAndWorstSolves = new ArrayList<Solve>();
-            mBestAndWorstSolves.add(PuzzleType.sCurrentPuzzleType.getCurrentSession().getBestSolve(PuzzleType.sCurrentPuzzleType.getCurrentSession().getSolves()));
-            mBestAndWorstSolves.add(PuzzleType.sCurrentPuzzleType.getCurrentSession().getWorstSolve(PuzzleType.sCurrentPuzzleType.getCurrentSession().getSolves()));
+            mBestAndWorstSolves.add(Session.getBestSolve(PuzzleType.sCurrentPuzzleType.getSession(PuzzleType.CURRENT_SESSION).getSolves()));
+            mBestAndWorstSolves.add(Session.getWorstSolve(PuzzleType.sCurrentPuzzleType.getSession(PuzzleType.CURRENT_SESSION).getSolves()));
             notifyDataSetChanged();
         }
 

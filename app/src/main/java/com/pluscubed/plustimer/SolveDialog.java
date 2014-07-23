@@ -17,8 +17,9 @@ import android.widget.TextView;
  * Solve modify dialog
  */
 public class SolveDialog extends DialogFragment {
-
-    public static final String BUNDLEKEY_DIALOG_INIT_SOLVE_INDEX = "index";
+    public static final String ARG_DIALOG_INIT_PUZZLETYPE_DISPLAY_NAME = "puzzleType";
+    public static final String ARG_DIALOG_INIT_SESSION_INDEX = "sessionIndex";
+    public static final String ARG_DIALOG_INIT_SOLVE_INDEX = "solveIndex";
 
 
     public static final int DIALOG_PENALTY_NONE = 0;
@@ -26,15 +27,19 @@ public class SolveDialog extends DialogFragment {
     public static final int DIALOG_PENALTY_DNF = 2;
     public static final int DIALOG_RESULT_DELETE = 3;
 
-    private int mPosition;
+    private String mPuzzleTypeDisplayName;
+    private int mSolveIndex;
+    private int mSessionIndex;
     private int mSelection;
 
     private SolveDialogListener mListener;
 
-    static SolveDialog newInstance(int position) {
+    static SolveDialog newInstance(String displayName, int sessionIndex, int solveIndex) {
         SolveDialog d = new SolveDialog();
         Bundle args = new Bundle();
-        args.putInt(BUNDLEKEY_DIALOG_INIT_SOLVE_INDEX, position);
+        args.putInt(ARG_DIALOG_INIT_SESSION_INDEX, sessionIndex);
+        args.putInt(ARG_DIALOG_INIT_SOLVE_INDEX, solveIndex);
+        args.putString(ARG_DIALOG_INIT_PUZZLETYPE_DISPLAY_NAME, displayName);
         d.setArguments(args);
         return d;
     }
@@ -55,15 +60,17 @@ public class SolveDialog extends DialogFragment {
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);
 
-        mListener.onDialogDismissed(mPosition, mSelection);
+        mListener.onDialogDismissed(mPuzzleTypeDisplayName, mSessionIndex, mSolveIndex, mSelection);
 
     }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        mPuzzleTypeDisplayName = getArguments().getString(ARG_DIALOG_INIT_PUZZLETYPE_DISPLAY_NAME);
+        mSessionIndex = getArguments().getInt(ARG_DIALOG_INIT_SESSION_INDEX);
+        mSolveIndex = getArguments().getInt(ARG_DIALOG_INIT_SOLVE_INDEX);
+        Solve solve = PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex).getSolveByPosition(mSolveIndex);
 
-        mPosition = getArguments().getInt(BUNDLEKEY_DIALOG_INIT_SOLVE_INDEX);
-        Solve solve = PuzzleType.sCurrentPuzzleType.getCurrentSession().getSolveByPosition(mPosition);
         String timeString = solve.getDescriptiveTimeString();
         String scramble = solve.getScrambleAndSvg().scramble;
         long timestamp = solve.getTimestamp();
@@ -128,6 +135,6 @@ public class SolveDialog extends DialogFragment {
 
 
     public interface SolveDialogListener {
-        public void onDialogDismissed(int position, int penalty);
+        public void onDialogDismissed(String displayName, int sessionIndex, int solveIndex, int penalty);
     }
 }

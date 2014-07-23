@@ -47,6 +47,7 @@ public enum PuzzleType {
         sCurrentPuzzleType = PuzzleType.THREE;
     }
 
+    public static int CURRENT_SESSION = -1;
     public static PuzzleType sCurrentPuzzleType;
     private final String mFilename;
     private final String mScramblerSpec;
@@ -61,6 +62,15 @@ public enum PuzzleType {
         this.mDisplayName = displayName;
         mCurrentSession = new Session();
         mFilename = mScramblerSpec + ".json";
+    }
+
+    public static PuzzleType get(String displayName) {
+        for (PuzzleType i : PuzzleType.values()) {
+            if (i.toString().equals(displayName)) {
+                return i;
+            }
+        }
+        return null;
     }
 
     public void submitCurrentSession(Context context) throws IOException {
@@ -122,10 +132,13 @@ public enum PuzzleType {
         return mDisplayName;
     }
 
-    public Session getCurrentSession() {
-        if (mCurrentSession == null)
-            mCurrentSession = new Session();
-        return mCurrentSession;
+    public Session getSession(int index) {
+        if (index == CURRENT_SESSION) {
+            if (mCurrentSession == null) mCurrentSession = new Session();
+            return mCurrentSession;
+        } else {
+            return mHistorySessionsList.get(index);
+        }
     }
 
     public void resetCurrentSession() {

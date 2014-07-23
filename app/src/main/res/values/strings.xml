@@ -8,7 +8,8 @@
     <string name="scrambling">Scrambling…</string>
     <string name="puzzle_selection">Puzzle Selection</string>
     <string name="solves">"Solves: "</string>
-    <string name="ao">"Current Ao"</string>
+    <string name="cao">"Current Ao"</string>
+    <string name="bao">"Best Ao"</string>
     <string name="mean">"Session Mean: "</string>
     <string name="delete">Delete</string>
     <string name="penalty">Penalty:</string>

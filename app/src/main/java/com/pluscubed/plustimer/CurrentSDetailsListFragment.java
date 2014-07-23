@@ -1,5 +1,6 @@
 package com.pluscubed.plustimer;
 
+import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -15,6 +16,8 @@ import android.widget.TextView;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 
 
 /**
@@ -24,6 +27,21 @@ public class CurrentSDetailsListFragment extends CurrentSBaseFragment {
 
     private TextView mQuickStats;
     private ListView mListView;
+
+    public static String buildAdvancedStatsWithAveragesOf(Context context, Integer... currentAverages) {
+        Arrays.sort(currentAverages, Collections.reverseOrder());
+        String s = "";
+        for (int i : currentAverages) {
+            if (PuzzleType.sCurrentPuzzleType.getSession(PuzzleType.CURRENT_SESSION).getNumberOfSolves() >= i) {
+                s += context.getString(R.string.cao) + i + ": " + PuzzleType.sCurrentPuzzleType.getSession(PuzzleType.CURRENT_SESSION).getStringCurrentAverageOf(i) + "\n";
+                s += context.getString(R.string.bao) + i + ": " + PuzzleType.sCurrentPuzzleType.getSession(PuzzleType.CURRENT_SESSION).getStringBestAverageOf(i) + "\n";
+            }
+        }
+        if (PuzzleType.sCurrentPuzzleType.getSession(PuzzleType.CURRENT_SESSION).getNumberOfSolves() > 0) {
+            s += context.getString(R.string.mean) + PuzzleType.sCurrentPuzzleType.getSession(PuzzleType.CURRENT_SESSION).getStringMean();
+        }
+        return s;
+    }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -40,11 +58,11 @@ public class CurrentSDetailsListFragment extends CurrentSBaseFragment {
     }
 
     public void updateQuickStats() {
-        mQuickStats.setText(CurrentSTimerFragment.buildStatsWithAveragesOf(getAttachedActivity(), 5, 12, 50, 100, 1000));
-        if (!CurrentSTimerFragment.buildStatsWithAveragesOf(getAttachedActivity(), 5, 12, 50, 100, 1000).equals("")) {
+        mQuickStats.setText(buildAdvancedStatsWithAveragesOf(getAttachedActivity(), 5, 12, 50, 100, 1000));
+        if (!buildAdvancedStatsWithAveragesOf(getAttachedActivity(), 5, 12, 50, 100, 1000).equals("")) {
             mQuickStats.append("\n");
         }
-        mQuickStats.append(getString(R.string.solves) + PuzzleType.sCurrentPuzzleType.getCurrentSession().getNumberOfSolves());
+        mQuickStats.append(getString(R.string.solves) + PuzzleType.sCurrentPuzzleType.getSession(PuzzleType.CURRENT_SESSION).getNumberOfSolves());
     }
 
     @Override
@@ -101,10 +119,10 @@ public class CurrentSDetailsListFragment extends CurrentSBaseFragment {
         private ArrayList<Solve> mBestAndWorstSolves;
 
         public SolveListAdapter(PuzzleType currentPuzzleType) {
-            super(getAttachedActivity(), 0, currentPuzzleType.getCurrentSession().getSolves());
+            super(getAttachedActivity(), 0, currentPuzzleType.getSession(PuzzleType.CURRENT_SESSION).getSolves());
             mBestAndWorstSolves = new ArrayList<Solve>();
-            mBestAndWorstSolves.add(currentPuzzleType.getCurrentSession().getBestSolve(currentPuzzleType.getCurrentSession().getSolves()));
-            mBestAndWorstSolves.add(currentPuzzleType.getCurrentSession().getWorstSolve(currentPuzzleType.getCurrentSession().getSolves()));
+            mBestAndWorstSolves.add(Session.getBestSolve(currentPuzzleType.getSession(PuzzleType.CURRENT_SESSION).getSolves()));
+            mBestAndWorstSolves.add(Session.getWorstSolve(currentPuzzleType.getSession(PuzzleType.CURRENT_SESSION).getSolves()));
         }
 
         @Override
@@ -137,16 +155,16 @@ public class CurrentSDetailsListFragment extends CurrentSBaseFragment {
         public void updateSolvesList(PuzzleType puzzleType) {
             clear();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
-                addAll(puzzleType.getCurrentSession().getSolves());
+                addAll(puzzleType.getSession(PuzzleType.CURRENT_SESSION).getSolves());
             else {
-                for (Solve i : puzzleType.getCurrentSession().getSolves()) {
+                for (Solve i : puzzleType.getSession(PuzzleType.CURRENT_SESSION).getSolves()) {
                     add(i);
                 }
             }
 
             mBestAndWorstSolves = new ArrayList<Solve>();
-            mBestAndWorstSolves.add(puzzleType.getCurrentSession().getBestSolve(puzzleType.getCurrentSession().getSolves()));
-            mBestAndWorstSolves.add(puzzleType.getCurrentSession().getWorstSolve(puzzleType.getCurrentSession().getSolves()));
+            mBestAndWorstSolves.add(Session.getBestSolve(puzzleType.getSession(PuzzleType.CURRENT_SESSION).getSolves()));
+            mBestAndWorstSolves.add(Session.getWorstSolve(puzzleType.getSession(PuzzleType.CURRENT_SESSION).getSolves()));
             notifyDataSetChanged();
         }
 

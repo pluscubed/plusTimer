@@ -1,7 +1,6 @@
 package com.pluscubed.plustimer;
 
 import android.content.Context;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ListFragment;
@@ -42,7 +41,7 @@ public class HistorySessionFragment extends ListFragment {
         String s = "";
         for (int i : currentAverages) {
             if (PuzzleType.sCurrentPuzzleType.getHistorySessions(getActivity()).get(mPosition).getNumberOfSolves() >= i) {
-                s += context.getString(R.string.ao) + i + ": " + PuzzleType.sCurrentPuzzleType.getHistorySessions(getActivity()).get(mPosition).getStringCurrentAverageOf(i) + "\n";
+                s += context.getString(R.string.cao) + i + ": " + PuzzleType.sCurrentPuzzleType.getHistorySessions(getActivity()).get(mPosition).getStringCurrentAverageOf(i) + "\n";
             }
         }
         if (PuzzleType.sCurrentPuzzleType.getHistorySessions(getActivity()).get(mPosition).getNumberOfSolves() > 0) {
@@ -104,8 +103,8 @@ public class HistorySessionFragment extends ListFragment {
         public SolveListAdapter(PuzzleType currentPuzzleType) throws IOException {
             super(getActivity(), 0, currentPuzzleType.getHistorySessions(getActivity()).get(mPosition).getSolves());
             mBestAndWorstSolves = new ArrayList<Solve>();
-            mBestAndWorstSolves.add(currentPuzzleType.getHistorySessions(getActivity()).get(mPosition).getBestSolve(currentPuzzleType.getHistorySessions(getActivity()).get(mPosition).getSolves()));
-            mBestAndWorstSolves.add(currentPuzzleType.getHistorySessions(getActivity()).get(mPosition).getWorstSolve(currentPuzzleType.getHistorySessions(getActivity()).get(mPosition).getSolves()));
+            mBestAndWorstSolves.add(Session.getBestSolve(currentPuzzleType.getHistorySessions(getActivity()).get(mPosition).getSolves()));
+            mBestAndWorstSolves.add(Session.getWorstSolve(currentPuzzleType.getHistorySessions(getActivity()).get(mPosition).getSolves()));
         }
 
         @Override
@@ -133,22 +132,6 @@ public class HistorySessionFragment extends ListFragment {
             desc.setText(s.getScrambleAndSvg().scramble);
 
             return convertView;
-        }
-
-        public void updateSolvesList(PuzzleType puzzleType) throws IOException {
-            clear();
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
-                addAll(puzzleType.getHistorySessions(getActivity()).get(mPosition).getSolves());
-            else {
-                for (Solve i : puzzleType.getHistorySessions(getActivity()).get(mPosition).getSolves()) {
-                    add(i);
-                }
-            }
-
-            mBestAndWorstSolves = new ArrayList<Solve>();
-            mBestAndWorstSolves.add(puzzleType.getHistorySessions(getActivity()).get(mPosition).getBestSolve(puzzleType.getCurrentSession().getSolves()));
-            mBestAndWorstSolves.add(puzzleType.getHistorySessions(getActivity()).get(mPosition).getWorstSolve(puzzleType.getCurrentSession().getSolves()));
-            notifyDataSetChanged();
         }
 
 
