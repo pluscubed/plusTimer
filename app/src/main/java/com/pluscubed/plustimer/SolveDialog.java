@@ -1,10 +1,12 @@
 package com.pluscubed.plustimer;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,9 +19,9 @@ import android.widget.TextView;
  * Solve modify dialog
  */
 public class SolveDialog extends DialogFragment {
-    public static final String ARG_DIALOG_INIT_PUZZLETYPE_DISPLAY_NAME = "puzzleType";
-    public static final String ARG_DIALOG_INIT_SESSION_INDEX = "sessionIndex";
-    public static final String ARG_DIALOG_INIT_SOLVE_INDEX = "solveIndex";
+    public static final String ARG_DIALOG_INIT_PUZZLETYPE_DISPLAY_NAME = "com.pluscubed.plustimer.dialog.puzzleType";
+    public static final String ARG_DIALOG_INIT_SESSION_INDEX = "com.pluscubed.plustimer.dialog.sessionIndex";
+    public static final String ARG_DIALOG_INIT_SOLVE_INDEX = "com.pluscubed.plustimer.dialog.solveIndex";
 
 
     public static final int DIALOG_PENALTY_NONE = 0;
@@ -64,12 +66,13 @@ public class SolveDialog extends DialogFragment {
 
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         mPuzzleTypeDisplayName = getArguments().getString(ARG_DIALOG_INIT_PUZZLETYPE_DISPLAY_NAME);
         mSessionIndex = getArguments().getInt(ARG_DIALOG_INIT_SESSION_INDEX);
         mSolveIndex = getArguments().getInt(ARG_DIALOG_INIT_SOLVE_INDEX);
-        Solve solve = PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex).getSolveByPosition(mSolveIndex);
+        Solve solve = PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getActivity()).getSolveByPosition(mSolveIndex);
 
         String timeString = solve.getDescriptiveTimeString();
         String scramble = solve.getScrambleAndSvg().scramble;
@@ -88,6 +91,8 @@ public class SolveDialog extends DialogFragment {
         }
 
         LayoutInflater inflater = getActivity().getLayoutInflater();
+
+        @SuppressLint("InflateParams")
         View v = inflater.inflate(R.layout.dialog_solve, null);
 
         Spinner penaltySpinner = (Spinner) v.findViewById(R.id.dialog_solve_modify_penalty_spinner);

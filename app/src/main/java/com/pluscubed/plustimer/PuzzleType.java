@@ -48,7 +48,8 @@ public enum PuzzleType {
     }
 
     public static int CURRENT_SESSION = -1;
-    public static PuzzleType sCurrentPuzzleType;
+    public static String CURRENT = "current_puzzletype";
+    private static PuzzleType sCurrentPuzzleType;
     private final String mFilename;
     private final String mScramblerSpec;
     private final String mDisplayName;
@@ -64,7 +65,14 @@ public enum PuzzleType {
         mFilename = mScramblerSpec + ".json";
     }
 
+    public static void setCurrentPuzzleType(PuzzleType p) {
+        sCurrentPuzzleType = p;
+    }
+
     public static PuzzleType get(String displayName) {
+        if (displayName.equals(CURRENT)) {
+            return sCurrentPuzzleType;
+        }
         for (PuzzleType i : PuzzleType.values()) {
             if (i.toString().equals(displayName)) {
                 return i;
@@ -88,6 +96,18 @@ public enum PuzzleType {
         updateHistorySessionsFromFile();
     }
 
+    public void saveHistorySessionsToFile(Context context) throws IOException {
+        Writer writer = null;
+        try {
+            OutputStream out = context.openFileOutput(mFilename, Context.MODE_PRIVATE);
+            writer = new OutputStreamWriter(out);
+            new Gson().toJson(mHistorySessionsList, sSessionArrayListType, writer);
+        } finally {
+            if (writer != null) writer.close();
+        }
+        updateHistorySessionsFromFile();
+    }
+
     public void updateHistorySessionsFromFile() {
         mHistorySessionsList = null;
     }
@@ -108,7 +128,7 @@ public enum PuzzleType {
                 }
             }
         }
-        return mHistorySessionsList;
+        return new ArrayList<Session>(mHistorySessionsList);
     }
 
     public Puzzle getPuzzle() {
@@ -132,17 +152,32 @@ public enum PuzzleType {
         return mDisplayName;
     }
 
-    public Session getSession(int index) {
+    public Session getCurrentSession() {
+        if (mCurrentSession == null) mCurrentSession = new Session();
+        return mCurrentSession;
+    }
+
+    public Session getSession(int index, Context context) {
         if (index == CURRENT_SESSION) {
             if (mCurrentSession == null) mCurrentSession = new Session();
             return mCurrentSession;
         } else {
-            return mHistorySessionsList.get(index);
+            try {
+                return getHistorySessions(context).get(index);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+        return null;
     }
 
     public void resetCurrentSession() {
         mCurrentSession = null;
     }
+
+    public void deleteHistorySession(int index) {
+        mHistorySessionsList.remove(index);
+    }
+
 
 }

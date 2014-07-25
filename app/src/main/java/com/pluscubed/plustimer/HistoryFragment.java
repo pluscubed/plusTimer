@@ -1,6 +1,7 @@
 package com.pluscubed.plustimer;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ListFragment;
@@ -30,15 +31,21 @@ public class HistoryFragment extends ListFragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        ((SessionListAdapter) getListAdapter()).onSessionListChanged();
+    }
+
+    @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        Intent i = new Intent(getActivity(), HistorySessionActivity.class);
-        i.putExtra(HistorySessionActivity.EXTRA_HISTORY_SESSION_POSITION, position);
+        Intent i = new Intent(getActivity(), HistorySolveListActivity.class);
+        i.putExtra(HistorySolveListActivity.EXTRA_HISTORY_SESSION_POSITION, position);
         startActivity(i);
     }
 
     public class SessionListAdapter extends ArrayAdapter<Session> {
         SessionListAdapter() throws IOException {
-            super(getActivity(), android.R.layout.simple_list_item_1, PuzzleType.sCurrentPuzzleType.getHistorySessions(getActivity()));
+            super(getActivity(), android.R.layout.simple_list_item_1, PuzzleType.get(PuzzleType.CURRENT).getHistorySessions(getActivity()));
         }
 
         @Override
@@ -51,6 +58,27 @@ public class HistoryFragment extends ListFragment {
             text.setText(session.getTimestampStringOfLastSolve(getActivity()));
             return convertView;
         }
+
+        public void onSessionListChanged() {
+            clear();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+                try {
+                    addAll(PuzzleType.get(PuzzleType.CURRENT).getHistorySessions(getActivity()));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            else {
+                try {
+                    for (Session i : PuzzleType.get(PuzzleType.CURRENT).getHistorySessions(getActivity())) {
+                        add(i);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            notifyDataSetChanged();
+        }
+
     }
 
 }

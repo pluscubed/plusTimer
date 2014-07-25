@@ -9,6 +9,7 @@
     <string name="puzzle_selection">Puzzle Selection</string>
     <string name="solves">"Solves: "</string>
     <string name="cao">"Current Ao"</string>
+    <string name="lao">"Last Ao"</string>
     <string name="bao">"Best Ao"</string>
     <string name="mean">"Session Mean: "</string>
     <string name="delete">Delete</string>

@@ -68,10 +68,10 @@ public class CurrentSTimerRetainedFragment extends Fragment implements CurrentST
     //Generate scramble image and text
     private ScrambleAndSvg generateScramble() {
 
-        String scramble = PuzzleType.sCurrentPuzzleType.getPuzzle().generateScramble();
+        String scramble = PuzzleType.get(PuzzleType.CURRENT).getPuzzle().generateScramble();
         ScrambleAndSvg scrambleAndSvg = null;
         try {
-            scrambleAndSvg = new ScrambleAndSvg(scramble, PuzzleType.sCurrentPuzzleType.getPuzzle().drawScramble(scramble, null));
+            scrambleAndSvg = new ScrambleAndSvg(scramble, PuzzleType.get(PuzzleType.CURRENT).getPuzzle().drawScramble(scramble, null));
         } catch (InvalidScrambleException e) {
             e.printStackTrace();
         }

@@ -35,13 +35,13 @@ public abstract class CurrentSBaseFragment extends Fragment {
         menuPuzzleSpinner.post(new Runnable() {
             @Override
             public void run() {
-                menuPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition(PuzzleType.sCurrentPuzzleType), true);
+                menuPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition(PuzzleType.get(PuzzleType.CURRENT)), true);
                 menuPuzzleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        if (menuPuzzleSpinner.getSelectedItemPosition() != puzzleTypeSpinnerAdapter.getPosition(PuzzleType.sCurrentPuzzleType)) {
+                        if (menuPuzzleSpinner.getSelectedItemPosition() != puzzleTypeSpinnerAdapter.getPosition(PuzzleType.get(PuzzleType.CURRENT))) {
 
-                            PuzzleType.sCurrentPuzzleType = (PuzzleType) parent.getItemAtPosition(position);
+                            PuzzleType.setCurrentPuzzleType((PuzzleType) parent.getItemAtPosition(position));
                             GetChildFragmentsListener listener;
                             try {
                                 listener = (GetChildFragmentsListener) getParentFragment();
@@ -64,12 +64,11 @@ public abstract class CurrentSBaseFragment extends Fragment {
     }
 
     public Activity getAttachedActivity() {
-        if (getParentFragment() != null)
-            return getParentFragment().getActivity();
+        if (getParentFragment() != null) return getParentFragment().getActivity();
         return getActivity();
     }
 
-    public void onSolveItemClick(int position) {
+    public void onSolveItemClick(String displayName, int sessionIndex, int solveIndex) {
         OnSolveItemClickListener listener;
         try {
             listener = (OnSolveItemClickListener) getAttachedActivity();
@@ -77,7 +76,7 @@ public abstract class CurrentSBaseFragment extends Fragment {
             throw new ClassCastException(getAttachedActivity().toString()
                     + " must implement OnSolveItemClickListener");
         }
-        listener.showCurrentSolveDialog(position);
+        listener.showCurrentSolveDialog(displayName, sessionIndex, solveIndex);
     }
 
     abstract void onSessionSolvesChanged();
@@ -89,6 +88,6 @@ public abstract class CurrentSBaseFragment extends Fragment {
     }
 
     public interface OnSolveItemClickListener {
-        void showCurrentSolveDialog(int position);
+        void showCurrentSolveDialog(String displayName, int sessionIndex, int solveIndex);
     }
 }

@@ -18,7 +18,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".HistorySessionActivity"
+            android:name=".HistorySolveListActivity"
             android:parentActivityName=".MainActivity">
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data

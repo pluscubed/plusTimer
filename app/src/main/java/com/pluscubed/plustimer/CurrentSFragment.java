@@ -21,7 +21,6 @@ import java.util.ArrayList;
  */
 public class CurrentSFragment extends Fragment implements CurrentSBaseFragment.GetChildFragmentsListener, CurrentSTimerFragment.MenuItemsEnableListener {
     private static final String STATE_MENU_ITEMS_ENABLE_BOOLEAN = "menu_items_enable_boolean";
-    private static final String ARG_CURRENT_S_TIMER_STATE = "state";
     private SlidingTabLayout mSlidingTabLayout;
     private ViewPager mViewPager;
     private boolean mMenuItemsEnable;
@@ -136,7 +135,7 @@ public class CurrentSFragment extends Fragment implements CurrentSBaseFragment.G
                 case 0:
                     return new CurrentSTimerFragment();
                 case 1:
-                    return new CurrentSDetailsListFragment();
+                    return SolveListFragment.newInstance(true, PuzzleType.CURRENT, PuzzleType.CURRENT_SESSION);
             }
             return null;
         }

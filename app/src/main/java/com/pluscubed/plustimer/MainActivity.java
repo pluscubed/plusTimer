@@ -43,7 +43,7 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
 
     @Override
     public void onDialogDismissed(String displayName, int sessionIndex, int solveIndex, int penalty) {
-        Solve solve = PuzzleType.get(displayName).getSession(sessionIndex).getSolveByPosition(solveIndex);
+        Solve solve = PuzzleType.get(displayName).getSession(sessionIndex, this).getSolveByPosition(solveIndex);
         switch (penalty) {
             case SolveDialog.DIALOG_PENALTY_NONE:
                 solve.setPenalty(Solve.Penalty.NONE);
@@ -55,7 +55,7 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
                 solve.setPenalty(Solve.Penalty.DNF);
                 break;
             case SolveDialog.DIALOG_RESULT_DELETE:
-                PuzzleType.get(displayName).getSession(sessionIndex).deleteSolve(solveIndex);
+                PuzzleType.get(displayName).getSession(sessionIndex, this).deleteSolve(solveIndex);
                 break;
         }
         if (getSupportFragmentManager().findFragmentByTag(CURRENT_S_TAG) != null) {
@@ -239,10 +239,10 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
     }
 
     @Override
-    public void showCurrentSolveDialog(int position) {
+    public void showCurrentSolveDialog(String displayName, int sessionIndex, int solveIndex) {
         DialogFragment dialog = (DialogFragment) getSupportFragmentManager().findFragmentByTag(DIALOG_FRAGMENT_TAG);
         if (dialog == null) {
-            SolveDialog d = SolveDialog.newInstance(PuzzleType.sCurrentPuzzleType.toString(), PuzzleType.CURRENT_SESSION, position);
+            SolveDialog d = SolveDialog.newInstance(PuzzleType.get(displayName).toString(), sessionIndex, solveIndex);
             d.show(getSupportFragmentManager(), DIALOG_FRAGMENT_TAG);
         }
     }
