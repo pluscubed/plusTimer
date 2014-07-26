@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 import net.gnehzr.tnoodle.scrambles.Puzzle;
@@ -45,7 +46,13 @@ public enum PuzzleType {
         sSessionArrayListType = new TypeToken<ArrayList<Session>>() {
         }.getType();
         sCurrentPuzzleType = PuzzleType.THREE;
+        gson = new GsonBuilder()
+                .registerTypeAdapter(ScrambleAndSvg.class, new ScrambleAndSvg.Serializer())
+                .registerTypeAdapter(ScrambleAndSvg.class, new ScrambleAndSvg.Deserializer())
+                .create();
     }
+
+    private static final Gson gson;
 
     public static int CURRENT_SESSION = -1;
     public static String CURRENT = "current_puzzletype";
@@ -88,7 +95,7 @@ public enum PuzzleType {
             writer = new OutputStreamWriter(out);
             ArrayList<Session> historySessions = getHistorySessions(context);
             historySessions.add(mCurrentSession);
-            new Gson().toJson(historySessions, sSessionArrayListType, writer);
+            gson.toJson(historySessions, sSessionArrayListType, writer);
         } finally {
             if (writer != null) writer.close();
         }
@@ -101,7 +108,7 @@ public enum PuzzleType {
         try {
             OutputStream out = context.openFileOutput(mFilename, Context.MODE_PRIVATE);
             writer = new OutputStreamWriter(out);
-            new Gson().toJson(mHistorySessionsList, sSessionArrayListType, writer);
+            gson.toJson(mHistorySessionsList, sSessionArrayListType, writer);
         } finally {
             if (writer != null) writer.close();
         }
@@ -118,7 +125,7 @@ public enum PuzzleType {
             try {
                 InputStream in = context.openFileInput(mFilename);
                 reader = new BufferedReader(new InputStreamReader(in));
-                mHistorySessionsList = new Gson().fromJson(reader, sSessionArrayListType);
+                mHistorySessionsList = gson.fromJson(reader, sSessionArrayListType);
             } catch (FileNotFoundException e) {
                 Log.e(TAG, mDisplayName + ": Session history file not found");
             } finally {
