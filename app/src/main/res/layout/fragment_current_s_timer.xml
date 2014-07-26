@@ -11,7 +11,7 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:text="@string/ready"
-        android:textSize="50sp"/>
+        android:textSize="70sp"/>
 
     <TextView
         android:id="@id/fragment_current_s_timer_inspecting_textview"
@@ -19,11 +19,11 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:gravity="center"
-        android:paddingBottom="100dp"
+        android:paddingBottom="110dp"
         android:paddingLeft="7dp"
         android:paddingTop="5dp"
         android:text="@string/inspection"
-        android:textSize="16sp"
+        android:textSize="20sp"
         android:visibility="gone"/>
 
     <TextView
