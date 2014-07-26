@@ -13,6 +13,8 @@
 
     <item name="fragment_current_s_timer_scramble_imageview" type="id"/>
 
+    <item name="fragment_current_s_timer_inspecting_textview" type="id"/>
+
     <!--SolveDialog-->
     <item name="dialog_solve_timestamp_textview" type="id"/>
     <item name="dialog_solve_scramble_textview" type="id"/>

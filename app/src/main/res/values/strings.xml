@@ -17,6 +17,8 @@
     <string name="reset">Reset</string>
     <string name="scrambleimage">Scramble Image</string>
 
+    <string name="inspection">Inspection:</string>
+
     <string-array name="penalty_array">
         <item>None</item>
         <item>+2</item>

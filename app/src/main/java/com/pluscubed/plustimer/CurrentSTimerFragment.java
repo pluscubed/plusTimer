@@ -1,6 +1,7 @@
 package com.pluscubed.plustimer;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PictureDrawable;
 import android.os.Build;
@@ -39,6 +40,8 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
     private static final String STATE_IMAGE_DISPLAYED = "scramble_image_displayed_boolean";
     private static final String STATE_START_TIME = "start_time_long";
     private static final String STATE_RUNNING = "running_boolean";
+    private static final String STATE_INSPECTING = "inspecting_boolean";
+    private static final String STATE_INSPECTION_START_TIME = "inspection_start_time_long";
 
     private RetainedFragmentCallback mRetainedFragment;
 
@@ -46,26 +49,78 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
     private TextView mScrambleText;
     private HListView mHListView;
     private ImageView mScrambleImage;
-    private TextView mQuickStatsSolves;
-    private TextView mQuickStats;
-    private long mStartTime;
+    private TextView mStatsSolvesText;
+    private TextView mStatsText;
+    private TextView mInspectingText;
+
+    private Handler mUiHandler;
+    private boolean mHoldTimerStarted;
+    private long mHoldTimerStartTimestamp;
+    private final Runnable holdTimerRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (500000000L <= System.nanoTime() - mHoldTimerStartTimestamp) {
+                mTimerText.setTextColor(Color.GREEN);
+            } else {
+                mUiHandler.postDelayed(this, 10);
+            }
+        }
+    };
+    private boolean mInspecting;
+    private long mInspectionStartTimestamp;
+    private long mStartTimestamp;
     private final Runnable timerRunnable = new Runnable() {
         @Override
         public void run() {
-            mTimerText.setText(Solve.timeStringFromLong(System.nanoTime() - mStartTime));
+            mTimerText.setText(Solve.timeStringFromLong(System.nanoTime() - mStartTimestamp));
             mUiHandler.postDelayed(this, 10);
         }
     };
-    private long mEndTime;
+    private long mEndTimestamp;
     private long mFinalTime;
-
     private boolean mFromSavedInstanceState;
-
     private boolean mRunning;
-
     private boolean mScrambleImageDisplay;
+    private boolean mLateStartPenalty;
+    private final Runnable inspectionRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mTimerText.setText(Solve.timeStringFromLong(15000000000L - (System.nanoTime() - mInspectionStartTimestamp)));
+            if (15000000000L - (System.nanoTime() - mInspectionStartTimestamp) <= 0) {
+                mLateStartPenalty = true;
+                mTimerText.setText("Late Start +2");
+                if (17000000000L - (System.nanoTime() - mInspectionStartTimestamp) <= 0) {
+                    mLateStartPenalty = false;
+                    mInspecting = false;
+                    mInspectingText.setVisibility(View.GONE);
+                    mHoldTimerStarted = false;
+                    //Stop keeping the screen on
+                    getAttachedActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                    //stop the runnables
+                    mUiHandler.removeCallbacksAndMessages(null);
 
-    private Handler mUiHandler;
+                    Solve s = new Solve(mRetainedFragment.getCurrentScrambleAndSvg(), 0);
+                    s.setPenalty(Solve.Penalty.DNF);
+
+                    //Add the solve to the current session with the current scramble/scramble image and DNF
+                    PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().addSolve(s);
+
+                    mTimerText.setText(s.getTimeString());
+
+                    //Update stats and HListView
+                    onSessionSolvesChanged();
+
+                    if (getRetainedFragment().isScrambling()) {
+                        mScrambleText.setText(R.string.scrambling);
+                    }
+
+                    mRetainedFragment.updateViews();
+                    return;
+                }
+            }
+            mUiHandler.postDelayed(this, 10);
+        }
+    };
 
     //Generate string with specified current averages and mean of current session
     public static String buildStatsWithAveragesOf(Context context, Integer... currentAverages) {
@@ -102,8 +157,10 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(STATE_IMAGE_DISPLAYED, mScrambleImageDisplay);
-        outState.putLong(STATE_START_TIME, mStartTime);
+        outState.putLong(STATE_START_TIME, mStartTimestamp);
         outState.putBoolean(STATE_RUNNING, mRunning);
+        outState.putBoolean(STATE_INSPECTING, mInspecting);
+        outState.putLong(STATE_INSPECTION_START_TIME, mInspectionStartTimestamp);
     }
 
     //Set scramble text and scramble image to current ones
@@ -137,8 +194,10 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
 
         if (savedInstanceState != null) {
             mScrambleImageDisplay = savedInstanceState.getBoolean(STATE_IMAGE_DISPLAYED);
-            mStartTime = savedInstanceState.getLong(STATE_START_TIME);
+            mStartTimestamp = savedInstanceState.getLong(STATE_START_TIME);
             mRunning = savedInstanceState.getBoolean(STATE_RUNNING);
+            mInspecting = savedInstanceState.getBoolean(STATE_INSPECTING);
+            mInspectionStartTimestamp = savedInstanceState.getLong(STATE_INSPECTION_START_TIME);
             mFromSavedInstanceState = true;
         } else {
             mFromSavedInstanceState = false;
@@ -156,8 +215,8 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
     @Override
     public void onSessionSolvesChanged() {
         //Update stats
-        mQuickStatsSolves.setText(getString(R.string.solves) + PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().getNumberOfSolves());
-        mQuickStats.setText(buildStatsWithAveragesOf(getAttachedActivity(), 5, 12, 100));
+        mStatsSolvesText.setText(getString(R.string.solves) + PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().getNumberOfSolves());
+        mStatsText.setText(buildStatsWithAveragesOf(getAttachedActivity(), 5, 12, 100));
         //Update HListView
         ((SolveHListViewAdapter) mHListView.getAdapter()).updateSolvesList();
     }
@@ -264,8 +323,11 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
         mScrambleImage = (ImageView) v.findViewById(R.id.fragment_current_s_timer_scramble_imageview);
         mHListView = (HListView) v.findViewById(R.id.fragment_current_s_timer_bottom_hlistview);
 
-        mQuickStats = (TextView) v.findViewById(R.id.fragment_current_s_timer_quickstats_textview);
-        mQuickStatsSolves = (TextView) v.findViewById(R.id.fragment_current_s_timer_quickstats_solves_number_textview);
+
+        mInspectingText = (TextView) v.findViewById(R.id.fragment_current_s_timer_inspecting_textview);
+
+        mStatsText = (TextView) v.findViewById(R.id.fragment_current_s_timer_quickstats_textview);
+        mStatsSolvesText = (TextView) v.findViewById(R.id.fragment_current_s_timer_quickstats_solves_number_textview);
 
         final SolveHListViewAdapter adapter = new SolveHListViewAdapter();
         mHListView.setAdapter(adapter);
@@ -276,63 +338,87 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
             }
         });
 
-        //When the timer text is clicked (start when released)...
-        mTimerText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //If timer is not running and it is not scrambling...
-                if (!mRunning && !mRetainedFragment.isScrambling()) {
-                    //Set flag to keep screen on
-                    getAttachedActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-                    //Set the start time, set flag to true, and start the timer runnable
-                    mStartTime = System.nanoTime();
-                    mRunning = true;
-                    mUiHandler.post(timerRunnable);
-                    //Update the options menu (disable)
-                    enableOptionsMenu(false);
-                    //Set the scramble image to gone
-                    mScrambleImage.setVisibility(View.GONE);
-                    mScrambleImageDisplay = false;
-                    //Post to scrambler thread: generate the next scramble
-                    mRetainedFragment.generateNextScramble();
-                }
-
-            }
-        });
 
         //When the timer text is touched...
         mTimerText.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                //If the timer is running....
-                if (mRunning) {
-                    //Stop keeping the screen on
-                    getAttachedActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-                    //Record the ending time, set flag to false, and stop the timer runnable
-                    mEndTime = System.nanoTime();
-                    mRunning = false;
-                    mUiHandler.removeCallbacksAndMessages(null);
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN: {
+                        if (mRunning) {
+                            //Stop keeping the screen on
+                            getAttachedActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                            //Record the ending time, set flag to false, and stop the timer runnable
+                            mEndTimestamp = System.nanoTime();
+                            mRunning = false;
+                            mUiHandler.removeCallbacksAndMessages(null);
 
-                    //Set the timer text to total time
-                    mFinalTime = mEndTime - mStartTime;
-                    mTimerText.setText(Solve.timeStringFromLong(mFinalTime));
+                            //Set the timer text to total time
+                            mFinalTime = mEndTimestamp - mStartTimestamp;
 
-                    //Add the solve to the current session with the current scramble/scramble image and time
-                    PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().addSolve(new Solve(mRetainedFragment.getCurrentScrambleAndSvg(), mFinalTime));
+                            Solve s = new Solve(mRetainedFragment.getCurrentScrambleAndSvg(), mFinalTime);
+                            if (mLateStartPenalty) {
+                                s.setPenalty(Solve.Penalty.PLUSTWO);
+                                mLateStartPenalty = false;
+                            }
+                            //Add the solve to the current session with the current scramble/scramble image and time
+                            PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().addSolve(s);
 
-                    //Update stats and HListView
-                    onSessionSolvesChanged();
+                            mTimerText.setText(s.getTimeString());
 
-                    if (getRetainedFragment().isScrambling()) {
-                        mScrambleText.setText(R.string.scrambling);
+                            //Update stats and HListView
+                            onSessionSolvesChanged();
+
+                            if (getRetainedFragment().isScrambling()) {
+                                mScrambleText.setText(R.string.scrambling);
+                            }
+
+                            mRetainedFragment.updateViews();
+                            return false;
+                        } else if (!mInspecting && !mRetainedFragment.isScrambling()) {
+                            return true;
+                        } else if (mInspecting) {
+                            mHoldTimerStarted = true;
+                            mHoldTimerStartTimestamp = System.nanoTime();
+                            mTimerText.setTextColor(Color.RED);
+                            mUiHandler.postDelayed(holdTimerRunnable, 450);
+                            return true;
+                        }
+                        break;
                     }
 
-                    mRetainedFragment.updateViews();
-                    return true;
-                } else {
-                    return false;
-                }
+                    case MotionEvent.ACTION_UP: {
+                        if (!mInspecting && !mRunning && !mRetainedFragment.isScrambling()) {
+                            getAttachedActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                            mInspectionStartTimestamp = System.nanoTime();
+                            mInspecting = true;
+                            mInspectingText.setVisibility(View.VISIBLE);
+                            mUiHandler.post(inspectionRunnable);
+                            enableOptionsMenu(false);
+                            //Set the scramble image to gone
+                            mScrambleImage.setVisibility(View.GONE);
+                            mScrambleImageDisplay = false;
+                            //Post to scrambler thread: generate the next scramble
+                            mRetainedFragment.generateNextScramble();
+                        } else if (mInspecting && !mRunning) {
+                            if (mHoldTimerStarted && 500000000L <= System.nanoTime() - mHoldTimerStartTimestamp) {
+                                mStartTimestamp = System.nanoTime();
+                                mInspecting = false;
+                                mInspectingText.setVisibility(View.GONE);
+                                mRunning = true;
+                                mUiHandler.removeCallbacksAndMessages(null);
+                                mUiHandler.post(timerRunnable);
+                            } else {
+                                mHoldTimerStarted = false;
+                                mUiHandler.removeCallbacks(holdTimerRunnable);
+                            }
+                            mTimerText.setTextColor(Color.BLACK);
+                        }
+                        return false;
+                    }
 
+                }
+                return false;
             }
         });
 
@@ -345,15 +431,21 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
             mRetainedFragment.generateNextScramble();
             mRetainedFragment.updateViews();
         } else {
+            if (mInspecting) {
+                mUiHandler.post(inspectionRunnable);
+                mInspectingText.setVisibility(View.VISIBLE);
+            }
             if (mRunning) {
                 mUiHandler.post(timerRunnable);
+            }
+            if (mRunning || mInspecting) {
+                enableOptionsMenu(false);
+            } else if (!getRetainedFragment().isScrambling()) {
+                enableOptionsMenu(true);
             }
             if (mRunning || !getRetainedFragment().isScrambling()) {
                 // If timer is running, then update text/image to current. If timer is not running and not scrambling, then update scramble views to current.
                 updateScrambleTextAndImageToCurrent();
-                if (!getRetainedFragment().isScrambling()) {
-                    enableOptionsMenu(true);
-                }
             } else {
                 mScrambleText.setText(R.string.scrambling);
             }
