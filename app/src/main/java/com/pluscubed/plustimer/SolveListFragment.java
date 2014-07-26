@@ -13,6 +13,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -112,6 +113,10 @@ public class SolveListFragment extends CurrentSBaseFragment {
             submit.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    if (PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().getNumberOfSolves() == 0) {
+                        Toast.makeText(getAttachedActivity().getApplicationContext(), getResources().getText(R.string.session_no_solves), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     try {
                         PuzzleType.get(PuzzleType.CURRENT).submitCurrentSession(getAttachedActivity());
                     } catch (IOException e) {
