@@ -3,7 +3,7 @@
     <!--CurrentSTimerFragment-->
     <item name="fragment_current_s_timer_scramble_textview" type="id"/>
     <item name="fragment_current_s_timer_time_textview" type="id"/>
-    <item name="menu_current_s_puzzletype_spinner" type="id"/>
+
 
     <item name="fragment_current_s_timer_bottom_hlistview" type="id"/>
     <item name="hlist_item_solve_textview" type="id"/>
@@ -22,6 +22,8 @@
 
     <!--ActionBar-->
     <item name="menu_current_s_toggle_scramble_image_action" type="id"/>
+    <item name="menu_current_s_puzzletype_spinner" type="id"/>
+    <item name="menu_current_s_details_share" type="id"/>
 
     <!--SolveListFragment-->
     <item name="list_item_session_list_solve_title_textview" type="id"/>
@@ -29,6 +31,7 @@
     <item name="fragment_session_list_stats_textview" type="id"/>
     <item name="fragment_current_s_details_reset_button" type="id"/>
     <item name="fragment_current_s_details_submit_button" type="id"/>
+
 
     <!--MainActivity-->
     <item name="activity_main_drawerlayout" type="id"/>

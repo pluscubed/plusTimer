@@ -88,6 +88,36 @@ public enum PuzzleType {
         return null;
     }
 
+    public String toSessionText(Context context, Session session, boolean current) {
+        StringBuilder s = new StringBuilder(mDisplayName).append("\n\n")
+                .append("Number of Solves: ").append(session.getNumberOfSolves()).append("\n");
+        if (session.getNumberOfSolves() > 0) {
+            s.append("Best: ").append(Session.getBestSolve(session.getSolves()).getDescriptiveTimeString()).append("\n")
+                    .append("Worst: ").append(Session.getWorstSolve(session.getSolves()).getDescriptiveTimeString()).append("\n")
+                    .append("Mean: ").append(session.getStringMean()).append("\n");
+            int[] averages = {1000, 100, 50, 12, 5};
+            for (int i : averages) {
+                if (session.getNumberOfSolves() >= i) {
+                    if (current) {
+                        s.append(context.getString(R.string.cao)).append(i).append(": ").append(session.getStringCurrentAverageOf(i)).append("\n");
+                    } else {
+                        s.append(context.getString(R.string.lao)).append(i).append(": ").append(session.getStringCurrentAverageOf(i)).append("\n");
+                    }
+                    s.append(context.getString(R.string.bao)).append(i).append(": ").append(session.getStringBestAverageOf(i)).append("\n");
+                }
+            }
+            s.append("\n\n");
+            int c = 1;
+            for (Solve i : session.getSolves()) {
+                s.append(c).append(". ").append(i.getDescriptiveTimeString()).append("\n")
+                        .append("     ").append(Solve.timeDateStringFromTimestamp(context, i.getTimestamp())).append("\n")
+                        .append("     ").append(i.getScrambleAndSvg().scramble).append("\n\n");
+                c++;
+            }
+        }
+        return s.toString();
+    }
+
     public void submitCurrentSession(Context context) throws IOException {
         Writer writer = null;
         try {

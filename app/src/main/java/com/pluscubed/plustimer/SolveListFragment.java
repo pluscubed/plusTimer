@@ -1,11 +1,13 @@
 package com.pluscubed.plustimer;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -36,6 +38,8 @@ public class SolveListFragment extends CurrentSBaseFragment {
     private int mSessionIndex;
     private String mPuzzleTypeDisplayName;
     private boolean mCurrentToggle;
+
+    private String mShareText;
 
     public static SolveListFragment newInstance(boolean current, String displayName, int sessionIndex) {
         SolveListFragment f = new SolveListFragment();
@@ -73,6 +77,25 @@ public class SolveListFragment extends CurrentSBaseFragment {
             inflater.inflate(R.menu.menu_current_s_detailslist, menu);
             setUpPuzzleSpinner(menu);
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_current_s_details_share:
+                share();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+
+    }
+
+    private void share() {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT, PuzzleType.get(mPuzzleTypeDisplayName).toSessionText(getAttachedActivity(), PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getAttachedActivity()), mCurrentToggle));
+        startActivity(Intent.createChooser(intent, getResources().getString(R.string.share_dialog_title)));
     }
 
     @Override

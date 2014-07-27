@@ -8,4 +8,11 @@
         android:title="@string/puzzle_selection"
         plustimer:actionViewClass="android.widget.Spinner"
         plustimer:showAsAction="always"/>
+
+    <item
+        android:id="@id/menu_current_s_details_share"
+        android:icon="@drawable/ic_action_share"
+        android:title="@string/share"
+        plustimer:showAsAction="ifRoom"
+        />
 </menu>

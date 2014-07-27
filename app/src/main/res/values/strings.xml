@@ -17,6 +17,8 @@
     <string name="reset">Reset</string>
     <string name="scrambleimage">Scramble Image</string>
     <string name="session_no_solves">Session is empty! Do some solves first.</string>
+    <string name="share">Share</string>
+    <string name="share_dialog_title">Share times via…</string>
 
     <string name="inspection">Inspection:</string>
 

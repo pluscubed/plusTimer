@@ -79,6 +79,9 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
         if (menu.findItem(R.id.menu_current_s_toggle_scramble_image_action) != null) {
             menu.findItem(R.id.menu_current_s_toggle_scramble_image_action).setVisible(!drawerOpen);
         }
+        if (menu.findItem(R.id.menu_current_s_details_share) != null) {
+            menu.findItem(R.id.menu_current_s_details_share).setVisible(!drawerOpen);
+        }
         if (drawerOpen) {
             getSupportActionBar().setTitle(mDrawerTitle);
         } else {
