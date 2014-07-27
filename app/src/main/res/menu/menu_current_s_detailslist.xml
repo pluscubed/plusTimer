@@ -11,8 +11,8 @@
 
     <item
         android:id="@id/menu_solvelist_share"
-        android:icon="@drawable/ic_action_share"
         android:title="@string/share"
+        plustimer:actionProviderClass="com.pluscubed.plustimer.ShareActionProvider"
         plustimer:showAsAction="ifRoom"
         />
 </menu>

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -42,6 +43,7 @@ public class SolveListFragment extends CurrentSBaseFragment {
     private Button mReset;
     private Button mSubmit;
 
+    private ShareActionProvider mShareActionProvider;
 
     public static SolveListFragment newInstance(boolean current, String displayName, int sessionIndex) {
         SolveListFragment f = new SolveListFragment();
@@ -78,28 +80,22 @@ public class SolveListFragment extends CurrentSBaseFragment {
         if (mCurrentToggle) {
             inflater.inflate(R.menu.menu_current_s_detailslist, menu);
             setUpPuzzleSpinner(menu);
+            MenuItem shareItem = menu.findItem(R.id.menu_solvelist_share);
+            mShareActionProvider = (ShareActionProvider)
+                    MenuItemCompat.getActionProvider(shareItem);
+            setShareIntent();
         } else {
             inflater.inflate(R.menu.menu_history_solvelist, menu);
         }
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_solvelist_share:
-                share();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+    private void setShareIntent() {
+        if (mShareActionProvider != null) {
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_TEXT, PuzzleType.get(mPuzzleTypeDisplayName).toSessionText(getAttachedActivity(), PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getAttachedActivity()), mCurrentToggle));
+            mShareActionProvider.setShareIntent(intent);
         }
-
-    }
-
-    private void share() {
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_TEXT, PuzzleType.get(mPuzzleTypeDisplayName).toSessionText(getAttachedActivity(), PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getAttachedActivity()), mCurrentToggle));
-        startActivity(Intent.createChooser(intent, getResources().getString(R.string.share_dialog_title)));
     }
 
     @Override
@@ -182,6 +178,7 @@ public class SolveListFragment extends CurrentSBaseFragment {
         updateQuickStats();
         if (mCurrentToggle)
             enableResetSubmitButtons(PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().getNumberOfSolves() > 0);
+        setShareIntent();
     }
 
     @Override
