@@ -39,11 +39,13 @@ public enum PuzzleType {
     FOURFAST("444fast", "4x4-fast"),
     THREE("333", "3x3"),
     TWO("222", "2x2");
-    private static final Type sSessionArrayListType;
+    public static final int CURRENT_SESSION = -1;
+    public static final String CURRENT = "current_puzzletype";
+    private static final Type SESSION_ARRAY_LIST_TYPE;
     private static final String TAG = "PuzzleType";
 
     static {
-        sSessionArrayListType = new TypeToken<ArrayList<Session>>() {
+        SESSION_ARRAY_LIST_TYPE = new TypeToken<ArrayList<Session>>() {
         }.getType();
         sCurrentPuzzleType = PuzzleType.THREE;
         gson = new GsonBuilder()
@@ -53,9 +55,6 @@ public enum PuzzleType {
     }
 
     private static final Gson gson;
-
-    public static int CURRENT_SESSION = -1;
-    public static String CURRENT = "current_puzzletype";
     private static PuzzleType sCurrentPuzzleType;
     private final String mFilename;
     private final String mScramblerSpec;
@@ -125,7 +124,7 @@ public enum PuzzleType {
             writer = new OutputStreamWriter(out);
             ArrayList<Session> historySessions = getHistorySessions(context);
             historySessions.add(mCurrentSession);
-            gson.toJson(historySessions, sSessionArrayListType, writer);
+            gson.toJson(historySessions, SESSION_ARRAY_LIST_TYPE, writer);
         } finally {
             if (writer != null) writer.close();
         }
@@ -138,7 +137,7 @@ public enum PuzzleType {
         try {
             OutputStream out = context.openFileOutput(mFilename, Context.MODE_PRIVATE);
             writer = new OutputStreamWriter(out);
-            gson.toJson(mHistorySessionsList, sSessionArrayListType, writer);
+            gson.toJson(mHistorySessionsList, SESSION_ARRAY_LIST_TYPE, writer);
         } finally {
             if (writer != null) writer.close();
         }
@@ -155,7 +154,7 @@ public enum PuzzleType {
             try {
                 InputStream in = context.openFileInput(mFilename);
                 reader = new BufferedReader(new InputStreamReader(in));
-                mHistorySessionsList = gson.fromJson(reader, sSessionArrayListType);
+                mHistorySessionsList = gson.fromJson(reader, SESSION_ARRAY_LIST_TYPE);
             } catch (FileNotFoundException e) {
                 Log.e(TAG, mDisplayName + ": Session history file not found");
             } finally {

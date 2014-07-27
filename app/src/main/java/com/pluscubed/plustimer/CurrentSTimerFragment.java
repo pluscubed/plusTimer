@@ -56,7 +56,7 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
     private Handler mUiHandler;
     private boolean mHoldTimerStarted;
     private long mHoldTimerStartTimestamp;
-    private final Runnable holdTimerRunnable = new Runnable() {
+    private final Runnable mHoldTimerRunnable = new Runnable() {
         @Override
         public void run() {
             if (500000000L <= System.nanoTime() - mHoldTimerStartTimestamp) {
@@ -69,7 +69,7 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
     private boolean mInspecting;
     private long mInspectionStartTimestamp;
     private long mStartTimestamp;
-    private final Runnable timerRunnable = new Runnable() {
+    private final Runnable mTimerRunnable = new Runnable() {
         @Override
         public void run() {
             mTimerText.setText(Solve.timeStringFromLong(System.nanoTime() - mStartTimestamp));
@@ -82,7 +82,7 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
     private boolean mRunning;
     private boolean mScrambleImageDisplay;
     private boolean mLateStartPenalty;
-    private final Runnable inspectionRunnable = new Runnable() {
+    private final Runnable mInspectionRunnable = new Runnable() {
         @Override
         public void run() {
             mTimerText.setText(Solve.timeStringFromLong(15000000000L - (System.nanoTime() - mInspectionStartTimestamp)));
@@ -381,7 +381,7 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
                             mHoldTimerStarted = true;
                             mHoldTimerStartTimestamp = System.nanoTime();
                             mTimerText.setTextColor(Color.RED);
-                            mUiHandler.postDelayed(holdTimerRunnable, 450);
+                            mUiHandler.postDelayed(mHoldTimerRunnable, 450);
                             return true;
                         }
                         break;
@@ -393,7 +393,7 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
                             mInspectionStartTimestamp = System.nanoTime();
                             mInspecting = true;
                             mInspectingText.setVisibility(View.VISIBLE);
-                            mUiHandler.post(inspectionRunnable);
+                            mUiHandler.post(mInspectionRunnable);
                             enableOptionsMenu(false);
                             //Set the scramble image to gone
                             mScrambleImage.setVisibility(View.GONE);
@@ -407,10 +407,10 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
                                 mInspectingText.setVisibility(View.GONE);
                                 mRunning = true;
                                 mUiHandler.removeCallbacksAndMessages(null);
-                                mUiHandler.post(timerRunnable);
+                                mUiHandler.post(mTimerRunnable);
                             } else {
                                 mHoldTimerStarted = false;
-                                mUiHandler.removeCallbacks(holdTimerRunnable);
+                                mUiHandler.removeCallbacks(mHoldTimerRunnable);
                             }
                             mTimerText.setTextColor(Color.BLACK);
                         }
@@ -432,11 +432,11 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
             mRetainedFragment.updateViews();
         } else {
             if (mInspecting) {
-                mUiHandler.post(inspectionRunnable);
+                mUiHandler.post(mInspectionRunnable);
                 mInspectingText.setVisibility(View.VISIBLE);
             }
             if (mRunning) {
-                mUiHandler.post(timerRunnable);
+                mUiHandler.post(mTimerRunnable);
             }
             if (mRunning || mInspecting) {
                 enableOptionsMenu(false);

@@ -17,8 +17,8 @@ import java.lang.reflect.Type;
  */
 
 public class ScrambleAndSvg {
-    String scramble;
-    Svg svgLite;
+    public String scramble;
+    public Svg svgLite;
 
     public ScrambleAndSvg(String scramble, Svg svgLite) {
         this.scramble = scramble;

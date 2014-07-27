@@ -11,8 +11,8 @@ import net.gnehzr.tnoodle.scrambles.InvalidScrambleException;
  * Retained fragment alongside CurrentSTimerFragment
  */
 public class CurrentSTimerRetainedFragment extends Fragment implements CurrentSTimerFragment.RetainedFragmentCallback {
-    Handler mScramblerThreadHandler;
-    HandlerThread mScramblerThread;
+    private Handler mScramblerThreadHandler;
+    private HandlerThread mScramblerThread;
     private ScrambleAndSvg mCurrentScrambleAndSvg;
     private ScrambleAndSvg mNextScrambleAndSvg;
 
