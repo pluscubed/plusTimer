@@ -85,7 +85,7 @@ public class HistorySessionListFragment extends ListFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_history, container, false);
+        View v = inflater.inflate(R.layout.fragment_history_sessionlist, container, false);
         try {
             setListAdapter(new SessionListAdapter());
         } catch (IOException e) {

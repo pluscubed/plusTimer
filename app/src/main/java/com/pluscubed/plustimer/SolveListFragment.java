@@ -39,6 +39,9 @@ public class SolveListFragment extends CurrentSBaseFragment {
     private String mPuzzleTypeDisplayName;
     private boolean mCurrentToggle;
 
+    private Button mReset;
+    private Button mSubmit;
+
 
     public static SolveListFragment newInstance(boolean current, String displayName, int sessionIndex) {
         SolveListFragment f = new SolveListFragment();
@@ -118,23 +121,21 @@ public class SolveListFragment extends CurrentSBaseFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_session_list, container, false);
+        View v = inflater.inflate(R.layout.fragment_solvelist, container, false);
 
         mQuickStats = (TextView) v.findViewById(R.id.fragment_session_list_stats_textview);
 
         if (mCurrentToggle) {
-            Button reset = (Button) v.findViewById(R.id.fragment_current_s_details_reset_button);
-            reset.setOnClickListener(new View.OnClickListener() {
+            mReset = (Button) v.findViewById(R.id.fragment_current_s_details_reset_button);
+            mReset.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     PuzzleType.get(PuzzleType.CURRENT).resetCurrentSession();
                     onSessionSolvesChanged();
                 }
             });
-
-            reset.setVisibility(View.VISIBLE);
-            Button submit = (Button) v.findViewById(R.id.fragment_current_s_details_submit_button);
-            submit.setOnClickListener(new View.OnClickListener() {
+            mSubmit = (Button) v.findViewById(R.id.fragment_current_s_details_submit_button);
+            mSubmit.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().getNumberOfSolves() == 0) {
@@ -149,7 +150,7 @@ public class SolveListFragment extends CurrentSBaseFragment {
                     onSessionSolvesChanged();
                 }
             });
-            submit.setVisibility(View.VISIBLE);
+
         }
 
         mListView = (ListView) v.findViewById(android.R.id.list);
@@ -160,14 +161,27 @@ public class SolveListFragment extends CurrentSBaseFragment {
                 onSolveItemClick(mPuzzleTypeDisplayName, mSessionIndex, position);
             }
         });
+        mListView.setEmptyView(v.findViewById(android.R.id.empty));
         onSessionSolvesChanged();
         return v;
+    }
+
+    public void enableResetSubmitButtons(boolean enable) {
+        if (enable) {
+            mReset.setVisibility(View.VISIBLE);
+            mSubmit.setVisibility(View.VISIBLE);
+        } else {
+            mReset.setVisibility(View.GONE);
+            mSubmit.setVisibility(View.GONE);
+        }
     }
 
     @Override
     public void onSessionSolvesChanged() {
         ((SolveListAdapter) mListView.getAdapter()).updateSolvesList();
         updateQuickStats();
+        if (mCurrentToggle)
+            enableResetSubmitButtons(PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().getNumberOfSolves() > 0);
     }
 
     @Override

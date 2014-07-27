@@ -22,6 +22,15 @@
         android:footerDividersEnabled="true"
         android:transcriptMode="normal"/>
 
+    <TextView
+        android:id="@id/android:empty"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:padding="6dp"
+        android:text="@string/session_no_solves"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
