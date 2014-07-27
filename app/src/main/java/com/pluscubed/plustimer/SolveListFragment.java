@@ -39,7 +39,6 @@ public class SolveListFragment extends CurrentSBaseFragment {
     private String mPuzzleTypeDisplayName;
     private boolean mCurrentToggle;
 
-    private String mShareText;
 
     public static SolveListFragment newInstance(boolean current, String displayName, int sessionIndex) {
         SolveListFragment f = new SolveListFragment();
@@ -76,13 +75,15 @@ public class SolveListFragment extends CurrentSBaseFragment {
         if (mCurrentToggle) {
             inflater.inflate(R.menu.menu_current_s_detailslist, menu);
             setUpPuzzleSpinner(menu);
+        } else {
+            inflater.inflate(R.menu.menu_history_solvelist, menu);
         }
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.menu_current_s_details_share:
+            case R.id.menu_solvelist_share:
                 share();
                 return true;
             default:
@@ -104,7 +105,7 @@ public class SolveListFragment extends CurrentSBaseFragment {
         mCurrentToggle = getArguments().getBoolean(ARG_CURRENT_BOOLEAN);
         mPuzzleTypeDisplayName = getArguments().getString(ARG_PUZZLETYPE_DISPLAYNAME);
         mSessionIndex = getArguments().getInt(ARG_SESSION_POSITION);
-        if (mCurrentToggle) setHasOptionsMenu(true);
+        setHasOptionsMenu(true);
     }
 
     public void updateQuickStats() {

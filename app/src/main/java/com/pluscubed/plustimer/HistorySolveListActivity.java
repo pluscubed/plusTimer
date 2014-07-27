@@ -13,6 +13,7 @@ import java.io.IOException;
  */
 public class HistorySolveListActivity extends ActionBarActivity implements CurrentSBaseFragment.OnSolveItemClickListener, SolveDialog.SolveDialogListener {
     public static final String EXTRA_HISTORY_SESSION_POSITION = "com.pluscubed.plustimer.history_session_position";
+    public static final String EXTRA_HISTORY_PUZZLETYPE_DISPLAYNAME = "com.pluscubed.plustimer.history_puzzletype_displayname";
     public static final String HISTORY_DIALOG_FRAGMENT_TAG = "HISTORY_MODIFY_DIALOG";
 
     @Override
@@ -66,8 +67,12 @@ public class HistorySolveListActivity extends ActionBarActivity implements Curre
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_history_session);
         FragmentManager fm = getSupportFragmentManager();
-        int position = getIntent().getIntExtra(EXTRA_HISTORY_SESSION_POSITION, 0);
-        Fragment fragment = SolveListFragment.newInstance(false, PuzzleType.CURRENT, position);
-        fm.beginTransaction().add(R.id.activity_history_solve_list_framelayout, fragment).commit();
+        Fragment fragment = fm.findFragmentById(R.id.activity_history_solve_list_framelayout);
+        if (fragment == null) {
+            int position = getIntent().getIntExtra(EXTRA_HISTORY_SESSION_POSITION, 0);
+            String puzzleType = getIntent().getStringExtra(EXTRA_HISTORY_PUZZLETYPE_DISPLAYNAME);
+            fragment = SolveListFragment.newInstance(false, puzzleType, position);
+            fm.beginTransaction().add(R.id.activity_history_solve_list_framelayout, fragment).commit();
+        }
     }
 }

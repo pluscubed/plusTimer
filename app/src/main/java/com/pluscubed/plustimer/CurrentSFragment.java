@@ -40,7 +40,7 @@ public class CurrentSFragment extends Fragment implements CurrentSBaseFragment.G
         super.onPrepareOptionsMenu(menu);
         MenuItem menuPuzzleMenuItem = menu.findItem(R.id.menu_current_s_puzzletype_spinner);
         MenuItem menuDisplayScramble = menu.findItem(R.id.menu_current_s_toggle_scramble_image_action);
-        MenuItem menuShareAction = menu.findItem(R.id.menu_current_s_details_share);
+        MenuItem menuShareAction = menu.findItem(R.id.menu_solvelist_share);
 
         if (menuPuzzleMenuItem != null) {
             Spinner menuPuzzleSpinner = (Spinner) MenuItemCompat.getActionView(menuPuzzleMenuItem);

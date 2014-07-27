@@ -79,8 +79,11 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
         if (menu.findItem(R.id.menu_current_s_toggle_scramble_image_action) != null) {
             menu.findItem(R.id.menu_current_s_toggle_scramble_image_action).setVisible(!drawerOpen);
         }
-        if (menu.findItem(R.id.menu_current_s_details_share) != null) {
-            menu.findItem(R.id.menu_current_s_details_share).setVisible(!drawerOpen);
+        if (menu.findItem(R.id.menu_solvelist_share) != null) {
+            menu.findItem(R.id.menu_solvelist_share).setVisible(!drawerOpen);
+        }
+        if (menu.findItem(R.id.menu_history_sessionlist_puzzltype_spinner) != null) {
+            menu.findItem(R.id.menu_history_sessionlist_puzzltype_spinner).setVisible(!drawerOpen);
         }
         if (drawerOpen) {
             getSupportActionBar().setTitle(mDrawerTitle);
@@ -213,7 +216,7 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
                     break;
                 case 1:
                     tag = HISTORY_TAG;
-                    fragmentClass = HistoryFragment.class;
+                    fragmentClass = HistorySessionListFragment.class;
                     break;
                 default:
                     Toast.makeText(getApplicationContext(), "Work in Progress", Toast.LENGTH_SHORT).show();

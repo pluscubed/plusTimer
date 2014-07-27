@@ -23,7 +23,8 @@
     <!--ActionBar-->
     <item name="menu_current_s_toggle_scramble_image_action" type="id"/>
     <item name="menu_current_s_puzzletype_spinner" type="id"/>
-    <item name="menu_current_s_details_share" type="id"/>
+    <item name="menu_solvelist_share" type="id"/>
+    <item name="menu_history_sessionlist_puzzltype_spinner" type="id"/>
 
     <!--SolveListFragment-->
     <item name="list_item_session_list_solve_title_textview" type="id"/>
