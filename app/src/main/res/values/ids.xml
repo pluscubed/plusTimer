@@ -25,11 +25,12 @@
     <item name="menu_current_s_puzzletype_spinner" type="id"/>
     <item name="menu_solvelist_share" type="id"/>
     <item name="menu_history_sessionlist_puzzltype_spinner" type="id"/>
+    <item name="context_solvelist_delete" type="id"/>
 
     <!--SolveListFragment-->
-    <item name="list_item_session_list_solve_title_textview" type="id"/>
-    <item name="list_item_session_list_solve_desc_textview" type="id"/>
-    <item name="fragment_session_list_stats_textview" type="id"/>
+    <item name="list_item_solvelist_title_textview" type="id"/>
+    <item name="list_item_solvelist_desc_textview" type="id"/>
+    <item name="fragment_solvelist_stats_textview" type="id"/>
     <item name="fragment_current_s_details_reset_button" type="id"/>
     <item name="fragment_current_s_details_submit_button" type="id"/>
 
@@ -45,5 +46,8 @@
 
     <!--HistorySolveListActivity-->
     <item name="activity_history_solve_list_framelayout" type="id"/>
+
+    <!--HistorySessionListFragment-->
+    <item name="list_item_history_sessionlist_textview" type="id"/>
 
 </resources>

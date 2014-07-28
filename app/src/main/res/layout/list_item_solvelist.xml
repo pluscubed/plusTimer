@@ -3,10 +3,11 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
+              android:background="@drawable/background_activated"
               android:orientation="vertical">
 
     <TextView
-        android:id="@id/list_item_session_list_solve_title_textview"
+        android:id="@id/list_item_solvelist_title_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingLeft="4dp"
@@ -15,7 +16,7 @@
         android:textStyle="bold"/>
 
     <TextView
-        android:id="@id/list_item_session_list_solve_desc_textview"
+        android:id="@id/list_item_solvelist_desc_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingBottom="4dp"

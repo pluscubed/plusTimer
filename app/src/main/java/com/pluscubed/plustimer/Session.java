@@ -177,4 +177,8 @@ public class Session {
         mSolves.remove(position);
     }
 
+    public void deleteSolve(Solve i) {
+        mSolves.remove(i);
+    }
+
 }

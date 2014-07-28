@@ -211,9 +211,21 @@ public enum PuzzleType {
         mCurrentSession = null;
     }
 
-    public void deleteHistorySession(int index) {
+    public void deleteHistorySession(int index, Context context) {
         mHistorySessionsList.remove(index);
+        try {
+            saveHistorySessionsToFile(context);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-
+    public void deleteHistorySession(Session session, Context context) {
+        mHistorySessionsList.remove(session);
+        try {
+            saveHistorySessionsToFile(context);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

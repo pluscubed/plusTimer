@@ -8,7 +8,7 @@
               tools:context=".MainActivity">
 
     <TextView
-        android:id="@id/fragment_session_list_stats_textview"
+        android:id="@id/fragment_solvelist_stats_textview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#ffe0e0e0"
@@ -19,6 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:choiceMode="none"
         android:footerDividersEnabled="true"
         android:transcriptMode="normal"/>
 

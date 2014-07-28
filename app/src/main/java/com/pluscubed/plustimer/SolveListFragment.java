@@ -5,12 +5,16 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.view.ActionMode;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -29,9 +33,11 @@ import java.util.Collections;
  */
 public class SolveListFragment extends CurrentSBaseFragment {
 
-    public static final String ARG_PUZZLETYPE_DISPLAYNAME = "com.pluscubed.plustimer.solvelist.display_name";
-    public static final String ARG_SESSION_POSITION = "com.pluscubed.plustimer.solvelist.session_position";
-    public static final String ARG_CURRENT_BOOLEAN = "com.pluscubed.plustimer.solvelist.current_boolean";
+    private static final String ARG_PUZZLETYPE_DISPLAYNAME = "com.pluscubed.plustimer.solvelist.display_name";
+    private static final String ARG_SESSION_POSITION = "com.pluscubed.plustimer.solvelist.session_position";
+    private static final String ARG_CURRENT_BOOLEAN = "com.pluscubed.plustimer.solvelist.current_boolean";
+
+    private static final String STATE_CAB_BOOLEAN = "cab_displayed";
 
     private TextView mQuickStats;
     private ListView mListView;
@@ -44,6 +50,8 @@ public class SolveListFragment extends CurrentSBaseFragment {
     private Button mSubmit;
 
     private ShareActionProvider mShareActionProvider;
+
+    private ActionMode mActionMode;
 
     public static SolveListFragment newInstance(boolean current, String displayName, int sessionIndex) {
         SolveListFragment f = new SolveListFragment();
@@ -72,6 +80,12 @@ public class SolveListFragment extends CurrentSBaseFragment {
             s += context.getString(R.string.mean) + PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getAttachedActivity()).getStringMean();
         }
         return s;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(STATE_CAB_BOOLEAN, mActionMode != null);
     }
 
     @Override
@@ -119,7 +133,7 @@ public class SolveListFragment extends CurrentSBaseFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_solvelist, container, false);
 
-        mQuickStats = (TextView) v.findViewById(R.id.fragment_session_list_stats_textview);
+        mQuickStats = (TextView) v.findViewById(R.id.fragment_solvelist_stats_textview);
 
         if (mCurrentToggle) {
             mReset = (Button) v.findViewById(R.id.fragment_current_s_details_reset_button);
@@ -151,13 +165,37 @@ public class SolveListFragment extends CurrentSBaseFragment {
 
         mListView = (ListView) v.findViewById(android.R.id.list);
         mListView.setAdapter(new SolveListAdapter());
+        mListView.setEmptyView(v.findViewById(android.R.id.empty));
+
+        //Getting CAB to work API9+: Doctoror Drive's answer - http://stackoverflow.com/questions/14737519/how-can-you-implement-multi-selection-and-contextual-actionmode-in-actionbarsher
+
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                onSolveItemClick(mPuzzleTypeDisplayName, mSessionIndex, position);
+                if (mActionMode == null)
+                    onSolveItemClick(mPuzzleTypeDisplayName, mSessionIndex, position);
             }
         });
-        mListView.setEmptyView(v.findViewById(android.R.id.empty));
+
+        mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                if (mActionMode != null) {
+                    return false;
+                }
+
+                mListView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
+                mListView.setItemChecked(position, true);
+                ((ActionBarActivity) getAttachedActivity()).startSupportActionMode(new SolveListActionModeCallback());
+                return true;
+            }
+        });
+
+        if (savedInstanceState != null && savedInstanceState.getBoolean(STATE_CAB_BOOLEAN)) {
+            mListView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
+            ((ActionBarActivity) getAttachedActivity()).startSupportActionMode(new SolveListActionModeCallback());
+        }
+
         onSessionSolvesChanged();
         return v;
     }
@@ -174,6 +212,19 @@ public class SolveListFragment extends CurrentSBaseFragment {
 
     @Override
     public void onSessionSolvesChanged() {
+        if (!mCurrentToggle) {
+            if (PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getAttachedActivity()).getNumberOfSolves() == 0) {
+                PuzzleType.get(mPuzzleTypeDisplayName).deleteHistorySession(mSessionIndex, getAttachedActivity());
+
+                getAttachedActivity().finish();
+                return;
+            }
+            try {
+                PuzzleType.get(mPuzzleTypeDisplayName).saveHistorySessionsToFile(getAttachedActivity());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         ((SolveListAdapter) mListView.getAdapter()).updateSolvesList();
         updateQuickStats();
         if (mCurrentToggle)
@@ -184,6 +235,51 @@ public class SolveListFragment extends CurrentSBaseFragment {
     @Override
     public void onSessionChanged() {
         onSessionSolvesChanged();
+    }
+
+    private class SolveListActionModeCallback implements ActionMode.Callback {
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            mActionMode = mode;
+            getAttachedActivity().getMenuInflater().inflate(R.menu.context_solve_or_session_list, menu);
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            SparseBooleanArray checked;
+            switch (item.getItemId()) {
+                case R.id.context_solvelist_delete:
+                    checked = mListView.getCheckedItemPositions();
+                    ArrayList<Solve> toDelete = new ArrayList<Solve>();
+                    for (int i = 0; i < checked.size(); i++) {
+                        final int index = checked.keyAt(i);
+                        if (checked.get(index)) {
+                            toDelete.add(PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getAttachedActivity()).getSolveByPosition(index));
+                        }
+                    }
+                    for (Solve i : toDelete) {
+                        PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getAttachedActivity()).deleteSolve(i);
+                    }
+                    mode.finish();
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            mListView.clearChoices();
+            mListView.setChoiceMode(AbsListView.CHOICE_MODE_NONE);
+            mActionMode = null;
+            onSessionSolvesChanged();
+        }
     }
 
     public class SolveListAdapter extends ArrayAdapter<Solve> {
@@ -198,11 +294,11 @@ public class SolveListFragment extends CurrentSBaseFragment {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
-                convertView = getAttachedActivity().getLayoutInflater().inflate(R.layout.list_item_session_list_solve, parent, false);
+                convertView = getAttachedActivity().getLayoutInflater().inflate(R.layout.list_item_solvelist, parent, false);
             }
             Solve s = getItem(position);
-            TextView time = (TextView) convertView.findViewById(R.id.list_item_session_list_solve_title_textview);
-            TextView desc = (TextView) convertView.findViewById(R.id.list_item_session_list_solve_desc_textview);
+            TextView time = (TextView) convertView.findViewById(R.id.list_item_solvelist_title_textview);
+            TextView desc = (TextView) convertView.findViewById(R.id.list_item_solvelist_desc_textview);
 
 
             time.setText("");

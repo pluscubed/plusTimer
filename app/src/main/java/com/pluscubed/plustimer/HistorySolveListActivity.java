@@ -6,8 +6,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
 
-import java.io.IOException;
-
 /**
  * History session activity
  */
@@ -28,7 +26,6 @@ public class HistorySolveListActivity extends ActionBarActivity implements Curre
     @Override
     public void onDialogDismissed(String displayName, int sessionIndex, int solveIndex, int penalty) {
         Solve solve = PuzzleType.get(displayName).getSession(sessionIndex, this).getSolveByPosition(solveIndex);
-        boolean finish = false;
         switch (penalty) {
             case SolveDialog.DIALOG_PENALTY_NONE:
                 solve.setPenalty(Solve.Penalty.NONE);
@@ -41,21 +38,9 @@ public class HistorySolveListActivity extends ActionBarActivity implements Curre
                 break;
             case SolveDialog.DIALOG_RESULT_DELETE:
                 PuzzleType.get(displayName).getSession(sessionIndex, this).deleteSolve(solveIndex);
-                if (PuzzleType.get(displayName).getSession(sessionIndex, this).getNumberOfSolves() == 0) {
-                    PuzzleType.get(displayName).deleteHistorySession(sessionIndex);
-                    finish = true;
-                }
                 break;
         }
-        try {
-            PuzzleType.get(displayName).saveHistorySessionsToFile(this);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        if (finish) {
-            finish();
-            return;
-        }
+
         if (getSupportFragmentManager().findFragmentById(R.id.activity_history_solve_list_framelayout) != null) {
             ((SolveListFragment) getSupportFragmentManager().findFragmentById(R.id.activity_history_solve_list_framelayout)).onSessionSolvesChanged();
         }

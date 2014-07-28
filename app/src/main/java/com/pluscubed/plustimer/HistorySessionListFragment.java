@@ -7,11 +7,15 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ListFragment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.view.ActionMode;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -19,6 +23,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * History Fragment
@@ -26,13 +31,17 @@ import java.io.IOException;
 public class HistorySessionListFragment extends ListFragment {
 
     private static final String STATE_PUZZLETYPE_DISPLAYNAME = "puzzletype_displayname";
+    private static final String STATE_CAB_BOOLEAN = "cab_displayed";
 
     private String mPuzzleTypeDisplayName;
+
+    private ActionMode mActionMode;
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(STATE_PUZZLETYPE_DISPLAYNAME, mPuzzleTypeDisplayName);
+        outState.putBoolean(STATE_CAB_BOOLEAN, mActionMode != null);
     }
 
     @Override
@@ -91,7 +100,31 @@ public class HistorySessionListFragment extends ListFragment {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        if (savedInstanceState != null && savedInstanceState.getBoolean(STATE_CAB_BOOLEAN)) {
+            getListView().setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
+            ((ActionBarActivity) getActivity()).startSupportActionMode(new SolveListActionModeCallback());
+        }
+
         return v;
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                if (mActionMode != null) {
+                    return false;
+                }
+
+                getListView().setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
+                getListView().setItemChecked(position, true);
+                ((ActionBarActivity) getActivity()).startSupportActionMode(new SolveListActionModeCallback());
+                return true;
+            }
+        });
     }
 
     @Override
@@ -102,24 +135,75 @@ public class HistorySessionListFragment extends ListFragment {
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        Intent i = new Intent(getActivity(), HistorySolveListActivity.class);
-        i.putExtra(HistorySolveListActivity.EXTRA_HISTORY_SESSION_POSITION, position);
-        i.putExtra(HistorySolveListActivity.EXTRA_HISTORY_PUZZLETYPE_DISPLAYNAME, mPuzzleTypeDisplayName);
-        startActivity(i);
+        if (mActionMode == null) {
+            Intent i = new Intent(getActivity(), HistorySolveListActivity.class);
+            i.putExtra(HistorySolveListActivity.EXTRA_HISTORY_SESSION_POSITION, position);
+            i.putExtra(HistorySolveListActivity.EXTRA_HISTORY_PUZZLETYPE_DISPLAYNAME, mPuzzleTypeDisplayName);
+            startActivity(i);
+        }
+    }
+
+    private class SolveListActionModeCallback implements android.support.v7.view.ActionMode.Callback {
+        @Override
+        public boolean onCreateActionMode(android.support.v7.view.ActionMode mode, Menu menu) {
+            mActionMode = mode;
+            getActivity().getMenuInflater().inflate(R.menu.context_solve_or_session_list, menu);
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(android.support.v7.view.ActionMode mode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(android.support.v7.view.ActionMode mode, MenuItem item) {
+            SparseBooleanArray checked;
+            switch (item.getItemId()) {
+                case R.id.context_solvelist_delete:
+                    checked = getListView().getCheckedItemPositions();
+                    ArrayList<Session> toDelete = new ArrayList<Session>();
+                    for (int i = 0; i < checked.size(); i++) {
+                        final int index = checked.keyAt(i);
+                        if (checked.get(index)) {
+                            try {
+                                toDelete.add(PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions(getActivity()).get(index));
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                    for (Session i : toDelete) {
+                        PuzzleType.get(mPuzzleTypeDisplayName).deleteHistorySession(i, getActivity());
+                    }
+                    mode.finish();
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        @Override
+        public void onDestroyActionMode(android.support.v7.view.ActionMode mode) {
+            getListView().clearChoices();
+            getListView().setChoiceMode(AbsListView.CHOICE_MODE_NONE);
+            mActionMode = null;
+            ((SessionListAdapter) getListAdapter()).onSessionListChanged();
+        }
     }
 
     public class SessionListAdapter extends ArrayAdapter<Session> {
         SessionListAdapter() throws IOException {
-            super(getActivity(), android.R.layout.simple_list_item_1, PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions(getActivity()));
+            super(getActivity(), 0, PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions(getActivity()));
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
-                convertView = getActivity().getLayoutInflater().inflate(android.R.layout.simple_list_item_1, parent, false);
+                convertView = getActivity().getLayoutInflater().inflate(R.layout.list_item_history_sessionlist, parent, false);
             }
             Session session = getItem(position);
-            TextView text = (TextView) convertView.findViewById(android.R.id.text1);
+            TextView text = (TextView) convertView.findViewById(R.id.list_item_history_sessionlist_textview);
             text.setText(session.getTimestampStringOfLastSolve(getActivity()));
             return convertView;
         }
