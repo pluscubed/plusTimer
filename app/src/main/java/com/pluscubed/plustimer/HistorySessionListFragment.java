@@ -1,7 +1,6 @@
 package com.pluscubed.plustimer;
 
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ListFragment;
@@ -166,11 +165,7 @@ public class HistorySessionListFragment extends ListFragment {
                     for (int i = 0; i < checked.size(); i++) {
                         final int index = checked.keyAt(i);
                         if (checked.get(index)) {
-                            try {
-                                toDelete.add(PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions(getActivity()).get(index));
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
+                            toDelete.add(PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions(getActivity()).get(index));
                         }
                     }
                     for (Session i : toDelete) {
@@ -209,22 +204,6 @@ public class HistorySessionListFragment extends ListFragment {
         }
 
         public void onSessionListChanged() {
-            clear();
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
-                try {
-                    addAll(PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions(getActivity()));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            else {
-                try {
-                    for (Session i : PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions(getActivity())) {
-                        add(i);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
             notifyDataSetChanged();
         }
 

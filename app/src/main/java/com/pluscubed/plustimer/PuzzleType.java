@@ -22,6 +22,8 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Puzzle type enum
@@ -41,16 +43,17 @@ public enum PuzzleType {
     TWO("222", "2x2");
     public static final int CURRENT_SESSION = -1;
     public static final String CURRENT = "current_puzzletype";
-    private static final Type SESSION_ARRAY_LIST_TYPE;
+    private static final Type SESSION_LIST_TYPE;
     private static final String TAG = "PuzzleType";
 
     static {
-        SESSION_ARRAY_LIST_TYPE = new TypeToken<ArrayList<Session>>() {
+        SESSION_LIST_TYPE = new TypeToken<List<Session>>() {
         }.getType();
         sCurrentPuzzleType = PuzzleType.THREE;
         gson = new GsonBuilder()
                 .registerTypeAdapter(ScrambleAndSvg.class, new ScrambleAndSvg.Serializer())
                 .registerTypeAdapter(ScrambleAndSvg.class, new ScrambleAndSvg.Deserializer())
+                .setPrettyPrinting()
                 .create();
     }
 
@@ -60,7 +63,7 @@ public enum PuzzleType {
     private final String mScramblerSpec;
     private final String mDisplayName;
     private Session mCurrentSession;
-    private ArrayList<Session> mHistorySessionsList;
+    private List<Session> mHistorySessionsList;
     private Puzzle mPuzzle;
 
 
@@ -117,54 +120,50 @@ public enum PuzzleType {
         return s.toString();
     }
 
-    public void submitCurrentSession(Context context) throws IOException {
-        Writer writer = null;
-        try {
-            OutputStream out = context.openFileOutput(mFilename, Context.MODE_PRIVATE);
-            writer = new OutputStreamWriter(out);
-            ArrayList<Session> historySessions = getHistorySessions(context);
-            historySessions.add(mCurrentSession);
-            gson.toJson(historySessions, SESSION_ARRAY_LIST_TYPE, writer);
-        } finally {
-            if (writer != null) writer.close();
-        }
+    public void submitCurrentSession() {
+        mHistorySessionsList.add(mCurrentSession);
         resetCurrentSession();
-        updateHistorySessionsFromFile();
     }
 
-    public void saveHistorySessionsToFile(Context context) throws IOException {
+    public void saveHistorySessionsToFile(Context context) {
         Writer writer = null;
         try {
             OutputStream out = context.openFileOutput(mFilename, Context.MODE_PRIVATE);
             writer = new OutputStreamWriter(out);
-            gson.toJson(mHistorySessionsList, SESSION_ARRAY_LIST_TYPE, writer);
+            gson.toJson(mHistorySessionsList, SESSION_LIST_TYPE, writer);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         } finally {
-            if (writer != null) writer.close();
+            if (writer != null) try {
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
-        updateHistorySessionsFromFile();
     }
 
-    public void updateHistorySessionsFromFile() {
-        mHistorySessionsList = null;
-    }
-
-    public ArrayList<Session> getHistorySessions(Context context) throws IOException {
+    public List<Session> getHistorySessions(Context context) {
         if (mHistorySessionsList == null) {
             BufferedReader reader = null;
             try {
                 InputStream in = context.openFileInput(mFilename);
                 reader = new BufferedReader(new InputStreamReader(in));
-                mHistorySessionsList = gson.fromJson(reader, SESSION_ARRAY_LIST_TYPE);
+                mHistorySessionsList = gson.fromJson(reader, SESSION_LIST_TYPE);
             } catch (FileNotFoundException e) {
                 Log.e(TAG, mDisplayName + ": Session history file not found");
             } finally {
-                if (reader != null) reader.close();
+                if (reader != null) try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 if (mHistorySessionsList == null) {
+                    Log.e(TAG, "found null history list");
                     mHistorySessionsList = new ArrayList<Session>();
                 }
             }
         }
-        return new ArrayList<Session>(mHistorySessionsList);
+        return new ArrayList<Session>(Collections.unmodifiableList(mHistorySessionsList));
     }
 
     public Puzzle getPuzzle() {
@@ -198,13 +197,8 @@ public enum PuzzleType {
             if (mCurrentSession == null) mCurrentSession = new Session();
             return mCurrentSession;
         } else {
-            try {
-                return getHistorySessions(context).get(index);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            return getHistorySessions(context).get(index);
         }
-        return null;
     }
 
     public void resetCurrentSession() {
@@ -213,19 +207,12 @@ public enum PuzzleType {
 
     public void deleteHistorySession(int index, Context context) {
         mHistorySessionsList.remove(index);
-        try {
-            saveHistorySessionsToFile(context);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        saveHistorySessionsToFile(context);
     }
 
     public void deleteHistorySession(Session session, Context context) {
         mHistorySessionsList.remove(session);
-        try {
-            saveHistorySessionsToFile(context);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        saveHistorySessionsToFile(context);
+
     }
 }

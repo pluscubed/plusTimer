@@ -25,7 +25,8 @@ public class Session {
         return timeTwo;
     }
 
-    public static Solve getBestSolve(List<Solve> solveList) {
+    public static Solve getBestSolve(List<Solve> list) {
+        List<Solve> solveList = new ArrayList<Solve>(list);
         if (solveList.size() > 0) {
             Collections.reverse(solveList);
             List<Long> times = getListTimeTwoNdnf(solveList);
@@ -41,7 +42,8 @@ public class Session {
         return null;
     }
 
-    public static Solve getWorstSolve(ArrayList<Solve> solveList) {
+    public static Solve getWorstSolve(List<Solve> list) {
+        List<Solve> solveList = new ArrayList<Solve>(list);
         if (solveList.size() > 0) {
             Collections.reverse(solveList);
             for (Solve i : solveList) {
@@ -61,8 +63,8 @@ public class Session {
         return null;
     }
 
-    public ArrayList<Solve> getSolves() {
-        return new ArrayList<Solve>(mSolves);
+    public List<Solve> getSolves() {
+        return new ArrayList<Solve>(Collections.unmodifiableList(mSolves));
     }
 
     public void addSolve(Solve s) {

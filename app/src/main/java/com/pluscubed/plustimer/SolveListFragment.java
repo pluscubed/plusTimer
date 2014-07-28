@@ -22,7 +22,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -152,11 +151,9 @@ public class SolveListFragment extends CurrentSBaseFragment {
                         Toast.makeText(getAttachedActivity().getApplicationContext(), getResources().getText(R.string.session_no_solves), Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    try {
-                        PuzzleType.get(PuzzleType.CURRENT).submitCurrentSession(getAttachedActivity());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+
+                    PuzzleType.get(PuzzleType.CURRENT).submitCurrentSession();
+
                     onSessionSolvesChanged();
                 }
             });
@@ -211,19 +208,17 @@ public class SolveListFragment extends CurrentSBaseFragment {
     }
 
     @Override
-    public void onSessionSolvesChanged() {
-        if (!mCurrentToggle) {
-            if (PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getAttachedActivity()).getNumberOfSolves() == 0) {
-                PuzzleType.get(mPuzzleTypeDisplayName).deleteHistorySession(mSessionIndex, getAttachedActivity());
+    public void onPause() {
+        super.onPause();
+        PuzzleType.get(mPuzzleTypeDisplayName).saveHistorySessionsToFile(getAttachedActivity());
+    }
 
-                getAttachedActivity().finish();
-                return;
-            }
-            try {
-                PuzzleType.get(mPuzzleTypeDisplayName).saveHistorySessionsToFile(getAttachedActivity());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+    @Override
+    public void onSessionSolvesChanged() {
+        if (!mCurrentToggle && PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getAttachedActivity()).getNumberOfSolves() <= 0) {
+            PuzzleType.get(mPuzzleTypeDisplayName).deleteHistorySession(mSessionIndex, getAttachedActivity());
+            getAttachedActivity().finish();
+            return;
         }
         ((SolveListAdapter) mListView.getAdapter()).updateSolvesList();
         updateQuickStats();
