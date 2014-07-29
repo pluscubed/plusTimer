@@ -28,7 +28,7 @@ import java.util.ArrayList;
 /**
  * History Fragment
  */
-public class HistorySessionListFragment extends ListFragment {
+public class HistorySessionListFragment extends ListFragment implements MainActivity.ActionModeNavDrawerCallback {
 
     private static final String STATE_PUZZLETYPE_DISPLAYNAME = "puzzletype_displayname";
     private static final String STATE_CAB_BOOLEAN = "cab_displayed";
@@ -141,6 +141,11 @@ public class HistorySessionListFragment extends ListFragment {
             i.putExtra(HistorySolveListActivity.EXTRA_HISTORY_PUZZLETYPE_DISPLAYNAME, mPuzzleTypeDisplayName);
             startActivity(i);
         }
+    }
+
+    @Override
+    public ActionMode getActionMode() {
+        return mActionMode;
     }
 
     private class SolveListActionModeCallback implements android.support.v7.view.ActionMode.Callback {

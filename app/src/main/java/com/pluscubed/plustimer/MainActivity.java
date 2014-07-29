@@ -10,6 +10,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -107,7 +108,7 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
         if (BuildConfig.USE_CRASHLYTICS)
             Crashlytics.start(this);
 
-        FragmentManager fm = getSupportFragmentManager();
+        final FragmentManager fm = getSupportFragmentManager();
         Fragment currentSRetainedFragment = fm.findFragmentByTag(CURRENT_S_TIMER_RETAINED_TAG);
 
         // If the Fragment is non-null, then it is currently being
@@ -164,6 +165,20 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
                     PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putBoolean(PREF_USER_LEARNED_DRAWER, true).commit();
                 }
 
+                //End ActionMode
+                ActionModeNavDrawerCallback[] fragments = new ActionModeNavDrawerCallback[2];
+                if (fm.findFragmentByTag(CURRENT_S_TAG) != null) {
+                    fragments[0] = ((ActionModeNavDrawerCallback) fm.findFragmentByTag(CURRENT_S_TAG).getChildFragmentManager().findFragmentByTag(CurrentSFragment.makeFragmentName(R.id.fragment_current_s_viewpager, 1)));
+                }
+                if (fm.findFragmentByTag(HISTORY_TAG) != null) {
+                    fragments[1] = ((ActionModeNavDrawerCallback) fm.findFragmentByTag(HISTORY_TAG));
+                }
+                for (ActionModeNavDrawerCallback fragment : fragments) {
+                    if (fragment != null && fragment.getActionMode() != null) {
+                        fragment.getActionMode().finish();
+                    }
+                }
+
                 supportInvalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
         };
@@ -206,7 +221,6 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
 
         return super.onOptionsItemSelected(item);
     }
-
 
     void selectItem(boolean initialize, int pos) {
         if (initialize || mCurrentSelectedPosition != pos) {
@@ -260,5 +274,9 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
     @Override
     public Fragment getCurrentSTimerRetainedFragment() {
         return getSupportFragmentManager().findFragmentByTag(CURRENT_S_TIMER_RETAINED_TAG);
+    }
+
+    public interface ActionModeNavDrawerCallback {
+        ActionMode getActionMode();
     }
 }

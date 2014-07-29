@@ -30,7 +30,7 @@ import java.util.Collections;
 /**
  * Session tab
  */
-public class SolveListFragment extends CurrentSBaseFragment {
+public class SolveListFragment extends CurrentSBaseFragment implements MainActivity.ActionModeNavDrawerCallback {
 
     private static final String ARG_PUZZLETYPE_DISPLAYNAME = "com.pluscubed.plustimer.solvelist.display_name";
     private static final String ARG_SESSION_POSITION = "com.pluscubed.plustimer.solvelist.session_position";
@@ -100,6 +100,11 @@ public class SolveListFragment extends CurrentSBaseFragment {
         } else {
             inflater.inflate(R.menu.menu_history_solvelist, menu);
         }
+    }
+
+    @Override
+    public ActionMode getActionMode() {
+        return mActionMode;
     }
 
     private void setShareIntent() {

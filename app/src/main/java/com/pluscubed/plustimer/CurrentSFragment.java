@@ -25,7 +25,7 @@ public class CurrentSFragment extends Fragment implements CurrentSBaseFragment.G
     private ViewPager mViewPager;
     private boolean mMenuItemsEnable;
 
-    private static String makeFragmentName(int viewId, int index) {
+    public static String makeFragmentName(int viewId, int index) {
         return "android:switcher:" + viewId + ":" + index;
     }
 
@@ -113,6 +113,9 @@ public class CurrentSFragment extends Fragment implements CurrentSBaseFragment.G
 
             @Override
             public void onPageSelected(int position) {
+                if (position == 0 && getChildFragments().get(1) != null && ((MainActivity.ActionModeNavDrawerCallback) getChildFragments().get(1)).getActionMode() != null) {
+                    ((MainActivity.ActionModeNavDrawerCallback) getChildFragments().get(1)).getActionMode().finish();
+                }
             }
 
             @Override
