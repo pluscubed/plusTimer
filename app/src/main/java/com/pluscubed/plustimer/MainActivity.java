@@ -120,6 +120,10 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
         if (savedInstanceState != null) {
             mCurrentSelectedPosition = savedInstanceState.getInt(STATE_SELECTED_POSITION);
             mFromSavedInstanceState = true;
+        } else {
+            for (PuzzleType p : PuzzleType.values()) {
+                p.getHistorySessions(this);
+            }
         }
 
         mUserLearnedDrawer = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PREF_USER_LEARNED_DRAWER, false);

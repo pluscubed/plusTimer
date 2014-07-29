@@ -53,7 +53,6 @@ public enum PuzzleType {
         gson = new GsonBuilder()
                 .registerTypeAdapter(ScrambleAndSvg.class, new ScrambleAndSvg.Serializer())
                 .registerTypeAdapter(ScrambleAndSvg.class, new ScrambleAndSvg.Deserializer())
-                .setPrettyPrinting()
                 .create();
     }
 
@@ -158,7 +157,6 @@ public enum PuzzleType {
                     e.printStackTrace();
                 }
                 if (mHistorySessionsList == null) {
-                    Log.e(TAG, "found null history list");
                     mHistorySessionsList = new ArrayList<Session>();
                 }
             }

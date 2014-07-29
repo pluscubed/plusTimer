@@ -1,6 +1,7 @@
 package com.pluscubed.plustimer;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ListFragment;
@@ -204,6 +205,14 @@ public class HistorySessionListFragment extends ListFragment {
         }
 
         public void onSessionListChanged() {
+            clear();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+                addAll(PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions(getActivity()));
+            else {
+                for (Session i : PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions(getActivity())) {
+                    add(i);
+                }
+            }
             notifyDataSetChanged();
         }
 
