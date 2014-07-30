@@ -38,6 +38,12 @@ public class HistorySessionListFragment extends ListFragment implements MainActi
     private ActionMode mActionMode;
 
     @Override
+    public void onPause() {
+        super.onPause();
+        PuzzleType.get(mPuzzleTypeDisplayName).saveHistorySessionsToFile(getActivity());
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(STATE_PUZZLETYPE_DISPLAYNAME, mPuzzleTypeDisplayName);
