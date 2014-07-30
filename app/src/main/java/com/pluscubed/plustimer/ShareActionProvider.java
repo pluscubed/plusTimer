@@ -1,5 +1,7 @@
 package com.pluscubed.plustimer;
 
+//Set max history size to 0 on line 134
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -9,6 +11,7 @@ import android.support.v4.view.ActionProvider;
 import android.support.v7.appcompat.R;
 import android.support.v7.internal.widget.ActivityChooserModel;
 import android.support.v7.internal.widget.ActivityChooserModel.OnChooseActivityListener;
+import android.support.v7.internal.widget.ActivityChooserView;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -128,6 +131,7 @@ public class ShareActionProvider extends ActionProvider {
     public View onCreateActionView() {
         // Create the view and set its data model.
         ActivityChooserModel dataModel = ActivityChooserModel.get(mContext, mShareHistoryFileName);
+        dataModel.setHistoryMaxSize(0);
         ActivityChooserView activityChooserView = new ActivityChooserView(mContext);
         activityChooserView.setActivityChooserModel(dataModel);
 

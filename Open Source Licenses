@@ -13,7 +13,7 @@ https://github.com/sephiroth74/HorizontalVariableListView/tree/development
         -Changes in build.gradle and AndroidManifest.xml (refer to comments in files)
 
 ---------------------------------------------------------------------------------------------------
-CONTAINS SOURCE CODE - support-v7 library: ActivityChooserView.java, ShareActionProvider.java:
+CONTAINS SOURCE CODE - support-v7 library: ShareActionProvider.java:
                        SlidingTabsBasic sample: SlidingTabLayout.java, SlidingTabStrip.java:
 
      All files' package declarations have been changed to com.pluscubed.plustimer
