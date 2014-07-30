@@ -112,7 +112,7 @@ public class Session {
     }
 
     public long getAverageOf(List<Solve> list, int number) {
-        if (number >= 5 && list.size() == number) {
+        if (number > 2 && list.size() == number) {
             long sum = 0;
             ArrayList<Solve> solves = new ArrayList<Solve>(list);
 
@@ -181,6 +181,45 @@ public class Session {
 
     public void deleteSolve(Solve i) {
         mSolves.remove(i);
+    }
+
+    public String toString(Context context, String puzzleTypeDisplayName, boolean current, boolean displaySolves) {
+        StringBuilder s = new StringBuilder();
+        if (displaySolves) {
+            s.append(puzzleTypeDisplayName).append("\n\n");
+        }
+        s.append(context.getString(R.string.number_solves)).append(getNumberOfSolves());
+        if (getNumberOfSolves() > 0) {
+            s.append("\n").append(context.getString(R.string.best)).append(Session.getBestSolve(getSolves()).getDescriptiveTimeString()).append("\n")
+                    .append(context.getString(R.string.worst)).append(Session.getWorstSolve(getSolves()).getDescriptiveTimeString()).append("\n")
+                    .append(context.getString(R.string.mean)).append(getStringMean());
+            if (getNumberOfSolves() > 2) {
+                s.append("\n").append(context.getString(R.string.average)).append(Solve.timeStringFromLong(getAverageOf(mSolves, mSolves.size())));
+
+                int[] averages = {1000, 100, 50, 12, 5};
+                for (int i : averages) {
+                    if (getNumberOfSolves() >= i) {
+                        if (current) {
+                            s.append("\n").append(context.getString(R.string.cao)).append(i).append(": ").append(getStringCurrentAverageOf(i));
+                        } else {
+                            s.append("\n").append(context.getString(R.string.lao)).append(i).append(": ").append(getStringCurrentAverageOf(i));
+                        }
+                        s.append("\n").append(context.getString(R.string.bao)).append(i).append(": ").append(getStringBestAverageOf(i));
+                    }
+                }
+            }
+            if (displaySolves) {
+                s.append("\n\n");
+                int c = 1;
+                for (Solve i : mSolves) {
+                    s.append(c).append(". ").append(i.getDescriptiveTimeString()).append("\n")
+                            .append("     ").append(Solve.timeDateStringFromTimestamp(context, i.getTimestamp())).append("\n")
+                            .append("     ").append(i.getScrambleAndSvg().scramble).append("\n\n");
+                    c++;
+                }
+            }
+        }
+        return s.toString();
     }
 
 }

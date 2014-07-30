@@ -11,7 +11,11 @@
     <string name="cao">"Current Ao"</string>
     <string name="lao">"Last Ao"</string>
     <string name="bao">"Best Ao"</string>
-    <string name="mean">"Session Mean: "</string>
+    <string name="number_solves">"Number of Solves: "</string>
+    <string name="mean">"Mean: "</string>
+    <string name="best">"Best: "</string>
+    <string name="worst">"Worst: "</string>
+    <string name="average">"Average: "</string>
     <string name="delete">Delete</string>
     <string name="penalty">Penalty:</string>
     <string name="reset">Reset</string>

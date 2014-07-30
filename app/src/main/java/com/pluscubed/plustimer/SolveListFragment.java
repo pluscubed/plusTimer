@@ -1,6 +1,5 @@
 package com.pluscubed.plustimer;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -23,8 +22,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 
 
 /**
@@ -37,6 +34,8 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
     private static final String ARG_CURRENT_BOOLEAN = "com.pluscubed.plustimer.solvelist.current_boolean";
 
     private static final String STATE_CAB_BOOLEAN = "cab_displayed";
+
+    private Session mSession;
 
     private TextView mQuickStats;
     private ListView mListView;
@@ -62,25 +61,25 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
         return f;
     }
 
-    public String buildAdvancedStatsWithAveragesOf(Context context, Integer... currentAverages) {
-        Arrays.sort(currentAverages, Collections.reverseOrder());
-        String s = "";
-        for (int i : currentAverages) {
-            if (PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getAttachedActivity()).getNumberOfSolves() >= i) {
-                if (mCurrentToggle) {
-                    s += context.getString(R.string.cao) + i + ": " + PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getAttachedActivity()).getStringCurrentAverageOf(i) + "\n";
-                } else {
-                    s += context.getString(R.string.lao) + i + ": " + PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getAttachedActivity()).getStringCurrentAverageOf(i) + "\n";
-                }
-                s += context.getString(R.string.bao) + i + ": " + PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getAttachedActivity()).getStringBestAverageOf(i) + "\n";
-            }
-        }
-        if (PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getAttachedActivity()).getNumberOfSolves() > 0) {
-            s += context.getString(R.string.mean) + PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getAttachedActivity()).getStringMean();
-        }
-        return s;
-    }
-
+    /* public String buildAdvancedStatsWithAveragesOf(Context context, Integer... currentAverages) {
+         Arrays.sort(currentAverages, Collections.reverseOrder());
+         String s = "";
+         for (int i : currentAverages) {
+             if (PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getAttachedActivity()).getNumberOfSolves() >= i) {
+                 if (mCurrentToggle) {
+                     s += context.getString(R.string.cao) + i + ": " + PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getAttachedActivity()).getStringCurrentAverageOf(i) + "\n";
+                 } else {
+                     s += context.getString(R.string.lao) + i + ": " + PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getAttachedActivity()).getStringCurrentAverageOf(i) + "\n";
+                 }
+                 s += context.getString(R.string.bao) + i + ": " + PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getAttachedActivity()).getStringBestAverageOf(i) + "\n";
+             }
+         }
+         if (PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getAttachedActivity()).getNumberOfSolves() > 0) {
+             s += context.getString(R.string.mean) + PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getAttachedActivity()).getStringMean();
+         }
+         return s;
+     }
+ */
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -93,13 +92,13 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
         if (mCurrentToggle) {
             inflater.inflate(R.menu.menu_current_s_detailslist, menu);
             setUpPuzzleSpinner(menu);
-            MenuItem shareItem = menu.findItem(R.id.menu_solvelist_share);
-            mShareActionProvider = (ShareActionProvider)
-                    MenuItemCompat.getActionProvider(shareItem);
-            setShareIntent();
         } else {
             inflater.inflate(R.menu.menu_history_solvelist, menu);
         }
+        MenuItem shareItem = menu.findItem(R.id.menu_solvelist_share);
+        mShareActionProvider = (ShareActionProvider)
+                MenuItemCompat.getActionProvider(shareItem);
+        setShareIntent();
     }
 
     @Override
@@ -111,7 +110,10 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
         if (mShareActionProvider != null) {
             Intent intent = new Intent(Intent.ACTION_SEND);
             intent.setType("text/plain");
-            intent.putExtra(Intent.EXTRA_TEXT, PuzzleType.get(mPuzzleTypeDisplayName).toSessionText(getAttachedActivity(), PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getAttachedActivity()), mCurrentToggle));
+            intent.putExtra(
+                    Intent.EXTRA_TEXT,
+                    mSession.toString(getAttachedActivity(), PuzzleType.get(mPuzzleTypeDisplayName).toString(), mCurrentToggle, true)
+            );
             mShareActionProvider.setShareIntent(intent);
         }
     }
@@ -122,15 +124,12 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
         mCurrentToggle = getArguments().getBoolean(ARG_CURRENT_BOOLEAN);
         mPuzzleTypeDisplayName = getArguments().getString(ARG_PUZZLETYPE_DISPLAYNAME);
         mSessionIndex = getArguments().getInt(ARG_SESSION_POSITION);
+        mSession = PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getAttachedActivity());
         setHasOptionsMenu(true);
     }
 
     public void updateQuickStats() {
-        mQuickStats.setText(buildAdvancedStatsWithAveragesOf(getAttachedActivity(), 5, 12, 50, 100, 1000));
-        if (!buildAdvancedStatsWithAveragesOf(getAttachedActivity(), 5, 12, 50, 100, 1000).equals("")) {
-            mQuickStats.append("\n");
-        }
-        mQuickStats.append(getString(R.string.solves) + PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getAttachedActivity()).getNumberOfSolves());
+        mQuickStats.setText(mSession.toString(getAttachedActivity(), PuzzleType.get(mPuzzleTypeDisplayName).toString(), mCurrentToggle, false));
     }
 
     @Override
@@ -144,7 +143,7 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
             mReset.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    PuzzleType.get(PuzzleType.CURRENT).resetCurrentSession();
+                    PuzzleType.get(mPuzzleTypeDisplayName).resetCurrentSession();
                     onSessionSolvesChanged();
                 }
             });
@@ -152,12 +151,12 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
             mSubmit.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().getNumberOfSolves() == 0) {
+                    if (mSession.getNumberOfSolves() == 0) {
                         Toast.makeText(getAttachedActivity().getApplicationContext(), getResources().getText(R.string.session_no_solves), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
-                    PuzzleType.get(PuzzleType.CURRENT).submitCurrentSession();
+                    PuzzleType.get(mPuzzleTypeDisplayName).submitCurrentSession();
 
                     onSessionSolvesChanged();
                 }
@@ -220,7 +219,7 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
 
     @Override
     public void onSessionSolvesChanged() {
-        if (!mCurrentToggle && PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getAttachedActivity()).getNumberOfSolves() <= 0) {
+        if (!mCurrentToggle && mSession.getNumberOfSolves() <= 0) {
             PuzzleType.get(mPuzzleTypeDisplayName).deleteHistorySession(mSessionIndex, getAttachedActivity());
             getAttachedActivity().finish();
             return;
@@ -228,7 +227,7 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
         ((SolveListAdapter) mListView.getAdapter()).updateSolvesList();
         updateQuickStats();
         if (mCurrentToggle)
-            enableResetSubmitButtons(PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().getNumberOfSolves() > 0);
+            enableResetSubmitButtons(PuzzleType.get(mPuzzleTypeDisplayName).getCurrentSession().getNumberOfSolves() > 0);
         setShareIntent();
     }
 
@@ -260,11 +259,11 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
                     for (int i = 0; i < checked.size(); i++) {
                         final int index = checked.keyAt(i);
                         if (checked.get(index)) {
-                            toDelete.add(PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getAttachedActivity()).getSolveByPosition(index));
+                            toDelete.add(mSession.getSolveByPosition(index));
                         }
                     }
                     for (Solve i : toDelete) {
-                        PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getAttachedActivity()).deleteSolve(i);
+                        mSession.deleteSolve(i);
                     }
                     mode.finish();
                     return true;
@@ -287,7 +286,7 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
         private ArrayList<Solve> mBestAndWorstSolves;
 
         public SolveListAdapter() {
-            super(getAttachedActivity(), 0, PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getAttachedActivity()).getSolves());
+            super(getAttachedActivity(), 0, mSession.getSolves());
             updateSolvesList();
         }
 
@@ -321,16 +320,16 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
         public void updateSolvesList() {
             clear();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
-                addAll(PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getAttachedActivity()).getSolves());
+                addAll(mSession.getSolves());
             else {
-                for (Solve i : PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getAttachedActivity()).getSolves()) {
+                for (Solve i : mSession.getSolves()) {
                     add(i);
                 }
             }
 
             mBestAndWorstSolves = new ArrayList<Solve>();
-            mBestAndWorstSolves.add(Session.getBestSolve(PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getAttachedActivity()).getSolves()));
-            mBestAndWorstSolves.add(Session.getWorstSolve(PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getAttachedActivity()).getSolves()));
+            mBestAndWorstSolves.add(Session.getBestSolve(mSession.getSolves()));
+            mBestAndWorstSolves.add(Session.getWorstSolve(mSession.getSolves()));
             notifyDataSetChanged();
         }
 
