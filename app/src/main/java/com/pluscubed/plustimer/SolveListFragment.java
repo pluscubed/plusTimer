@@ -219,6 +219,7 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
 
     @Override
     public void onSessionSolvesChanged() {
+        mSession=PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getAttachedActivity());
         if (!mCurrentToggle && mSession.getNumberOfSolves() <= 0) {
             PuzzleType.get(mPuzzleTypeDisplayName).deleteHistorySession(mSessionIndex, getAttachedActivity());
             getAttachedActivity().finish();
