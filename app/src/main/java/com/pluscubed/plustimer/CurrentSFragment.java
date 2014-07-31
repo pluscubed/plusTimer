@@ -40,7 +40,6 @@ public class CurrentSFragment extends Fragment implements CurrentSBaseFragment.G
         super.onPrepareOptionsMenu(menu);
         MenuItem menuPuzzleMenuItem = menu.findItem(R.id.menu_current_s_puzzletype_spinner);
         MenuItem menuDisplayScramble = menu.findItem(R.id.menu_current_s_toggle_scramble_image_action);
-        MenuItem menuShareAction = menu.findItem(R.id.menu_solvelist_share);
 
         if (menuPuzzleMenuItem != null) {
             Spinner menuPuzzleSpinner = (Spinner) MenuItemCompat.getActionView(menuPuzzleMenuItem);
@@ -48,9 +47,7 @@ public class CurrentSFragment extends Fragment implements CurrentSBaseFragment.G
         }
         if (menuDisplayScramble != null) {
             menuDisplayScramble.setEnabled(mMenuItemsEnable);
-        }
-        if (menuShareAction != null) {
-            menuShareAction.setEnabled(mMenuItemsEnable);
+            menuDisplayScramble.getIcon().setAlpha(mMenuItemsEnable ? 255 : 96);
         }
     }
 
@@ -99,9 +96,10 @@ public class CurrentSFragment extends Fragment implements CurrentSBaseFragment.G
         mViewPager = (ViewPager) v.findViewById(R.id.fragment_current_s_viewpager);
         mViewPager.setAdapter(new CurrentSessionPagerAdapter(getChildFragmentManager(), getResources().getStringArray(R.array.current_s_page_titles)));
         mSlidingTabLayout = (SlidingTabLayout) v.findViewById(R.id.fragment_current_s_slidingtablayout);
+        mSlidingTabLayout.setSelectedIndicatorColors(Color.parseColor("white"));
         mSlidingTabLayout.setDistributeEvenly(true);
+        mSlidingTabLayout.setCustomTabView(R.layout.sliding_tab_textview, android.R.id.text1);
         mSlidingTabLayout.setViewPager(mViewPager);
-        mViewPager.setCurrentItem(0);
         mSlidingTabLayout.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -122,7 +120,7 @@ public class CurrentSFragment extends Fragment implements CurrentSBaseFragment.G
                 }
             }
         });
-        mSlidingTabLayout.setSelectedIndicatorColors(Color.parseColor("#424242"));
+        mViewPager.setCurrentItem(0);
         return v;
     }
 

@@ -1,6 +1,7 @@
 package com.pluscubed.plustimer;
 
 import android.content.res.Configuration;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -14,9 +15,11 @@ import android.support.v7.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
@@ -135,14 +138,16 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
         mDrawerListView = (ListView) findViewById(R.id.activity_main_drawer_listview);
         mDrawerTitle = getResources().getString(R.string.app_name);
 
-        mDrawerListView.setAdapter(new ArrayAdapter<String>(this,
-                R.layout.list_item_drawer, mFragmentTitles));
+        mDrawerListView.setAdapter(new NavDrawerAdapater());
         mDrawerListView.setOnItemClickListener(new ListView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 selectItem(false, position);
             }
         });
+
+        View nav_drawer_footer = getLayoutInflater().inflate(R.layout.nav_drawer_footer, null);
+        mDrawerListView.addFooterView(nav_drawer_footer, null, false);
 
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
 
@@ -254,9 +259,9 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
                 fragmentManager.beginTransaction()
                         .replace(R.id.activity_main_content_framelayout, fragment, tag)
                         .commit();
-                mCurrentSelectedPosition = pos;
             }
         }
+        mCurrentSelectedPosition = pos;
         mDrawerListView.setItemChecked(pos, true);
         setTitle(mFragmentActionBarTitles[pos]);
         mDrawerLayout.closeDrawer(mDrawerListView);
@@ -279,4 +284,27 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
     public interface ActionModeNavDrawerCallback {
         ActionMode getActionMode();
     }
+
+    public class NavDrawerAdapater extends ArrayAdapter<String> {
+        public NavDrawerAdapater() {
+            super(MainActivity.this, 0, mFragmentTitles);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                convertView = getLayoutInflater().inflate(R.layout.list_item_drawer, parent, false);
+            }
+
+            TextView text = (TextView) convertView.findViewById(android.R.id.text1);
+            text.setText(getItem(position));
+            if (position == mCurrentSelectedPosition) {
+                text.setTypeface(null, Typeface.BOLD);
+            } else {
+                text.setTypeface(Typeface.create("sans-serif-light", Typeface.NORMAL));
+            }
+            return convertView;
+        }
+    }
+
 }

@@ -3,8 +3,15 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="hlv_listViewStyle">@style/HListView</item>
+        <item name="android:actionBarStyle">@style/ActionBar</item>
+        <item name="actionBarStyle">@style/ActionBar</item>
+        <item name="android:windowContentOverlay">@null</item>
     </style>
 
+    <style name="ActionBar" parent="Widget.AppCompat.Light.ActionBar.Solid.Inverse">
+        <item name="android:background">@drawable/ab_background</item>
+        <item name="background">@drawable/ab_background</item>
+    </style>
 
     <style name="HListView">
         <item name="hlv_transcriptMode">normal</item>

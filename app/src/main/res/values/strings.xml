@@ -3,7 +3,7 @@
 
     <string name="app_name">plusTimer</string>
     <string name="ready">Ready</string>
-    <string name="action_settings">Settings</string>
+    <string name="settings">SETTINGS</string>
     <string name="submit">Submit</string>
     <string name="scrambling">Scrambling…</string>
     <string name="puzzle_selection">Puzzle Selection</string>
@@ -37,15 +37,11 @@
     <string-array name="drawer_array">
         <item>Current Session</item>
         <item>History</item>
-        <item>Settings</item>
-        <item>Help</item>
     </string-array>
 
     <string-array name="drawer_actionbar_array">
         <item>Current</item>
         <item>History</item>
-        <item>Settings</item>
-        <item>Help</item>
     </string-array>
 
     <string-array name="current_s_page_titles">

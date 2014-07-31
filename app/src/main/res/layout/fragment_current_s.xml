@@ -8,13 +8,13 @@
     <com.pluscubed.plustimer.SlidingTabLayout
         android:id="@id/fragment_current_s_slidingtablayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:background="#222222"/>
 
     <android.support.v4.view.ViewPager
         android:id="@id/fragment_current_s_viewpager"
         android:layout_width="match_parent"
-        android:layout_height="0px"
-        android:layout_weight="1"
-        android:background="@android:color/white"/>
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
 
 </LinearLayout>
