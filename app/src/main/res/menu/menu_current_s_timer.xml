@@ -12,7 +12,7 @@
 
     <item
         android:id="@id/menu_current_s_toggle_scramble_image_action"
-        android:icon="@android:drawable/ic_menu_gallery"
+        android:icon="@drawable/ic_action_picture"
         android:title="@string/scrambleimage"
         plustimer:showAsAction="ifRoom|withText"/>
 

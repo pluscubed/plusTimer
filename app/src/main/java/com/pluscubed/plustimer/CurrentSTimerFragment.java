@@ -88,7 +88,7 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
             mTimerText.setText(Solve.timeStringFromLong(15000000000L - (System.nanoTime() - mInspectionStartTimestamp)));
             if (15000000000L - (System.nanoTime() - mInspectionStartTimestamp) <= 0) {
                 mLateStartPenalty = true;
-                mTimerText.setText("Late Start +2");
+                mTimerText.setText(getString(R.string.plus_two));
                 if (17000000000L - (System.nanoTime() - mInspectionStartTimestamp) <= 0) {
                     mLateStartPenalty = false;
                     mInspecting = false;
@@ -113,7 +113,7 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
                     if (getRetainedFragment().isScrambling()) {
                         mScrambleText.setText(R.string.scrambling);
                     }
-
+                    mTimerText.setTextColor(Color.BLACK);
                     mRetainedFragment.updateViews();
                     return;
                 }

@@ -95,14 +95,11 @@ public class CurrentSFragment extends Fragment implements CurrentSBaseFragment.G
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_current_s, container, false);
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        mViewPager = (ViewPager) view.findViewById(R.id.fragment_current_s_viewpager);
+        View v = inflater.inflate(R.layout.fragment_current_s, container, false);
+        mViewPager = (ViewPager) v.findViewById(R.id.fragment_current_s_viewpager);
         mViewPager.setAdapter(new CurrentSessionPagerAdapter(getChildFragmentManager(), getResources().getStringArray(R.array.current_s_page_titles)));
-        mSlidingTabLayout = (SlidingTabLayout) view.findViewById(R.id.fragment_current_s_slidingtablayout);
+        mSlidingTabLayout = (SlidingTabLayout) v.findViewById(R.id.fragment_current_s_slidingtablayout);
+        mSlidingTabLayout.setDistributeEvenly(true);
         mSlidingTabLayout.setViewPager(mViewPager);
         mViewPager.setCurrentItem(0);
         mSlidingTabLayout.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -126,6 +123,7 @@ public class CurrentSFragment extends Fragment implements CurrentSBaseFragment.G
             }
         });
         mSlidingTabLayout.setSelectedIndicatorColors(Color.parseColor("#424242"));
+        return v;
     }
 
     public class CurrentSessionPagerAdapter extends FragmentPagerAdapter {

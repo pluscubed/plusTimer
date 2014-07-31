@@ -3,9 +3,9 @@ package com.pluscubed.plustimer;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.view.ActionMode;
+import android.text.method.ScrollingMovementMethod;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -46,8 +46,6 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
 
     private Button mReset;
     private Button mSubmit;
-
-    private ShareActionProvider mShareActionProvider;
 
     private ActionMode mActionMode;
 
@@ -90,15 +88,11 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         if (mCurrentToggle) {
-            inflater.inflate(R.menu.menu_current_s_detailslist, menu);
+            inflater.inflate(R.menu.menu_current_s_solvelist, menu);
             setUpPuzzleSpinner(menu);
         } else {
             inflater.inflate(R.menu.menu_history_solvelist, menu);
         }
-        MenuItem shareItem = menu.findItem(R.id.menu_solvelist_share);
-        mShareActionProvider = (ShareActionProvider)
-                MenuItemCompat.getActionProvider(shareItem);
-        setShareIntent();
     }
 
     @Override
@@ -106,16 +100,14 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
         return mActionMode;
     }
 
-    private void setShareIntent() {
-        if (mShareActionProvider != null) {
-            Intent intent = new Intent(Intent.ACTION_SEND);
-            intent.setType("text/plain");
-            intent.putExtra(
-                    Intent.EXTRA_TEXT,
-                    mSession.toString(getAttachedActivity(), PuzzleType.get(mPuzzleTypeDisplayName).toString(), mCurrentToggle, true)
-            );
-            mShareActionProvider.setShareIntent(intent);
-        }
+    private void share() {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(
+                Intent.EXTRA_TEXT,
+                mSession.toString(getAttachedActivity(), PuzzleType.get(mPuzzleTypeDisplayName).toString(), mCurrentToggle, true)
+        );
+        startActivity(Intent.createChooser(intent, getResources().getString(R.string.share_dialog_title)));
     }
 
     @Override
@@ -128,6 +120,18 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
         setHasOptionsMenu(true);
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_solvelist_share:
+                share();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+
     public void updateQuickStats() {
         mQuickStats.setText(mSession.toString(getAttachedActivity(), PuzzleType.get(mPuzzleTypeDisplayName).toString(), mCurrentToggle, false));
     }
@@ -137,6 +141,7 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
         View v = inflater.inflate(R.layout.fragment_solvelist, container, false);
 
         mQuickStats = (TextView) v.findViewById(R.id.fragment_solvelist_stats_textview);
+        mQuickStats.setMovementMethod(new ScrollingMovementMethod());
 
         if (mCurrentToggle) {
             mReset = (Button) v.findViewById(R.id.fragment_current_s_details_reset_button);
@@ -219,7 +224,7 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
 
     @Override
     public void onSessionSolvesChanged() {
-        mSession=PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getAttachedActivity());
+        mSession = PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getAttachedActivity());
         if (!mCurrentToggle && mSession.getNumberOfSolves() <= 0) {
             PuzzleType.get(mPuzzleTypeDisplayName).deleteHistorySession(mSessionIndex, getAttachedActivity());
             getAttachedActivity().finish();
@@ -229,7 +234,6 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
         updateQuickStats();
         if (mCurrentToggle)
             enableResetSubmitButtons(PuzzleType.get(mPuzzleTypeDisplayName).getCurrentSession().getNumberOfSolves() > 0);
-        setShareIntent();
     }
 
     @Override

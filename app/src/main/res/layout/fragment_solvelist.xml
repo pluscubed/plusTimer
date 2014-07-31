@@ -12,7 +12,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#ffe0e0e0"
-        android:padding="4dp"/>
+        android:fadeScrollbars="false"
+        android:maxLines="5"
+        android:padding="4dp"
+        android:scrollbars="vertical"/>
 
     <ListView
         android:id="@id/android:list"
@@ -20,6 +23,7 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:choiceMode="none"
+        android:fadeScrollbars="false"
         android:footerDividersEnabled="true"
         android:transcriptMode="normal"/>
 

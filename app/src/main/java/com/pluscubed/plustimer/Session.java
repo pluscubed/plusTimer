@@ -38,6 +38,7 @@ public class Session {
                 }
 
             }
+            return solveList.get(solveList.size() - 1);
         }
         return null;
     }
@@ -190,9 +191,9 @@ public class Session {
         }
         s.append(context.getString(R.string.number_solves)).append(getNumberOfSolves());
         if (getNumberOfSolves() > 0) {
-            s.append("\n").append(context.getString(R.string.best)).append(Session.getBestSolve(getSolves()).getDescriptiveTimeString()).append("\n")
-                    .append(context.getString(R.string.worst)).append(Session.getWorstSolve(getSolves()).getDescriptiveTimeString()).append("\n")
-                    .append(context.getString(R.string.mean)).append(getStringMean());
+            s.append("\n").append(context.getString(R.string.best)).append(Session.getBestSolve(mSolves).getDescriptiveTimeString()).append("\n");
+            s.append(context.getString(R.string.worst)).append(Session.getWorstSolve(mSolves).getDescriptiveTimeString()).append("\n");
+            s.append(context.getString(R.string.mean)).append(getStringMean());
             if (getNumberOfSolves() > 2) {
                 s.append("\n").append(context.getString(R.string.average)).append(Solve.timeStringFromLong(getAverageOf(mSolves, mSolves.size())));
 

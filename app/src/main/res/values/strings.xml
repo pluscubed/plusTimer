@@ -24,6 +24,7 @@
     <string name="puzzletype_no_sovles">This puzzle has no recorded sessions!\nGo do some solves and click Submit in Session Details to record the session.</string>
     <string name="share">Share</string>
     <string name="share_dialog_title">Share times via…</string>
+    <string name="plus_two">+2</string>
 
     <string name="inspection">Inspection:</string>
 
@@ -48,8 +49,8 @@
     </string-array>
 
     <string-array name="current_s_page_titles">
-        <item>Timer</item>
-        <item>Session Details</item>
+        <item>TIMER</item>
+        <item>SESSION DETAILS</item>
     </string-array>
 
     <string name="drawer_open">Open navigation drawer</string>
