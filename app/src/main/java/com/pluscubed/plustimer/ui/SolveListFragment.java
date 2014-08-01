@@ -153,6 +153,7 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
                 @Override
                 public void onClick(View v) {
                     PuzzleType.get(mPuzzleTypeDisplayName).resetCurrentSession();
+                    Toast.makeText(getAttachedActivity().getApplicationContext(), getResources().getText(R.string.session_reset), Toast.LENGTH_SHORT).show();
                     onSessionSolvesChanged();
                 }
             });
@@ -164,6 +165,8 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
                         Toast.makeText(getAttachedActivity().getApplicationContext(), getResources().getText(R.string.session_no_solves), Toast.LENGTH_SHORT).show();
                         return;
                     }
+
+                    Toast.makeText(getAttachedActivity().getApplicationContext(), getResources().getText(R.string.session_submitted), Toast.LENGTH_SHORT).show();
 
                     PuzzleType.get(mPuzzleTypeDisplayName).submitCurrentSession();
 
