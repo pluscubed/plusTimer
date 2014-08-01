@@ -277,6 +277,7 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
         mScrambleImage.setVisibility(View.GONE);
         mScrambleImageDisplay = false;
 
+        mRetainedFragment.resetScramblerThread();
         mRetainedFragment.generateNextScramble();
         mRetainedFragment.updateViews();
 

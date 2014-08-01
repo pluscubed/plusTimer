@@ -5,14 +5,12 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Spinner;
 
 import java.util.ArrayList;
 
@@ -38,13 +36,8 @@ public class CurrentSFragment extends Fragment implements CurrentSBaseFragment.G
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
-        MenuItem menuPuzzleMenuItem = menu.findItem(R.id.menu_current_s_puzzletype_spinner);
         MenuItem menuDisplayScramble = menu.findItem(R.id.menu_current_s_toggle_scramble_image_action);
 
-        if (menuPuzzleMenuItem != null) {
-            Spinner menuPuzzleSpinner = (Spinner) MenuItemCompat.getActionView(menuPuzzleMenuItem);
-            menuPuzzleSpinner.setEnabled(mMenuItemsEnable);
-        }
         if (menuDisplayScramble != null) {
             menuDisplayScramble.setEnabled(mMenuItemsEnable);
             menuDisplayScramble.getIcon().setAlpha(mMenuItemsEnable ? 255 : 96);

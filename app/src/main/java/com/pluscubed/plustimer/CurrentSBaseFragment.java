@@ -39,19 +39,16 @@ public abstract class CurrentSBaseFragment extends Fragment {
                 menuPuzzleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        if (menuPuzzleSpinner.getSelectedItemPosition() != puzzleTypeSpinnerAdapter.getPosition(PuzzleType.get(PuzzleType.CURRENT))) {
-
-                            PuzzleType.setCurrentPuzzleType((PuzzleType) parent.getItemAtPosition(position));
-                            GetChildFragmentsListener listener;
-                            try {
-                                listener = (GetChildFragmentsListener) getParentFragment();
-                            } catch (ClassCastException e) {
-                                throw new ClassCastException(getAttachedActivity().toString()
-                                        + " must implement GetChildFragmentsListener");
-                            }
-                            for (CurrentSBaseFragment i : listener.getChildFragments()) {
-                                i.onSessionChanged();
-                            }
+                        PuzzleType.setCurrentPuzzleType((PuzzleType) parent.getItemAtPosition(position));
+                        GetChildFragmentsListener listener;
+                        try {
+                            listener = (GetChildFragmentsListener) getParentFragment();
+                        } catch (ClassCastException e) {
+                            throw new ClassCastException(getAttachedActivity().toString()
+                                    + " must implement GetChildFragmentsListener");
+                        }
+                        for (CurrentSBaseFragment i : listener.getChildFragments()) {
+                            i.onSessionChanged();
                         }
                     }
 
