@@ -14,11 +14,14 @@ https://github.com/sephiroth74/HorizontalVariableListView/tree/development
 
 ---------------------------------------------------------------------------------------------------
 CONTAINS SOURCE CODE - I/O 2014 app source: SlidingTabLayout.java, SlidingTabStrip.java, tab_text_color.xml, tab_indicator.xml:
+CONTAINS IMAGES - I/O 2014 app source: ic_action_overflow.png, ic_drawer_settings.png
 https://github.com/google/iosched
 
      All files' package declarations have been changed to com.pluscubed.plustimer
      tab_indicator.xml was renamed to sliding_tab_textview, and tab_text_color.xml was renamed to sliding_tab_text_color.xml
      Additional changes were made to sliding_tab_textview.xml to use the v7 support library
+
+     ic_drawer_settings.png has been modified in Photoshop to change to gray color
 
      /*
       * Copyright 2014 Google Inc. All rights reserved.

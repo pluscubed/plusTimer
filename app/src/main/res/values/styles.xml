@@ -10,11 +10,16 @@
         <item name="android:colorBackground">@color/bg_color</item>
         <item name="actionBarDivider">@null</item>
         <item name="android:actionBarDivider">@null</item>
+        <item name="android:actionOverflowButtonStyle">@style/ActionButton.Overflow</item>
     </style>
 
     <style name="ActionBar" parent="Widget.AppCompat.Light.ActionBar.Solid.Inverse">
         <item name="android:background">@drawable/ab_background</item>
         <item name="background">@drawable/ab_background</item>
+    </style>
+
+    <style name="ActionButton.Overflow" parent="Widget.AppCompat.ActionButton.Overflow">
+        <item name="android:src">@drawable/ic_action_overflow</item>
     </style>
 
     <style name="HListView">
