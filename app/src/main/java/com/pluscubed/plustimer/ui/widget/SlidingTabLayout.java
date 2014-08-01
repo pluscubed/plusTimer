@@ -1,4 +1,4 @@
-package com.pluscubed.plustimer;
+package com.pluscubed.plustimer.ui.widget;
 
 import android.content.Context;
 import android.graphics.Typeface;
@@ -26,7 +26,7 @@ import android.widget.TextView;
  * <p/>
  * The colors can be customized in two ways. The first and simplest is to provide an array of colors
  * via {@link #setSelectedIndicatorColors(int...)}. The
- * alternative is via the {@link com.pluscubed.plustimer.SlidingTabLayout.TabColorizer} interface which provides you complete control over
+ * alternative is via the {@link SlidingTabLayout.TabColorizer} interface which provides you complete control over
  * which color is used for any individual position.
  * <p/>
  * The views used as tabs can be customized by calling {@link #setCustomTabView(int, int)},
@@ -70,7 +70,7 @@ public class SlidingTabLayout extends HorizontalScrollView {
     }
 
     /**
-     * Set the custom {@link com.pluscubed.plustimer.SlidingTabLayout.TabColorizer} to be used.
+     * Set the custom {@link SlidingTabLayout.TabColorizer} to be used.
      * <p/>
      * If you only require simple custmisation then you can use
      * {@link #setSelectedIndicatorColors(int...)} to achieve
@@ -93,7 +93,7 @@ public class SlidingTabLayout extends HorizontalScrollView {
     }
 
     /**
-     * Set the {@link android.support.v4.view.ViewPager.OnPageChangeListener}. When using {@link com.pluscubed.plustimer.SlidingTabLayout} you are
+     * Set the {@link android.support.v4.view.ViewPager.OnPageChangeListener}. When using {@link SlidingTabLayout} you are
      * required to set any {@link android.support.v4.view.ViewPager.OnPageChangeListener} through this method. This is so
      * that the layout can update it's scroll position correctly.
      *
@@ -237,7 +237,7 @@ public class SlidingTabLayout extends HorizontalScrollView {
 
     /**
      * Allows complete control over the colors drawn in the tab layout. Set with
-     * {@link #setCustomTabColorizer(com.pluscubed.plustimer.SlidingTabLayout.TabColorizer)}.
+     * {@link #setCustomTabColorizer(SlidingTabLayout.TabColorizer)}.
      */
     public interface TabColorizer {
 

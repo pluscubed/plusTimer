@@ -1,4 +1,4 @@
-package com.pluscubed.plustimer;
+package com.pluscubed.plustimer.ui;
 
 import android.app.Activity;
 import android.support.v4.app.Fragment;
@@ -9,6 +9,9 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+
+import com.pluscubed.plustimer.R;
+import com.pluscubed.plustimer.model.PuzzleType;
 
 import java.util.ArrayList;
 

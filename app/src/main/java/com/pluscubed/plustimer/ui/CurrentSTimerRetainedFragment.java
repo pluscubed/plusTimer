@@ -1,9 +1,12 @@
-package com.pluscubed.plustimer;
+package com.pluscubed.plustimer.ui;
 
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.v4.app.Fragment;
+
+import com.pluscubed.plustimer.model.PuzzleType;
+import com.pluscubed.plustimer.model.ScrambleAndSvg;
 
 import net.gnehzr.tnoodle.scrambles.InvalidScrambleException;
 

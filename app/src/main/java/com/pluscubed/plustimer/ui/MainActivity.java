@@ -1,4 +1,4 @@
-package com.pluscubed.plustimer;
+package com.pluscubed.plustimer.ui;
 
 import android.content.res.Configuration;
 import android.graphics.Typeface;
@@ -23,6 +23,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
+import com.pluscubed.plustimer.BuildConfig;
+import com.pluscubed.plustimer.R;
+import com.pluscubed.plustimer.model.PuzzleType;
+import com.pluscubed.plustimer.model.Solve;
 
 /**
  * Main Activity

@@ -1,4 +1,4 @@
-package com.pluscubed.plustimer;
+package com.pluscubed.plustimer.model;
 
 import android.content.Context;
 

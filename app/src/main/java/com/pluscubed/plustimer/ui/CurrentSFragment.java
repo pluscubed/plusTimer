@@ -1,4 +1,4 @@
-package com.pluscubed.plustimer;
+package com.pluscubed.plustimer.ui;
 
 import android.graphics.Color;
 import android.os.Bundle;
@@ -11,6 +11,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.pluscubed.plustimer.R;
+import com.pluscubed.plustimer.model.PuzzleType;
+import com.pluscubed.plustimer.ui.widget.SlidingTabLayout;
 
 import java.util.ArrayList;
 

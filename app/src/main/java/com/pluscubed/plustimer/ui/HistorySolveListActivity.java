@@ -1,10 +1,14 @@
-package com.pluscubed.plustimer;
+package com.pluscubed.plustimer.ui;
 
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
+
+import com.pluscubed.plustimer.R;
+import com.pluscubed.plustimer.model.PuzzleType;
+import com.pluscubed.plustimer.model.Solve;
 
 /**
  * History session activity

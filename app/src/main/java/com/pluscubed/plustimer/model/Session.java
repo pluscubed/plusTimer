@@ -1,6 +1,8 @@
-package com.pluscubed.plustimer;
+package com.pluscubed.plustimer.model;
 
 import android.content.Context;
+
+import com.pluscubed.plustimer.R;
 
 import java.util.ArrayList;
 import java.util.Collections;

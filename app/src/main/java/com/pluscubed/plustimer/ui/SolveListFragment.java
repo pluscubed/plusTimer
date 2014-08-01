@@ -1,4 +1,4 @@
-package com.pluscubed.plustimer;
+package com.pluscubed.plustimer.ui;
 
 import android.content.Intent;
 import android.graphics.Color;
@@ -20,6 +20,11 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.pluscubed.plustimer.R;
+import com.pluscubed.plustimer.model.PuzzleType;
+import com.pluscubed.plustimer.model.Session;
+import com.pluscubed.plustimer.model.Solve;
 
 import java.util.ArrayList;
 

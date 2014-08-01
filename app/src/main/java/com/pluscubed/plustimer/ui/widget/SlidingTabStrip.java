@@ -1,4 +1,4 @@
-package com.pluscubed.plustimer;
+package com.pluscubed.plustimer.ui.widget;
 
 import android.R;
 import android.content.Context;

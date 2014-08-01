@@ -1,4 +1,4 @@
-package com.pluscubed.plustimer;
+package com.pluscubed.plustimer.ui;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -14,6 +14,10 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import com.pluscubed.plustimer.R;
+import com.pluscubed.plustimer.model.PuzzleType;
+import com.pluscubed.plustimer.model.Solve;
 
 /**
  * Solve modify dialog

@@ -5,7 +5,7 @@
               android:layout_height="match_parent"
               android:orientation="vertical">
 
-    <com.pluscubed.plustimer.SlidingTabLayout
+    <com.pluscubed.plustimer.ui.widget.SlidingTabLayout
         android:id="@id/fragment_current_s_slidingtablayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -1,4 +1,4 @@
-package com.pluscubed.plustimer;
+package com.pluscubed.plustimer.ui;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -23,6 +23,11 @@ import android.widget.TextView;
 
 import com.caverock.androidsvg.SVG;
 import com.caverock.androidsvg.SVGParseException;
+import com.pluscubed.plustimer.R;
+import com.pluscubed.plustimer.model.PuzzleType;
+import com.pluscubed.plustimer.model.ScrambleAndSvg;
+import com.pluscubed.plustimer.model.Session;
+import com.pluscubed.plustimer.model.Solve;
 
 import java.util.ArrayList;
 import java.util.Arrays;
