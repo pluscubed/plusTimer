@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item name="bg_color" type="color">#fff1f1f1</item>
+    <item name="light_gray" type="color">#ffcccccc</item>
 </resources>

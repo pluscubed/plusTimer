@@ -56,7 +56,7 @@
         android:layout_width="match_parent"
         android:layout_height="45dp"
         android:layout_alignParentBottom="true"
-        android:background="#ffcccccc"
+        android:background="@color/light_gray"
         android:listSelector="@drawable/background_dark_list_selector"
         android:overScrollMode="always"/>
 
