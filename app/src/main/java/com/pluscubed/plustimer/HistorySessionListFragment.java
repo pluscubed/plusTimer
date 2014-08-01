@@ -1,6 +1,7 @@
 package com.pluscubed.plustimer;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -127,6 +128,7 @@ public class HistorySessionListFragment extends ListFragment implements MainActi
 
                 getListView().setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
                 getListView().setItemChecked(position, true);
+                ((SessionListAdapter) getListAdapter()).onSessionListChanged();
                 ((ActionBarActivity) getActivity()).startSupportActionMode(new SolveListActionModeCallback());
                 return true;
             }
@@ -146,6 +148,8 @@ public class HistorySessionListFragment extends ListFragment implements MainActi
             i.putExtra(HistorySolveListActivity.EXTRA_HISTORY_SESSION_POSITION, position);
             i.putExtra(HistorySolveListActivity.EXTRA_HISTORY_PUZZLETYPE_DISPLAYNAME, mPuzzleTypeDisplayName);
             startActivity(i);
+        } else {
+            ((SessionListAdapter) getListAdapter()).onSessionListChanged();
         }
     }
 
@@ -212,6 +216,12 @@ public class HistorySessionListFragment extends ListFragment implements MainActi
             Session session = getItem(position);
             TextView text = (TextView) convertView.findViewById(R.id.list_item_history_sessionlist_textview);
             text.setText(session.getTimestampStringOfLastSolve(getActivity()));
+            if (mActionMode != null && getListView().getCheckedItemPositions().get(position)) {
+                convertView.setBackgroundColor(Color.parseColor("#aaaaaa"));
+            } else {
+                convertView.setBackgroundResource(0);
+            }
+
             return convertView;
         }
 

@@ -31,7 +31,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@id/fragment_current_s_timer_bottom_hlistview"
-        android:background="#ffe0e0e0"
+        android:background="@color/bg_color"
         android:paddingBottom="5dp"
         android:paddingLeft="7dp"
         android:paddingTop="5dp"
@@ -54,10 +54,10 @@
     <it.sephiroth.android.library.widget.HListView
         android:id="@id/fragment_current_s_timer_bottom_hlistview"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="45dp"
         android:layout_alignParentBottom="true"
-        android:background="#ffb0b0b0"
-        android:listSelector="@android:drawable/list_selector_background"
+        android:background="#ffcccccc"
+        android:listSelector="@drawable/background_dark_list_selector"
         android:overScrollMode="always"/>
 
 
@@ -65,7 +65,7 @@
         android:id="@id/fragment_current_s_timer_scramble_textview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#ffe0e0e0"
+        android:background="@color/bg_color"
         android:gravity="center_horizontal"
         android:padding="6dp"
         android:text="@string/scrambling"

@@ -7,15 +7,25 @@
               android:orientation="vertical"
               tools:context=".MainActivity">
 
-    <TextView
-        android:id="@id/fragment_solvelist_stats_textview"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#ffe0e0e0"
+        android:layout_height="74dp"
         android:fadeScrollbars="false"
-        android:maxLines="5"
-        android:padding="4dp"
-        android:scrollbars="vertical"/>
+        android:scrollbars="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@id/fragment_solvelist_stats_textview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"/>
+        </LinearLayout>
+
+    </ScrollView>
+
 
     <ListView
         android:id="@id/android:list"
@@ -23,9 +33,10 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:choiceMode="none"
+        android:divider="@null"
         android:fadeScrollbars="false"
-        android:footerDividersEnabled="true"
-        android:transcriptMode="normal"/>
+        android:overScrollMode="always"
+        android:transcriptMode="alwaysScroll"/>
 
     <TextView
         android:id="@id/android:empty"

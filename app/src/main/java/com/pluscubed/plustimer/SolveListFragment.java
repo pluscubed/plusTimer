@@ -1,11 +1,11 @@
 package com.pluscubed.plustimer;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.view.ActionMode;
-import android.text.method.ScrollingMovementMethod;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -132,7 +132,7 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
     }
 
 
-    public void updateQuickStats() {
+    public void updateStats() {
         mQuickStats.setText(mSession.toString(getAttachedActivity(), PuzzleType.get(mPuzzleTypeDisplayName).toString(), mCurrentToggle, false));
     }
 
@@ -141,7 +141,6 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
         View v = inflater.inflate(R.layout.fragment_solvelist, container, false);
 
         mQuickStats = (TextView) v.findViewById(R.id.fragment_solvelist_stats_textview);
-        mQuickStats.setMovementMethod(new ScrollingMovementMethod());
 
         if (mCurrentToggle) {
             mReset = (Button) v.findViewById(R.id.fragment_current_s_details_reset_button);
@@ -180,6 +179,7 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (mActionMode == null)
                     onSolveItemClick(mPuzzleTypeDisplayName, mSessionIndex, position);
+                else onSessionSolvesChanged();
             }
         });
 
@@ -192,6 +192,7 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
 
                 mListView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
                 mListView.setItemChecked(position, true);
+                onSessionSolvesChanged();
                 ((ActionBarActivity) getAttachedActivity()).startSupportActionMode(new SolveListActionModeCallback());
                 return true;
             }
@@ -231,7 +232,7 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
             return;
         }
         ((SolveListAdapter) mListView.getAdapter()).updateSolvesList();
-        updateQuickStats();
+        updateStats();
         if (mCurrentToggle)
             enableResetSubmitButtons(PuzzleType.get(mPuzzleTypeDisplayName).getCurrentSession().getNumberOfSolves() > 0);
     }
@@ -311,6 +312,11 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
                 if (a == s) {
                     time.setText("(" + s.getDescriptiveTimeString() + ")");
                 }
+            }
+            if (mActionMode != null && mListView.getCheckedItemPositions().get(position)) {
+                convertView.setBackgroundColor(Color.parseColor("#aaaaaa"));
+            } else {
+                convertView.setBackgroundResource(0);
             }
 
             if (time.getText() == "") {
