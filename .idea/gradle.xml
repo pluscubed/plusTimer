@@ -11,6 +11,7 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/libraries" />
             <option value="$PROJECT_DIR$/libraries/hlistviewlibrary" />
+            <option value="$PROJECT_DIR$/libraries/support-v4-preferencefragment" />
           </set>
         </option>
       </GradleProjectSettings>

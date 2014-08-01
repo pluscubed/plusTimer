@@ -1,5 +1,6 @@
 package com.pluscubed.plustimer.ui;
 
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -18,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -112,6 +114,8 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+
         if (BuildConfig.USE_CRASHLYTICS)
             Crashlytics.start(this);
 
@@ -142,6 +146,16 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
         mDrawerListView = (ListView) findViewById(R.id.activity_main_drawer_listview);
         mDrawerTitle = getResources().getString(R.string.app_name);
 
+        View nav_drawer_footer = getLayoutInflater().inflate(R.layout.nav_drawer_footer, null);
+        LinearLayout nav_drawer_settings = (LinearLayout) nav_drawer_footer.findViewById(R.id.nav_drawer_footer_settings_linearlayout);
+        nav_drawer_settings.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+                mDrawerLayout.closeDrawer(mDrawerListView);
+            }
+        });
+        mDrawerListView.addFooterView(nav_drawer_footer, null, false);
         mDrawerListView.setAdapter(new NavDrawerAdapater());
         mDrawerListView.setOnItemClickListener(new ListView.OnItemClickListener() {
             @Override
@@ -149,9 +163,6 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
                 selectItem(false, position);
             }
         });
-
-        View nav_drawer_footer = getLayoutInflater().inflate(R.layout.nav_drawer_footer, null);
-        mDrawerListView.addFooterView(nav_drawer_footer, null, false);
 
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
 

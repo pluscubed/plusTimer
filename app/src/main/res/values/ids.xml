@@ -40,6 +40,8 @@
     <item name="activity_main_content_framelayout" type="id"/>
     <item name="activity_main_drawer_listview" type="id"/>
 
+    <item name="nav_drawer_footer_settings_linearlayout" type="id"/>
+
     <!--CurrentSFragment-->
     <item name="fragment_current_s_slidingtablayout" type="id"/>
     <item name="fragment_current_s_viewpager" type="id"/>

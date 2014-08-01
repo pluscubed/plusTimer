@@ -30,6 +30,10 @@
 
     <string name="inspection">Inspection:</string>
 
+    <string name="pref_inspection_checkbox">pref_inspection_checkbox</string>
+    <string name="pref_inspection_title">Inspection</string>
+    <string name="preg_inspection_summary">15-second WCA countdown for inspecting the cube</string>
+
     <string-array name="penalty_array">
         <item>None</item>
         <item>+2</item>

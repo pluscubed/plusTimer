@@ -9,7 +9,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".ui.MainActivity"
+            android:name="com.pluscubed.plustimer.ui.MainActivity"
             android:label="@string/app_name"
             android:launchMode="singleTop">
             <intent-filter>
@@ -18,12 +18,20 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.HistorySolveListActivity"
-            android:parentActivityName=".ui.MainActivity">
+            android:name="com.pluscubed.plustimer.ui.HistorySolveListActivity"
+            android:parentActivityName="com.pluscubed.plustimer.ui.MainActivity">
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
+                android:value="com.pluscubed.plustimer.ui.MainActivity"/>
+        </activity>
+        <activity
+            android:name="com.pluscubed.plustimer.ui.SettingsActivity"
+            android:parentActivityName="com.pluscubed.plustimer.ui.MainActivity">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.pluscubed.plustimer.ui.MainActivity"/>
         </activity>
     </application>
 
