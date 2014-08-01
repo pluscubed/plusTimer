@@ -215,7 +215,15 @@ public class Session {
                 s.append("\n\n");
                 int c = 1;
                 for (Solve i : mSolves) {
-                    s.append(c).append(". ").append(i.getDescriptiveTimeString()).append("\n")
+                    Solve best = Session.getBestSolve(mSolves);
+                    Solve worst = Session.getWorstSolve(mSolves);
+                    s.append(c).append(". ");
+                    if (i == best || i == worst) {
+                        s.append("(").append(i.getDescriptiveTimeString()).append(")");
+                    } else {
+                        s.append(i.getDescriptiveTimeString());
+                    }
+                    s.append("\n")
                             .append("     ").append(Solve.timeDateStringFromTimestamp(context, i.getTimestamp())).append("\n")
                             .append("     ").append(i.getScrambleAndSvg().scramble).append("\n\n");
                     c++;
