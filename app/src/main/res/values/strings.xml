@@ -32,7 +32,11 @@
 
     <string name="pref_inspection_checkbox">pref_inspection_checkbox</string>
     <string name="pref_inspection_title">Inspection</string>
-    <string name="preg_inspection_summary">15-second WCA countdown for inspecting the cube</string>
+    <string name="pref_inspection_summary">15-second WCA countdown for inspecting the cube</string>
+
+    <string name="pref_holdtostart_checkbox">pref_holdtostart_checkbox</string>
+    <string name="pref_holdtostart_title">Hold to Start</string>
+    <string name="pref_holdtostart_summary">Touch and hold for about half a second to start (similar to a SpeedStacks timer)</string>
 
     <string-array name="penalty_array">
         <item>None</item>

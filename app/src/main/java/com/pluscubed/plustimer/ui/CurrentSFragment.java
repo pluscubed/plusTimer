@@ -100,7 +100,10 @@ public class CurrentSFragment extends Fragment implements CurrentSBaseFragment.G
         mSlidingTabLayout.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
+                CurrentSTimerFragment currentSTimerFragment = (CurrentSTimerFragment) getChildFragmentManager().findFragmentByTag(CurrentSFragment.makeFragmentName(R.id.fragment_current_s_viewpager, 0));
+                if (currentSTimerFragment != null) {
+                    currentSTimerFragment.stopHoldTimer();
+                }
             }
 
             @Override

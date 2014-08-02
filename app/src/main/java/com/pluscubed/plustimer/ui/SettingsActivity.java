@@ -2,6 +2,9 @@ package com.pluscubed.plustimer.ui;
 
 
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
+import android.preference.Preference;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.NavUtils;
@@ -44,6 +47,19 @@ public class SettingsActivity extends ActionBarActivity {
         public void onCreate(Bundle paramBundle) {
             super.onCreate(paramBundle);
             addPreferencesFromResource(R.xml.preferences);
+            CheckBoxPreference inspection = (CheckBoxPreference) findPreference(getString(R.string.pref_inspection_checkbox));
+
+            inspection.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    if (newValue.toString().equals("true")) {
+                        PreferenceManager.getDefaultSharedPreferences(getActivity()).edit().putBoolean(getString(R.string.pref_holdtostart_checkbox), true).commit();
+                        CheckBoxPreference hold = (CheckBoxPreference) findPreference(getString(R.string.pref_holdtostart_checkbox));
+                        hold.setChecked(true);
+                    }
+                    return true;
+                }
+            });
         }
     }
 }

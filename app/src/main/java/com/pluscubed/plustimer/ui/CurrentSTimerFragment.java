@@ -8,6 +8,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -59,6 +60,8 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
     private TextView mInspectingText;
 
     private Handler mUiHandler;
+
+    private boolean mHoldToStartOn;
     private boolean mHoldTimerStarted;
     private long mHoldTimerStartTimestamp;
     private final Runnable mHoldTimerRunnable = new Runnable() {
@@ -71,6 +74,8 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
             }
         }
     };
+
+    private boolean mInspectionOn;
     private boolean mInspecting;
     private long mInspectionStartTimestamp;
     private long mStartTimestamp;
@@ -81,6 +86,8 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
             mUiHandler.postDelayed(this, 10);
         }
     };
+
+
     private long mEndTimestamp;
     private long mFinalTime;
     private boolean mFromSavedInstanceState;
@@ -197,6 +204,8 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
         //Set up UIHandler
         mUiHandler = new Handler(Looper.getMainLooper());
 
+        PreferenceManager.setDefaultValues(getAttachedActivity(), R.xml.preferences, false);
+
         if (savedInstanceState != null) {
             mScrambleImageDisplay = savedInstanceState.getBoolean(STATE_IMAGE_DISPLAYED);
             mStartTimestamp = savedInstanceState.getLong(STATE_START_TIME);
@@ -245,6 +254,19 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mInspectionOn = PreferenceManager.getDefaultSharedPreferences(getAttachedActivity()).getBoolean(getString(R.string.pref_inspection_checkbox), true);
+        mHoldToStartOn = PreferenceManager.getDefaultSharedPreferences(getAttachedActivity()).getBoolean(getString(R.string.pref_holdtostart_checkbox), true);
+    }
+
+    public void stopHoldTimer() {
+        mUiHandler.removeCallbacks(mHoldTimerRunnable);
+        mTimerText.setTextColor(Color.BLACK);
+
     }
 
     private RetainedFragmentCallback getRetainedFragment() {
@@ -363,7 +385,7 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
                             mFinalTime = mEndTimestamp - mStartTimestamp;
 
                             Solve s = new Solve(mRetainedFragment.getCurrentScrambleAndSvg(), mFinalTime);
-                            if (mLateStartPenalty) {
+                            if (mInspectionOn && mLateStartPenalty) {
                                 s.setPenalty(Solve.Penalty.PLUSTWO);
                                 mLateStartPenalty = false;
                             }
@@ -381,20 +403,22 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
 
                             mRetainedFragment.updateViews();
                             return false;
-                        } else if (!mInspecting && !mRetainedFragment.isScrambling()) {
+                        } else if (mInspectionOn && !mInspecting && !mRetainedFragment.isScrambling()) {
                             return true;
-                        } else if (mInspecting) {
+                        } else if (mInspecting || (mHoldToStartOn && !mRetainedFragment.isScrambling())) {
                             mHoldTimerStarted = true;
                             mHoldTimerStartTimestamp = System.nanoTime();
                             mTimerText.setTextColor(Color.RED);
                             mUiHandler.postDelayed(mHoldTimerRunnable, 450);
                             return true;
+                        } else if (!mInspectionOn && !mHoldToStartOn && !mRetainedFragment.isScrambling()) {
+                            return true;
                         }
-                        break;
+                        return false;
                     }
 
                     case MotionEvent.ACTION_UP: {
-                        if (!mInspecting && !mRunning && !mRetainedFragment.isScrambling()) {
+                        if (mInspectionOn && !mInspecting && !mRunning) {
                             getAttachedActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                             mInspectionStartTimestamp = System.nanoTime();
                             mInspecting = true;
@@ -406,7 +430,7 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
                             mScrambleImageDisplay = false;
                             //Post to scrambler thread: generate the next scramble
                             mRetainedFragment.generateNextScramble();
-                        } else if (mInspecting && !mRunning) {
+                        } else if (((mInspectionOn && mInspecting) || mHoldToStartOn) && !mRunning) {
                             if (mHoldTimerStarted && 500000000L <= System.nanoTime() - mHoldTimerStartTimestamp) {
                                 mStartTimestamp = System.nanoTime();
                                 mInspecting = false;
@@ -414,17 +438,39 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
                                 mRunning = true;
                                 mUiHandler.removeCallbacksAndMessages(null);
                                 mUiHandler.post(mTimerRunnable);
+                                if (mHoldToStartOn) {
+                                    getAttachedActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                                    enableOptionsMenu(false);
+                                    //Set the scramble image to gone
+                                    mScrambleImage.setVisibility(View.GONE);
+                                    mScrambleImageDisplay = false;
+                                    //Post to scrambler thread: generate the next scramble
+                                    mRetainedFragment.generateNextScramble();
+                                }
                             } else {
                                 mHoldTimerStarted = false;
                                 mUiHandler.removeCallbacks(mHoldTimerRunnable);
                             }
                             mTimerText.setTextColor(Color.BLACK);
+                        } else if (!mInspectionOn && !mHoldToStartOn && !mRunning) {
+                            getAttachedActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                            enableOptionsMenu(false);
+                            //Set the scramble image to gone
+                            mScrambleImage.setVisibility(View.GONE);
+                            mScrambleImageDisplay = false;
+                            //Post to scrambler thread: generate the next scramble
+                            mRetainedFragment.generateNextScramble();
+                            mStartTimestamp = System.nanoTime();
+                            mRunning = true;
+                            mUiHandler.removeCallbacksAndMessages(null);
+                            mUiHandler.post(mTimerRunnable);
                         }
                         return false;
                     }
 
+                    default:
+                        return false;
                 }
-                return false;
             }
         });
 
@@ -449,7 +495,7 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
             } else if (!getRetainedFragment().isScrambling()) {
                 enableOptionsMenu(true);
             }
-            if (mRunning || !getRetainedFragment().isScrambling()) {
+            if (mInspecting || mRunning || !getRetainedFragment().isScrambling()) {
                 // If timer is running, then update text/image to current. If timer is not running and not scrambling, then update scramble views to current.
                 updateScrambleTextAndImageToCurrent();
             } else {

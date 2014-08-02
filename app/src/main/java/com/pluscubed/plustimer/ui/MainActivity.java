@@ -114,8 +114,6 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-
         if (BuildConfig.USE_CRASHLYTICS)
             Crashlytics.start(this);
 
@@ -151,8 +149,8 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
         nav_drawer_settings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, SettingsActivity.class));
                 mDrawerLayout.closeDrawer(mDrawerListView);
+                startActivity(new Intent(MainActivity.this, SettingsActivity.class));
             }
         });
         mDrawerListView.addFooterView(nav_drawer_footer, null, false);
@@ -170,12 +168,14 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
                 R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close) {
 
             /** Called when a drawer has settled in a completely closed state. */
+            @Override
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
                 supportInvalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
 
             /** Called when a drawer has settled in a completely open state. */
+            @Override
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
                 if (!mUserLearnedDrawer) {
@@ -200,6 +200,20 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
                 }
 
                 supportInvalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+            }
+
+            @Override
+            public void onDrawerSlide(View drawerView, float slideOffset) {
+                super.onDrawerSlide(drawerView, slideOffset);
+                Fragment currentSFragment = getSupportFragmentManager().findFragmentByTag(CURRENT_S_TAG);
+                if (currentSFragment != null) {
+                    CurrentSTimerFragment currentSTimerFragment = (CurrentSTimerFragment) currentSFragment.getChildFragmentManager().findFragmentByTag(CurrentSFragment.makeFragmentName(R.id.fragment_current_s_viewpager, 0));
+                    if (currentSTimerFragment != null) {
+                        currentSTimerFragment.stopHoldTimer();
+                    }
+                }
+
+
             }
         };
 
