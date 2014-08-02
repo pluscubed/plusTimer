@@ -48,9 +48,11 @@
         android:text="@string/session_no_solves"/>
 
     <LinearLayout
+        android:id="@id/fragment_current_s_submit_reset_linearlayout"
         android:layout_width="match_parent"
         android:layout_height="45dp"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:visibility="gone">
 
         <Button
             android:id="@id/fragment_current_s_details_reset_button"
@@ -59,8 +61,7 @@
             android:layout_weight="1"
             android:background="@drawable/button_background"
             android:text="@string/reset"
-            android:textSize="18sp"
-            android:visibility="gone"/>
+            android:textSize="18sp"/>
 
         <Button
             android:id="@id/fragment_current_s_details_submit_button"
@@ -69,8 +70,7 @@
             android:layout_weight="1"
             android:background="@drawable/button_background"
             android:text="@string/submit"
-            android:textSize="18sp"
-            android:visibility="gone"/>
+            android:textSize="18sp"/>
 
     </LinearLayout>
 

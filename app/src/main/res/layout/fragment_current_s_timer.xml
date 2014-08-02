@@ -27,10 +27,11 @@
         android:visibility="gone"/>
 
     <TextView
-        android:id="@id/fragment_current_s_timer_quickstats_textview"
-        android:layout_width="match_parent"
+        android:id="@id/fragment_current_s_timer_stats_textview"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@id/fragment_current_s_timer_bottom_hlistview"
+        android:layout_alignParentLeft="true"
         android:background="@color/bg_color"
         android:paddingBottom="5dp"
         android:paddingLeft="7dp"
@@ -39,11 +40,12 @@
 
 
     <TextView
-        android:id="@id/fragment_current_s_timer_quickstats_solves_number_textview"
+        android:id="@id/fragment_current_s_timer_stats_solves_number_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@id/fragment_current_s_timer_bottom_hlistview"
         android:layout_alignParentRight="true"
+        android:background="@color/bg_color"
         android:paddingBottom="5dp"
         android:paddingLeft="5dp"
         android:paddingRight="7dp"

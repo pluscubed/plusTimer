@@ -354,8 +354,8 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
 
         mInspectingText = (TextView) v.findViewById(R.id.fragment_current_s_timer_inspecting_textview);
 
-        mStatsText = (TextView) v.findViewById(R.id.fragment_current_s_timer_quickstats_textview);
-        mStatsSolvesText = (TextView) v.findViewById(R.id.fragment_current_s_timer_quickstats_solves_number_textview);
+        mStatsText = (TextView) v.findViewById(R.id.fragment_current_s_timer_stats_textview);
+        mStatsSolvesText = (TextView) v.findViewById(R.id.fragment_current_s_timer_stats_solves_number_textview);
 
         final SolveHListViewAdapter adapter = new SolveHListViewAdapter();
         mHListView.setAdapter(adapter);

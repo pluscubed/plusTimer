@@ -17,6 +17,7 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -51,6 +52,7 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
 
     private Button mReset;
     private Button mSubmit;
+    private LinearLayout mResetSubmitLinearLayout;
 
     private ActionMode mActionMode;
 
@@ -148,6 +150,8 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
         mQuickStats = (TextView) v.findViewById(R.id.fragment_solvelist_stats_textview);
 
         if (mCurrentToggle) {
+            mResetSubmitLinearLayout = (LinearLayout) v.findViewById(R.id.fragment_current_s_submit_reset_linearlayout);
+
             mReset = (Button) v.findViewById(R.id.fragment_current_s_details_reset_button);
             mReset.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -216,13 +220,7 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
     }
 
     public void enableResetSubmitButtons(boolean enable) {
-        if (enable) {
-            mReset.setVisibility(View.VISIBLE);
-            mSubmit.setVisibility(View.VISIBLE);
-        } else {
-            mReset.setVisibility(View.GONE);
-            mSubmit.setVisibility(View.GONE);
-        }
+        mResetSubmitLinearLayout.setVisibility(enable ? View.VISIBLE : View.GONE);
     }
 
     @Override
