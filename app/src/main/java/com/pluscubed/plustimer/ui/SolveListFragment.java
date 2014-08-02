@@ -22,12 +22,15 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.commonsware.cwac.merge.MergeAdapter;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 
 /**
@@ -45,6 +48,9 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
 
     private TextView mQuickStats;
     private ListView mListView;
+
+    private SolveListAdapter mListAdapter;
+    private MergeAdapter mMergeAdapter;
 
     private int mSessionIndex;
     private String mPuzzleTypeDisplayName;
@@ -147,7 +153,6 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_solvelist, container, false);
 
-        mQuickStats = (TextView) v.findViewById(R.id.fragment_solvelist_stats_textview);
 
         if (mCurrentToggle) {
             mResetSubmitLinearLayout = (LinearLayout) v.findViewById(R.id.fragment_current_s_submit_reset_linearlayout);
@@ -181,8 +186,19 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
         }
 
         mListView = (ListView) v.findViewById(android.R.id.list);
-        mListView.setAdapter(new SolveListAdapter());
+        mListAdapter = new SolveListAdapter();
+        View header = inflater.inflate(R.layout.solvelist_header, null);
+        mQuickStats = (TextView) header.findViewById(R.id.solvelist_header_stats_textview);
+        mMergeAdapter = new MergeAdapter() {
+            @Override
+            public boolean isEmpty() {
+                return getCount() == 1;
+            }
+        };
+        mMergeAdapter.addView(header);
+        mMergeAdapter.addAdapter(mListAdapter);
         mListView.setEmptyView(v.findViewById(android.R.id.empty));
+        mListView.setAdapter(mMergeAdapter);
 
         //Getting CAB to work API9+: Doctoror Drive's answer - http://stackoverflow.com/questions/14737519/how-can-you-implement-multi-selection-and-contextual-actionmode-in-actionbarsher
 
@@ -190,7 +206,7 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (mActionMode == null)
-                    onSolveItemClick(mPuzzleTypeDisplayName, mSessionIndex, position);
+                    onSolveItemClick(mPuzzleTypeDisplayName, mSessionIndex, mSession.getPosition((Solve) mListView.getItemAtPosition(position)));
                 else onSessionSolvesChanged();
             }
         });
@@ -203,7 +219,7 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
                 }
 
                 mListView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
-                mListView.setItemChecked(position, true);
+                mListView.setItemChecked(position - 1, true);
                 onSessionSolvesChanged();
                 ((ActionBarActivity) getAttachedActivity()).startSupportActionMode(new SolveListActionModeCallback());
                 return true;
@@ -237,7 +253,7 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
             getAttachedActivity().finish();
             return;
         }
-        ((SolveListAdapter) mListView.getAdapter()).updateSolvesList();
+        mListAdapter.updateSolvesList();
         updateStats();
         if (mCurrentToggle)
             enableResetSubmitButtons(PuzzleType.get(mPuzzleTypeDisplayName).getCurrentSession().getNumberOfSolves() > 0);
@@ -271,7 +287,7 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
                     for (int i = 0; i < checked.size(); i++) {
                         final int index = checked.keyAt(i);
                         if (checked.get(index)) {
-                            toDelete.add(mSession.getSolveByPosition(index));
+                            toDelete.add(mSession.getSolveByPosition(index - 1));
                         }
                     }
                     for (Solve i : toDelete) {
@@ -298,7 +314,7 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
         private ArrayList<Solve> mBestAndWorstSolves;
 
         public SolveListAdapter() {
-            super(getAttachedActivity(), 0, mSession.getSolves());
+            super(getAttachedActivity(), 0, new ArrayList<Solve>());
             updateSolvesList();
         }
 
@@ -336,10 +352,12 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
 
         public void updateSolvesList() {
             clear();
+            List<Solve> solves = mSession.getSolves();
+            Collections.reverse(solves);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
-                addAll(mSession.getSolves());
+                addAll(solves);
             else {
-                for (Solve i : mSession.getSolves()) {
+                for (Solve i : solves) {
                     add(i);
                 }
             }

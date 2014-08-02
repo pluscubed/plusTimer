@@ -30,7 +30,7 @@
     <!--SolveListFragment-->
     <item name="list_item_solvelist_title_textview" type="id"/>
     <item name="list_item_solvelist_desc_textview" type="id"/>
-    <item name="fragment_solvelist_stats_textview" type="id"/>
+    <item name="solvelist_header_stats_textview" type="id"/>
     <item name="fragment_current_s_details_reset_button" type="id"/>
     <item name="fragment_current_s_details_submit_button" type="id"/>
     <item name="fragment_current_s_submit_reset_linearlayout" type="id"/>

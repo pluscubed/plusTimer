@@ -66,6 +66,10 @@ public class Session {
         return null;
     }
 
+    public int getPosition(Solve i) {
+        return mSolves.indexOf(i);
+    }
+
     public List<Solve> getSolves() {
         return new ArrayList<Solve>(Collections.unmodifiableList(mSolves));
     }
@@ -193,21 +197,24 @@ public class Session {
         }
         s.append(context.getString(R.string.number_solves)).append(getNumberOfSolves());
         if (getNumberOfSolves() > 0) {
-            s.append("\n").append(context.getString(R.string.best)).append(Session.getBestSolve(mSolves).getDescriptiveTimeString()).append("\n");
-            s.append(context.getString(R.string.worst)).append(Session.getWorstSolve(mSolves).getDescriptiveTimeString()).append("\n");
-            s.append(context.getString(R.string.mean)).append(getStringMean());
-            if (getNumberOfSolves() > 2) {
-                s.append("\n").append(context.getString(R.string.average)).append(Solve.timeStringFromLong(getAverageOf(mSolves, mSolves.size())));
+            s.append("\n").append(context.getString(R.string.mean)).append(getStringMean());
+            if (getNumberOfSolves() > 1) {
+                s.append("\n").append(context.getString(R.string.best)).append(Session.getBestSolve(mSolves).getDescriptiveTimeString());
+                s.append("\n").append(context.getString(R.string.worst)).append(Session.getWorstSolve(mSolves).getDescriptiveTimeString());
 
-                int[] averages = {1000, 100, 50, 12, 5};
-                for (int i : averages) {
-                    if (getNumberOfSolves() >= i) {
-                        if (current) {
-                            s.append("\n").append(context.getString(R.string.cao)).append(i).append(": ").append(getStringCurrentAverageOf(i));
-                        } else {
-                            s.append("\n").append(context.getString(R.string.lao)).append(i).append(": ").append(getStringCurrentAverageOf(i));
+                if (getNumberOfSolves() > 2) {
+                    s.append("\n").append(context.getString(R.string.average)).append(Solve.timeStringFromLong(getAverageOf(mSolves, mSolves.size())));
+
+                    int[] averages = {1000, 100, 50, 12, 5};
+                    for (int i : averages) {
+                        if (getNumberOfSolves() >= i) {
+                            if (current) {
+                                s.append("\n").append(context.getString(R.string.cao)).append(i).append(": ").append(getStringCurrentAverageOf(i));
+                            } else {
+                                s.append("\n").append(context.getString(R.string.lao)).append(i).append(": ").append(getStringCurrentAverageOf(i));
+                            }
+                            s.append("\n").append(context.getString(R.string.bao)).append(i).append(": ").append(getStringBestAverageOf(i));
                         }
-                        s.append("\n").append(context.getString(R.string.bao)).append(i).append(": ").append(getStringBestAverageOf(i));
                     }
                 }
             }
