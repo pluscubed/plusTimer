@@ -23,7 +23,8 @@
         android:layout_weight="1"
         android:gravity="center"
         android:padding="6dp"
-        android:text="@string/session_no_solves"/>
+        android:text="@string/session_no_solves"
+        android:visibility="gone"/>
 
     <LinearLayout
         android:id="@id/fragment_current_s_submit_reset_linearlayout"

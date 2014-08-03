@@ -22,7 +22,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.commonsware.cwac.merge.MergeAdapter;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Session;
@@ -48,9 +47,9 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
 
     private TextView mQuickStats;
     private ListView mListView;
+    private TextView mEmptyView;
 
     private SolveListAdapter mListAdapter;
-    private MergeAdapter mMergeAdapter;
 
     private int mSessionIndex;
     private String mPuzzleTypeDisplayName;
@@ -189,16 +188,10 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
         mListAdapter = new SolveListAdapter();
         View header = inflater.inflate(R.layout.solvelist_header, null);
         mQuickStats = (TextView) header.findViewById(R.id.solvelist_header_stats_textview);
-        mMergeAdapter = new MergeAdapter() {
-            @Override
-            public boolean isEmpty() {
-                return getCount() == 1;
-            }
-        };
-        mMergeAdapter.addView(header);
-        mMergeAdapter.addAdapter(mListAdapter);
-        mListView.setEmptyView(v.findViewById(android.R.id.empty));
-        mListView.setAdapter(mMergeAdapter);
+        mListView.addHeaderView(header, null, true);
+        mListView.setAdapter(mListAdapter);
+
+        mEmptyView = (TextView) v.findViewById(android.R.id.empty);
 
         //Getting CAB to work API9+: Doctoror Drive's answer - http://stackoverflow.com/questions/14737519/how-can-you-implement-multi-selection-and-contextual-actionmode-in-actionbarsher
 
@@ -219,7 +212,7 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
                 }
 
                 mListView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
-                mListView.setItemChecked(position - 1, true);
+                mListView.setItemChecked(position, true);
                 onSessionSolvesChanged();
                 ((ActionBarActivity) getAttachedActivity()).startSupportActionMode(new SolveListActionModeCallback());
                 return true;
@@ -254,6 +247,13 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
             return;
         }
         mListAdapter.updateSolvesList();
+        if (mListAdapter.getCount() == 0) {
+            mListView.setVisibility(View.GONE);
+            mEmptyView.setVisibility(View.VISIBLE);
+        } else {
+            mListView.setVisibility(View.VISIBLE);
+            mEmptyView.setVisibility(View.GONE);
+        }
         updateStats();
         if (mCurrentToggle)
             enableResetSubmitButtons(PuzzleType.get(mPuzzleTypeDisplayName).getCurrentSession().getNumberOfSolves() > 0);
@@ -287,7 +287,7 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
                     for (int i = 0; i < checked.size(); i++) {
                         final int index = checked.keyAt(i);
                         if (checked.get(index)) {
-                            toDelete.add(mSession.getSolveByPosition(index - 1));
+                            toDelete.add((Solve) mListView.getItemAtPosition(index));
                         }
                     }
                     for (Solve i : toDelete) {
@@ -335,7 +335,7 @@ public class SolveListFragment extends CurrentSBaseFragment implements MainActiv
                     time.setText("(" + s.getDescriptiveTimeString() + ")");
                 }
             }
-            if (mActionMode != null && mListView.getCheckedItemPositions().get(position)) {
+            if (mActionMode != null && mListView.getCheckedItemPositions().get(position + 1)) {
                 convertView.setBackgroundColor(Color.parseColor("#aaaaaa"));
             } else {
                 convertView.setBackgroundResource(0);
