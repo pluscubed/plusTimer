@@ -91,7 +91,7 @@ public class Solve {
     public String getDescriptiveTimeString() {
         switch (mPenalty) {
             case DNF:
-                return "DNF (" + timeStringFromLong(mRawTime) + ")";
+                if (mRawTime != 0) return "DNF (" + timeStringFromLong(mRawTime) + ")";
             default:
                 return getTimeString();
         }
