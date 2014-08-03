@@ -3,14 +3,19 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="hlv_listViewStyle">@style/HListView</item>
+
         <item name="android:actionBarStyle">@style/ActionBar</item>
         <item name="actionBarStyle">@style/ActionBar</item>
+
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowBackground">@color/bg_color</item>
         <item name="android:colorBackground">@color/bg_color</item>
+
         <item name="actionBarDivider">@null</item>
         <item name="android:actionBarDivider">@null</item>
+
         <item name="android:actionOverflowButtonStyle">@style/ActionButton.Overflow</item>
+        <item name="actionOverflowButtonStyle">@style/ActionButton.Overflow</item>
     </style>
 
     <style name="ActionBar" parent="Widget.AppCompat.Light.ActionBar.Solid.Inverse">
