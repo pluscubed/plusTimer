@@ -1,3 +1,4 @@
+/*
 package com.pluscubed.plustimer.ui;
 
 import android.content.Intent;
@@ -6,13 +7,11 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.view.ActionMode;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -30,10 +29,12 @@ import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Solve;
 
+*/
 /**
  * Main Activity
- */
-public class MainActivity extends ActionBarActivity implements SolveDialog.SolveDialogListener, CurrentSBaseFragment.OnSolveItemClickListener, CurrentSTimerFragment.GetRetainedFragmentCallback {
+ *//*
+
+public class MainActivity extends FragmentActivity implements SolveDialog.SolveDialogListener, CurrentSessionActivityCallbacks.OnSolveItemClickListener, CurrentSessionTimerFragment.GetRetainedFragmentCallback {
     public static final String DIALOG_FRAGMENT_TAG = "MODIFY_DIALOG";
     private static final String STATE_SELECTED_POSITION = "selected_navigation_drawer_position";
     private static final String PREF_USER_LEARNED_DRAWER = "navigation_drawer_learned";
@@ -96,9 +97,9 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
             menu.findItem(R.id.menu_history_sessionlist_puzzltype_spinner).setVisible(!drawerOpen);
         }
         if (drawerOpen) {
-            getSupportActionBar().setTitle(mDrawerTitle);
+            getActionBar().setTitle(mDrawerTitle);
         } else {
-            getSupportActionBar().setTitle(mCurrentFragmentTitle);
+            getActionBar().setTitle(mCurrentFragmentTitle);
         }
         return super.onPrepareOptionsMenu(menu);
     }
@@ -112,7 +113,7 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_current_session);
 
         if (BuildConfig.USE_CRASHLYTICS)
             Crashlytics.start(this);
@@ -123,7 +124,7 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
         // If the Fragment is non-null, then it is currently being
         // retained across a configuration change.
         if (currentSRetainedFragment == null) {
-            currentSRetainedFragment = new CurrentSTimerRetainedFragment();
+            currentSRetainedFragment = new CurrentSessionTimerRetainedFragment();
             fm.beginTransaction().add(currentSRetainedFragment, CURRENT_S_TIMER_RETAINED_TAG).commit();
         }
 
@@ -162,19 +163,23 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
             }
         });
 
-        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, Gravity.START);
 
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
                 R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close) {
 
-            /** Called when a drawer has settled in a completely closed state. */
+            */
+/** Called when a drawer has settled in a completely closed state. *//*
+
             @Override
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
                 supportInvalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
 
-            /** Called when a drawer has settled in a completely open state. */
+            */
+/** Called when a drawer has settled in a completely open state. *//*
+
             @Override
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
@@ -188,7 +193,7 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
                 //End ActionMode
                 ActionModeNavDrawerCallback[] fragments = new ActionModeNavDrawerCallback[2];
                 if (fm.findFragmentByTag(CURRENT_S_TAG) != null) {
-                    fragments[0] = ((ActionModeNavDrawerCallback) fm.findFragmentByTag(CURRENT_S_TAG).getChildFragmentManager().findFragmentByTag(CurrentSFragment.makeFragmentName(R.id.fragment_current_s_viewpager, 1)));
+                    fragments[0] = ((ActionModeNavDrawerCallback) fm.findFragmentByTag(CURRENT_S_TAG).getChildFragmentManager().findFragmentByTag(CurrentSFragment.makeFragmentName(R.id.activity_current_session_viewpager, 1)));
                 }
                 if (fm.findFragmentByTag(HISTORY_TAG) != null) {
                     fragments[1] = ((ActionModeNavDrawerCallback) fm.findFragmentByTag(HISTORY_TAG));
@@ -207,7 +212,7 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
                 super.onDrawerSlide(drawerView, slideOffset);
                 Fragment currentSFragment = getSupportFragmentManager().findFragmentByTag(CURRENT_S_TAG);
                 if (currentSFragment != null) {
-                    CurrentSTimerFragment currentSTimerFragment = (CurrentSTimerFragment) currentSFragment.getChildFragmentManager().findFragmentByTag(CurrentSFragment.makeFragmentName(R.id.fragment_current_s_viewpager, 0));
+                    CurrentSessionTimerFragment currentSTimerFragment = (CurrentSessionTimerFragment) currentSFragment.getChildFragmentManager().findFragmentByTag(CurrentSFragment.makeFragmentName(R.id.activity_current_session_viewpager, 0));
                     if (currentSTimerFragment != null) {
                         currentSTimerFragment.stopHoldTimer();
                     }
@@ -221,14 +226,14 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
 
         if (!mUserLearnedDrawer && !mFromSavedInstanceState) {
             mDrawerLayout.openDrawer(mDrawerListView);
-            getSupportActionBar().setTitle(mDrawerTitle);
+            getActionBar().setTitle(mDrawerTitle);
         }
 
         // Set the drawer toggle as the DrawerListener
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setHomeButtonEnabled(true);
     }
 
     @Override
@@ -311,7 +316,7 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
     }
 
     public interface ActionModeNavDrawerCallback {
-        ActionMode getActionMode();
+        android.view.ActionMode getActionMode();
     }
 
     public class NavDrawerAdapater extends ArrayAdapter<String> {
@@ -337,3 +342,4 @@ public class MainActivity extends ActionBarActivity implements SolveDialog.Solve
     }
 
 }
+*/

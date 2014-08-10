@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<android.support.v4.widget.DrawerLayout
+    android:id="@id/activity_base_drawerlayout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.CurrentSessionActivity">
+    <!-- The main content view -->
+
+    <LinearLayout
+        android:id="@id/activity_base_content_framelayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <com.pluscubed.plustimer.ui.widget.SlidingTabLayout
+            android:id="@id/activity_current_session_slidingtablayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/ab_color"/>
+
+        <android.support.v4.view.ViewPager
+            android:id="@id/activity_current_session_viewpager"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+    </LinearLayout>
+
+    <!-- The navigation drawer -->
+    <ListView
+        android:id="@id/activity_base_drawer_listview"
+        android:layout_width="@dimen/navigation_drawer_width"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:background="#f7f7f7"
+        android:choiceMode="singleChoice"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="0dp"/>
+
+</android.support.v4.widget.DrawerLayout>

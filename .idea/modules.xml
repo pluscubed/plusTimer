@@ -5,7 +5,6 @@
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/libraries/hlistviewlibrary/hlistviewlibrary.iml" filepath="$PROJECT_DIR$/libraries/hlistviewlibrary/hlistviewlibrary.iml" />
       <module fileurl="file://$PROJECT_DIR$/plusTimer.iml" filepath="$PROJECT_DIR$/plusTimer.iml" />
-      <module fileurl="file://$PROJECT_DIR$/libraries/support-v4-preferencefragment/support-v4-preferencefragment.iml" filepath="$PROJECT_DIR$/libraries/support-v4-preferencefragment/support-v4-preferencefragment.iml" />
     </modules>
   </component>
 </project>

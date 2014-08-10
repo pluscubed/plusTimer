@@ -8,7 +8,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:divider="@drawable/abc_list_divider_holo_light"
+        android:divider="?android:attr/listDividerAlertDialog"
         android:orientation="vertical"
         android:showDividers="middle">
 
@@ -17,14 +17,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            android:gravity="center_horizontal"/>
+            android:gravity="center_horizontal"
+            android:textColor="?android:attr/textColorAlertDialogListItem"/>
 
         <TextView
             android:id="@id/dialog_solve_scramble_textview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            android:gravity="center_horizontal"/>
+            android:gravity="center_horizontal"
+            android:textColor="?android:attr/textColorAlertDialogListItem"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -36,7 +38,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:gravity="center_vertical"
-                android:text="@string/penalty"/>
+                android:text="@string/penalty"
+                android:textColor="?android:attr/textColorAlertDialogListItem"/>
 
             <Spinner
                 android:id="@id/dialog_solve_modify_penalty_spinner"

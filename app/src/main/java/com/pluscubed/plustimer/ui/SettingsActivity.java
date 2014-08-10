@@ -1,15 +1,15 @@
 package com.pluscubed.plustimer.ui;
 
 
+import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.Preference;
+import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.NavUtils;
-import android.support.v4.preference.PreferenceFragment;
-import android.support.v7.app.ActionBarActivity;
 import android.view.MenuItem;
 
 import com.pluscubed.plustimer.R;
@@ -17,18 +17,18 @@ import com.pluscubed.plustimer.R;
 /**
  * Settings Activity and Fragment
  */
-public class SettingsActivity extends ActionBarActivity {
+public class SettingsActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        FragmentManager fm = getSupportFragmentManager();
+        FragmentManager fm = getFragmentManager();
         Fragment f = fm.findFragmentById(android.R.id.content);
         if (f == null) {
             fm.beginTransaction()
                     .replace(android.R.id.content, new SettingsFragment())
                     .commit();
         }
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     @Override

@@ -38,7 +38,8 @@ public enum PuzzleType {
     SEVEN("777", "7x7"),
     SIX("666", "6x6"),
     FIVE("555", "5x5"),
-    FOURFAST("444fast", "4x4-fast"),
+    FOUR("444", "4x4"),
+    FOURFAST("444", "4x4-fast"),
     THREE("333", "3x3"),
     TWO("222", "2x2");
     public static final int CURRENT_SESSION = -1;

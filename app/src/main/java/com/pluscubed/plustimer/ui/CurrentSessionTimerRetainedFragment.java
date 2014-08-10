@@ -1,9 +1,9 @@
 package com.pluscubed.plustimer.ui;
 
+import android.app.Fragment;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.support.v4.app.Fragment;
 
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.ScrambleAndSvg;
@@ -13,7 +13,7 @@ import net.gnehzr.tnoodle.scrambles.InvalidScrambleException;
 /**
  * Retained fragment alongside CurrentSTimerFragment
  */
-public class CurrentSTimerRetainedFragment extends Fragment implements CurrentSTimerFragment.RetainedFragmentCallback {
+public class CurrentSessionTimerRetainedFragment extends Fragment {
     private Handler mScramblerThreadHandler;
     private HandlerThread mScramblerThread;
     private ScrambleAndSvg mCurrentScrambleAndSvg;
@@ -21,19 +21,16 @@ public class CurrentSTimerRetainedFragment extends Fragment implements CurrentST
 
     private boolean mScrambling;
 
-    private CurrentSTimerFragmentCallback mCallback;
+    private Callback mCallback;
 
-    @Override
-    public void setTimerFragmentCallback(CurrentSTimerFragmentCallback fragment) {
+    public void setTimerFragmentCallback(Callback fragment) {
         mCallback = fragment;
     }
 
-    @Override
     public boolean isScrambling() {
         return mScrambling;
     }
 
-    @Override
     public void generateNextScramble() {
         postToScrambleThread(new Runnable() {
             @Override
@@ -47,7 +44,6 @@ public class CurrentSTimerRetainedFragment extends Fragment implements CurrentST
 
     }
 
-    @Override
     public void updateViews() {
         postToScrambleThread(new Runnable() {
             @Override
@@ -82,11 +78,9 @@ public class CurrentSTimerRetainedFragment extends Fragment implements CurrentST
         return scrambleAndSvg;
     }
 
-    @Override
     public ScrambleAndSvg getCurrentScrambleAndSvg() {
         return mCurrentScrambleAndSvg;
     }
-
 
     private void postToScrambleThread(Runnable r) {
 
@@ -108,7 +102,6 @@ public class CurrentSTimerRetainedFragment extends Fragment implements CurrentST
         }
     }
 
-    @Override
     public void resetScramblerThread() {
         stopScramblerThread();
         startScramblerThread();
@@ -129,5 +122,13 @@ public class CurrentSTimerRetainedFragment extends Fragment implements CurrentST
     public void onDestroy() {
         super.onDestroy();
         stopScramblerThread();
+    }
+
+    public interface Callback {
+        Handler getUiHandler();
+
+        void updateScrambleTextAndImageToCurrent();
+
+        void enableOptionsMenu(boolean enable);
     }
 }

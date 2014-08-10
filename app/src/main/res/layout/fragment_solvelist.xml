@@ -13,8 +13,8 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:choiceMode="none"
-        android:divider="@null"/>
+        android:divider="@android:color/transparent"
+        android:dividerHeight="0dp"/>
 
     <TextView
         android:id="@id/android:empty"
@@ -27,29 +27,31 @@
         android:visibility="gone"/>
 
     <LinearLayout
-        android:id="@id/fragment_current_s_submit_reset_linearlayout"
+        android:id="@id/fragment_solvelist_submit_reset_linearlayout"
         android:layout_width="match_parent"
         android:layout_height="45dp"
         android:orientation="horizontal"
         android:visibility="gone">
 
         <Button
-            android:id="@id/fragment_current_s_details_reset_button"
+            android:id="@id/fragment_solvelist_reset_button"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@drawable/button_background"
+            android:background="@drawable/background_button_bar"
             android:text="@string/reset"
-            android:textSize="18sp"/>
+            android:textSize="18sp"
+            tools:ignore="ButtonStyle"/>
 
         <Button
-            android:id="@id/fragment_current_s_details_submit_button"
+            android:id="@id/fragment_solvelist_submit_button"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@drawable/button_background"
+            android:background="@drawable/background_button_bar"
             android:text="@string/submit"
-            android:textSize="18sp"/>
+            android:textSize="18sp"
+            tools:ignore="ButtonStyle"/>
 
     </LinearLayout>
 

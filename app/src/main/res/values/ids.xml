@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--CurrentSTimerFragment-->
-    <item name="fragment_current_s_timer_scramble_textview" type="id"/>
-    <item name="fragment_current_s_timer_time_textview" type="id"/>
+    <item name="fragment_current_session_timer_scramble_textview" type="id"/>
+    <item name="fragment_current_session_timer_time_textview" type="id"/>
 
 
-    <item name="fragment_current_s_timer_bottom_hlistview" type="id"/>
+    <item name="fragment_current_session_timer_bottom_hlistview" type="id"/>
     <item name="hlist_item_solve_textview" type="id"/>
 
-    <item name="fragment_current_s_timer_stats_solves_number_textview" type="id"/>
-    <item name="fragment_current_s_timer_stats_textview" type="id"/>
+    <item name="fragment_current_session_timer_stats_solves_number_textview" type="id"/>
+    <item name="fragment_current_session_timer_stats_textview" type="id"/>
 
-    <item name="fragment_current_s_timer_scramble_imageview" type="id"/>
+    <item name="fragment_current_session_timer_scramble_imageview" type="id"/>
 
-    <item name="fragment_current_s_timer_inspecting_textview" type="id"/>
+    <item name="fragment_current_session_timer_inspecting_textview" type="id"/>
 
     <!--SolveDialog-->
     <item name="dialog_solve_timestamp_textview" type="id"/>
@@ -21,34 +21,34 @@
     <item name="dialog_solve_modify_penalty_spinner" type="id"/>
 
     <!--ActionBar-->
-    <item name="menu_current_s_toggle_scramble_image_action" type="id"/>
-    <item name="menu_current_s_puzzletype_spinner" type="id"/>
-    <item name="menu_solvelist_share" type="id"/>
+    <item name="menu_activity_current_session_scramble_image_menuitem" type="id"/>
+    <item name="menu_activity_current_session_puzzletype_spinner" type="id"/>
+    <item name="menu_activity_current_session_share_menuitem" type="id"/>
     <item name="menu_history_sessionlist_puzzltype_spinner" type="id"/>
-    <item name="context_solvelist_delete" type="id"/>
+    <item name="context_solvelist_delete_menuitem" type="id"/>
 
     <!--SolveListFragment-->
     <item name="list_item_solvelist_title_textview" type="id"/>
     <item name="list_item_solvelist_desc_textview" type="id"/>
     <item name="solvelist_header_stats_textview" type="id"/>
-    <item name="fragment_current_s_details_reset_button" type="id"/>
-    <item name="fragment_current_s_details_submit_button" type="id"/>
-    <item name="fragment_current_s_submit_reset_linearlayout" type="id"/>
+    <item name="fragment_solvelist_reset_button" type="id"/>
+    <item name="fragment_solvelist_submit_button" type="id"/>
+    <item name="fragment_solvelist_submit_reset_linearlayout" type="id"/>
 
 
     <!--MainActivity-->
-    <item name="activity_main_drawerlayout" type="id"/>
-    <item name="activity_main_content_framelayout" type="id"/>
-    <item name="activity_main_drawer_listview" type="id"/>
+    <item name="activity_base_drawerlayout" type="id"/>
+    <item name="activity_base_content_framelayout" type="id"/>
+    <item name="activity_base_drawer_listview" type="id"/>
 
     <item name="nav_drawer_footer_settings_linearlayout" type="id"/>
 
-    <!--CurrentSFragment-->
-    <item name="fragment_current_s_slidingtablayout" type="id"/>
-    <item name="fragment_current_s_viewpager" type="id"/>
+    <!--CurrentSessionActivity-->
+    <item name="activity_current_session_slidingtablayout" type="id"/>
+    <item name="activity_current_session_viewpager" type="id"/>
 
     <!--HistorySolveListActivity-->
-    <item name="activity_history_solve_list_framelayout" type="id"/>
+    <item name="activity_history_solvelist_framelayout" type="id"/>
 
     <!--HistorySessionListFragment-->
     <item name="list_item_history_sessionlist_textview" type="id"/>

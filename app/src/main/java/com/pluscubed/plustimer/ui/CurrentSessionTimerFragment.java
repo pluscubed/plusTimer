@@ -1,5 +1,6 @@
 package com.pluscubed.plustimer.ui;
 
+import android.app.Fragment;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -9,10 +10,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -26,7 +24,6 @@ import com.caverock.androidsvg.SVG;
 import com.caverock.androidsvg.SVGParseException;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
-import com.pluscubed.plustimer.model.ScrambleAndSvg;
 import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
 
@@ -40,8 +37,8 @@ import it.sephiroth.android.library.widget.HListView;
  * TimerFragment
  */
 
-public class CurrentSTimerFragment extends CurrentSBaseFragment implements CurrentSTimerFragmentCallback {
-    public static final String TAG = "TIMER";
+public class CurrentSessionTimerFragment extends Fragment implements CurrentSessionTimerRetainedFragment.Callback {
+    public static final String TAG = "CURRENT_SESSION_TIMER_FRAGMENT";
 
     private static final String STATE_IMAGE_DISPLAYED = "scramble_image_displayed_boolean";
     private static final String STATE_START_TIME = "start_time_long";
@@ -49,7 +46,7 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
     private static final String STATE_INSPECTING = "inspecting_boolean";
     private static final String STATE_INSPECTION_START_TIME = "inspection_start_time_long";
 
-    private RetainedFragmentCallback mRetainedFragment;
+    private CurrentSessionTimerRetainedFragment mRetainedFragment;
 
     private TextView mTimerText;
     private TextView mScrambleText;
@@ -107,7 +104,7 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
                     mInspectingText.setVisibility(View.GONE);
                     mHoldTimerStarted = false;
                     //Stop keeping the screen on
-                    getAttachedActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                    getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                     //stop the runnables
                     mUiHandler.removeCallbacksAndMessages(null);
 
@@ -122,7 +119,7 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
                     //Update stats and HListView
                     onSessionSolvesChanged();
 
-                    if (getRetainedFragment().isScrambling()) {
+                    if (mRetainedFragment.isScrambling()) {
                         mScrambleText.setText(R.string.scrambling);
                     }
                     mTimerText.setTextColor(Color.BLACK);
@@ -204,7 +201,7 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
         //Set up UIHandler
         mUiHandler = new Handler(Looper.getMainLooper());
 
-        PreferenceManager.setDefaultValues(getAttachedActivity(), R.xml.preferences, false);
+        PreferenceManager.setDefaultValues(getActivity(), R.xml.preferences, false);
 
         if (savedInstanceState != null) {
             mScrambleImageDisplay = savedInstanceState.getBoolean(STATE_IMAGE_DISPLAYED);
@@ -226,29 +223,21 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
         mRetainedFragment.setTimerFragmentCallback(null);
     }
 
-    @Override
+
     public void onSessionSolvesChanged() {
         //Update stats
         mStatsSolvesText.setText(getString(R.string.solves) + PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().getNumberOfSolves());
-        mStatsText.setText(buildStatsWithAveragesOf(getAttachedActivity(), 5, 12, 100));
+        mStatsText.setText(buildStatsWithAveragesOf(getActivity(), 5, 12, 100));
         //Update HListView
         ((SolveHListViewAdapter) mHListView.getAdapter()).updateSolvesList();
     }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.menu_current_s_timer, menu);
-
-        //setUpPuzzleSpinner (CurrentSBaseFragment)
-        setUpPuzzleSpinner(menu);
-    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             //Toggle image button
-            case R.id.menu_current_s_toggle_scramble_image_action:
+            case R.id.menu_activity_current_session_scramble_image_menuitem:
                 toggleScrambleImage();
                 return true;
             default:
@@ -259,8 +248,8 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
     @Override
     public void onResume() {
         super.onResume();
-        mInspectionOn = PreferenceManager.getDefaultSharedPreferences(getAttachedActivity()).getBoolean(getString(R.string.pref_inspection_checkbox), true);
-        mHoldToStartOn = PreferenceManager.getDefaultSharedPreferences(getAttachedActivity()).getBoolean(getString(R.string.pref_holdtostart_checkbox), true);
+        mInspectionOn = PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(getString(R.string.pref_inspection_checkbox), true);
+        mHoldToStartOn = PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(getString(R.string.pref_holdtostart_checkbox), true);
     }
 
     public void stopHoldTimer() {
@@ -269,26 +258,18 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
 
     }
 
-    private RetainedFragmentCallback getRetainedFragment() {
+    private CurrentSessionTimerRetainedFragment getRetainedFragment() {
         GetRetainedFragmentCallback callback;
         try {
-            callback = (GetRetainedFragmentCallback) getAttachedActivity();
+            callback = (GetRetainedFragmentCallback) getActivity();
         } catch (ClassCastException e) {
-            throw new ClassCastException(getAttachedActivity().toString()
+            throw new ClassCastException(getActivity().toString()
                     + " must implement GetRetainedFragmentCallback");
         }
-        RetainedFragmentCallback fragment;
-        try {
-            fragment = (RetainedFragmentCallback) callback.getCurrentSTimerRetainedFragment();
-        } catch (ClassCastException e) {
-            throw new ClassCastException(callback.getCurrentSTimerRetainedFragment().toString()
-                    + " must implement RetainedFragmentCallback");
-        }
-        return fragment;
+        return callback.getCurrentSessionTimerRetainedFragment();
     }
 
     //Called when the session is changed to another one (action bar spinner)
-    @Override
     public void onSessionChanged() {
         //Update quick stats and hlistview
         onSessionSolvesChanged();
@@ -312,15 +293,7 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
 
     @Override
     public void enableOptionsMenu(boolean enable) {
-        //Get the parent fragment and enable/disable the options menu depending if the app is initializing, scrambling, or running
-        MenuItemsEnableListener listener;
-        try {
-            listener = (MenuItemsEnableListener) getParentFragment();
-        } catch (ClassCastException e) {
-            throw new ClassCastException(getParentFragment().toString()
-                    + " must implement MenuItemsEnableListener");
-        }
-        listener.menuItemsEnable(enable);
+        //TODO:ENABLE OPTIONS MENU
     }
 
     public void toggleScrambleImage() {
@@ -344,25 +317,31 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_current_s_timer, container, false);
+        View v = inflater.inflate(R.layout.fragment_current_session_timer, container, false);
 
-        mTimerText = (TextView) v.findViewById(R.id.fragment_current_s_timer_time_textview);
-        mScrambleText = (TextView) v.findViewById(R.id.fragment_current_s_timer_scramble_textview);
-        mScrambleImage = (ImageView) v.findViewById(R.id.fragment_current_s_timer_scramble_imageview);
-        mHListView = (HListView) v.findViewById(R.id.fragment_current_s_timer_bottom_hlistview);
+        mTimerText = (TextView) v.findViewById(R.id.fragment_current_session_timer_time_textview);
+        mScrambleText = (TextView) v.findViewById(R.id.fragment_current_session_timer_scramble_textview);
+        mScrambleImage = (ImageView) v.findViewById(R.id.fragment_current_session_timer_scramble_imageview);
+        mHListView = (HListView) v.findViewById(R.id.fragment_current_session_timer_bottom_hlistview);
 
 
-        mInspectingText = (TextView) v.findViewById(R.id.fragment_current_s_timer_inspecting_textview);
+        mInspectingText = (TextView) v.findViewById(R.id.fragment_current_session_timer_inspecting_textview);
 
-        mStatsText = (TextView) v.findViewById(R.id.fragment_current_s_timer_stats_textview);
-        mStatsSolvesText = (TextView) v.findViewById(R.id.fragment_current_s_timer_stats_solves_number_textview);
+        mStatsText = (TextView) v.findViewById(R.id.fragment_current_session_timer_stats_textview);
+        mStatsSolvesText = (TextView) v.findViewById(R.id.fragment_current_session_timer_stats_solves_number_textview);
 
         final SolveHListViewAdapter adapter = new SolveHListViewAdapter();
         mHListView.setAdapter(adapter);
         mHListView.setOnItemClickListener(new it.sephiroth.android.library.widget.AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(it.sephiroth.android.library.widget.AdapterView<?> parent, View view, int position, long id) {
-                onSolveItemClick(PuzzleType.CURRENT, PuzzleType.CURRENT_SESSION, position);
+                try {
+                    CreateDialogCallback callback = (CreateDialogCallback) getActivity();
+                    callback.createSolveDialog(null, 0, position);
+                } catch (ClassCastException e) {
+                    throw new ClassCastException(getActivity().toString()
+                            + " must implement OnDialogDismissedListener");
+                }
             }
         });
 
@@ -375,7 +354,7 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
                     case MotionEvent.ACTION_DOWN: {
                         if (mRunning) {
                             //Stop keeping the screen on
-                            getAttachedActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                            getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                             //Record the ending time, set flag to false, and stop the timer runnable
                             mEndTimestamp = System.nanoTime();
                             mRunning = false;
@@ -397,7 +376,7 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
                             //Update stats and HListView
                             onSessionSolvesChanged();
 
-                            if (getRetainedFragment().isScrambling()) {
+                            if (mRetainedFragment.isScrambling()) {
                                 mScrambleText.setText(R.string.scrambling);
                             }
 
@@ -419,7 +398,7 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
 
                     case MotionEvent.ACTION_UP: {
                         if (mInspectionOn && !mInspecting && !mRunning) {
-                            getAttachedActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                            getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                             mInspectionStartTimestamp = System.nanoTime();
                             mInspecting = true;
                             mInspectingText.setVisibility(View.VISIBLE);
@@ -439,7 +418,7 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
                                 mUiHandler.removeCallbacksAndMessages(null);
                                 mUiHandler.post(mTimerRunnable);
                                 if (mHoldToStartOn) {
-                                    getAttachedActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                                    getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                                     enableOptionsMenu(false);
                                     //Set the scramble image to gone
                                     mScrambleImage.setVisibility(View.GONE);
@@ -453,7 +432,7 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
                             }
                             mTimerText.setTextColor(Color.BLACK);
                         } else if (!mInspectionOn && !mHoldToStartOn && !mRunning) {
-                            getAttachedActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                            getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                             enableOptionsMenu(false);
                             //Set the scramble image to gone
                             mScrambleImage.setVisibility(View.GONE);
@@ -492,10 +471,10 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
             }
             if (mRunning || mInspecting) {
                 enableOptionsMenu(false);
-            } else if (!getRetainedFragment().isScrambling()) {
+            } else if (!mRetainedFragment.isScrambling()) {
                 enableOptionsMenu(true);
             }
-            if (mInspecting || mRunning || !getRetainedFragment().isScrambling()) {
+            if (mInspecting || mRunning || !mRetainedFragment.isScrambling()) {
                 // If timer is running, then update text/image to current. If timer is not running and not scrambling, then update scramble views to current.
                 updateScrambleTextAndImageToCurrent();
             } else {
@@ -511,7 +490,7 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
 
         //If the scramble image is currently displayed and it is not scrambling, then make sure it is set to visible and that the OnClickListener is set to toggling it; otherwise, set to gone.
         if (mScrambleImageDisplay) {
-            if (!getRetainedFragment().isScrambling()) {
+            if (!mRetainedFragment.isScrambling()) {
                 mScrambleImage.setVisibility(View.VISIBLE);
                 mScrambleImageDisplay = true;
                 mScrambleImage.setOnClickListener(new View.OnClickListener() {
@@ -538,24 +517,7 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
 
 
     public interface GetRetainedFragmentCallback {
-        Fragment getCurrentSTimerRetainedFragment();
-    }
-
-
-    public interface RetainedFragmentCallback {
-
-        ScrambleAndSvg getCurrentScrambleAndSvg();
-
-        boolean isScrambling();
-
-        void generateNextScramble();
-
-        void setTimerFragmentCallback(CurrentSTimerFragmentCallback fragment);
-
-        void updateViews();
-
-        void resetScramblerThread();
-
+        CurrentSessionTimerRetainedFragment getCurrentSessionTimerRetainedFragment();
     }
 
     public interface MenuItemsEnableListener {
@@ -567,7 +529,7 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
         private ArrayList<Solve> mBestAndWorstSolves;
 
         public SolveHListViewAdapter() {
-            super(getAttachedActivity(), 0, PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().getSolves());
+            super(getActivity(), 0, PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().getSolves());
             mBestAndWorstSolves = new ArrayList<Solve>();
             mBestAndWorstSolves.add(Session.getBestSolve(PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().getSolves()));
             mBestAndWorstSolves.add(Session.getWorstSolve(PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().getSolves()));
@@ -576,7 +538,7 @@ public class CurrentSTimerFragment extends CurrentSBaseFragment implements Curre
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
-                convertView = getAttachedActivity().getLayoutInflater().inflate(R.layout.hlist_item_solve, parent, false);
+                convertView = getActivity().getLayoutInflater().inflate(R.layout.hlist_item_solve, parent, false);
             }
             Solve s = getItem(position);
             TextView time = (TextView) convertView.findViewById(R.id.hlist_item_solve_textview);

@@ -2,4 +2,5 @@
 <resources>
     <item name="bg_color" type="color">#fff1f1f1</item>
     <item name="light_gray" type="color">#ffcccccc</item>
+    <item name="ab_color" type="color">#222222</item>
 </resources>

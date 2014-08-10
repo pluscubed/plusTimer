@@ -4,10 +4,10 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -38,7 +38,7 @@ public class SolveDialog extends DialogFragment {
     private int mSessionIndex;
     private int mSelection;
 
-    private SolveDialogListener mListener;
+    private OnDialogDismissedListener mListener;
 
     static SolveDialog newInstance(String displayName, int sessionIndex, int solveIndex) {
         SolveDialog d = new SolveDialog();
@@ -54,11 +54,11 @@ public class SolveDialog extends DialogFragment {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
-            mListener = (SolveDialogListener) activity;
+            mListener = (OnDialogDismissedListener) activity;
         } catch (ClassCastException e) {
             // The activity doesn't implement the interface, throw exception
             throw new ClassCastException(activity.toString()
-                    + " must implement SolveDialogListener");
+                    + " must implement OnDialogDismissedListener");
         }
     }
 
@@ -143,7 +143,7 @@ public class SolveDialog extends DialogFragment {
     }
 
 
-    public interface SolveDialogListener {
+    public interface OnDialogDismissedListener {
         public void onDialogDismissed(String displayName, int sessionIndex, int solveIndex, int penalty);
     }
 }

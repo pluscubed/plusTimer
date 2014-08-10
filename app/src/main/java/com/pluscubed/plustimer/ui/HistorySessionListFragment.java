@@ -1,3 +1,4 @@
+/*
 package com.pluscubed.plustimer.ui;
 
 import android.content.Intent;
@@ -6,10 +7,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ListFragment;
-import android.support.v4.view.MenuItemCompat;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.view.ActionMode;
 import android.util.SparseBooleanArray;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -30,10 +29,12 @@ import com.pluscubed.plustimer.model.Session;
 import java.io.IOException;
 import java.util.ArrayList;
 
+*/
 /**
  * History Fragment
- */
-public class HistorySessionListFragment extends ListFragment implements MainActivity.ActionModeNavDrawerCallback {
+ *//*
+
+public class HistorySessionListFragment extends ListFragment {
 
     private static final String STATE_PUZZLETYPE_DISPLAYNAME = "puzzletype_displayname";
     private static final String STATE_CAB_BOOLEAN = "cab_displayed";
@@ -70,11 +71,11 @@ public class HistorySessionListFragment extends ListFragment implements MainActi
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.menu_history_sessionlist, menu);
-        final Spinner menuPuzzleSpinner = (Spinner) MenuItemCompat.getActionView(menu.findItem(R.id.menu_history_sessionlist_puzzltype_spinner));
+        final Spinner menuPuzzleSpinner = (Spinner) menu.findItem(R.id.menu_history_sessionlist_puzzltype_spinner).getActionView();
 
         final ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter =
                 new ArrayAdapter<PuzzleType>(
-                        ((ActionBarActivity) getActivity()).getSupportActionBar().getThemedContext(),
+                        getActivity().getActionBar().getThemedContext(),
                         android.R.layout.simple_spinner_item,
                         PuzzleType.values()
                 );
@@ -114,7 +115,7 @@ public class HistorySessionListFragment extends ListFragment implements MainActi
 
         if (savedInstanceState != null && savedInstanceState.getBoolean(STATE_CAB_BOOLEAN)) {
             getListView().setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
-            ((ActionBarActivity) getActivity()).startSupportActionMode(new SolveListActionModeCallback());
+            getActivity().startActionMode(new SolveListActionModeCallback());
         }
 
         return v;
@@ -133,7 +134,7 @@ public class HistorySessionListFragment extends ListFragment implements MainActi
                 getListView().setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
                 getListView().setItemChecked(position, true);
                 ((SessionListAdapter) getListAdapter()).onSessionListChanged();
-                ((ActionBarActivity) getActivity()).startSupportActionMode(new SolveListActionModeCallback());
+                getActivity().startActionMode(new SolveListActionModeCallback());
                 return true;
             }
         });
@@ -148,38 +149,37 @@ public class HistorySessionListFragment extends ListFragment implements MainActi
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         if (mActionMode == null) {
-            Intent i = new Intent(getActivity(), HistorySolveListActivity.class);
-            i.putExtra(HistorySolveListActivity.EXTRA_HISTORY_SESSION_POSITION, position);
-            i.putExtra(HistorySolveListActivity.EXTRA_HISTORY_PUZZLETYPE_DISPLAYNAME, mPuzzleTypeDisplayName);
+            Intent i = new Intent(getActivity(), HistorySessionListActivity.class);
+            i.putExtra(HistorySessionListActivity.EXTRA_HISTORY_SESSION_POSITION, position);
+            i.putExtra(HistorySessionListActivity.EXTRA_HISTORY_PUZZLETYPE_DISPLAYNAME, mPuzzleTypeDisplayName);
             startActivity(i);
         } else {
             ((SessionListAdapter) getListAdapter()).onSessionListChanged();
         }
     }
 
-    @Override
     public ActionMode getActionMode() {
         return mActionMode;
     }
 
-    private class SolveListActionModeCallback implements android.support.v7.view.ActionMode.Callback {
+    private class SolveListActionModeCallback implements ActionMode.Callback {
         @Override
-        public boolean onCreateActionMode(android.support.v7.view.ActionMode mode, Menu menu) {
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             mActionMode = mode;
             getActivity().getMenuInflater().inflate(R.menu.context_solve_or_session_list, menu);
             return true;
         }
 
         @Override
-        public boolean onPrepareActionMode(android.support.v7.view.ActionMode mode, Menu menu) {
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
             return false;
         }
 
         @Override
-        public boolean onActionItemClicked(android.support.v7.view.ActionMode mode, MenuItem item) {
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             SparseBooleanArray checked;
             switch (item.getItemId()) {
-                case R.id.context_solvelist_delete:
+                case R.id.context_solvelist_delete_menuitem:
                     checked = getListView().getCheckedItemPositions();
                     ArrayList<Session> toDelete = new ArrayList<Session>();
                     for (int i = 0; i < checked.size(); i++) {
@@ -199,7 +199,7 @@ public class HistorySessionListFragment extends ListFragment implements MainActi
         }
 
         @Override
-        public void onDestroyActionMode(android.support.v7.view.ActionMode mode) {
+        public void onDestroyActionMode(ActionMode mode) {
             getListView().clearChoices();
             getListView().setChoiceMode(AbsListView.CHOICE_MODE_NONE);
             mActionMode = null;
@@ -244,3 +244,4 @@ public class HistorySessionListFragment extends ListFragment implements MainActi
     }
 
 }
+*/

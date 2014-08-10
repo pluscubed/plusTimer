@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-      xmlns:plustimer="http://schemas.android.com/apk/res-auto">
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
 
 
     <item
-        android:id="@id/menu_solvelist_share"
+        android:id="@id/menu_activity_current_session_share_menuitem"
         android:icon="@drawable/ic_action_share"
+        android:showAsAction="ifRoom"
         android:title="@string/share"
-        plustimer:showAsAction="ifRoom"
         />
 </menu>
