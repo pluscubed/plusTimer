@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical"
-    >
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="#e5e5e5"/>
+        android:background="#e5e5e5" />
 
     <LinearLayout
         android:id="@id/nav_drawer_footer_settings_linearlayout"
@@ -24,7 +23,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:contentDescription="@string/settings"
-            android:src="@drawable/ic_drawer_settings"/>
+            android:src="@drawable/ic_drawer_settings" />
 
         <TextView
             android:layout_width="match_parent"
@@ -36,13 +35,13 @@
             android:text="@string/settings"
             android:textAllCaps="true"
             android:textColor="#666666"
-            android:textSize="13sp"/>
+            android:textSize="13sp" />
     </LinearLayout>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="#e5e5e5"/>
+        android:background="#e5e5e5" />
 
 
 </LinearLayout>

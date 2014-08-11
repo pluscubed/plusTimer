@@ -34,7 +34,7 @@ public abstract class BaseActivity extends Activity {
     protected static final int NAVDRAWER_ITEM_HISTORY = 1;
     protected static final int NAVDRAWER_ITEM_INVALID = -1;
     private static final String PREF_WELCOME_DONE = "welcome_done";
-    private static final int NAVDRAWER_LAUNCH_DELAY = 200;
+    private static final int NAVDRAWER_LAUNCH_DELAY = 250;
     // fade in and fade out durations for the main content when switching between
     // different Activities of the app through the Nav Drawer
     private static final int MAIN_CONTENT_FADEOUT_DURATION = 150;
@@ -49,6 +49,7 @@ public abstract class BaseActivity extends Activity {
     private ListView mDrawerListView;
     private ActionBarDrawerToggle mDrawerToggle;
     private Handler mHandler;
+    private boolean mFadeIn = true;
 
     public static boolean isWelcomeDone(final Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
@@ -265,13 +266,18 @@ public abstract class BaseActivity extends Activity {
         mDrawerLayout.closeDrawer(Gravity.START);
     }
 
+    protected void setFadeIn(boolean fadeIn) {
+        mFadeIn = fadeIn;
+    }
+
+
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
 
 
         View mainContent = findViewById(R.id.activity_base_content_framelayout);
-        if (mainContent != null) {
+        if (mFadeIn && mainContent != null) {
             mainContent.setAlpha(0);
             mainContent.animate().alpha(1).setDuration(MAIN_CONTENT_FADEIN_DURATION);
         }

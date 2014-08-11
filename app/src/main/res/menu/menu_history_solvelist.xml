@@ -7,6 +7,5 @@
         android:id="@id/menu_activity_current_session_share_menuitem"
         android:icon="@drawable/ic_action_share"
         android:showAsAction="ifRoom"
-        android:title="@string/share"
-        />
+        android:title="@string/share" />
 </menu>

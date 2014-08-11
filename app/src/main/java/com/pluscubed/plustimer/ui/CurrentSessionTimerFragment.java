@@ -279,7 +279,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         mTimerText.setText(R.string.ready);
 
         //Update options menu (disable)
-        enableOptionsMenu(false);
+        enableMenuItems(false);
 
         //Hide scramble image
         mScrambleImage.setVisibility(View.GONE);
@@ -289,11 +289,36 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         mRetainedFragment.generateNextScramble();
         mRetainedFragment.updateViews();
 
+        resetTimer();
+    }
+
+    public void resetTimer() {
+        mUiHandler.removeCallbacksAndMessages(null);
+        mHoldToStartOn = false;
+        mHoldTimerStarted = false;
+        mRunning = false;
+        mLateStartPenalty = false;
+        mHoldTimerStartTimestamp = 0;
+        mInspectionStartTimestamp = 0;
+        mStartTimestamp = 0;
+        mEndTimestamp = 0;
+        mFinalTime = 0;
+        mInspecting = false;
+
+        mTimerText.setText(getString(R.string.ready));
+        mTimerText.setTextColor(Color.BLACK);
+        mInspectingText.setVisibility(View.GONE);
     }
 
     @Override
-    public void enableOptionsMenu(boolean enable) {
-        //TODO:ENABLE OPTIONS MENU
+    public void enableMenuItems(boolean enable) {
+        MenuItemsEnableCallback callback;
+        try {
+            callback = (MenuItemsEnableCallback) getActivity();
+        } catch (ClassCastException e) {
+            throw new ClassCastException(getActivity().toString() + " must implement MenuItemsCallback");
+        }
+        callback.enableMenuItems(enable);
     }
 
     public void toggleScrambleImage() {
@@ -403,7 +428,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
                             mInspecting = true;
                             mInspectingText.setVisibility(View.VISIBLE);
                             mUiHandler.post(mInspectionRunnable);
-                            enableOptionsMenu(false);
+                            enableMenuItems(false);
                             //Set the scramble image to gone
                             mScrambleImage.setVisibility(View.GONE);
                             mScrambleImageDisplay = false;
@@ -419,7 +444,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
                                 mUiHandler.post(mTimerRunnable);
                                 if (mHoldToStartOn) {
                                     getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-                                    enableOptionsMenu(false);
+                                    enableMenuItems(false);
                                     //Set the scramble image to gone
                                     mScrambleImage.setVisibility(View.GONE);
                                     mScrambleImageDisplay = false;
@@ -433,7 +458,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
                             mTimerText.setTextColor(Color.BLACK);
                         } else if (!mInspectionOn && !mHoldToStartOn && !mRunning) {
                             getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-                            enableOptionsMenu(false);
+                            enableMenuItems(false);
                             //Set the scramble image to gone
                             mScrambleImage.setVisibility(View.GONE);
                             mScrambleImageDisplay = false;
@@ -457,7 +482,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
 
         if (!mFromSavedInstanceState) {
             mRetainedFragment.resetScramblerThread();
-            enableOptionsMenu(false);
+            enableMenuItems(false);
             mScrambleText.setText(R.string.scrambling);
             mRetainedFragment.generateNextScramble();
             mRetainedFragment.updateViews();
@@ -470,9 +495,9 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
                 mUiHandler.post(mTimerRunnable);
             }
             if (mRunning || mInspecting) {
-                enableOptionsMenu(false);
+                enableMenuItems(false);
             } else if (!mRetainedFragment.isScrambling()) {
-                enableOptionsMenu(true);
+                enableMenuItems(true);
             }
             if (mInspecting || mRunning || !mRetainedFragment.isScrambling()) {
                 // If timer is running, then update text/image to current. If timer is not running and not scrambling, then update scramble views to current.
@@ -520,8 +545,8 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         CurrentSessionTimerRetainedFragment getCurrentSessionTimerRetainedFragment();
     }
 
-    public interface MenuItemsEnableListener {
-        void menuItemsEnable(boolean enable);
+    public interface MenuItemsEnableCallback {
+        void enableMenuItems(boolean enable);
     }
 
     public class SolveHListViewAdapter extends ArrayAdapter<Solve> {

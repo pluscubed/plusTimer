@@ -15,6 +15,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
+import com.crashlytics.android.Crashlytics;
+import com.pluscubed.plustimer.BuildConfig;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Solve;
@@ -23,7 +25,7 @@ import com.pluscubed.plustimer.ui.widget.SlidingTabLayout;
 /**
  * Current Session Activity
  */
-public class CurrentSessionActivity extends BaseActivity implements CurrentSessionTimerFragment.GetRetainedFragmentCallback, SolveDialog.OnDialogDismissedListener, CreateDialogCallback {
+public class CurrentSessionActivity extends BaseActivity implements CurrentSessionTimerFragment.GetRetainedFragmentCallback, SolveDialog.OnDialogDismissedListener, CreateDialogCallback, CurrentSessionTimerFragment.MenuItemsEnableCallback {
     public static final String DIALOG_SOLVE_TAG = "SOLVE_DIALOG";
     private static final String STATE_MENU_ITEMS_ENABLE_BOOLEAN = "menu_items_enable_boolean";
     private static final String CURRENT_SESSION_TIMER_RETAINED_TAG = "CURRENT_SESSION_TIMER_RETAINED";
@@ -64,10 +66,17 @@ public class CurrentSessionActivity extends BaseActivity implements CurrentSessi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.activity_current_session);
+        setFadeIn(false);
         super.onCreate(savedInstanceState);
+
+        if (BuildConfig.USE_CRASHLYTICS) Crashlytics.start(this);
 
         if (savedInstanceState != null) {
             mMenuItemsEnable = savedInstanceState.getBoolean(STATE_MENU_ITEMS_ENABLE_BOOLEAN);
+        }else{
+            for (PuzzleType p : PuzzleType.values()) {
+                p.getHistorySessions(this);
+            }
         }
 
         Fragment currentSessionRetainedFragment = getFragmentManager().findFragmentByTag(CURRENT_SESSION_TIMER_RETAINED_TAG);
@@ -126,7 +135,7 @@ public class CurrentSessionActivity extends BaseActivity implements CurrentSessi
         return (CurrentSessionTimerRetainedFragment) getFragmentManager().findFragmentByTag(CURRENT_SESSION_TIMER_RETAINED_TAG);
     }
 
-
+    @Override
     public void enableMenuItems(boolean enable) {
         mMenuItemsEnable = enable;
         invalidateOptionsMenu();
@@ -203,24 +212,17 @@ public class CurrentSessionActivity extends BaseActivity implements CurrentSessi
 
         puzzleTypeSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         menuPuzzleSpinner.setAdapter(puzzleTypeSpinnerAdapter);
-
-
-        menuPuzzleSpinner.post(new Runnable() {
+        menuPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition(PuzzleType.get(PuzzleType.CURRENT)), true);
+        menuPuzzleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void run() {
-                menuPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition(PuzzleType.get(PuzzleType.CURRENT)), true);
-                menuPuzzleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        PuzzleType.setCurrentPuzzleType((PuzzleType) parent.getItemAtPosition(position));
-                        ((CurrentSessionTimerFragment) getFragmentManager().findFragmentByTag(makeFragmentName(R.id.activity_current_session_viewpager, 0))).onSessionChanged();
-                        ((SolveListFragment) getFragmentManager().findFragmentByTag(makeFragmentName(R.id.activity_current_session_viewpager, 1))).onSessionChanged();
-                    }
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                PuzzleType.setCurrentPuzzleType((PuzzleType) parent.getItemAtPosition(position));
+                ((CurrentSessionTimerFragment) getFragmentManager().findFragmentByTag(makeFragmentName(R.id.activity_current_session_viewpager, 0))).onSessionChanged();
+                ((SolveListFragment) getFragmentManager().findFragmentByTag(makeFragmentName(R.id.activity_current_session_viewpager, 1))).onSessionChanged();
+            }
 
-                    @Override
-                    public void onNothingSelected(AdapterView<?> parent) {
-                    }
-                });
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
             }
         });
     }

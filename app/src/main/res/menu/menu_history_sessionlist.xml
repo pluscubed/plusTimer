@@ -6,5 +6,5 @@
         android:actionViewClass="android.widget.Spinner"
         android:orderInCategory="9999"
         android:showAsAction="always"
-        android:title="@string/puzzle_selection"/>
+        android:title="@string/puzzle_selection" />
 </menu>

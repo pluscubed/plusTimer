@@ -55,7 +55,7 @@ public class CurrentSessionTimerRetainedFragment extends Fragment {
                         @Override
                         public void run() {
                             mCallback.updateScrambleTextAndImageToCurrent();
-                            mCallback.enableOptionsMenu(true);
+                            mCallback.enableMenuItems(true);
                         }
                     });
                 }
@@ -129,6 +129,6 @@ public class CurrentSessionTimerRetainedFragment extends Fragment {
 
         void updateScrambleTextAndImageToCurrent();
 
-        void enableOptionsMenu(boolean enable);
+        void enableMenuItems(boolean enable);
     }
 }
