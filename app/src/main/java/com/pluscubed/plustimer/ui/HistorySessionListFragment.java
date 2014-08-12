@@ -1,13 +1,11 @@
-/*
 package com.pluscubed.plustimer.ui;
 
+import android.app.ListFragment;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ListFragment;
-import android.util.SparseBooleanArray;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -27,17 +25,14 @@ import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Session;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
-*/
 /**
- * History Fragment
- *//*
+ * History SessionList Fragment
+ */
 
 public class HistorySessionListFragment extends ListFragment {
 
     private static final String STATE_PUZZLETYPE_DISPLAYNAME = "puzzletype_displayname";
-    private static final String STATE_CAB_BOOLEAN = "cab_displayed";
 
     private String mPuzzleTypeDisplayName;
 
@@ -53,7 +48,6 @@ public class HistorySessionListFragment extends ListFragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(STATE_PUZZLETYPE_DISPLAYNAME, mPuzzleTypeDisplayName);
-        outState.putBoolean(STATE_CAB_BOOLEAN, mActionMode != null);
     }
 
     @Override
@@ -64,6 +58,58 @@ public class HistorySessionListFragment extends ListFragment {
             mPuzzleTypeDisplayName = savedInstanceState.getString(STATE_PUZZLETYPE_DISPLAYNAME);
         } else {
             mPuzzleTypeDisplayName = PuzzleType.CURRENT;
+        }
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        getListView().setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
+        getListView().setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
+            @Override
+            public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
+
+            }
+
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                getActivity().getMenuInflater().inflate(R.menu.context_solve_or_session_list, menu);
+                mActionMode = mode;
+                return true;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.context_solvelist_delete_menuitem:
+                        for (int i = getListView().getCount() - 1; i >= 0; i--) {
+                            if (getListView().isItemChecked(i)) {
+                                PuzzleType.get(mPuzzleTypeDisplayName).deleteHistorySession((Session) getListView().getItemAtPosition(i), getActivity());
+                            }
+                        }
+                        mode.finish();
+                        ((SessionListAdapter) getListAdapter()).onSessionListChanged();
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+                mActionMode = null;
+            }
+        });
+    }
+
+    public void finishActionMode() {
+        if (mActionMode != null) {
+            mActionMode.finish();
         }
     }
 
@@ -105,7 +151,7 @@ public class HistorySessionListFragment extends ListFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_history_sessionlist, container, false);
         try {
             setListAdapter(new SessionListAdapter());
@@ -113,98 +159,22 @@ public class HistorySessionListFragment extends ListFragment {
             e.printStackTrace();
         }
 
-        if (savedInstanceState != null && savedInstanceState.getBoolean(STATE_CAB_BOOLEAN)) {
-            getListView().setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
-            getActivity().startActionMode(new SolveListActionModeCallback());
-        }
-
         return v;
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                if (mActionMode != null) {
-                    return false;
-                }
-
-                getListView().setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
-                getListView().setItemChecked(position, true);
-                ((SessionListAdapter) getListAdapter()).onSessionListChanged();
-                getActivity().startActionMode(new SolveListActionModeCallback());
-                return true;
-            }
-        });
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        //Update list when session is deleted in HistorySolveList
         ((SessionListAdapter) getListAdapter()).onSessionListChanged();
     }
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        if (mActionMode == null) {
-            Intent i = new Intent(getActivity(), HistorySessionListActivity.class);
-            i.putExtra(HistorySessionListActivity.EXTRA_HISTORY_SESSION_POSITION, position);
-            i.putExtra(HistorySessionListActivity.EXTRA_HISTORY_PUZZLETYPE_DISPLAYNAME, mPuzzleTypeDisplayName);
-            startActivity(i);
-        } else {
-            ((SessionListAdapter) getListAdapter()).onSessionListChanged();
-        }
-    }
-
-    public ActionMode getActionMode() {
-        return mActionMode;
-    }
-
-    private class SolveListActionModeCallback implements ActionMode.Callback {
-        @Override
-        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            mActionMode = mode;
-            getActivity().getMenuInflater().inflate(R.menu.context_solve_or_session_list, menu);
-            return true;
-        }
-
-        @Override
-        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-            return false;
-        }
-
-        @Override
-        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            SparseBooleanArray checked;
-            switch (item.getItemId()) {
-                case R.id.context_solvelist_delete_menuitem:
-                    checked = getListView().getCheckedItemPositions();
-                    ArrayList<Session> toDelete = new ArrayList<Session>();
-                    for (int i = 0; i < checked.size(); i++) {
-                        final int index = checked.keyAt(i);
-                        if (checked.get(index)) {
-                            toDelete.add(PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions(getActivity()).get(index));
-                        }
-                    }
-                    for (Session i : toDelete) {
-                        PuzzleType.get(mPuzzleTypeDisplayName).deleteHistorySession(i, getActivity());
-                    }
-                    mode.finish();
-                    return true;
-                default:
-                    return false;
-            }
-        }
-
-        @Override
-        public void onDestroyActionMode(ActionMode mode) {
-            getListView().clearChoices();
-            getListView().setChoiceMode(AbsListView.CHOICE_MODE_NONE);
-            mActionMode = null;
-            ((SessionListAdapter) getListAdapter()).onSessionListChanged();
-        }
+        Intent i = new Intent(getActivity(), HistorySolveListActivity.class);
+        i.putExtra(HistorySolveListActivity.EXTRA_HISTORY_SESSION_POSITION, position);
+        i.putExtra(HistorySolveListActivity.EXTRA_HISTORY_PUZZLETYPE_DISPLAYNAME, mPuzzleTypeDisplayName);
+        startActivity(i);
     }
 
     public class SessionListAdapter extends ArrayAdapter<Session> {
@@ -220,11 +190,6 @@ public class HistorySessionListFragment extends ListFragment {
             Session session = getItem(position);
             TextView text = (TextView) convertView.findViewById(R.id.list_item_history_sessionlist_textview);
             text.setText(session.getTimestampStringOfLastSolve(getActivity()));
-            if (mActionMode != null && getListView().getCheckedItemPositions().get(position)) {
-                convertView.setBackgroundColor(Color.parseColor("#aaaaaa"));
-            } else {
-                convertView.setBackgroundResource(0);
-            }
 
             return convertView;
         }
@@ -244,4 +209,3 @@ public class HistorySessionListFragment extends ListFragment {
     }
 
 }
-*/

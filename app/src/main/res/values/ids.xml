@@ -53,4 +53,7 @@
     <!--HistorySessionListFragment-->
     <item name="list_item_history_sessionlist_textview" type="id" />
 
+    <!--HistorySessionListActivity-->
+    <item name="activity_history_sessionlist_main_framelayout" type="id" />
+
 </resources>

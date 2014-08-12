@@ -17,6 +17,18 @@
             </intent-filter>
         </activity>
         <activity
+            android:name="com.pluscubed.plustimer.ui.HistorySessionListActivity"
+            android:launchMode="singleTop" />
+
+        <activity
+            android:name="com.pluscubed.plustimer.ui.HistorySolveListActivity"
+            android:parentActivityName="com.pluscubed.plustimer.ui.HistorySessionListActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.pluscubed.plustimer.ui.HistorySessionListActivity" />
+        </activity>
+
+        <activity
             android:name="com.pluscubed.plustimer.ui.SettingsActivity"
             android:parentActivityName="com.pluscubed.plustimer.ui.CurrentSessionActivity">
             <!-- Parent activity meta-data to support 4.0 and lower -->

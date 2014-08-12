@@ -35,21 +35,14 @@ public abstract class BaseActivity extends Activity {
     protected static final int NAVDRAWER_ITEM_INVALID = -1;
     private static final String PREF_WELCOME_DONE = "welcome_done";
     private static final int NAVDRAWER_LAUNCH_DELAY = 250;
-    // fade in and fade out durations for the main content when switching between
-    // different Activities of the app through the Nav Drawer
-    private static final int MAIN_CONTENT_FADEOUT_DURATION = 150;
-    private static final int MAIN_CONTENT_FADEIN_DURATION = 200;
 
-    private static int[] sAbItemIds;
     private static String[] sSectionTitles;
     private static CharSequence sDrawerTitle;
     private static String[] sSectionAbTitles;
-    private boolean mUserLearnedDrawer;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerListView;
     private ActionBarDrawerToggle mDrawerToggle;
     private Handler mHandler;
-    private boolean mFadeIn = true;
 
     public static boolean isWelcomeDone(final Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
@@ -90,7 +83,6 @@ public abstract class BaseActivity extends Activity {
         // What nav drawer item should be selected?
         int selfItem = getSelfNavDrawerItem();
 
-
         mDrawerListView = (ListView) findViewById(R.id.activity_base_drawer_listview);
         sSectionTitles = getResources().getStringArray(R.array.drawer_array);
         sDrawerTitle = getResources().getString(R.string.app_name);
@@ -129,12 +121,6 @@ public abstract class BaseActivity extends Activity {
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
                 mWrapped.onDrawerOpened(drawerView);
-                if (!mUserLearnedDrawer) {
-                    // The user manually opened the drawer; store this flag to prevent auto-showing
-                    // the navigation drawer automatically in the future.
-                    mUserLearnedDrawer = true;
-                    PreferenceManager.getDefaultSharedPreferences(BaseActivity.this).edit().putBoolean(PREF_WELCOME_DONE, true).commit();
-                }
 
                 invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
@@ -181,24 +167,28 @@ public abstract class BaseActivity extends Activity {
         mDrawerListView.setAdapter(new NavDrawerAdapater());
         setTitle(sSectionAbTitles[getSelfNavDrawerItem()]);
 
-        // When the user runs the app for the first time, we want to land them with the
-        // navigation drawer open. But just the first time.
+
         if (!isWelcomeDone(this)) {
-            // first run of the app starts with the nav drawer open
             markWelcomeDone(this);
             mDrawerLayout.openDrawer(Gravity.START);
         }
-
 
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        setupNavDrawer();
         mHandler = new Handler();
-
+        setupNavDrawer();
+        if (isWelcomeDone(this) && savedInstanceState == null) {
+            mDrawerLayout.openDrawer(Gravity.START);
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mDrawerLayout.closeDrawer(Gravity.START);
+                }
+            });
+        }
     }
 
     @Override
@@ -243,45 +233,9 @@ public abstract class BaseActivity extends Activity {
             mDrawerLayout.closeDrawer(Gravity.START);
             return;
         }
-        if (position != getSelfNavDrawerItem()) {
-            goToNavDrawerItem(position);
-            return;
-        }
-
-        // launch the target Activity after a short delay, to allow the close animation to play
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                goToNavDrawerItem(position);
-            }
-        }, NAVDRAWER_LAUNCH_DELAY);
-
-        // fade out the main content
-        View mainContent = findViewById(R.id.activity_base_content_framelayout);
-        if (mainContent != null) {
-            mainContent.animate().alpha(0).setDuration(MAIN_CONTENT_FADEOUT_DURATION);
-        }
-
-        mDrawerListView.setItemChecked(position, true);
-        mDrawerLayout.closeDrawer(Gravity.START);
+        goToNavDrawerItem(position);
     }
 
-    protected void setFadeIn(boolean fadeIn) {
-        mFadeIn = fadeIn;
-    }
-
-
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-
-
-        View mainContent = findViewById(R.id.activity_base_content_framelayout);
-        if (mFadeIn && mainContent != null) {
-            mainContent.setAlpha(0);
-            mainContent.animate().alpha(1).setDuration(MAIN_CONTENT_FADEIN_DURATION);
-        }
-    }
 
     protected boolean isNavDrawerOpen() {
         return mDrawerLayout != null && mDrawerLayout.isDrawerOpen(Gravity.START);
@@ -294,11 +248,15 @@ public abstract class BaseActivity extends Activity {
                 i = new Intent(this, CurrentSessionActivity.class);
                 break;
             case NAVDRAWER_ITEM_HISTORY:
+                i = new Intent(this, HistorySessionListActivity.class);
+                break;
             default:
                 Toast.makeText(getApplicationContext(), "Work in Progress", Toast.LENGTH_SHORT).show();
                 return;
         }
+
         startActivity(i);
+        overridePendingTransition(0, 0);
         finish();
     }
 

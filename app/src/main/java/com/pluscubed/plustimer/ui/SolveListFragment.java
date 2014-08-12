@@ -151,7 +151,7 @@ public class SolveListFragment extends Fragment {
 
         mListView = (ListView) v.findViewById(android.R.id.list);
         mListAdapter = new SolveListAdapter();
-        View header = inflater.inflate(R.layout.solvelist_header, null);
+        View header = inflater.inflate(R.layout.solvelist_header, mListView, false);
         mQuickStats = (TextView) header.findViewById(R.id.solvelist_header_stats_textview);
         mListView.addHeaderView(header, null, false);
         mListView.setAdapter(mListAdapter);

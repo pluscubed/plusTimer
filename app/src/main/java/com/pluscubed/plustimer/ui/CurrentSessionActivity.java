@@ -66,14 +66,13 @@ public class CurrentSessionActivity extends BaseActivity implements CurrentSessi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.activity_current_session);
-        setFadeIn(false);
         super.onCreate(savedInstanceState);
 
         if (BuildConfig.USE_CRASHLYTICS) Crashlytics.start(this);
 
         if (savedInstanceState != null) {
             mMenuItemsEnable = savedInstanceState.getBoolean(STATE_MENU_ITEMS_ENABLE_BOOLEAN);
-        }else{
+        } else {
             for (PuzzleType p : PuzzleType.values()) {
                 p.getHistorySessions(this);
             }
