@@ -250,6 +250,11 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         super.onResume();
         mInspectionOn = PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(getString(R.string.pref_inspection_checkbox), true);
         mHoldToStartOn = PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(getString(R.string.pref_holdtostart_checkbox), true);
+        if (PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(getString(R.string.pref_keepscreenon_checkbox), true)) {
+            getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        } else {
+            getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
     }
 
     public void stopHoldTimer() {
@@ -341,6 +346,12 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_current_session_timer, container, false);
 
@@ -378,8 +389,6 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN: {
                         if (mRunning) {
-                            //Stop keeping the screen on
-                            getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                             //Record the ending time, set flag to false, and stop the timer runnable
                             mEndTimestamp = System.nanoTime();
                             mRunning = false;
@@ -423,7 +432,6 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
 
                     case MotionEvent.ACTION_UP: {
                         if (mInspectionOn && !mInspecting && !mRunning) {
-                            getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                             mInspectionStartTimestamp = System.nanoTime();
                             mInspecting = true;
                             mInspectingText.setVisibility(View.VISIBLE);
@@ -443,7 +451,6 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
                                 mUiHandler.removeCallbacksAndMessages(null);
                                 mUiHandler.post(mTimerRunnable);
                                 if (mHoldToStartOn) {
-                                    getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                                     enableMenuItems(false);
                                     //Set the scramble image to gone
                                     mScrambleImage.setVisibility(View.GONE);
@@ -457,7 +464,6 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
                             }
                             mTimerText.setTextColor(Color.BLACK);
                         } else if (!mInspectionOn && !mHoldToStartOn && !mRunning) {
-                            getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                             enableMenuItems(false);
                             //Set the scramble image to gone
                             mScrambleImage.setVisibility(View.GONE);

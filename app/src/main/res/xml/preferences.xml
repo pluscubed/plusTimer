@@ -13,4 +13,9 @@
         android:key="@string/pref_holdtostart_checkbox"
         android:summary="@string/pref_holdtostart_summary"
         android:title="@string/pref_holdtostart_title" />
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="@string/pref_keepscreenon_checkbox"
+        android:summary="@string/pref_keepscreenon_summary"
+        android:title="@string/pref_keepscreenon_title" />
 </PreferenceScreen>
