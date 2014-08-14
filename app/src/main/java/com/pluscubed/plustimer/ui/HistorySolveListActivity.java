@@ -54,6 +54,8 @@ public class HistorySolveListActivity extends Activity implements SolveDialog.On
             getSolveListFragment().onSessionSolvesChanged();
         }
 
+        setTitle(PuzzleType.get(displayName).getSession(sessionIndex, this).getTimestampStringOfLastSolve(this));
+
     }
 
     private SolveListFragment getSolveListFragment() {
@@ -75,12 +77,13 @@ public class HistorySolveListActivity extends Activity implements SolveDialog.On
         getActionBar().setHomeButtonEnabled(true);
         FragmentManager fm = getFragmentManager();
         Fragment fragment = fm.findFragmentById(R.id.activity_history_solvelist_framelayout);
+        int position = getIntent().getIntExtra(EXTRA_HISTORY_SESSION_POSITION, 0);
+        String puzzleType = getIntent().getStringExtra(EXTRA_HISTORY_PUZZLETYPE_DISPLAYNAME);
         if (fragment == null) {
-            int position = getIntent().getIntExtra(EXTRA_HISTORY_SESSION_POSITION, 0);
-            String puzzleType = getIntent().getStringExtra(EXTRA_HISTORY_PUZZLETYPE_DISPLAYNAME);
             fragment = SolveListFragment.newInstance(false, puzzleType, position);
             fm.beginTransaction().add(R.id.activity_history_solvelist_framelayout, fragment).commit();
         }
+        setTitle(PuzzleType.get(puzzleType).getSession(position, this).getTimestampStringOfLastSolve(this));
     }
 
 

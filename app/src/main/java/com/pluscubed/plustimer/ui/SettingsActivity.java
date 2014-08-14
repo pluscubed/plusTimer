@@ -29,6 +29,8 @@ public class SettingsActivity extends Activity {
                     .commit();
         }
         getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setHomeButtonEnabled(true);
+        setTitle(R.string.settings);
     }
 
     @Override
