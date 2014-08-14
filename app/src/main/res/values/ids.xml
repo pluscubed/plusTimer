@@ -24,7 +24,7 @@
     <item name="menu_activity_current_session_scramble_image_menuitem" type="id" />
     <item name="menu_activity_current_session_puzzletype_spinner" type="id" />
     <item name="menu_activity_current_session_share_menuitem" type="id" />
-    <item name="menu_history_sessionlist_puzzltype_spinner" type="id" />
+    <item name="menu_history_sessionlist_puzzletype_spinner" type="id" />
     <item name="context_solvelist_delete_menuitem" type="id" />
 
     <!--SolveListFragment-->

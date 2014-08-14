@@ -39,7 +39,7 @@
     <string name="pref_holdtostart_summary">Touch and hold for about half a second to start (similar to a SpeedStacks timer)</string>
 
     <string name="pref_keepscreenon_checkbox">pref_keepscreenon_checkbox</string>
-    <string name="pref_keepscreenon_summary">Prevent automatic sleep timeout in timer</string>
+    <string name="pref_keepscreenon_summary">Prevent automatic sleep timeout</string>
     <string name="pref_keepscreenon_title">Keep Screen On</string>
 
     <string-array name="penalty_array">
