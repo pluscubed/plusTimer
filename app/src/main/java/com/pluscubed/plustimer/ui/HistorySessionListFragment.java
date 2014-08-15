@@ -117,7 +117,7 @@ public class HistorySessionListFragment extends ListFragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.menu_history_sessionlist, menu);
-        final Spinner menuPuzzleSpinner = (Spinner) menu.findItem(R.id.menu_history_sessionlist_puzzletype_spinner).getActionView();
+        final Spinner menuPuzzleSpinner = (Spinner) menu.findItem(R.id.menu_activity_history_sessionlist_puzzletype_spinner).getActionView();
 
         final ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter =
                 new ArrayAdapter<PuzzleType>(

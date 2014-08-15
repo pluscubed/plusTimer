@@ -2,7 +2,7 @@
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@id/menu_history_sessionlist_puzzletype_spinner"
+        android:id="@id/menu_activity_history_sessionlist_puzzletype_spinner"
         android:actionViewClass="android.widget.Spinner"
         android:orderInCategory="9999"
         android:showAsAction="always"

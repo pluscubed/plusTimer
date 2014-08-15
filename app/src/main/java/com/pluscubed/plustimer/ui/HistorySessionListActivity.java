@@ -3,6 +3,7 @@ package com.pluscubed.plustimer.ui;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.os.Bundle;
+import android.view.Menu;
 import android.view.View;
 
 import com.pluscubed.plustimer.R;
@@ -29,6 +30,19 @@ public class HistorySessionListActivity extends BaseActivity {
                 }
             }
         };
+    }
+
+    @Override
+    protected int[] getNavDrawerHideActionBarItemIds() {
+        return new int[]{R.id.menu_activity_history_sessionlist_puzzletype_spinner};
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        if (menu.findItem(R.id.menu_activity_history_sessionlist_puzzletype_spinner) != null) {
+            menu.findItem(R.id.menu_activity_history_sessionlist_puzzletype_spinner).setVisible(true);
+        }
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override

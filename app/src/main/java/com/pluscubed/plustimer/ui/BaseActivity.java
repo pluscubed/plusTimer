@@ -37,8 +37,8 @@ public abstract class BaseActivity extends Activity {
     private static final int NAVDRAWER_LAUNCH_DELAY = 250;
     // fade in and fade out durations for the main content when switching between
     // different Activities of the app through the Nav Drawer
-    private static final int MAIN_CONTENT_FADEOUT_DURATION = 100;
-    private static final int MAIN_CONTENT_FADEIN_DURATION = 100;
+    private static final int MAIN_CONTENT_FADEOUT_DURATION = 150;
+    private static final int MAIN_CONTENT_FADEIN_DURATION = 250;
 
     private static String[] sSectionTitles;
     private static CharSequence sDrawerTitle;
@@ -189,11 +189,9 @@ public abstract class BaseActivity extends Activity {
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        if (getSelfNavDrawerItem() != NAVDRAWER_ITEM_CURRENT_SESSION) {
-            View mainContent = findViewById(R.id.activity_base_content_framelayout);
-            mainContent.setAlpha(0);
-            mainContent.animate().alpha(1).setDuration(MAIN_CONTENT_FADEIN_DURATION);
-        }
+        View mainContent = findViewById(R.id.activity_base_content_framelayout);
+        mainContent.setAlpha(0);
+        mainContent.animate().alpha(1).setDuration(MAIN_CONTENT_FADEIN_DURATION);
     }
 
     @Override
