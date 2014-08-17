@@ -154,13 +154,13 @@ public class CurrentSessionActivity extends BaseActivity implements CurrentSessi
             menuDisplayScramble.setEnabled(mMenuItemsEnable);
             menuDisplayScramble.getIcon().setAlpha(mMenuItemsEnable ? 255 : 96);
         }
-        if (menu.findItem(R.id.menu_activity_current_session_share_menuitem) != null && menu.findItem(R.id.menu_activity_current_session_scramble_image_menuitem) != null) {
+        if (menu.findItem(R.id.menu_solvelist_share_menuitem) != null && menu.findItem(R.id.menu_activity_current_session_scramble_image_menuitem) != null) {
             if (mSelectedPosition == 0) {
-                menu.findItem(R.id.menu_activity_current_session_share_menuitem).setVisible(false);
+                menu.findItem(R.id.menu_solvelist_share_menuitem).setVisible(false);
                 menu.findItem(R.id.menu_activity_current_session_scramble_image_menuitem).setVisible(true);
             } else {
                 menu.findItem(R.id.menu_activity_current_session_scramble_image_menuitem).setVisible(false);
-                menu.findItem(R.id.menu_activity_current_session_share_menuitem).setVisible(true);
+                menu.findItem(R.id.menu_solvelist_share_menuitem).setVisible(true);
             }
         }
 
@@ -187,7 +187,7 @@ public class CurrentSessionActivity extends BaseActivity implements CurrentSessi
 
     @Override
     protected int[] getNavDrawerHideActionBarItemIds() {
-        return new int[]{R.id.menu_activity_current_session_scramble_image_menuitem, R.id.menu_activity_current_session_share_menuitem, R.id.menu_activity_current_session_puzzletype_spinner};
+        return new int[]{R.id.menu_activity_current_session_scramble_image_menuitem, R.id.menu_solvelist_share_menuitem, R.id.menu_activity_current_session_puzzletype_spinner};
     }
 
     public void setUpPuzzleSpinner(Menu menu) {

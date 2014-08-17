@@ -94,8 +94,12 @@ public class SolveListFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.menu_activity_current_session_share_menuitem:
+            case R.id.menu_solvelist_share_menuitem:
                 share();
+                return true;
+            case R.id.menu_history_solvelist_delete_menuitem:
+                PuzzleType.get(mPuzzleTypeDisplayName).deleteHistorySession(mSessionIndex, getActivity());
+                getActivity().finish();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

@@ -4,7 +4,6 @@
     <item name="fragment_current_session_timer_scramble_textview" type="id" />
     <item name="fragment_current_session_timer_time_textview" type="id" />
 
-
     <item name="fragment_current_session_timer_bottom_hlistview" type="id" />
     <item name="hlist_item_solve_textview" type="id" />
 
@@ -23,8 +22,9 @@
     <!--ActionBar-->
     <item name="menu_activity_current_session_scramble_image_menuitem" type="id" />
     <item name="menu_activity_current_session_puzzletype_spinner" type="id" />
-    <item name="menu_activity_current_session_share_menuitem" type="id" />
+    <item name="menu_solvelist_share_menuitem" type="id" />
     <item name="menu_activity_history_sessionlist_puzzletype_spinner" type="id" />
+    <item name="menu_history_solvelist_delete_menuitem" type="id" />
     <item name="context_solvelist_delete_menuitem" type="id" />
 
     <!--SolveListFragment-->
