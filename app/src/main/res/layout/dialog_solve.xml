@@ -31,7 +31,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
             android:orientation="horizontal">
 
             <TextView
@@ -45,7 +46,13 @@
                 android:id="@id/dialog_solve_modify_penalty_spinner"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1" />
+                android:layout_marginBottom="4dp"
+                android:layout_marginLeft="4dp"
+                android:layout_marginTop="4dp"
+                android:layout_weight="1"
+                android:background="?android:attr/selectableItemBackground"
+                android:paddingBottom="10dp"
+                android:paddingTop="10dp" />
         </LinearLayout>
 
 

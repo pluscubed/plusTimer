@@ -14,12 +14,13 @@ https://github.com/sephiroth74/HorizontalVariableListView/tree/development
 
 ---------------------------------------------------------------------------------------------------
 CONTAINS SOURCE CODE - I/O 2014 app source: SlidingTabLayout.java, SlidingTabStrip.java, tab_text_color.xml, tab_indicator.xml:
-CONTAINS IMAGES - I/O 2014 app source: ic_action_overflow.png, ic_drawer_settings.png
+CONTAINS IMAGES - I/O 2014 app source: ic_action_overflow.png, ic_drawer_settings.png, spinner_triangle.png
 https://github.com/google/iosched
 
      All files' package declarations have been changed to com.pluscubed.plustimer
      tab_indicator.xml was renamed to sliding_tab_textview, and tab_text_color.xml was renamed to sliding_tab_text_color.xml
-     sliding_tab_textview's values have been changed to constants
+     sliding_tab_textview.xml's values have been changed to constants
+     spinner_triangle.png was duplicated to spinner_triangle_black.png with a black color filter
 
      ic_drawer_settings.png has been modified in Photoshop to change to gray color
 

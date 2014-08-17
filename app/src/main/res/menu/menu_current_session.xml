@@ -4,7 +4,7 @@
 
     <item
         android:id="@id/menu_activity_current_session_puzzletype_spinner"
-        android:actionViewClass="android.widget.Spinner"
+        android:actionLayout="@layout/actionview_spinner"
         android:orderInCategory="9999"
         android:showAsAction="always"
         android:title="@string/puzzle_selection" />

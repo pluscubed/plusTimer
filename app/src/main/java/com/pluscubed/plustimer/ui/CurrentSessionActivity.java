@@ -11,15 +11,16 @@ import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
 import com.pluscubed.plustimer.BuildConfig;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
-import com.pluscubed.plustimer.model.Solve;
 import com.pluscubed.plustimer.ui.widget.SlidingTabLayout;
 
 /**
@@ -43,17 +44,7 @@ public class CurrentSessionActivity extends BaseActivity implements CurrentSessi
 
     @Override
     public void onDialogDismissed(String displayName, int sessionIndex, int solveIndex, int penalty) {
-        Solve solve = PuzzleType.get(displayName).getSession(sessionIndex, this).getSolveByPosition(solveIndex);
         switch (penalty) {
-            case SolveDialog.DIALOG_PENALTY_NONE:
-                solve.setPenalty(Solve.Penalty.NONE);
-                break;
-            case SolveDialog.DIALOG_PENALTY_PLUSTWO:
-                solve.setPenalty(Solve.Penalty.PLUSTWO);
-                break;
-            case SolveDialog.DIALOG_PENALTY_DNF:
-                solve.setPenalty(Solve.Penalty.DNF);
-                break;
             case SolveDialog.DIALOG_RESULT_DELETE:
                 PuzzleType.get(displayName).getSession(sessionIndex, this).deleteSolve(solveIndex);
                 break;
@@ -203,13 +194,20 @@ public class CurrentSessionActivity extends BaseActivity implements CurrentSessi
         final Spinner menuPuzzleSpinner = (Spinner) menu.findItem(R.id.menu_activity_current_session_puzzletype_spinner).getActionView();
 
         final ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter =
-                new ArrayAdapter<PuzzleType>(
-                        getActionBar().getThemedContext(),
-                        android.R.layout.simple_spinner_item,
-                        PuzzleType.values()
-                );
+                new ArrayAdapter<PuzzleType>(getActionBar().getThemedContext(), 0, PuzzleType.values()) {
+                    @Override
+                    public View getView(int position, View convertView, ViewGroup parent) {
+                        if (convertView == null) {
+                            convertView = getLayoutInflater().inflate(R.layout.spinner_item, parent, false);
+                        }
+                        TextView textView = (TextView) convertView.findViewById(android.R.id.text1);
+                        textView.setText(getItem(position).toString());
+                        textView.setTextColor(Color.WHITE);
+                        return convertView;
+                    }
+                };
 
-        puzzleTypeSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        puzzleTypeSpinnerAdapter.setDropDownViewResource(R.layout.spinner_item_dropdown);
         menuPuzzleSpinner.setAdapter(puzzleTypeSpinnerAdapter);
         menuPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition(PuzzleType.get(PuzzleType.CURRENT)), true);
         menuPuzzleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {

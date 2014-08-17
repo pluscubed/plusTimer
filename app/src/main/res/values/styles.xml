@@ -27,9 +27,10 @@
         <item name="android:background">@drawable/ab_background</item>
     </style>
 
-    <style name="DropDownListView" parent="android:style/Widget.ListView.DropDown">
+    <style name="DropDownListView" parent="@android:style/Widget.ListView.DropDown">
         <item name="android:divider">@android:color/transparent</item>
         <item name="android:dividerHeight">0dp</item>
+        <item name="android:listSelector">?android:selectableItemBackground</item>
     </style>
 
     <style name="ActionButton.Overflow" parent="@android:style/Widget.Holo.ActionButton.Overflow">

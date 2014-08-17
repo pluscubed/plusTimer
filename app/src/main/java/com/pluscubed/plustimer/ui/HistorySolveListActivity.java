@@ -11,7 +11,6 @@ import android.view.MenuItem;
 
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
-import com.pluscubed.plustimer.model.Solve;
 
 /**
  * History SolveList (started onListItemClick HistorySessionListFragment) activity
@@ -34,17 +33,7 @@ public class HistorySolveListActivity extends Activity implements SolveDialog.On
 
     @Override
     public void onDialogDismissed(String displayName, int sessionIndex, int solveIndex, int penalty) {
-        Solve solve = PuzzleType.get(displayName).getSession(sessionIndex, this).getSolveByPosition(solveIndex);
         switch (penalty) {
-            case SolveDialog.DIALOG_PENALTY_NONE:
-                solve.setPenalty(Solve.Penalty.NONE);
-                break;
-            case SolveDialog.DIALOG_PENALTY_PLUSTWO:
-                solve.setPenalty(Solve.Penalty.PLUSTWO);
-                break;
-            case SolveDialog.DIALOG_PENALTY_DNF:
-                solve.setPenalty(Solve.Penalty.DNF);
-                break;
             case SolveDialog.DIALOG_RESULT_DELETE:
                 PuzzleType.get(displayName).getSession(sessionIndex, this).deleteSolve(solveIndex);
                 break;

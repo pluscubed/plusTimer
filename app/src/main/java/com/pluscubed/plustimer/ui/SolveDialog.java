@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
@@ -76,7 +77,7 @@ public class SolveDialog extends DialogFragment {
         mPuzzleTypeDisplayName = getArguments().getString(ARG_DIALOG_INIT_PUZZLETYPE_DISPLAY_NAME);
         mSessionIndex = getArguments().getInt(ARG_DIALOG_INIT_SESSION_INDEX);
         mSolveIndex = getArguments().getInt(ARG_DIALOG_INIT_SOLVE_INDEX);
-        Solve solve = PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getActivity()).getSolveByPosition(mSolveIndex);
+        final Solve solve = PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getActivity()).getSolveByPosition(mSolveIndex);
 
         String timeString = solve.getDescriptiveTimeString();
         String scramble = solve.getScrambleAndSvg().scramble;
@@ -107,15 +108,38 @@ public class SolveDialog extends DialogFragment {
 
         timestampTextView.setText(Solve.timeDateStringFromTimestamp(getActivity().getApplicationContext(), timestamp));
 
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
-                R.array.penalty_array, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<CharSequence> adapter = new ArrayAdapter<CharSequence>(getActivity(),
+                0, getResources().getStringArray(R.array.penalty_array)) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                if (convertView == null) {
+                    convertView = getActivity().getLayoutInflater().inflate(R.layout.spinner_item, parent, false);
+                }
+                TextView textView = (TextView) convertView.findViewById(android.R.id.text1);
+                textView.setText(getItem(position));
+                textView.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.spinner_triangle_black, 0);
+                return convertView;
+            }
+        };
+        adapter.setDropDownViewResource(R.layout.spinner_item_dropdown_black);
         penaltySpinner.setAdapter(adapter);
 
         penaltySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int selectedPosition, long id) {
                 mSelection = selectedPosition;
+                switch (mSelection) {
+                    case SolveDialog.DIALOG_PENALTY_NONE:
+                        solve.setPenalty(Solve.Penalty.NONE);
+                        break;
+                    case SolveDialog.DIALOG_PENALTY_PLUSTWO:
+                        solve.setPenalty(Solve.Penalty.PLUSTWO);
+                        break;
+                    case SolveDialog.DIALOG_PENALTY_DNF:
+                        solve.setPenalty(Solve.Penalty.DNF);
+                        break;
+                }
+                getDialog().setTitle(solve.getDescriptiveTimeString());
             }
 
             @Override
