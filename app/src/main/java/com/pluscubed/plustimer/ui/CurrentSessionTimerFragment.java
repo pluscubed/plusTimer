@@ -103,8 +103,6 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
                     mInspecting = false;
                     mInspectingText.setVisibility(View.GONE);
                     mHoldTimerStarted = false;
-                    //Stop keeping the screen on
-                    getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                     //stop the runnables
                     mUiHandler.removeCallbacksAndMessages(null);
 
