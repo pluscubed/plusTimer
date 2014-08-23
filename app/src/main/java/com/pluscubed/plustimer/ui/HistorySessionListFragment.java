@@ -3,7 +3,6 @@ package com.pluscubed.plustimer.ui;
 import android.app.ListFragment;
 import android.content.Intent;
 import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -24,8 +23,12 @@ import android.widget.TextView;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Session;
+import com.pluscubed.plustimer.model.Solve;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * History SessionList Fragment
@@ -36,6 +39,8 @@ public class HistorySessionListFragment extends ListFragment {
     private static final String STATE_PUZZLETYPE_DISPLAYNAME = "puzzletype_displayname";
 
     private String mPuzzleTypeDisplayName;
+
+    private TextView mStatsText;
 
     private ActionMode mActionMode;
 
@@ -94,7 +99,7 @@ public class HistorySessionListFragment extends ListFragment {
                             }
                         }
                         mode.finish();
-                        ((SessionListAdapter) getListAdapter()).onSessionListChanged();
+                        onSessionListChanged();
                         return true;
                     default:
                         return false;
@@ -106,6 +111,53 @@ public class HistorySessionListFragment extends ListFragment {
                 mActionMode = null;
             }
         });
+        getListView().addHeaderView(getActivity().getLayoutInflater().inflate(R.layout.history_sessionlist_header, getListView(), false), null, false);
+        try {
+            setListAdapter(new SessionListAdapter());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        mStatsText = (TextView) view.findViewById(R.id.history_sessionlist_header_stats_textview);
+    }
+
+    public void onSessionListChanged() {
+        updateStats();
+        ((SessionListAdapter) getListAdapter()).onSessionListChanged();
+    }
+
+    public void updateStats() {
+        List<Session> sessions = PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions(getActivity());
+        StringBuilder s = new StringBuilder();
+
+        ArrayList<Solve> bestSolves = new ArrayList<Solve>();
+        if (sessions.size() > 0) {
+            for (Session session : sessions) {
+                bestSolves.add(Session.getBestSolve(session.getSolves()));
+            }
+            s.append(getString(R.string.pb)).append(": ").append(Session.getBestSolve(bestSolves).getDescriptiveTimeString());
+        }
+        s.append(getBestAverageOfSessions(new int[]{1000, 100, 50, 12, 5}, sessions));
+
+        mStatsText.setText(s.toString());
+    }
+
+    public String getBestAverageOfSessions(int[] numbers, List<Session> sessions) {
+        StringBuilder builder = new StringBuilder();
+        for (int number : numbers) {
+            ArrayList<Long> bestAverages = new ArrayList<Long>();
+            if (sessions.size() > 0) {
+                for (Session session : sessions) {
+                    long bestAverage = session.getBestAverageOf(number);
+                    if (bestAverage != Session.GET_AVERAGE_INVALID) bestAverages.add(bestAverage);
+                }
+                if (bestAverages.size() > 0) {
+                    Long bestAverage = Collections.min(bestAverages);
+                    builder.append("\n").append(getString(R.string.pb)).append(" ").append(getString(R.string.ao)).append(number).append(": ").append(bestAverage == Long.MAX_VALUE ? "DNF" : Solve.timeStringFromLong(bestAverage));
+                }
+            }
+        }
+        return builder.toString();
     }
 
     public void finishActionMode() {
@@ -147,7 +199,7 @@ public class HistorySessionListFragment extends ListFragment {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (menuPuzzleSpinner.getSelectedItemPosition() != puzzleTypeSpinnerAdapter.getPosition(PuzzleType.get(mPuzzleTypeDisplayName))) {
                     mPuzzleTypeDisplayName = (parent.getItemAtPosition(position)).toString();
-                    ((SessionListAdapter) getListAdapter()).onSessionListChanged();
+                    onSessionListChanged();
                 }
             }
 
@@ -159,34 +211,29 @@ public class HistorySessionListFragment extends ListFragment {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_history_sessionlist, container, false);
-        try {
-            setListAdapter(new SessionListAdapter());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return v;
+        return inflater.inflate(R.layout.fragment_history_sessionlist, container, false);
     }
 
     @Override
     public void onResume() {
         super.onResume();
         //Update list when session is deleted in HistorySolveList
-        ((SessionListAdapter) getListAdapter()).onSessionListChanged();
+        onSessionListChanged();
     }
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         Intent i = new Intent(getActivity(), HistorySolveListActivity.class);
-        i.putExtra(HistorySolveListActivity.EXTRA_HISTORY_SESSION_POSITION, position);
+        int index = PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions(getActivity()).indexOf(getListView().getItemAtPosition(position));
+        i.putExtra(HistorySolveListActivity.EXTRA_HISTORY_SESSION_POSITION, index);
         i.putExtra(HistorySolveListActivity.EXTRA_HISTORY_PUZZLETYPE_DISPLAYNAME, mPuzzleTypeDisplayName);
         startActivity(i);
     }
 
     public class SessionListAdapter extends ArrayAdapter<Session> {
         SessionListAdapter() throws IOException {
-            super(getActivity(), 0, PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions(getActivity()));
+            super(getActivity(), 0, new ArrayList<Session>());
+            onSessionListChanged();
         }
 
         @Override
@@ -203,13 +250,9 @@ public class HistorySessionListFragment extends ListFragment {
 
         public void onSessionListChanged() {
             clear();
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
-                addAll(PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions(getActivity()));
-            else {
-                for (Session i : PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions(getActivity())) {
-                    add(i);
-                }
-            }
+            List<Session> sessions = PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions(getActivity());
+            Collections.reverse(sessions);
+            addAll(sessions);
             notifyDataSetChanged();
         }
 

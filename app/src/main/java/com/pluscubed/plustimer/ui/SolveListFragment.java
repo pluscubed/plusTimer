@@ -2,7 +2,6 @@ package com.pluscubed.plustimer.ui;
 
 import android.app.Fragment;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
@@ -241,7 +240,7 @@ public class SolveListFragment extends Fragment {
             getActivity().finish();
             return;
         }
-        mListAdapter.updateSolvesList();
+        mListAdapter.onSolveListChanged();
         if (mListAdapter.getCount() == 0) {
             mListView.setVisibility(View.GONE);
             mEmptyView.setVisibility(View.VISIBLE);
@@ -265,7 +264,7 @@ public class SolveListFragment extends Fragment {
 
         public SolveListAdapter() {
             super(getActivity(), 0, new ArrayList<Solve>());
-            updateSolvesList();
+            onSolveListChanged();
         }
 
         @Override
@@ -295,18 +294,11 @@ public class SolveListFragment extends Fragment {
             return convertView;
         }
 
-        public void updateSolvesList() {
+        public void onSolveListChanged() {
             clear();
             List<Solve> solves = mSession.getSolves();
             Collections.reverse(solves);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
-                addAll(solves);
-            else {
-                for (Solve i : solves) {
-                    add(i);
-                }
-            }
-
+            addAll(solves);
             mBestAndWorstSolves = new ArrayList<Solve>();
             mBestAndWorstSolves.add(Session.getBestSolve(mSession.getSolves()));
             mBestAndWorstSolves.add(Session.getWorstSolve(mSession.getSolves()));

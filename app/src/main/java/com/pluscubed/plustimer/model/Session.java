@@ -12,6 +12,8 @@ import java.util.List;
  * Session data
  */
 public class Session {
+    public static final int GET_AVERAGE_INVALID = -2;
+
     private ArrayList<Solve> mSolves;
 
     public Session() {
@@ -142,25 +144,36 @@ public class Session {
                 return Long.MAX_VALUE;
             }
         }
-        return -2;
+        return GET_AVERAGE_INVALID;
     }
 
     public String getStringBestAverageOf(int number) {
+        long bestAverage = getBestAverageOf(number);
+        if (bestAverage == GET_AVERAGE_INVALID) {
+            return null;
+        }
+        if (bestAverage == Long.MAX_VALUE) {
+            return "DNF";
+        }
+        return Solve.timeStringFromLong(bestAverage);
+    }
+
+    public long getBestAverageOf(int number) {
         long bestAverage = -1;
         for (int i = 0; mSolves.size() - (number + i) >= 0; i++) {
             long average = getAverageOf(mSolves.subList(mSolves.size() - (number + i), mSolves.size() - i), number);
-            if (average != -2) {
+            if (average != GET_AVERAGE_INVALID) {
                 if (average < bestAverage || bestAverage == -1) {
                     bestAverage = average;
                 }
             }
         }
         if (bestAverage != -1 && bestAverage != Long.MAX_VALUE) {
-            return Solve.timeStringFromLong(bestAverage);
+            return bestAverage;
         } else if (bestAverage == Long.MAX_VALUE) {
-            return "DNF";
+            return bestAverage;
         }
-        return null;
+        return GET_AVERAGE_INVALID;
     }
 
     public String getStringMean() {
