@@ -58,16 +58,18 @@ public class Util {
      */
     //TODO: Localization of timeStringFromNanoseconds
     public static String timeStringFromNanoseconds(long nanoseconds) {
-        int minutes = (int) ((nanoseconds / (60 * 1000000000L)) % 60);
-        int hours = (int) ((nanoseconds / (3600 * 1000000000L)) % 24);
-        float seconds = (nanoseconds / 1000000000F) % 60;
+        int hours = (int) ((nanoseconds / 1000000000L / 60L / 60L) % 24L);
+        int minutes = (int) ((nanoseconds / 1000000000L / 60L) % 60L);
+        int seconds = (int) ((nanoseconds / 1000000000L) % 60L);
+        int milliseconds = (int) ((nanoseconds / 1000000L) % 1000L);
 
+        // 0x is saying add zeroes for how many digits
         if (hours != 0) {
-            return String.format("%d:%02d:%06.3f", hours, minutes, seconds);
+            return String.format("%d:%02d:%02d.%03d", hours, minutes, seconds, milliseconds);
         } else if (minutes != 0) {
-            return String.format("%d:%06.3f", minutes, seconds);
+            return String.format("%d:%02d.%03d", minutes, seconds, milliseconds);
         } else {
-            return String.format("%.3f", seconds);
+            return String.format("%d.%03d", seconds, milliseconds);
         }
     }
 
