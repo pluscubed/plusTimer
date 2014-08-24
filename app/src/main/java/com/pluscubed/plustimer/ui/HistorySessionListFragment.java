@@ -197,14 +197,15 @@ public class HistorySessionListFragment extends ListFragment {
 
                 //Set bounds for Y
                 Solve bestSolve = Session.getBestSolve(bestSolvesOfSessions);
-                mGraph.setManualYMinBound(bestSolve.getTimeTwo() - bestSolve.getTimeTwo() * 0.1 >= 0 ? bestSolve.getTimeTwo() - bestSolve.getTimeTwo() * 0.1 : 0);
                 Solve worstSolve = Session.getWorstSolve(bestSolvesOfSessions);
-                mGraph.setManualYMaxBound(worstSolve.getTimeTwo() + bestSolve.getTimeTwo() * 0.1);
+                //Check to make sure the minimum bound is more than 0 (if yes, set bound to 0)
+                mGraph.setManualYMinBound(bestSolve.getTimeTwo() - (worstSolve.getTimeTwo() - bestSolve.getTimeTwo()) * 0.1 >= 0 ? bestSolve.getTimeTwo() - (worstSolve.getTimeTwo() - bestSolve.getTimeTwo()) * 0.1 : 0);
+                mGraph.setManualYMaxBound(worstSolve.getTimeTwo() + (worstSolve.getTimeTwo() - bestSolve.getTimeTwo()) * 0.1);
 
                 //Set bounds for X
                 long firstTimestamp = bestSolvesOfSessionsNoDnf.get(0).getTimestamp();
                 long lastTimestamp = bestSolvesOfSessionsNoDnf.get(bestSolvesOfSessionsNoDnf.size() - 1).getTimestamp();
-                mGraph.setViewPort(firstTimestamp - firstTimestamp * 0.000005, (lastTimestamp + firstTimestamp * 0.000005) - (firstTimestamp - firstTimestamp * 0.000005));
+                mGraph.setViewPort(firstTimestamp - (lastTimestamp - firstTimestamp) * 0.1, (lastTimestamp + (lastTimestamp - firstTimestamp) * 0.1) - (firstTimestamp - (lastTimestamp - firstTimestamp) * 0.1));
 
                 //Remove all series since we're adding one
                 mGraph.removeAllSeries();
