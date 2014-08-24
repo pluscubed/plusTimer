@@ -23,8 +23,8 @@ import android.widget.TextView;
 import com.caverock.androidsvg.SVG;
 import com.caverock.androidsvg.SVGParseException;
 import com.pluscubed.plustimer.R;
+import com.pluscubed.plustimer.Util;
 import com.pluscubed.plustimer.model.PuzzleType;
-import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
 
 import java.util.ArrayList;
@@ -79,7 +79,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
     private final Runnable mTimerRunnable = new Runnable() {
         @Override
         public void run() {
-            mTimerText.setText(Solve.timeStringFromLong(System.nanoTime() - mStartTimestamp));
+            mTimerText.setText(Util.timeStringFromNanoseconds(System.nanoTime() - mStartTimestamp));
             mUiHandler.postDelayed(this, 10);
         }
     };
@@ -94,7 +94,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
     private final Runnable mInspectionRunnable = new Runnable() {
         @Override
         public void run() {
-            mTimerText.setText(Solve.timeStringFromLong(15000000000L - (System.nanoTime() - mInspectionStartTimestamp)));
+            mTimerText.setText(Util.timeStringFromNanoseconds(15000000000L - (System.nanoTime() - mInspectionStartTimestamp)));
             if (15000000000L - (System.nanoTime() - mInspectionStartTimestamp) <= 0) {
                 mLateStartPenalty = true;
                 mTimerText.setText(getString(R.string.plus_two));
@@ -130,7 +130,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
     };
 
     //Generate string with specified current averages and mean of current session
-    public static String buildStatsWithAveragesOf(Context context, Integer... currentAverages) {
+    private String buildStatsWithAveragesOf(Context context, Integer... currentAverages) {
         Arrays.sort(currentAverages, Collections.reverseOrder());
         String s = "";
         for (int i : currentAverages) {
@@ -560,8 +560,8 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         public SolveHListViewAdapter() {
             super(getActivity(), 0, PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().getSolves());
             mBestAndWorstSolves = new ArrayList<Solve>();
-            mBestAndWorstSolves.add(Session.getBestSolve(PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().getSolves()));
-            mBestAndWorstSolves.add(Session.getWorstSolve(PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().getSolves()));
+            mBestAndWorstSolves.add(Util.getBestSolveOfList(PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().getSolves()));
+            mBestAndWorstSolves.add(Util.getWorstSolveOfList(PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().getSolves()));
         }
 
         @Override
@@ -598,8 +598,8 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
             }
 
             mBestAndWorstSolves = new ArrayList<Solve>();
-            mBestAndWorstSolves.add(Session.getBestSolve(PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().getSolves()));
-            mBestAndWorstSolves.add(Session.getWorstSolve(PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().getSolves()));
+            mBestAndWorstSolves.add(Util.getBestSolveOfList(PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().getSolves()));
+            mBestAndWorstSolves.add(Util.getWorstSolveOfList(PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().getSolves()));
             notifyDataSetChanged();
         }
 

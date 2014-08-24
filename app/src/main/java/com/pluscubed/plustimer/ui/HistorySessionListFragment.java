@@ -29,6 +29,7 @@ import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.GraphViewSeries;
 import com.jjoe64.graphview.LineGraphView;
 import com.pluscubed.plustimer.R;
+import com.pluscubed.plustimer.Util;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
@@ -157,11 +158,11 @@ public class HistorySessionListFragment extends ListFragment {
             //Get best solves of each history session and add to list
             ArrayList<Solve> bestSolvesOfSessions = new ArrayList<Solve>();
             for (Session session : historySessions) {
-                bestSolvesOfSessions.add(Session.getBestSolve(session.getSolves()));
+                bestSolvesOfSessions.add(Util.getBestSolveOfList(session.getSolves()));
             }
 
             //Add PB of all historySessions
-            s.append(getString(R.string.pb)).append(": ").append(Session.getBestSolve(bestSolvesOfSessions).getDescriptiveTimeString());
+            s.append(getString(R.string.pb)).append(": ").append(Util.getBestSolveOfList(bestSolvesOfSessions).getDescriptiveTimeString());
 
             //Add PB of Ao5,12,50,100,1000
             s.append(getBestAverageOfSessions(new int[]{1000, 100, 50, 12, 5}, historySessions));
@@ -171,8 +172,8 @@ public class HistorySessionListFragment extends ListFragment {
             if (bestSolvesOfSessions.size() > 1) {
                 ArrayList<Solve> bestSolvesOfSessionsNoDnf = new ArrayList<Solve>();
                 for (Session session : historySessions) {
-                    if (Session.getBestSolve(session.getSolves()).getPenalty() != Solve.Penalty.DNF) {
-                        bestSolvesOfSessionsNoDnf.add(Session.getBestSolve(session.getSolves()));
+                    if (Util.getBestSolveOfList(session.getSolves()).getPenalty() != Solve.Penalty.DNF) {
+                        bestSolvesOfSessionsNoDnf.add(Util.getBestSolveOfList(session.getSolves()));
                     }
                 }
                 mGraph.setVisibility(View.VISIBLE);
@@ -187,17 +188,17 @@ public class HistorySessionListFragment extends ListFragment {
                     @Override
                     public String formatLabel(double value, boolean isValueX) {
                         if (isValueX) {
-                            return Solve.timeDateStringFromTimestamp(getActivity().getApplicationContext(), (long) value);
+                            return Util.timeDateStringFromTimestamp(getActivity().getApplicationContext(), (long) value);
                         } else {
-                            return Solve.timeStringFromLong((long) value);
+                            return Util.timeStringFromNanoseconds((long) value);
                         }
 
                     }
                 });
 
                 //Set bounds for Y
-                Solve bestSolve = Session.getBestSolve(bestSolvesOfSessions);
-                Solve worstSolve = Session.getWorstSolve(bestSolvesOfSessions);
+                Solve bestSolve = Util.getBestSolveOfList(bestSolvesOfSessions);
+                Solve worstSolve = Util.getWorstSolveOfList(bestSolvesOfSessions);
                 //Check to make sure the minimum bound is more than 0 (if yes, set bound to 0)
                 mGraph.setManualYMinBound(bestSolve.getTimeTwo() - (worstSolve.getTimeTwo() - bestSolve.getTimeTwo()) * 0.1 >= 0 ? bestSolve.getTimeTwo() - (worstSolve.getTimeTwo() - bestSolve.getTimeTwo()) * 0.1 : 0);
                 mGraph.setManualYMaxBound(worstSolve.getTimeTwo() + (worstSolve.getTimeTwo() - bestSolve.getTimeTwo()) * 0.1);
@@ -216,6 +217,13 @@ public class HistorySessionListFragment extends ListFragment {
         }
     }
 
+    /**
+     * Returns string with best average of _ for each number specified out of all the session in the list
+     *
+     * @param numbers  the number for the averages
+     * @param sessions list of sessions
+     * @return String with the best average of _s
+     */
     public String getBestAverageOfSessions(int[] numbers, List<Session> sessions) {
         StringBuilder builder = new StringBuilder();
         for (int number : numbers) {
@@ -227,7 +235,7 @@ public class HistorySessionListFragment extends ListFragment {
                 }
                 if (bestAverages.size() > 0) {
                     Long bestAverage = Collections.min(bestAverages);
-                    builder.append("\n").append(getString(R.string.pb)).append(" ").append(getString(R.string.ao)).append(number).append(": ").append(bestAverage == Long.MAX_VALUE ? "DNF" : Solve.timeStringFromLong(bestAverage));
+                    builder.append("\n").append(getString(R.string.pb)).append(" ").append(getString(R.string.ao)).append(number).append(": ").append(bestAverage == Long.MAX_VALUE ? "DNF" : Util.timeStringFromNanoseconds(bestAverage));
                 }
             }
         }

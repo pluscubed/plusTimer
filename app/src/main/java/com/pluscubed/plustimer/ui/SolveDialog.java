@@ -17,6 +17,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.pluscubed.plustimer.R;
+import com.pluscubed.plustimer.Util;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Solve;
 
@@ -106,7 +107,7 @@ public class SolveDialog extends DialogFragment {
 
         scrambleTextView.setText(scramble);
 
-        timestampTextView.setText(Solve.timeDateStringFromTimestamp(getActivity().getApplicationContext(), timestamp));
+        timestampTextView.setText(Util.timeDateStringFromTimestamp(getActivity().getApplicationContext(), timestamp));
 
         ArrayAdapter<CharSequence> adapter = new ArrayAdapter<CharSequence>(getActivity(),
                 0, getResources().getStringArray(R.array.penalty_array)) {

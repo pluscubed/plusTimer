@@ -3,6 +3,7 @@ package com.pluscubed.plustimer.model;
 import android.content.Context;
 
 import com.pluscubed.plustimer.R;
+import com.pluscubed.plustimer.Util;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,54 +19,6 @@ public class Session {
 
     public Session() {
         mSolves = new ArrayList<Solve>();
-    }
-
-    public static List<Long> getListTimeTwoNdnf(List<Solve> solveList) {
-        ArrayList<Long> timeTwo = new ArrayList<Long>();
-        for (Solve i : solveList) {
-            if (!(i.getPenalty() == Solve.Penalty.DNF))
-                timeTwo.add(i.getTimeTwo());
-        }
-        return timeTwo;
-    }
-
-    public static Solve getBestSolve(List<Solve> list) {
-        List<Solve> solveList = new ArrayList<Solve>(list);
-        if (solveList.size() > 0) {
-            Collections.reverse(solveList);
-            List<Long> times = getListTimeTwoNdnf(solveList);
-            if (times.size() > 0) {
-                long bestTimeTwo = Collections.min(times);
-                for (Solve i : solveList) {
-                    if (!(i.getPenalty() == Solve.Penalty.DNF) && i.getTimeTwo() == bestTimeTwo)
-                        return i;
-                }
-
-            }
-            return solveList.get(solveList.size() - 1);
-        }
-        return null;
-    }
-
-    public static Solve getWorstSolve(List<Solve> list) {
-        List<Solve> solveList = new ArrayList<Solve>(list);
-        if (solveList.size() > 0) {
-            Collections.reverse(solveList);
-            for (Solve i : solveList) {
-                if (i.getPenalty() == Solve.Penalty.DNF) {
-                    return i;
-                }
-            }
-            List<Long> times = getListTimeTwoNdnf(solveList);
-            if (times.size() > 0) {
-                long worstTimeTwo = Collections.max(times);
-                for (Solve i : solveList) {
-                    if (i.getTimeTwo() == worstTimeTwo)
-                        return i;
-                }
-            }
-        }
-        return null;
     }
 
     public int getPosition(Solve i) {
@@ -107,12 +60,12 @@ public class Session {
             }
 
             if (dnfcount < 2) {
-                solves.remove(getBestSolve(new ArrayList<Solve>(solves)));
-                solves.remove(getWorstSolve(new ArrayList<Solve>(solves)));
+                solves.remove(Util.getBestSolveOfList(new ArrayList<Solve>(solves)));
+                solves.remove(Util.getWorstSolveOfList(new ArrayList<Solve>(solves)));
                 for (Solve i : solves) {
                     sum += i.getTimeTwo();
                 }
-                return Solve.timeStringFromLong(sum / (number - 2L));
+                return Util.timeStringFromNanoseconds(sum / (number - 2L));
             } else {
                 return "DNF";
             }
@@ -134,8 +87,8 @@ public class Session {
             }
 
             if (dnfcount < 2) {
-                solves.remove(getBestSolve(new ArrayList<Solve>(solves)));
-                solves.remove(getWorstSolve(new ArrayList<Solve>(solves)));
+                solves.remove(Util.getBestSolveOfList(new ArrayList<Solve>(solves)));
+                solves.remove(Util.getWorstSolveOfList(new ArrayList<Solve>(solves)));
                 for (Solve i : solves) {
                     sum += i.getTimeTwo();
                 }
@@ -155,7 +108,7 @@ public class Session {
         if (bestAverage == Long.MAX_VALUE) {
             return "DNF";
         }
-        return Solve.timeStringFromLong(bestAverage);
+        return Util.timeStringFromNanoseconds(bestAverage);
     }
 
     public long getBestAverageOf(int number) {
@@ -186,13 +139,13 @@ public class Session {
                 dnf = true;
         }
         if (!dnf)
-            return Solve.timeStringFromLong(sum / mSolves.size());
+            return Util.timeStringFromNanoseconds(sum / mSolves.size());
         else
             return "DNF";
     }
 
     public String getTimestampStringOfLastSolve(Context context) {
-        return Solve.timeDateStringFromTimestamp(context, getLastSolve().getTimestamp());
+        return Util.timeDateStringFromTimestamp(context, getLastSolve().getTimestamp());
     }
 
     public void deleteSolve(int position) {
@@ -212,11 +165,11 @@ public class Session {
         if (getNumberOfSolves() > 0) {
             s.append("\n").append(context.getString(R.string.mean)).append(getStringMean());
             if (getNumberOfSolves() > 1) {
-                s.append("\n").append(context.getString(R.string.best)).append(Session.getBestSolve(mSolves).getDescriptiveTimeString());
-                s.append("\n").append(context.getString(R.string.worst)).append(Session.getWorstSolve(mSolves).getDescriptiveTimeString());
+                s.append("\n").append(context.getString(R.string.best)).append(Util.getBestSolveOfList(mSolves).getDescriptiveTimeString());
+                s.append("\n").append(context.getString(R.string.worst)).append(Util.getWorstSolveOfList(mSolves).getDescriptiveTimeString());
 
                 if (getNumberOfSolves() > 2) {
-                    s.append("\n").append(context.getString(R.string.average)).append(Solve.timeStringFromLong(getAverageOf(mSolves, mSolves.size())));
+                    s.append("\n").append(context.getString(R.string.average)).append(Util.timeStringFromNanoseconds(getAverageOf(mSolves, mSolves.size())));
 
                     int[] averages = {1000, 100, 50, 12, 5};
                     for (int i : averages) {
@@ -235,8 +188,8 @@ public class Session {
                 s.append("\n\n");
                 int c = 1;
                 for (Solve i : mSolves) {
-                    Solve best = Session.getBestSolve(mSolves);
-                    Solve worst = Session.getWorstSolve(mSolves);
+                    Solve best = Util.getBestSolveOfList(mSolves);
+                    Solve worst = Util.getWorstSolveOfList(mSolves);
                     s.append(c).append(". ");
                     if (i == best || i == worst) {
                         s.append("(").append(i.getDescriptiveTimeString()).append(")");
@@ -244,7 +197,7 @@ public class Session {
                         s.append(i.getDescriptiveTimeString());
                     }
                     s.append("\n")
-                            .append("     ").append(Solve.timeDateStringFromTimestamp(context, i.getTimestamp())).append("\n")
+                            .append("     ").append(Util.timeDateStringFromTimestamp(context, i.getTimestamp())).append("\n")
                             .append("     ").append(i.getScrambleAndSvg().scramble).append("\n\n");
                     c++;
                 }

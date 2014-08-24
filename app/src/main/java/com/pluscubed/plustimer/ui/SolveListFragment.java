@@ -19,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.pluscubed.plustimer.R;
+import com.pluscubed.plustimer.Util;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
@@ -300,8 +301,8 @@ public class SolveListFragment extends Fragment {
             Collections.reverse(solves);
             addAll(solves);
             mBestAndWorstSolves = new ArrayList<Solve>();
-            mBestAndWorstSolves.add(Session.getBestSolve(mSession.getSolves()));
-            mBestAndWorstSolves.add(Session.getWorstSolve(mSession.getSolves()));
+            mBestAndWorstSolves.add(Util.getBestSolveOfList(mSession.getSolves()));
+            mBestAndWorstSolves.add(Util.getWorstSolveOfList(mSession.getSolves()));
             notifyDataSetChanged();
         }
 
