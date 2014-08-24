@@ -2,10 +2,13 @@ package com.pluscubed.plustimer.ui;
 
 import android.app.ListFragment;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -16,10 +19,15 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.jjoe64.graphview.CustomLabelFormatter;
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.GraphViewSeries;
+import com.jjoe64.graphview.LineGraphView;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Session;
@@ -41,6 +49,7 @@ public class HistorySessionListFragment extends ListFragment {
     private String mPuzzleTypeDisplayName;
 
     private TextView mStatsText;
+    private GraphView mGraph;
 
     private ActionMode mActionMode;
 
@@ -111,14 +120,28 @@ public class HistorySessionListFragment extends ListFragment {
                 mActionMode = null;
             }
         });
-        getListView().addHeaderView(getActivity().getLayoutInflater().inflate(R.layout.history_sessionlist_header, getListView(), false), null, false);
+        LinearLayout headerView = (LinearLayout) getActivity().getLayoutInflater().inflate(R.layout.history_sessionlist_header, getListView(), false);
+        mStatsText = (TextView) headerView.findViewById(R.id.history_sessionlist_header_stats_textview);
+        mGraph = new LineGraphView(getActivity(), "");
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) convertDpToPx(220));
+        layoutParams.setMargins(0, (int) convertDpToPx(8), 0, (int) convertDpToPx(8));
+        mGraph.setLayoutParams(layoutParams);
+        mGraph.setShowLegend(true);
+        mGraph.getGraphViewStyle().setLegendWidth((int) convertDpToPx(70));
+        headerView.addView(mGraph);
+        getListView().addHeaderView(headerView, null, false);
         try {
             setListAdapter(new SessionListAdapter());
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
 
-        mStatsText = (TextView) view.findViewById(R.id.history_sessionlist_header_stats_textview);
+    public float convertDpToPx(float dp) {
+        Resources r = getResources();
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, r.getDisplayMetrics());
     }
 
     public void onSessionListChanged() {
@@ -127,19 +150,69 @@ public class HistorySessionListFragment extends ListFragment {
     }
 
     public void updateStats() {
-        List<Session> sessions = PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions(getActivity());
-        StringBuilder s = new StringBuilder();
+        List<Session> historySessions = PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions(getActivity());
+        if (historySessions.size() > 0) {
+            StringBuilder s = new StringBuilder();
 
-        ArrayList<Solve> bestSolves = new ArrayList<Solve>();
-        if (sessions.size() > 0) {
-            for (Session session : sessions) {
-                bestSolves.add(Session.getBestSolve(session.getSolves()));
+            //Get best solves of each history session and add to list
+            ArrayList<Solve> bestSolvesOfSessions = new ArrayList<Solve>();
+            for (Session session : historySessions) {
+                bestSolvesOfSessions.add(Session.getBestSolve(session.getSolves()));
             }
-            s.append(getString(R.string.pb)).append(": ").append(Session.getBestSolve(bestSolves).getDescriptiveTimeString());
-        }
-        s.append(getBestAverageOfSessions(new int[]{1000, 100, 50, 12, 5}, sessions));
 
-        mStatsText.setText(s.toString());
+            //Add PB of all historySessions
+            s.append(getString(R.string.pb)).append(": ").append(Session.getBestSolve(bestSolvesOfSessions).getDescriptiveTimeString());
+
+            //Add PB of Ao5,12,50,100,1000
+            s.append(getBestAverageOfSessions(new int[]{1000, 100, 50, 12, 5}, historySessions));
+
+            mStatsText.setText(s.toString());
+
+            if (bestSolvesOfSessions.size() > 1) {
+                ArrayList<Solve> bestSolvesOfSessionsNoDnf = new ArrayList<Solve>();
+                for (Session session : historySessions) {
+                    if (Session.getBestSolve(session.getSolves()).getPenalty() != Solve.Penalty.DNF) {
+                        bestSolvesOfSessionsNoDnf.add(Session.getBestSolve(session.getSolves()));
+                    }
+                }
+                mGraph.setVisibility(View.VISIBLE);
+
+                GraphView.GraphViewData[] bestTimes = new GraphView.GraphViewData[bestSolvesOfSessionsNoDnf.size()];
+                for (int i = 0; i < bestSolvesOfSessionsNoDnf.size(); i++) {
+                    bestTimes[i] = new GraphView.GraphViewData(bestSolvesOfSessionsNoDnf.get(i).getTimestamp(), bestSolvesOfSessionsNoDnf.get(i).getTimeTwo());
+                }
+                GraphViewSeries bestTimesSeries = new GraphViewSeries("Best Times", new GraphViewSeries.GraphViewSeriesStyle(Color.BLUE, 5), bestTimes);
+
+                mGraph.setCustomLabelFormatter(new CustomLabelFormatter() {
+                    @Override
+                    public String formatLabel(double value, boolean isValueX) {
+                        if (isValueX) {
+                            return Solve.timeDateStringFromTimestamp(getActivity().getApplicationContext(), (long) value);
+                        } else {
+                            return Solve.timeStringFromLong((long) value);
+                        }
+
+                    }
+                });
+
+                //Set bounds for Y
+                Solve bestSolve = Session.getBestSolve(bestSolvesOfSessions);
+                mGraph.setManualYMinBound(bestSolve.getTimeTwo() - bestSolve.getTimeTwo() * 0.1 >= 0 ? bestSolve.getTimeTwo() - bestSolve.getTimeTwo() * 0.1 : 0);
+                Solve worstSolve = Session.getWorstSolve(bestSolvesOfSessions);
+                mGraph.setManualYMaxBound(worstSolve.getTimeTwo() + bestSolve.getTimeTwo() * 0.1);
+
+                //Set bounds for X
+                long firstTimestamp = bestSolvesOfSessionsNoDnf.get(0).getTimestamp();
+                long lastTimestamp = bestSolvesOfSessionsNoDnf.get(bestSolvesOfSessionsNoDnf.size() - 1).getTimestamp();
+                mGraph.setViewPort(firstTimestamp - firstTimestamp * 0.000005, (lastTimestamp + firstTimestamp * 0.000005) - (firstTimestamp - firstTimestamp * 0.000005));
+
+                //Remove all series since we're adding one
+                mGraph.removeAllSeries();
+                mGraph.addSeries(bestTimesSeries);
+            } else {
+                mGraph.setVisibility(View.GONE);
+            }
+        }
     }
 
     public String getBestAverageOfSessions(int[] numbers, List<Session> sessions) {

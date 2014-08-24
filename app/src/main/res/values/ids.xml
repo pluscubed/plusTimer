@@ -56,5 +56,6 @@
     <!--HistorySessionListActivity-->
     <item name="activity_history_sessionlist_main_framelayout" type="id" />
     <item name="history_sessionlist_header_stats_textview" type="id" />
+    <item name="history_sessionlist_graph" type="id" />
 
 </resources>
