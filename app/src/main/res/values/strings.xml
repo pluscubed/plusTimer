@@ -68,5 +68,7 @@
 
     <string name="pb">PB</string>
     <string name="ao">Ao</string>
+    <string name="help">Help</string>
+    <string name="about">About</string>
 
 </resources>

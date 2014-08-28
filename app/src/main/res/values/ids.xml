@@ -57,5 +57,7 @@
     <item name="activity_history_sessionlist_main_framelayout" type="id" />
     <item name="history_sessionlist_header_stats_textview" type="id" />
     <item name="history_sessionlist_graph" type="id" />
+    <item name="nav_drawer_footer_help_linearlayout" type="id" />
+    <item name="nav_drawer_footer_about_linearlayout" type="id" />
 
 </resources>
