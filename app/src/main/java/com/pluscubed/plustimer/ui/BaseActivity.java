@@ -155,6 +155,26 @@ public abstract class BaseActivity extends Activity {
                 mDrawerLayout.closeDrawer(mDrawerListView);
             }
         });
+        LinearLayout nav_drawer_help = (LinearLayout) nav_drawer_footer.findViewById(R.id.nav_drawer_footer_help_linearlayout);
+        nav_drawer_help.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getApplicationContext(), "Work in Progress", Toast.LENGTH_SHORT).show();
+            }
+        });
+        LinearLayout nav_drawer_about = (LinearLayout) nav_drawer_footer.findViewById(R.id.nav_drawer_footer_about_linearlayout);
+        nav_drawer_about.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        startActivity(new Intent(BaseActivity.this, AboutActivity.class));
+                    }
+                }, NAVDRAWER_LAUNCH_DELAY);
+                mDrawerLayout.closeDrawer(mDrawerListView);
+            }
+        });
         mDrawerListView.addFooterView(nav_drawer_footer, null, false);
         mDrawerListView.setOnItemClickListener(new ListView.OnItemClickListener() {
             @Override

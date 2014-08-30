@@ -70,5 +70,10 @@
     <string name="ao">Ao</string>
     <string name="help">Help</string>
     <string name="about">About</string>
+    <string name="icon">Icon</string>
+    <string name="open_source_licenses">Open Source Licenses</string>
+    <string name="github">GitHub</string>
+    <string name="email">Send feedback</string>
+    <string name="rate">Rate on the Play Store</string>
 
 </resources>
