@@ -144,8 +144,12 @@ public class Session {
             return "DNF";
     }
 
-    public String getTimestampStringOfLastSolve(Context context) {
+    public String getTimestampString(Context context) {
         return Util.timeDateStringFromTimestamp(context, getLastSolve().getTimestamp());
+    }
+
+    public long getTimestamp() {
+        return getLastSolve().getTimestamp();
     }
 
     public void deleteSolve(int position) {

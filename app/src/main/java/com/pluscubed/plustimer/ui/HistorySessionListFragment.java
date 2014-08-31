@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
+import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
@@ -50,7 +51,7 @@ public class HistorySessionListFragment extends ListFragment {
     private String mPuzzleTypeDisplayName;
 
     private TextView mStatsText;
-    private GraphView mGraph;
+    private LineGraphView mGraph;
 
     private ActionMode mActionMode;
 
@@ -131,6 +132,21 @@ public class HistorySessionListFragment extends ListFragment {
         mGraph.setLayoutParams(layoutParams);
         mGraph.setShowLegend(true);
         mGraph.getGraphViewStyle().setLegendWidth((int) convertDpToPx(70));
+        mGraph.getGraphViewStyle().setLegendMarginBottom((int) convertDpToPx(12));
+        mGraph.setLegendAlign(GraphView.LegendAlign.BOTTOM);
+        mGraph.setCustomLabelFormatter(new CustomLabelFormatter() {
+            @Override
+            public String formatLabel(double value, boolean isValueX) {
+                if (isValueX) {
+                    return Util.timeDateStringFromTimestamp(getActivity().getApplicationContext(), (long) value);
+                } else {
+                    return Util.timeStringFromNanoseconds((long) value);
+                }
+
+            }
+        });
+        mGraph.setDrawDataPoints(true);
+        mGraph.setDataPointsRadius(convertDpToPx(3));
         headerView.addView(mGraph);
         getListView().addHeaderView(headerView, null, false);
         try {
@@ -156,61 +172,139 @@ public class HistorySessionListFragment extends ListFragment {
             StringBuilder s = new StringBuilder();
 
             //Get best solves of each history session and add to list
-            ArrayList<Solve> bestSolvesOfSessions = new ArrayList<Solve>();
+            ArrayList<Solve> bestSolvesOfSessionsArray = new ArrayList<Solve>();
             for (Session session : historySessions) {
-                bestSolvesOfSessions.add(Util.getBestSolveOfList(session.getSolves()));
+                bestSolvesOfSessionsArray.add(Util.getBestSolveOfList(session.getSolves()));
             }
 
             //Add PB of all historySessions
-            s.append(getString(R.string.pb)).append(": ").append(Util.getBestSolveOfList(bestSolvesOfSessions).getDescriptiveTimeString());
+            s.append(getString(R.string.pb)).append(": ").append(Util.getBestSolveOfList(bestSolvesOfSessionsArray).getDescriptiveTimeString());
 
             //Add PB of Ao5,12,50,100,1000
-            s.append(getBestAverageOfSessions(new int[]{1000, 100, 50, 12, 5}, historySessions));
+            s.append(getBestAverageOfNumberOfSessions(new int[]{1000, 100, 50, 12, 5}, historySessions));
 
             mStatsText.setText(s.toString());
 
-            if (bestSolvesOfSessions.size() > 1) {
-                ArrayList<Solve> bestSolvesOfSessionsNoDnf = new ArrayList<Solve>();
-                for (Session session : historySessions) {
-                    if (Util.getBestSolveOfList(session.getSolves()).getPenalty() != Solve.Penalty.DNF) {
-                        bestSolvesOfSessionsNoDnf.add(Util.getBestSolveOfList(session.getSolves()));
-                    }
-                }
-                mGraph.setVisibility(View.VISIBLE);
 
-                GraphView.GraphViewData[] bestTimes = new GraphView.GraphViewData[bestSolvesOfSessionsNoDnf.size()];
-                for (int i = 0; i < bestSolvesOfSessionsNoDnf.size(); i++) {
-                    bestTimes[i] = new GraphView.GraphViewData(bestSolvesOfSessionsNoDnf.get(i).getTimestamp(), bestSolvesOfSessionsNoDnf.get(i).getTimeTwo());
-                }
-                GraphViewSeries bestTimesSeries = new GraphViewSeries("Best Times", new GraphViewSeries.GraphViewSeriesStyle(Color.BLUE, 5), bestTimes);
+            //Get the timestamps of each session, and put in a SparseArray
+            ArrayList<Long> sessionTimestamps = new ArrayList<Long>();
+            for (Session session : historySessions) {
+                sessionTimestamps.add(session.getTimestamp());
+            }
 
-                mGraph.setCustomLabelFormatter(new CustomLabelFormatter() {
-                    @Override
-                    public String formatLabel(double value, boolean isValueX) {
-                        if (isValueX) {
-                            return Util.timeDateStringFromTimestamp(getActivity().getApplicationContext(), (long) value);
-                        } else {
-                            return Util.timeStringFromNanoseconds((long) value);
+            //This SparseArray contains any number of SparseArray<Long>, one for each average (5,12,etc)
+            SparseArray<SparseArray<Long>> bestAverageMatrix = new SparseArray<SparseArray<Long>>();
+            for (int averageNumber : new int[]{5, 12, 50, 100, 1000}) {
+                SparseArray<Long> timesSparseArray = new SparseArray<Long>();
+                for (int i = 0; i < historySessions.size(); i++) {
+                    Session session = historySessions.get(i);
+                    if (session.getNumberOfSolves() >= averageNumber) {
+                        long bestAverage = session.getBestAverageOf(averageNumber);
+                        if (bestAverage != Long.MAX_VALUE && bestAverage != Session.GET_AVERAGE_INVALID) {
+                            timesSparseArray.put(i, bestAverage);
                         }
-
                     }
-                });
+                }
+                if (timesSparseArray.size() > 0) {
+                    bestAverageMatrix.put(averageNumber, timesSparseArray);
+                }
 
-                //Set bounds for Y
-                Solve bestSolve = Util.getBestSolveOfList(bestSolvesOfSessions);
-                Solve worstSolve = Util.getWorstSolveOfList(bestSolvesOfSessions);
-                //Check to make sure the minimum bound is more than 0 (if yes, set bound to 0)
-                mGraph.setManualYMinBound(bestSolve.getTimeTwo() - (worstSolve.getTimeTwo() - bestSolve.getTimeTwo()) * 0.1 >= 0 ? bestSolve.getTimeTwo() - (worstSolve.getTimeTwo() - bestSolve.getTimeTwo()) * 0.1 : 0);
-                mGraph.setManualYMaxBound(worstSolve.getTimeTwo() + (worstSolve.getTimeTwo() - bestSolve.getTimeTwo()) * 0.1);
+            }
 
-                //Set bounds for X
-                long firstTimestamp = bestSolvesOfSessionsNoDnf.get(0).getTimestamp();
-                long lastTimestamp = bestSolvesOfSessionsNoDnf.get(bestSolvesOfSessionsNoDnf.size() - 1).getTimestamp();
-                mGraph.setViewPort(firstTimestamp - (lastTimestamp - firstTimestamp) * 0.1, (lastTimestamp + (lastTimestamp - firstTimestamp) * 0.1) - (firstTimestamp - (lastTimestamp - firstTimestamp) * 0.1));
+            ArrayList<GraphViewSeries> bestAverageGraphViewSeries = new ArrayList<GraphViewSeries>();
+            for (int i = 0; i < bestAverageMatrix.size(); i++) {
+                SparseArray<Long> averageArray = bestAverageMatrix.valueAt(i);
+                if (averageArray.size() > 0) {
+                    GraphView.GraphViewData[] bestTimesDataArray = new GraphView.GraphViewData[averageArray.size()];
+                    for (int k = 0; k < averageArray.size(); k++) {
+                        bestTimesDataArray[k] = new GraphView.GraphViewData(sessionTimestamps.get(averageArray.keyAt(k)), averageArray.valueAt(k));
+                    }
+                    int lineColor = Color.RED;
+                    switch (bestAverageMatrix.keyAt(i)) {
+                        case 5:
+                            lineColor = Color.RED;
+                            break;
+                        case 12:
+                            lineColor = Color.GREEN;
+                            break;
+                        case 100:
+                            lineColor = Color.BLACK;
+                            break;
+                        case 1000:
+                            lineColor = Color.YELLOW;
+                    }
+                    bestAverageGraphViewSeries.add(new GraphViewSeries("Best Ao" + bestAverageMatrix.keyAt(i), new GraphViewSeries.GraphViewSeriesStyle(lineColor, (int) convertDpToPx(2)), bestTimesDataArray));
+                }
+            }
 
-                //Remove all series since we're adding one
+
+            //Get best times of each session excluding DNF, and create GraphViewData array bestTimes
+            SparseArray<Long> bestSolvesTimes = new SparseArray<Long>();
+            for (int i = 0; i < historySessions.size(); i++) {
+                Session session = historySessions.get(i);
+                if (Util.getBestSolveOfList(session.getSolves()).getPenalty() != Solve.Penalty.DNF) {
+                    bestSolvesTimes.put(i, Util.getBestSolveOfList(session.getSolves()).getTimeTwo());
+                }
+            }
+            GraphView.GraphViewData[] bestTimesDataArray = new GraphView.GraphViewData[bestSolvesTimes.size()];
+            for (int i = 0; i < bestSolvesTimes.size(); i++) {
+                bestTimesDataArray[i] = new GraphView.GraphViewData(sessionTimestamps.get(bestSolvesTimes.keyAt(i)), bestSolvesTimes.valueAt(i));
+            }
+            GraphViewSeries bestTimesSeries = new GraphViewSeries("Best Times", new GraphViewSeries.GraphViewSeriesStyle(Color.BLUE, (int) convertDpToPx(2)), bestTimesDataArray);
+
+            boolean averageMoreThanOne = false;
+            for (int i = 0; i < bestAverageMatrix.size(); i++) {
+                if (bestAverageMatrix.valueAt(i).size() > 1) {
+                    averageMoreThanOne = true;
+                }
+            }
+            if (averageMoreThanOne || bestSolvesTimes.size() > 1) {
+                mGraph.setVisibility(View.VISIBLE);
                 mGraph.removeAllSeries();
                 mGraph.addSeries(bestTimesSeries);
+                for (GraphViewSeries averageSeries : bestAverageGraphViewSeries) {
+                    mGraph.addSeries(averageSeries);
+                }
+
+                ArrayList<Long> allPointsValue = new ArrayList<Long>();
+                for (int i = 0; i < bestAverageMatrix.size(); i++) {
+                    for (int k = 0; k < bestAverageMatrix.valueAt(i).size(); k++) {
+                        allPointsValue.add(bestAverageMatrix.valueAt(i).valueAt(k));
+                    }
+                }
+                for (int i = 0; i < bestSolvesTimes.size(); i++) {
+                    allPointsValue.add(bestSolvesTimes.valueAt(i));
+                }
+
+                //Set bounds for Y
+                long lowestValue = Collections.min(allPointsValue);
+                long highestValue = Collections.max(allPointsValue);
+                //Check to make sure the minimum bound is more than 0 (if yes, set bound to 0)
+                mGraph.setManualYMinBound(lowestValue - (highestValue - lowestValue) * 0.1 >= 0 ? lowestValue - (highestValue - lowestValue) * 0.1 : 0);
+                mGraph.setManualYMaxBound(highestValue + (highestValue - lowestValue) * 0.1);
+
+                long firstTimestamp = Long.MAX_VALUE;
+                for (int i = 0; i < bestAverageMatrix.size(); i++) {
+                    if (sessionTimestamps.get(bestAverageMatrix.valueAt(i).keyAt(0)) < firstTimestamp) {
+                        firstTimestamp = sessionTimestamps.get(bestAverageMatrix.valueAt(i).keyAt(0));
+                    }
+                }
+                if (sessionTimestamps.get(bestSolvesTimes.keyAt(0)) < firstTimestamp) {
+                    firstTimestamp = sessionTimestamps.get(bestSolvesTimes.keyAt(0));
+                }
+
+                //Set bounds for X
+
+                long lastTimestamp = Long.MIN_VALUE;
+                for (int i = 0; i < bestAverageMatrix.size(); i++) {
+                    if (sessionTimestamps.get(bestAverageMatrix.valueAt(i).keyAt(bestAverageMatrix.valueAt(i).size() - 1)) > lastTimestamp) {
+                        lastTimestamp = sessionTimestamps.get(bestAverageMatrix.valueAt(i).keyAt(bestAverageMatrix.valueAt(i).size() - 1));
+                    }
+                }
+                if (sessionTimestamps.get(bestSolvesTimes.keyAt(bestSolvesTimes.size() - 1)) > lastTimestamp) {
+                    lastTimestamp = sessionTimestamps.get(bestSolvesTimes.keyAt(bestSolvesTimes.size() - 1));
+                }
+                mGraph.setViewPort(firstTimestamp - (lastTimestamp - firstTimestamp) * 0.1, (lastTimestamp + (lastTimestamp - firstTimestamp) * 0.1) - (firstTimestamp - (lastTimestamp - firstTimestamp) * 0.1));
             } else {
                 mGraph.setVisibility(View.GONE);
             }
@@ -222,9 +316,9 @@ public class HistorySessionListFragment extends ListFragment {
      *
      * @param numbers  the number for the averages
      * @param sessions list of sessions
-     * @return String with the best average of _s
+     * @return String with the best average of _'s
      */
-    public String getBestAverageOfSessions(int[] numbers, List<Session> sessions) {
+    public String getBestAverageOfNumberOfSessions(int[] numbers, List<Session> sessions) {
         StringBuilder builder = new StringBuilder();
         for (int number : numbers) {
             ArrayList<Long> bestAverages = new ArrayList<Long>();
@@ -325,7 +419,7 @@ public class HistorySessionListFragment extends ListFragment {
             }
             Session session = getItem(position);
             TextView text = (TextView) convertView.findViewById(R.id.list_item_history_sessionlist_textview);
-            text.setText(session.getTimestampStringOfLastSolve(getActivity()));
+            text.setText(session.getTimestampString(getActivity()));
 
             return convertView;
         }
