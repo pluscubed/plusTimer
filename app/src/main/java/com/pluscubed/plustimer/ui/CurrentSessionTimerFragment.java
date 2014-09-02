@@ -175,7 +175,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
     public void updateScrambleTextAndImageToCurrent() {
         SVG svg = null;
         try {
-            svg = SVG.getFromString(mRetainedFragment.getCurrentScrambleAndSvg().svgLite.toString());
+            svg = SVG.getFromString(mRetainedFragment.getCurrentScrambleAndSvg().svg);
         } catch (SVGParseException e) {
             e.printStackTrace();
         }

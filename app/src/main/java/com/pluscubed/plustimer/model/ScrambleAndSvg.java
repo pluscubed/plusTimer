@@ -8,8 +8,6 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
-import net.gnehzr.tnoodle.svglite.Svg;
-
 import java.lang.reflect.Type;
 
 /**
@@ -18,11 +16,11 @@ import java.lang.reflect.Type;
 
 public class ScrambleAndSvg {
     public String scramble;
-    public Svg svgLite;
+    public String svg;
 
-    public ScrambleAndSvg(String scramble, Svg svgLite) {
+    public ScrambleAndSvg(String scramble, String svg) {
         this.scramble = scramble;
-        this.svgLite = svgLite;
+        this.svg = svg;
     }
 
     public static class Serializer implements JsonSerializer<ScrambleAndSvg> {
