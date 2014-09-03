@@ -297,7 +297,6 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
 
     public void resetTimer() {
         mUiHandler.removeCallbacksAndMessages(null);
-        mHoldToStartOn = false;
         mHoldTimerStarted = false;
         mRunning = false;
         mLateStartPenalty = false;
