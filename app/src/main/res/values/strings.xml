@@ -76,4 +76,6 @@
     <string name="email">Send feedback</string>
     <string name="rate">Rate on the Play Store</string>
 
+    <string name="unofficial">(fast,unofficial)</string>
+
 </resources>

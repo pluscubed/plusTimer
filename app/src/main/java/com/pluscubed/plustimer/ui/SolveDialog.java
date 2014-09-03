@@ -109,8 +109,7 @@ public class SolveDialog extends DialogFragment {
 
         timestampTextView.setText(Util.timeDateStringFromTimestamp(getActivity().getApplicationContext(), timestamp));
 
-        ArrayAdapter<CharSequence> adapter = new ArrayAdapter<CharSequence>(getActivity(),
-                0, getResources().getStringArray(R.array.penalty_array)) {
+        ArrayAdapter<CharSequence> adapter = new ArrayAdapter<CharSequence>(getActivity(), 0, getResources().getStringArray(R.array.penalty_array)) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 if (convertView == null) {
@@ -121,8 +120,15 @@ public class SolveDialog extends DialogFragment {
                 textView.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.spinner_triangle_black, 0);
                 return convertView;
             }
+
+            @Override
+            public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                View v = super.getDropDownView(position, convertView, parent);
+                ((TextView) v.findViewById(android.R.id.text1)).setTextColor(getResources().getColorStateList(R.color.list_dropdown_color_light));
+                return v;
+            }
         };
-        adapter.setDropDownViewResource(R.layout.spinner_item_dropdown_black);
+        adapter.setDropDownViewResource(R.layout.spinner_item_dropdown);
         penaltySpinner.setAdapter(adapter);
 
         penaltySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {

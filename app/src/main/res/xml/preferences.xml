@@ -6,16 +6,16 @@
         android:disableDependentsState="true"
         android:key="@string/pref_inspection_checkbox"
         android:summary="@string/pref_inspection_summary"
-        android:title="@string/pref_inspection_title" />
+        android:title="@string/pref_inspection_title"/>
     <CheckBoxPreference
         android:defaultValue="true"
         android:dependency="@string/pref_inspection_checkbox"
         android:key="@string/pref_holdtostart_checkbox"
         android:summary="@string/pref_holdtostart_summary"
-        android:title="@string/pref_holdtostart_title" />
+        android:title="@string/pref_holdtostart_title"/>
     <CheckBoxPreference
         android:defaultValue="true"
         android:key="@string/pref_keepscreenon_checkbox"
         android:summary="@string/pref_keepscreenon_summary"
-        android:title="@string/pref_keepscreenon_title" />
+        android:title="@string/pref_keepscreenon_title"/>
 </PreferenceScreen>

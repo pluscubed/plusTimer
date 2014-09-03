@@ -346,37 +346,16 @@ public class HistorySessionListFragment extends ListFragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.menu_history_sessionlist, menu);
+
         final Spinner menuPuzzleSpinner = (Spinner) menu.findItem(R.id.menu_activity_history_sessionlist_puzzletype_spinner).getActionView();
-
-        final ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter =
-                new ArrayAdapter<PuzzleType>(
-                        getActivity().getActionBar().getThemedContext(),
-                        0,
-                        PuzzleType.values()
-                ) {
-                    @Override
-                    public View getView(int position, View convertView, ViewGroup parent) {
-                        if (convertView == null) {
-                            convertView = getActivity().getLayoutInflater().inflate(R.layout.spinner_item, parent, false);
-                        }
-                        TextView textView = (TextView) convertView.findViewById(android.R.id.text1);
-                        textView.setText(getItem(position).toString());
-                        textView.setTextColor(Color.WHITE);
-                        return convertView;
-                    }
-                };
-
-
-        puzzleTypeSpinnerAdapter.setDropDownViewResource(R.layout.spinner_item_dropdown);
+        final ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter = new SpinnerPuzzleTypeAdapter(getActivity().getLayoutInflater(), getActivity().getActionBar().getThemedContext());
         menuPuzzleSpinner.setAdapter(puzzleTypeSpinnerAdapter);
-        menuPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition(PuzzleType.get(mPuzzleTypeDisplayName)), true);
+        menuPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition(PuzzleType.get(PuzzleType.CURRENT)), true);
         menuPuzzleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (menuPuzzleSpinner.getSelectedItemPosition() != puzzleTypeSpinnerAdapter.getPosition(PuzzleType.get(mPuzzleTypeDisplayName))) {
-                    mPuzzleTypeDisplayName = (parent.getItemAtPosition(position)).toString();
-                    onSessionListChanged();
-                }
+                mPuzzleTypeDisplayName = (parent.getItemAtPosition(position)).toString();
+                onSessionListChanged();
             }
 
             @Override

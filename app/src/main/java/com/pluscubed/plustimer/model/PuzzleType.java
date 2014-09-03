@@ -29,8 +29,7 @@ import java.util.List;
  * Puzzle type enum
  */
 public enum PuzzleType {
-    //TODO: find faster square-1 scrambler
-    //SQ1("sq1", "Square 1"),
+    SQ1FAST("sq1fast", "Square-1", false),
     SKEWB("skewb", "Skewb"),
     PYRAMINX("pyram", "Pyraminx"),
     MINX("minx", "Megaminx"),
@@ -39,7 +38,7 @@ public enum PuzzleType {
     SIX("666", "6x6"),
     FIVE("555", "5x5"),
     FOUR("444", "4x4"),
-    FOURFAST("444fast", "4x4-fast"),
+    FOURFAST("444fast", "4x4", false),
     THREE("333", "3x3"),
     TWO("222", "2x2");
     public static final int CURRENT_SESSION = -1;
@@ -62,6 +61,7 @@ public enum PuzzleType {
     private final String mFilename;
     private final String mScramblerSpec;
     private final String mDisplayName;
+    private boolean mOfficial;
     private Session mCurrentSession;
     private List<Session> mHistorySessionsList;
     private Puzzle mPuzzle;
@@ -72,6 +72,12 @@ public enum PuzzleType {
         this.mDisplayName = displayName;
         mCurrentSession = new Session();
         mFilename = mScramblerSpec + ".json";
+        mOfficial = true;
+    }
+
+    PuzzleType(String scramblerSpec, String displayName, boolean official) {
+        this(scramblerSpec, displayName);
+        mOfficial = official;
     }
 
     public static void setCurrentPuzzleType(PuzzleType p) {
@@ -88,6 +94,10 @@ public enum PuzzleType {
             }
         }
         return null;
+    }
+
+    public boolean isOfficial() {
+        return mOfficial;
     }
 
     public void submitCurrentSession() {
@@ -182,6 +192,5 @@ public enum PuzzleType {
     public void deleteHistorySession(Session session, Context context) {
         mHistorySessionsList.remove(session);
         saveHistorySessionsToFile(context);
-
     }
 }

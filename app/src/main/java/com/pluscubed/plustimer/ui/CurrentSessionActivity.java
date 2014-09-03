@@ -11,11 +11,9 @@ import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
-import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
 import com.pluscubed.plustimer.BuildConfig;
@@ -143,7 +141,25 @@ public class CurrentSessionActivity extends BaseActivity implements CurrentSessi
             return true;
         }
         getMenuInflater().inflate(R.menu.menu_current_session, menu);
-        setUpPuzzleSpinner(menu);
+
+        final Spinner menuPuzzleSpinner = (Spinner) menu.findItem(R.id.menu_activity_current_session_puzzletype_spinner).getActionView();
+        final ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter = new SpinnerPuzzleTypeAdapter(getLayoutInflater(), this);
+        menuPuzzleSpinner.setAdapter(puzzleTypeSpinnerAdapter);
+        menuPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition(PuzzleType.get(PuzzleType.CURRENT)), true);
+        menuPuzzleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                PuzzleType.setCurrentPuzzleType((PuzzleType) parent.getItemAtPosition(position));
+                ((CurrentSessionTimerFragment) getFragmentManager().findFragmentByTag(makeFragmentName(R.id.activity_current_session_viewpager, 0))).onSessionChanged();
+                ((SolveListFragment) getFragmentManager().findFragmentByTag(makeFragmentName(R.id.activity_current_session_viewpager, 1))).onSessionChanged();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -190,39 +206,6 @@ public class CurrentSessionActivity extends BaseActivity implements CurrentSessi
         return new int[]{R.id.menu_activity_current_session_scramble_image_menuitem, R.id.menu_solvelist_share_menuitem, R.id.menu_activity_current_session_puzzletype_spinner};
     }
 
-    public void setUpPuzzleSpinner(Menu menu) {
-        final Spinner menuPuzzleSpinner = (Spinner) menu.findItem(R.id.menu_activity_current_session_puzzletype_spinner).getActionView();
-
-        final ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter =
-                new ArrayAdapter<PuzzleType>(getActionBar().getThemedContext(), 0, PuzzleType.values()) {
-                    @Override
-                    public View getView(int position, View convertView, ViewGroup parent) {
-                        if (convertView == null) {
-                            convertView = getLayoutInflater().inflate(R.layout.spinner_item, parent, false);
-                        }
-                        TextView textView = (TextView) convertView.findViewById(android.R.id.text1);
-                        textView.setText(getItem(position).toString());
-                        textView.setTextColor(Color.WHITE);
-                        return convertView;
-                    }
-                };
-
-        puzzleTypeSpinnerAdapter.setDropDownViewResource(R.layout.spinner_item_dropdown);
-        menuPuzzleSpinner.setAdapter(puzzleTypeSpinnerAdapter);
-        menuPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition(PuzzleType.get(PuzzleType.CURRENT)), true);
-        menuPuzzleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                PuzzleType.setCurrentPuzzleType((PuzzleType) parent.getItemAtPosition(position));
-                ((CurrentSessionTimerFragment) getFragmentManager().findFragmentByTag(makeFragmentName(R.id.activity_current_session_viewpager, 0))).onSessionChanged();
-                ((SolveListFragment) getFragmentManager().findFragmentByTag(makeFragmentName(R.id.activity_current_session_viewpager, 1))).onSessionChanged();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });
-    }
 
     @Override
     public void createSolveDialog(String displayName, int sessionIndex, int solveIndex) {
