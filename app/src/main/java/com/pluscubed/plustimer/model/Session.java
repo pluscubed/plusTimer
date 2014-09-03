@@ -173,7 +173,12 @@ public class Session {
                 s.append("\n").append(context.getString(R.string.worst)).append(Util.getWorstSolveOfList(mSolves).getDescriptiveTimeString());
 
                 if (getNumberOfSolves() > 2) {
-                    s.append("\n").append(context.getString(R.string.average)).append(Util.timeStringFromNanoseconds(getAverageOf(mSolves, mSolves.size())));
+                    long average = getAverageOf(mSolves, mSolves.size());
+                    if (average != Long.MAX_VALUE) {
+                        s.append("\n").append(context.getString(R.string.average)).append(Util.timeStringFromNanoseconds(average));
+                    } else {
+                        s.append("\n").append(context.getString(R.string.average)).append("DNF");
+                    }
 
                     int[] averages = {1000, 100, 50, 12, 5};
                     for (int i : averages) {
