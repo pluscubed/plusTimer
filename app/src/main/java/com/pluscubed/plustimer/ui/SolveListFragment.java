@@ -87,7 +87,7 @@ public class SolveListFragment extends Fragment {
         mCurrentToggle = getArguments().getBoolean(ARG_CURRENT_BOOLEAN);
         mPuzzleTypeDisplayName = getArguments().getString(ARG_PUZZLETYPE_DISPLAYNAME);
         mSessionIndex = getArguments().getInt(ARG_SESSION_POSITION);
-        mSession = PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getActivity());
+        mSession = PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex);
         setHasOptionsMenu(true);
     }
 
@@ -98,7 +98,7 @@ public class SolveListFragment extends Fragment {
                 share();
                 return true;
             case R.id.menu_history_solvelist_delete_menuitem:
-                PuzzleType.get(mPuzzleTypeDisplayName).deleteHistorySession(mSessionIndex, getActivity());
+                PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions().deleteSession(mSessionIndex, getActivity());
                 getActivity().finish();
                 return true;
             default:
@@ -145,7 +145,7 @@ public class SolveListFragment extends Fragment {
 
                     Toast.makeText(getActivity().getApplicationContext(), getResources().getText(R.string.session_submitted), Toast.LENGTH_SHORT).show();
 
-                    PuzzleType.get(mPuzzleTypeDisplayName).submitCurrentSession();
+                    PuzzleType.get(mPuzzleTypeDisplayName).submitCurrentSession(getActivity());
 
                     onSessionSolvesChanged();
                 }
@@ -231,13 +231,13 @@ public class SolveListFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        PuzzleType.get(mPuzzleTypeDisplayName).saveHistorySessionsToFile(getActivity());
+        PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions().save(getActivity());
     }
 
     public void onSessionSolvesChanged() {
-        mSession = PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getActivity());
+        mSession = PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex);
         if (!mCurrentToggle && mSession.getNumberOfSolves() <= 0) {
-            PuzzleType.get(mPuzzleTypeDisplayName).deleteHistorySession(mSessionIndex, getActivity());
+            PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions().deleteSession(mSessionIndex, getActivity());
             getActivity().finish();
             return;
         }
@@ -251,7 +251,7 @@ public class SolveListFragment extends Fragment {
         }
         updateStats();
         if (mCurrentToggle)
-            enableResetSubmitButtons(PuzzleType.get(mPuzzleTypeDisplayName).getCurrentSession().getNumberOfSolves() > 0);
+            enableResetSubmitButtons(PuzzleType.get(mPuzzleTypeDisplayName).getSession(PuzzleType.CURRENT_SESSION).getNumberOfSolves() > 0);
     }
 
     public void onSessionChanged() {

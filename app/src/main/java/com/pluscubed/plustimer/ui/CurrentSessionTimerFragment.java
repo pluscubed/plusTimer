@@ -110,7 +110,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
                     s.setPenalty(Solve.Penalty.DNF);
 
                     //Add the solve to the current session with the current scramble/scramble image and DNF
-                    PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().addSolve(s);
+                    PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION).addSolve(s);
 
                     mTimerText.setText(s.getTimeString());
 
@@ -134,12 +134,12 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         Arrays.sort(currentAverages, Collections.reverseOrder());
         String s = "";
         for (int i : currentAverages) {
-            if (PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().getNumberOfSolves() >= i) {
-                s += context.getString(R.string.cao) + i + ": " + PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().getStringCurrentAverageOf(i) + "\n";
+            if (PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION).getNumberOfSolves() >= i) {
+                s += context.getString(R.string.cao) + i + ": " + PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION).getStringCurrentAverageOf(i) + "\n";
             }
         }
-        if (PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().getNumberOfSolves() > 0) {
-            s += context.getString(R.string.mean) + PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().getStringMean();
+        if (PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION).getNumberOfSolves() > 0) {
+            s += context.getString(R.string.mean) + PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION).getStringMean();
         }
         return s;
     }
@@ -224,7 +224,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
 
     public void onSessionSolvesChanged() {
         //Update stats
-        mStatsSolvesText.setText(getString(R.string.solves) + PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().getNumberOfSolves());
+        mStatsSolvesText.setText(getString(R.string.solves) + PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION).getNumberOfSolves());
         mStatsText.setText(buildStatsWithAveragesOf(getActivity(), 5, 12, 100));
         //Update HListView
         ((SolveHListViewAdapter) mHListView.getAdapter()).updateSolvesList();
@@ -400,7 +400,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
                                 mLateStartPenalty = false;
                             }
                             //Add the solve to the current session with the current scramble/scramble image and time
-                            PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().addSolve(s);
+                            PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION).addSolve(s);
 
                             mTimerText.setText(s.getTimeString());
 
@@ -512,8 +512,8 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
 
 
         //If the current session has solves recorded, set the timer text to the latest solve's time.
-        if (PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().getNumberOfSolves() != 0) {
-            mTimerText.setText(PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().getLastSolve().getTimeString());
+        if (PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION).getNumberOfSolves() != 0) {
+            mTimerText.setText(PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION).getLastSolve().getTimeString());
         }
 
         //If the scramble image is currently displayed and it is not scrambling, then make sure it is set to visible and that the OnClickListener is set to toggling it; otherwise, set to gone.
@@ -557,10 +557,10 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         private ArrayList<Solve> mBestAndWorstSolves;
 
         public SolveHListViewAdapter() {
-            super(getActivity(), 0, PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().getSolves());
+            super(getActivity(), 0, PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION).getSolves());
             mBestAndWorstSolves = new ArrayList<Solve>();
-            mBestAndWorstSolves.add(Util.getBestSolveOfList(PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().getSolves()));
-            mBestAndWorstSolves.add(Util.getWorstSolveOfList(PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().getSolves()));
+            mBestAndWorstSolves.add(Util.getBestSolveOfList(PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION).getSolves()));
+            mBestAndWorstSolves.add(Util.getWorstSolveOfList(PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION).getSolves()));
         }
 
         @Override
@@ -589,16 +589,16 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         public void updateSolvesList() {
             clear();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
-                addAll(PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().getSolves());
+                addAll(PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION).getSolves());
             else {
-                for (Solve i : PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().getSolves()) {
+                for (Solve i : PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION).getSolves()) {
                     add(i);
                 }
             }
 
             mBestAndWorstSolves = new ArrayList<Solve>();
-            mBestAndWorstSolves.add(Util.getBestSolveOfList(PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().getSolves()));
-            mBestAndWorstSolves.add(Util.getWorstSolveOfList(PuzzleType.get(PuzzleType.CURRENT).getCurrentSession().getSolves()));
+            mBestAndWorstSolves.add(Util.getBestSolveOfList(PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION).getSolves()));
+            mBestAndWorstSolves.add(Util.getWorstSolveOfList(PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION).getSolves()));
             notifyDataSetChanged();
         }
 

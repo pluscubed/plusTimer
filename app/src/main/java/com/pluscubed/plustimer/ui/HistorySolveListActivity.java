@@ -35,7 +35,7 @@ public class HistorySolveListActivity extends Activity implements SolveDialog.On
     public void onDialogDismissed(String displayName, int sessionIndex, int solveIndex, int penalty) {
         switch (penalty) {
             case SolveDialog.DIALOG_RESULT_DELETE:
-                PuzzleType.get(displayName).getSession(sessionIndex, this).deleteSolve(solveIndex);
+                PuzzleType.get(displayName).getSession(sessionIndex).deleteSolve(solveIndex);
                 break;
         }
 
@@ -43,7 +43,7 @@ public class HistorySolveListActivity extends Activity implements SolveDialog.On
             getSolveListFragment().onSessionSolvesChanged();
         }
 
-        setTitle(PuzzleType.get(displayName).getSession(sessionIndex, this).getTimestampString(this));
+        setTitle(PuzzleType.get(displayName).getSession(sessionIndex).getTimestampString(this));
 
     }
 
@@ -72,7 +72,7 @@ public class HistorySolveListActivity extends Activity implements SolveDialog.On
             fragment = SolveListFragment.newInstance(false, puzzleType, position);
             fm.beginTransaction().add(R.id.activity_history_solvelist_framelayout, fragment).commit();
         }
-        setTitle(PuzzleType.get(puzzleType).getSession(position, this).getTimestampString(this));
+        setTitle(PuzzleType.get(puzzleType).getSession(position).getTimestampString(this));
     }
 
 

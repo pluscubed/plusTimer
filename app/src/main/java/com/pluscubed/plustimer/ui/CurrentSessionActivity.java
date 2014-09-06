@@ -44,7 +44,7 @@ public class CurrentSessionActivity extends BaseActivity implements CurrentSessi
     public void onDialogDismissed(String displayName, int sessionIndex, int solveIndex, int penalty) {
         switch (penalty) {
             case SolveDialog.DIALOG_RESULT_DELETE:
-                PuzzleType.get(displayName).getSession(sessionIndex, this).deleteSolve(solveIndex);
+                PuzzleType.get(displayName).getSession(sessionIndex).deleteSolve(solveIndex);
                 break;
         }
         if (getCurrentSessionTimerFragment() != null)
@@ -63,7 +63,7 @@ public class CurrentSessionActivity extends BaseActivity implements CurrentSessi
             mMenuItemsEnable = savedInstanceState.getBoolean(STATE_MENU_ITEMS_ENABLE_BOOLEAN);
         } else {
             for (PuzzleType p : PuzzleType.values()) {
-                p.getHistorySessions(this);
+                p.initHistorySessions(this);
             }
         }
 

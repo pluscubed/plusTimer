@@ -58,7 +58,7 @@ public class HistorySessionListFragment extends ListFragment {
     @Override
     public void onPause() {
         super.onPause();
-        PuzzleType.get(mPuzzleTypeDisplayName).saveHistorySessionsToFile(getActivity());
+        PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions().save(getActivity());
     }
 
     @Override
@@ -106,7 +106,7 @@ public class HistorySessionListFragment extends ListFragment {
                     case R.id.context_solvelist_delete_menuitem:
                         for (int i = getListView().getCount() - 1; i >= 0; i--) {
                             if (getListView().isItemChecked(i)) {
-                                PuzzleType.get(mPuzzleTypeDisplayName).deleteHistorySession((Session) getListView().getItemAtPosition(i), getActivity());
+                                PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions().deleteSession((Session) getListView().getItemAtPosition(i), getActivity());
                             }
                         }
                         mode.finish();
@@ -167,7 +167,7 @@ public class HistorySessionListFragment extends ListFragment {
     }
 
     public void updateStats() {
-        List<Session> historySessions = PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions(getActivity());
+        List<Session> historySessions = PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions().getList();
         if (historySessions.size() > 0) {
             StringBuilder s = new StringBuilder();
 
@@ -379,7 +379,7 @@ public class HistorySessionListFragment extends ListFragment {
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         Intent i = new Intent(getActivity(), HistorySolveListActivity.class);
-        int index = PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions(getActivity()).indexOf(getListView().getItemAtPosition(position));
+        int index = PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions().getList().indexOf(getListView().getItemAtPosition(position));
         i.putExtra(HistorySolveListActivity.EXTRA_HISTORY_SESSION_POSITION, index);
         i.putExtra(HistorySolveListActivity.EXTRA_HISTORY_PUZZLETYPE_DISPLAYNAME, mPuzzleTypeDisplayName);
         startActivity(i);
@@ -405,7 +405,7 @@ public class HistorySessionListFragment extends ListFragment {
 
         public void onSessionListChanged() {
             clear();
-            List<Session> sessions = PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions(getActivity());
+            List<Session> sessions = PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions().getList();
             Collections.reverse(sessions);
             addAll(sessions);
             notifyDataSetChanged();

@@ -78,7 +78,7 @@ public class SolveDialog extends DialogFragment {
         mPuzzleTypeDisplayName = getArguments().getString(ARG_DIALOG_INIT_PUZZLETYPE_DISPLAY_NAME);
         mSessionIndex = getArguments().getInt(ARG_DIALOG_INIT_SESSION_INDEX);
         mSolveIndex = getArguments().getInt(ARG_DIALOG_INIT_SOLVE_INDEX);
-        final Solve solve = PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex, getActivity()).getSolveByPosition(mSolveIndex);
+        final Solve solve = PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex).getSolveByPosition(mSolveIndex);
 
         String timeString = solve.getDescriptiveTimeString();
         String scramble = solve.getScrambleAndSvg().scramble;
