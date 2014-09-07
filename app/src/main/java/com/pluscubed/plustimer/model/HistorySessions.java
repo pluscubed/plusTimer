@@ -38,26 +38,42 @@ public class HistorySessions {
     private final String mFilename;
     private List<Session> mHistorySessionsList;
 
-
+    /**
+     * Constructs a new HistorySessions that will save to a file.
+     *
+     * @param filename the filename to use for saving and loading
+     */
     public HistorySessions(String filename) {
         mFilename = filename;
     }
 
+    /**
+     * Deletes a session according to its index and save.
+     */
     public void deleteSession(int index, Context context) {
         mHistorySessionsList.remove(index);
         save(context);
     }
 
+    /**
+     * Deletes a session matching the argument and save.
+     */
     public void deleteSession(Session session, Context context) {
         mHistorySessionsList.remove(session);
         save(context);
     }
 
+    /**
+     * Adds the Session to the history list and save.
+     */
     public void addSession(Session session, Context context) {
         mHistorySessionsList.add(session);
         save(context);
     }
 
+    /**
+     * Save the list to a file.
+     */
     public void save(Context context) {
         Writer writer = null;
         try {
@@ -75,10 +91,18 @@ public class HistorySessions {
         }
     }
 
+    /**
+     * Gets a copy of the list.
+     *
+     * @return a copy of the history sessions
+     */
     public List<Session> getList() {
         return new ArrayList<Session>(Collections.unmodifiableList(mHistorySessionsList));
     }
 
+    /**
+     * Load up the history sessions stored in the list. If the file doesn't exist, create an empty list.
+     */
     public void init(Context context) {
         BufferedReader reader = null;
         try {

@@ -15,8 +15,6 @@ import com.pluscubed.plustimer.model.PuzzleType;
 /**
  * History SolveList (started onListItemClick HistorySessionListFragment) activity
  */
-
-
 public class HistorySolveListActivity extends Activity implements SolveDialog.OnDialogDismissedListener, CreateDialogCallback {
     public static final String EXTRA_HISTORY_SESSION_POSITION = "com.pluscubed.plustimer.history_session_position";
     public static final String EXTRA_HISTORY_PUZZLETYPE_DISPLAYNAME = "com.pluscubed.plustimer.history_puzzletype_displayname";

@@ -17,6 +17,9 @@ public class Session {
 
     private ArrayList<Solve> mSolves;
 
+    /**
+     * Constructs a Session with an empty list of Solves
+     */
     public Session() {
         mSolves = new ArrayList<Solve>();
     }

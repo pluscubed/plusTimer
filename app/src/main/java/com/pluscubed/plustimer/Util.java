@@ -21,7 +21,7 @@ public class Util {
     /**
      * Returns a String containing the date and time according the device's settings and locale from the timestamp
      *
-     * @param applicationContext the Context used for android.text.format.DateFormat.getDateFormat(Context)
+     * @param applicationContext the application context
      * @param timestamp          the timestamp to convert into a date & time String
      * @return the String converted from the timestamp
      * @see android.text.format.DateFormat
@@ -53,7 +53,7 @@ public class Util {
     /**
      * Returns a String containing hours, minutes, and seconds (to the millisecond) from a duration in nanoseconds.
      *
-     * @param nanoseconds duration to be converted
+     * @param nanoseconds the duration to be converted
      * @return the String converted from the nanoseconds
      */
     //TODO: Localization of timeStringFromNanoseconds
@@ -73,16 +73,30 @@ public class Util {
         }
     }
 
-
-    public static List<Long> getListTimeTwoNoDnf(List<Solve> solveList) {
+    /**
+     * Gets a list of times (calculated with +2s) from the list of {@code Solve}s, excluding DNFs.
+     * If no times are found, an empty list is returned.
+     *
+     * @param list the list of solves to extract times from
+     * @return the list of nanoseconds of times
+     */
+    public static List<Long> getListTimeTwoNoDnf(List<Solve> list) {
         ArrayList<Long> timeTwo = new ArrayList<Long>();
-        for (Solve i : solveList) {
+        for (Solve i : list) {
             if (!(i.getPenalty() == Solve.Penalty.DNF))
                 timeTwo.add(i.getTimeTwo());
         }
         return timeTwo;
     }
 
+    /**
+     * Gets the best {@code Solve} out of the list (lowest time).
+     * <p/>
+     * If the list contains no solves, null is returned. If the list contains only DNFs, the last DNF solve is returned.
+     *
+     * @param list the list of solves, not empty
+     * @return the solve with the lowest time
+     */
     public static Solve getBestSolveOfList(List<Solve> list) {
         List<Solve> solveList = new ArrayList<Solve>(list);
         if (solveList.size() > 0) {
@@ -96,11 +110,20 @@ public class Util {
                 }
 
             }
-            return solveList.get(solveList.size() - 1);
+            return solveList.get(0);
         }
         return null;
     }
 
+    /**
+     * Gets the worst {@code Solve} out of the list (highest time).
+     * <p/>
+     * If the list contains DNFs, the last DNF solve is returned.
+     * If the list contains no solves, null is returned.
+     *
+     * @param list the list of solves, not empty
+     * @return the solve with the highest time
+     */
     public static Solve getWorstSolveOfList(List<Solve> list) {
         List<Solve> solveList = new ArrayList<Solve>(list);
         if (solveList.size() > 0) {
