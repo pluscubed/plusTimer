@@ -77,5 +77,7 @@
     <string name="rate">Rate on the Play Store</string>
 
     <string name="unofficial">(fast,unofficial)</string>
+    <string name="reset_warning">Reset session?</string>
+    <string name="reset_warning_message">You\'ll lose all solves recorded in this session!</string>
 
 </resources>

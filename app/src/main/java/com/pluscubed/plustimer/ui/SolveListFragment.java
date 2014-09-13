@@ -1,6 +1,8 @@
 package com.pluscubed.plustimer.ui;
 
+import android.app.AlertDialog;
 import android.app.Fragment;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.ActionMode;
@@ -129,9 +131,22 @@ public class SolveListFragment extends Fragment {
             reset.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    PuzzleType.get(mPuzzleTypeDisplayName).resetCurrentSession();
-                    Toast.makeText(getActivity().getApplicationContext(), getResources().getText(R.string.session_reset), Toast.LENGTH_SHORT).show();
-                    onSessionSolvesChanged();
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setMessage(getString(R.string.reset_warning_message))
+                            .setIcon(R.drawable.ic_action_warning)
+                            .setTitle(getString(R.string.reset_warning))
+                            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    PuzzleType.get(mPuzzleTypeDisplayName).resetCurrentSession();
+                                    Toast.makeText(getActivity().getApplicationContext(), getResources().getText(R.string.session_reset), Toast.LENGTH_SHORT).show();
+                                    onSessionSolvesChanged();
+                                }
+                            })
+                            .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                }
+                            });
+                    builder.create().show();
                 }
             });
             Button submit = (Button) v.findViewById(R.id.fragment_solvelist_submit_button);
@@ -161,8 +176,6 @@ public class SolveListFragment extends Fragment {
         mListView.setAdapter(mListAdapter);
 
         mEmptyView = (TextView) v.findViewById(android.R.id.empty);
-
-        //Getting CAB to work API9+: Doctoror Drive's answer - http://stackoverflow.com/questions/14737519/how-can-you-implement-multi-selection-and-contextual-actionmode-in-actionbarsher
 
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
