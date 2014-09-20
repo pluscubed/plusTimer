@@ -8,13 +8,17 @@ import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.Util;
@@ -24,11 +28,10 @@ import com.pluscubed.plustimer.model.Solve;
 /**
  * Solve modify dialog
  */
-public class SolveDialog extends DialogFragment {
+public class SolveDialogFragment extends DialogFragment {
     public static final String ARG_DIALOG_INIT_PUZZLETYPE_DISPLAY_NAME = "com.pluscubed.plustimer.dialog.puzzleType";
     public static final String ARG_DIALOG_INIT_SESSION_INDEX = "com.pluscubed.plustimer.dialog.sessionIndex";
     public static final String ARG_DIALOG_INIT_SOLVE_INDEX = "com.pluscubed.plustimer.dialog.solveIndex";
-
 
     public static final int DIALOG_PENALTY_NONE = 0;
     public static final int DIALOG_PENALTY_PLUSTWO = 1;
@@ -39,11 +42,12 @@ public class SolveDialog extends DialogFragment {
     private int mSolveIndex;
     private int mSessionIndex;
     private int mSelection;
+    private boolean mAddMode;
 
     private OnDialogDismissedListener mListener;
 
-    static SolveDialog newInstance(String displayName, int sessionIndex, int solveIndex) {
-        SolveDialog d = new SolveDialog();
+    static SolveDialogFragment newInstance(String displayName, int sessionIndex, int solveIndex) {
+        SolveDialogFragment d = new SolveDialogFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_DIALOG_INIT_SESSION_INDEX, sessionIndex);
         args.putInt(ARG_DIALOG_INIT_SOLVE_INDEX, solveIndex);
@@ -75,6 +79,7 @@ public class SolveDialog extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        //SOLVE SETUP
         mPuzzleTypeDisplayName = getArguments().getString(ARG_DIALOG_INIT_PUZZLETYPE_DISPLAY_NAME);
         mSessionIndex = getArguments().getInt(ARG_DIALOG_INIT_SESSION_INDEX);
         mSolveIndex = getArguments().getInt(ARG_DIALOG_INIT_SOLVE_INDEX);
@@ -98,17 +103,16 @@ public class SolveDialog extends DialogFragment {
 
         LayoutInflater inflater = getActivity().getLayoutInflater();
 
+        //VIEW INFLATION
         @SuppressLint("InflateParams")
         View v = inflater.inflate(R.layout.dialog_solve, null);
 
-        Spinner penaltySpinner = (Spinner) v.findViewById(R.id.dialog_solve_modify_penalty_spinner);
-        final TextView scrambleTextView = (TextView) v.findViewById(R.id.dialog_solve_scramble_textview);
+        //TIMESTAMP TEXTVIEW SETUP
         TextView timestampTextView = (TextView) v.findViewById(R.id.dialog_solve_timestamp_textview);
-
-        scrambleTextView.setText(scramble);
-
         timestampTextView.setText(Util.timeDateStringFromTimestamp(getActivity().getApplicationContext(), timestamp));
 
+        //PENALTY SPINNER SETUP
+        Spinner penaltySpinner = (Spinner) v.findViewById(R.id.dialog_solve_modify_penalty_spinner);
         ArrayAdapter<CharSequence> adapter = new ArrayAdapter<CharSequence>(getActivity(), 0, getResources().getStringArray(R.array.penalty_array)) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
@@ -130,19 +134,18 @@ public class SolveDialog extends DialogFragment {
         };
         adapter.setDropDownViewResource(R.layout.spinner_item_dropdown);
         penaltySpinner.setAdapter(adapter);
-
         penaltySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int selectedPosition, long id) {
                 mSelection = selectedPosition;
                 switch (mSelection) {
-                    case SolveDialog.DIALOG_PENALTY_NONE:
+                    case SolveDialogFragment.DIALOG_PENALTY_NONE:
                         solve.setPenalty(Solve.Penalty.NONE);
                         break;
-                    case SolveDialog.DIALOG_PENALTY_PLUSTWO:
+                    case SolveDialogFragment.DIALOG_PENALTY_PLUSTWO:
                         solve.setPenalty(Solve.Penalty.PLUSTWO);
                         break;
-                    case SolveDialog.DIALOG_PENALTY_DNF:
+                    case SolveDialogFragment.DIALOG_PENALTY_DNF:
                         solve.setPenalty(Solve.Penalty.DNF);
                         break;
                 }
@@ -156,9 +159,49 @@ public class SolveDialog extends DialogFragment {
         });
         penaltySpinner.setSelection(penalty);
 
+        //TIME EDITTEXT SETUP
+        EditText timeEdit = (EditText) v.findViewById(R.id.dialog_solve_time_edittext);
+        timeEdit.setText(timeString);
+        timeEdit.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                Toast.makeText(getActivity(), getString(R.string.dialog_wip), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        //SCRAMBLE EDITTEXT SETUP
+        EditText scrambleEdit = (EditText) v.findViewById(R.id.dialog_solve_scramble_edittext);
+        scrambleEdit.setText(scramble);
+        scrambleEdit.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                Toast.makeText(getActivity(), getString(R.string.dialog_wip), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        //Return
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle(timeString)
-                .setView(v)
+        builder.setView(v)
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {

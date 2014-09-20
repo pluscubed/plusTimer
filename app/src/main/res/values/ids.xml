@@ -65,5 +65,8 @@
     <item name="fragment_about_github_button" type="id"/>
     <item name="fragment_about_email_button" type="id"/>
     <item name="fragment_about_rate_button" type="id"/>
+    <item name="menu_solvelist_add_menuitem" type="id"/>
+    <item name="dialog_solve_time_edittext" type="id"/>
+    <item name="dialog_solve_scramble_edittext" type="id"/>
 
 </resources>

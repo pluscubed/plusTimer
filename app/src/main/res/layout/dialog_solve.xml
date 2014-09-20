@@ -12,6 +12,29 @@
         android:orientation="vertical"
         android:showDividers="middle">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/time"/>
+
+            <EditText
+                android:id="@id/dialog_solve_time_edittext"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="4dp"
+                android:imeOptions="actionDone"
+                android:inputType="numberDecimal"
+                android:textSize="14sp"/>
+
+        </LinearLayout>
+
         <TextView
             android:id="@id/dialog_solve_timestamp_textview"
             android:layout_width="match_parent"
@@ -20,13 +43,29 @@
             android:gravity="center_horizontal"
             android:textColor="?android:attr/textColorAlertDialogListItem"/>
 
-        <TextView
-            android:id="@id/dialog_solve_scramble_textview"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:gravity="center_horizontal"
-            android:textColor="?android:attr/textColorAlertDialogListItem"/>
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:text="@string/scramble_colon"/>
+
+            <EditText
+                android:id="@id/dialog_solve_scramble_edittext"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="4dp"
+                android:imeOptions="actionDone"
+                android:inputType="textMultiLine"
+                android:textSize="14sp"/>
+
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"

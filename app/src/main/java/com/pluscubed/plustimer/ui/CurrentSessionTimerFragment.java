@@ -97,7 +97,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
             mTimerText.setText(Util.timeStringFromNanoseconds(15000000000L - (System.nanoTime() - mInspectionStartTimestamp)));
             if (15000000000L - (System.nanoTime() - mInspectionStartTimestamp) <= 0) {
                 mLateStartPenalty = true;
-                mTimerText.setText(getString(R.string.plus_two));
+                mTimerText.setText("+2");
                 if (17000000000L - (System.nanoTime() - mInspectionStartTimestamp) <= 0) {
                     mLateStartPenalty = false;
                     mInspecting = false;

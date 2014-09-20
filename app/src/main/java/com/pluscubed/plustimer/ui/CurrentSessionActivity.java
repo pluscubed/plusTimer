@@ -24,7 +24,7 @@ import com.pluscubed.plustimer.ui.widget.SlidingTabLayout;
 /**
  * Current Session Activity
  */
-public class CurrentSessionActivity extends BaseActivity implements CurrentSessionTimerFragment.GetRetainedFragmentCallback, SolveDialog.OnDialogDismissedListener, CreateDialogCallback, CurrentSessionTimerFragment.MenuItemsEnableCallback {
+public class CurrentSessionActivity extends BaseActivity implements CurrentSessionTimerFragment.GetRetainedFragmentCallback, SolveDialogFragment.OnDialogDismissedListener, CreateDialogCallback, CurrentSessionTimerFragment.MenuItemsEnableCallback {
     public static final String DIALOG_SOLVE_TAG = "SOLVE_DIALOG";
     private static final String STATE_MENU_ITEMS_ENABLE_BOOLEAN = "menu_items_enable_boolean";
     private static final String CURRENT_SESSION_TIMER_RETAINED_TAG = "CURRENT_SESSION_TIMER_RETAINED";
@@ -43,7 +43,7 @@ public class CurrentSessionActivity extends BaseActivity implements CurrentSessi
     @Override
     public void onDialogDismissed(String displayName, int sessionIndex, int solveIndex, int penalty) {
         switch (penalty) {
-            case SolveDialog.DIALOG_RESULT_DELETE:
+            case SolveDialogFragment.DIALOG_RESULT_DELETE:
                 PuzzleType.get(displayName).getSession(sessionIndex).deleteSolve(solveIndex);
                 break;
         }
@@ -170,18 +170,20 @@ public class CurrentSessionActivity extends BaseActivity implements CurrentSessi
             menuDisplayScramble.setEnabled(mMenuItemsEnable);
             menuDisplayScramble.getIcon().setAlpha(mMenuItemsEnable ? 255 : 96);
         }
-        if (menu.findItem(R.id.menu_solvelist_share_menuitem) != null && menu.findItem(R.id.menu_activity_current_session_scramble_image_menuitem) != null) {
+        if (menu.findItem(R.id.menu_solvelist_share_menuitem) != null && menu.findItem(R.id.menu_activity_current_session_scramble_image_menuitem) != null && menu.findItem(R.id.menu_solvelist_add_menuitem) != null) {
             if (mSelectedPosition == 0) {
                 menu.findItem(R.id.menu_solvelist_share_menuitem).setVisible(false);
                 menu.findItem(R.id.menu_activity_current_session_scramble_image_menuitem).setVisible(true);
+                menu.findItem(R.id.menu_solvelist_add_menuitem).setVisible(false);
             } else {
                 menu.findItem(R.id.menu_activity_current_session_scramble_image_menuitem).setVisible(false);
                 menu.findItem(R.id.menu_solvelist_share_menuitem).setVisible(true);
+                //TODO: Set visible to true once dialog editing is fully implemented
+                menu.findItem(R.id.menu_solvelist_add_menuitem).setVisible(false);
             }
         }
 
         if (menu.findItem(R.id.menu_activity_current_session_puzzletype_spinner) != null) {
-
             menu.findItem(R.id.menu_activity_current_session_puzzletype_spinner).setVisible(true);
         }
 
@@ -211,7 +213,7 @@ public class CurrentSessionActivity extends BaseActivity implements CurrentSessi
     public void createSolveDialog(String displayName, int sessionIndex, int solveIndex) {
         DialogFragment dialog = (DialogFragment) getFragmentManager().findFragmentByTag(DIALOG_SOLVE_TAG);
         if (dialog == null) {
-            SolveDialog d = SolveDialog.newInstance(PuzzleType.CURRENT, PuzzleType.CURRENT_SESSION, solveIndex);
+            SolveDialogFragment d = SolveDialogFragment.newInstance(PuzzleType.CURRENT, PuzzleType.CURRENT_SESSION, solveIndex);
             d.show(getFragmentManager(), DIALOG_SOLVE_TAG);
         }
     }

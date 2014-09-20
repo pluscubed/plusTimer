@@ -10,6 +10,12 @@
         android:title="@string/puzzle_selection"/>
 
     <item
+        android:id="@id/menu_solvelist_add_menuitem"
+        android:icon="@drawable/ic_action_new"
+        android:showAsAction="ifRoom"
+        android:title="@string/manual_add_solve"/>
+
+    <item
         android:id="@id/menu_activity_current_session_scramble_image_menuitem"
         android:icon="@drawable/ic_action_picture"
         android:showAsAction="ifRoom|withText"

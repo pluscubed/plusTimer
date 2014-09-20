@@ -10,6 +10,13 @@
         android:title="@string/share"/>
 
     <item
+        android:id="@id/menu_solvelist_add_menuitem"
+        android:icon="@drawable/ic_action_new"
+        android:showAsAction="ifRoom"
+        android:title="@string/manual_add_solve"/>
+
+
+    <item
         android:id="@id/menu_history_solvelist_delete_menuitem"
         android:icon="@android:drawable/ic_menu_delete"
         android:showAsAction="ifRoom"
