@@ -16,7 +16,8 @@
         android:layout_height="wrap_content"
         android:background="?android:attr/selectableItemBackground"
         android:orientation="horizontal"
-        android:paddingLeft="16dp">
+        android:paddingLeft="16dp"
+        android:paddingStart="16dp">
 
         <ImageView
             android:layout_width="20dp"
@@ -31,6 +32,7 @@
             android:gravity="center_vertical"
             android:paddingBottom="14dp"
             android:paddingLeft="8dp"
+            android:paddingStart="8dp"
             android:paddingTop="14dp"
             android:text="@string/settings"
             android:textAllCaps="true"
@@ -49,7 +51,8 @@
         android:layout_height="wrap_content"
         android:background="?android:attr/selectableItemBackground"
         android:orientation="horizontal"
-        android:paddingLeft="16dp">
+        android:paddingLeft="16dp"
+        android:paddingStart="16dp">
 
         <ImageView
             android:layout_width="20dp"
@@ -64,6 +67,7 @@
             android:gravity="center_vertical"
             android:paddingBottom="14dp"
             android:paddingLeft="8dp"
+            android:paddingStart="8dp"
             android:paddingTop="14dp"
             android:text="@string/help"
             android:textAllCaps="true"
@@ -82,7 +86,8 @@
         android:layout_height="wrap_content"
         android:background="?android:attr/selectableItemBackground"
         android:orientation="horizontal"
-        android:paddingLeft="16dp">
+        android:paddingLeft="16dp"
+        android:paddingStart="16dp">
 
         <ImageView
             android:layout_width="20dp"
@@ -97,6 +102,7 @@
             android:gravity="center_vertical"
             android:paddingBottom="14dp"
             android:paddingLeft="8dp"
+            android:paddingStart="8dp"
             android:paddingTop="14dp"
             android:text="@string/about"
             android:textAllCaps="true"

@@ -17,20 +17,7 @@ import android.widget.TextView;
  * AutoResizeTextView from http://stackoverflow.com/questions/5033012/auto-scale-textview-text-to-fit-within-bounds/ by M-WaJeEh
  */
 public class AutoResizeTextView extends TextView {
-    private interface SizeTester {
-        /**
-         *
-         * @param suggestedSize
-         *            Size of text to be tested
-         * @param availableSpace
-         *            available space in which text must fit
-         * @return an integer < 0 if after applying {@code suggestedSize} to
-         *         text, it takes less space than {@code availableSpace}, > 0
-         *         otherwise
-         */
-        public int onTestSize(int suggestedSize, RectF availableSpace);
-    }
-
+    private static final int NO_LINE_LIMIT = -1;
     private RectF mTextRect = new RectF();
 
     private RectF mAvailableSpaceRect;
@@ -48,8 +35,45 @@ public class AutoResizeTextView extends TextView {
     private float mMinTextSize = 20;
 
     private int mWidthLimit;
+    private final SizeTester mSizeTester = new SizeTester() {
+        @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+        @Override
+        public int onTestSize(int suggestedSize, RectF availableSPace) {
+            mPaint.setTextSize(suggestedSize);
+            String text = getText().toString();
+            boolean singleline = getMaxLines() == 1;
+            if (singleline) {
+                mTextRect.bottom = mPaint.getFontSpacing();
+                mTextRect.right = mPaint.measureText(text);
+            } else {
+                StaticLayout layout = new StaticLayout(text, mPaint,
+                        mWidthLimit, Alignment.ALIGN_NORMAL, mSpacingMult,
+                        mSpacingAdd, true);
+                // return early if we have more lines
+                if (getMaxLines() != NO_LINE_LIMIT
+                        && layout.getLineCount() > getMaxLines()) {
+                    return 1;
+                }
+                mTextRect.bottom = layout.getHeight();
+                int maxWidth = -1;
+                for (int i = 0; i < layout.getLineCount(); i++) {
+                    if (maxWidth < layout.getLineWidth(i)) {
+                        maxWidth = (int) layout.getLineWidth(i);
+                    }
+                }
+                mTextRect.right = maxWidth;
+            }
 
-    private static final int NO_LINE_LIMIT = -1;
+            mTextRect.offsetTo(0, 0);
+            if (availableSPace.contains(mTextRect)) {
+                // may be too small, don't worry we will find the best match
+                return -1;
+            } else {
+                // too big
+                return 1;
+            }
+        }
+    };
     private int mMaxLines;
 
     private boolean mEnableSizeCache = true;
@@ -68,6 +92,31 @@ public class AutoResizeTextView extends TextView {
     public AutoResizeTextView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         initialize();
+    }
+
+    private static int binarySearch(int start, int end, SizeTester sizeTester,
+                                    RectF availableSpace) {
+        int lastBest = start;
+        int lo = start;
+        int hi = end - 1;
+        int mid = 0;
+        while (lo <= hi) {
+            mid = (lo + hi) >>> 1;
+            int midValCmp = sizeTester.onTestSize(mid, availableSpace);
+            if (midValCmp < 0) {
+                lastBest = lo;
+                lo = mid + 1;
+            } else if (midValCmp > 0) {
+                hi = mid - 1;
+                lastBest = hi;
+            } else {
+                return mid;
+            }
+        }
+        // make sure to return last best
+        // this is what should always be returned
+        return lastBest;
+
     }
 
     private void initialize() {
@@ -95,15 +144,15 @@ public class AutoResizeTextView extends TextView {
         adjustTextSize(getText().toString());
     }
 
+    public int getMaxLines() {
+        return mMaxLines;
+    }
+
     @Override
     public void setMaxLines(int maxlines) {
         super.setMaxLines(maxlines);
         mMaxLines = maxlines;
         reAdjust();
-    }
-
-    public int getMaxLines() {
-        return mMaxLines;
     }
 
     @Override
@@ -184,54 +233,13 @@ public class AutoResizeTextView extends TextView {
                         mSizeTester, mAvailableSpaceRect));
     }
 
-    private final SizeTester mSizeTester = new SizeTester() {
-        @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-        @Override
-        public int onTestSize(int suggestedSize, RectF availableSPace) {
-            mPaint.setTextSize(suggestedSize);
-            String text = getText().toString();
-            boolean singleline = getMaxLines() == 1;
-            if (singleline) {
-                mTextRect.bottom = mPaint.getFontSpacing();
-                mTextRect.right = mPaint.measureText(text);
-            } else {
-                StaticLayout layout = new StaticLayout(text, mPaint,
-                        mWidthLimit, Alignment.ALIGN_NORMAL, mSpacingMult,
-                        mSpacingAdd, true);
-                // return early if we have more lines
-                if (getMaxLines() != NO_LINE_LIMIT
-                        && layout.getLineCount() > getMaxLines()) {
-                    return 1;
-                }
-                mTextRect.bottom = layout.getHeight();
-                int maxWidth = -1;
-                for (int i = 0; i < layout.getLineCount(); i++) {
-                    if (maxWidth < layout.getLineWidth(i)) {
-                        maxWidth = (int) layout.getLineWidth(i);
-                    }
-                }
-                mTextRect.right = maxWidth;
-            }
-
-            mTextRect.offsetTo(0, 0);
-            if (availableSPace.contains(mTextRect)) {
-                // may be too small, don't worry we will find the best match
-                return -1;
-            } else {
-                // too big
-                return 1;
-            }
-        }
-    };
-
     /**
      * Enables or disables size caching, enabling it will improve performance
      * where you are animating a value inside TextView. This stores the font
      * size against getText().length() Be careful though while enabling it as 0
      * takes more space than 1 on some fonts and so on.
      *
-     * @param enable
-     *            enable font size caching
+     * @param enable enable font size caching
      */
     public void enableSizeCache(boolean enable) {
         mEnableSizeCache = enable;
@@ -255,31 +263,6 @@ public class AutoResizeTextView extends TextView {
         return size;
     }
 
-    private static int binarySearch(int start, int end, SizeTester sizeTester,
-                                    RectF availableSpace) {
-        int lastBest = start;
-        int lo = start;
-        int hi = end - 1;
-        int mid = 0;
-        while (lo <= hi) {
-            mid = (lo + hi) >>> 1;
-            int midValCmp = sizeTester.onTestSize(mid, availableSpace);
-            if (midValCmp < 0) {
-                lastBest = lo;
-                lo = mid + 1;
-            } else if (midValCmp > 0) {
-                hi = mid - 1;
-                lastBest = hi;
-            } else {
-                return mid;
-            }
-        }
-        // make sure to return last best
-        // this is what should always be returned
-        return lastBest;
-
-    }
-
     @Override
     protected void onTextChanged(final CharSequence text, final int start,
                                  final int before, final int after) {
@@ -295,5 +278,16 @@ public class AutoResizeTextView extends TextView {
         if (width != oldwidth || height != oldheight) {
             reAdjust();
         }
+    }
+
+    private interface SizeTester {
+        /**
+         * @param suggestedSize  Size of text to be tested
+         * @param availableSpace available space in which text must fit
+         * @return an integer < 0 if after applying {@code suggestedSize} to
+         * text, it takes less space than {@code availableSpace}, > 0
+         * otherwise
+         */
+        public int onTestSize(int suggestedSize, RectF availableSpace);
     }
 }

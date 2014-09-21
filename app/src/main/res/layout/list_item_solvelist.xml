@@ -10,8 +10,10 @@
         android:id="@id/list_item_solvelist_title_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingEnd="4dp"
         android:paddingLeft="4dp"
         android:paddingRight="4dp"
+        android:paddingStart="4dp"
         android:paddingTop="4dp"
         android:textStyle="bold"/>
 
@@ -20,8 +22,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingBottom="4dp"
+        android:paddingEnd="4dp"
         android:paddingLeft="4dp"
         android:paddingRight="4dp"
+        android:paddingStart="4dp"
         android:paddingTop="2dp"/>
 
 </LinearLayout>

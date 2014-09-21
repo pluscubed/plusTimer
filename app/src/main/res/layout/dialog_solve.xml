@@ -15,8 +15,10 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
+            android:layout_marginStart="8dp"
             android:orientation="horizontal">
 
             <TextView
@@ -29,6 +31,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="4dp"
+                android:layout_marginStart="4dp"
                 android:imeOptions="actionDone"
                 android:inputType="numberDecimal"
                 android:textSize="14sp"/>
@@ -46,8 +49,10 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
+            android:layout_marginStart="8dp"
             android:orientation="horizontal">
 
             <TextView
@@ -61,6 +66,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="4dp"
+                android:layout_marginStart="4dp"
                 android:imeOptions="actionDone"
                 android:inputType="textMultiLine"
                 android:textSize="14sp"/>
@@ -70,8 +76,10 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
+            android:layout_marginStart="8dp"
             android:orientation="horizontal">
 
             <TextView
@@ -87,6 +95,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="4dp"
                 android:layout_marginLeft="4dp"
+                android:layout_marginStart="4dp"
                 android:layout_marginTop="4dp"
                 android:layout_weight="1"
                 android:background="?android:attr/selectableItemBackground"
