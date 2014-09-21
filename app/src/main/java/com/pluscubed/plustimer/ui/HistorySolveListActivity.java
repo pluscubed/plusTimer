@@ -46,7 +46,7 @@ public class HistorySolveListActivity extends Activity implements SolveDialogFra
     }
 
     private SolveListFragment getSolveListFragment() {
-        return (SolveListFragment) getFragmentManager().findFragmentById(R.id.activity_history_solvelist_framelayout);
+        return (SolveListFragment) getFragmentManager().findFragmentById(android.R.id.content);
     }
 
     @Override
@@ -59,16 +59,15 @@ public class HistorySolveListActivity extends Activity implements SolveDialogFra
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_history_solvelist);
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
         FragmentManager fm = getFragmentManager();
-        Fragment fragment = fm.findFragmentById(R.id.activity_history_solvelist_framelayout);
+        Fragment fragment = fm.findFragmentById(android.R.id.content);
         int position = getIntent().getIntExtra(EXTRA_HISTORY_SESSION_POSITION, 0);
         String puzzleType = getIntent().getStringExtra(EXTRA_HISTORY_PUZZLETYPE_DISPLAYNAME);
         if (fragment == null) {
             fragment = SolveListFragment.newInstance(false, puzzleType, position);
-            fm.beginTransaction().add(R.id.activity_history_solvelist_framelayout, fragment).commit();
+            fm.beginTransaction().add(android.R.id.content, fragment).commit();
         }
         setTitle(PuzzleType.get(puzzleType).getSession(position).getTimestampString(this));
     }

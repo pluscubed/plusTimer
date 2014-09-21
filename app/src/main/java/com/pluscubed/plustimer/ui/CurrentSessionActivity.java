@@ -63,7 +63,7 @@ public class CurrentSessionActivity extends BaseActivity implements CurrentSessi
             mMenuItemsEnable = savedInstanceState.getBoolean(STATE_MENU_ITEMS_ENABLE_BOOLEAN);
         } else {
             for (PuzzleType p : PuzzleType.values()) {
-                p.initHistorySessions(this);
+                p.init(this);
             }
         }
 

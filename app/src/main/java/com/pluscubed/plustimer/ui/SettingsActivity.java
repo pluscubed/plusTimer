@@ -18,6 +18,10 @@ import com.pluscubed.plustimer.R;
  * Settings Activity and Fragment
  */
 public class SettingsActivity extends Activity {
+    public static final String PREF_INSPECTION_CHECKBOX = "pref_inspection_checkbox";
+    public static final String PREF_HOLDTOSTART_CHECKBOX = "pref_holdtostart_checkbox";
+    public static final String PREF_KEEPSCREENON_CHECKBOX = "pref_keepscreenon_checkbox";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,14 +53,14 @@ public class SettingsActivity extends Activity {
         public void onCreate(Bundle paramBundle) {
             super.onCreate(paramBundle);
             addPreferencesFromResource(R.xml.preferences);
-            CheckBoxPreference inspection = (CheckBoxPreference) findPreference(getString(R.string.pref_inspection_checkbox));
+            CheckBoxPreference inspection = (CheckBoxPreference) findPreference(PREF_INSPECTION_CHECKBOX);
 
             inspection.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
                     if (newValue.toString().equals("true")) {
-                        PreferenceManager.getDefaultSharedPreferences(getActivity()).edit().putBoolean(getString(R.string.pref_holdtostart_checkbox), true).commit();
-                        CheckBoxPreference hold = (CheckBoxPreference) findPreference(getString(R.string.pref_holdtostart_checkbox));
+                        PreferenceManager.getDefaultSharedPreferences(getActivity()).edit().putBoolean(PREF_HOLDTOSTART_CHECKBOX, true).commit();
+                        CheckBoxPreference hold = (CheckBoxPreference) findPreference(PREF_HOLDTOSTART_CHECKBOX);
                         hold.setChecked(true);
                     }
                     return true;

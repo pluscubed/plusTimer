@@ -187,11 +187,11 @@ public class Session {
                     for (int i : averages) {
                         if (getNumberOfSolves() >= i) {
                             if (current) {
-                                s.append("\n").append(context.getString(R.string.cao)).append(i).append(": ").append(getStringCurrentAverageOf(i));
+                                s.append("\n").append(String.format(context.getString(R.string.cao), i)).append(": ").append(getStringCurrentAverageOf(i));
                             } else {
-                                s.append("\n").append(context.getString(R.string.lao)).append(i).append(": ").append(getStringCurrentAverageOf(i));
+                                s.append("\n").append(String.format(context.getString(R.string.lao), i)).append(": ").append(getStringCurrentAverageOf(i));
                             }
-                            s.append("\n").append(context.getString(R.string.bao)).append(i).append(": ").append(getStringBestAverageOf(i));
+                            s.append("\n").append(String.format(context.getString(R.string.bao), i)).append(": ").append(getStringBestAverageOf(i));
                         }
                     }
                 }

@@ -2,6 +2,8 @@ package com.pluscubed.plustimer.model;
 
 import android.content.Context;
 
+import com.pluscubed.plustimer.R;
+
 import net.gnehzr.tnoodle.scrambles.Puzzle;
 import net.gnehzr.tnoodle.scrambles.PuzzlePlugins;
 import net.gnehzr.tnoodle.utils.BadLazyClassDescriptionException;
@@ -13,18 +15,18 @@ import java.io.IOException;
  * Puzzle type enum
  */
 public enum PuzzleType {
-    SQ1FAST("sq1fast", "Square-1", false),
-    SKEWB("skewb", "Skewb"),
-    PYRAMINX("pyram", "Pyraminx"),
-    MINX("minx", "Megaminx"),
-    CLOCK("clock", "Clock"),
-    SEVEN("777", "7x7"),
-    SIX("666", "6x6"),
-    FIVE("555", "5x5"),
-    FOUR("444", "4x4"),
-    FOURFAST("444fast", "4x4", false),
-    THREE("333", "3x3"),
-    TWO("222", "2x2");
+    SQ1FAST("sq1fast", 0, false),
+    SKEWB("skewb", 1),
+    PYRAMINX("pyram", 2),
+    MINX("minx", 3),
+    CLOCK("clock", 4),
+    SEVEN("777", 5),
+    SIX("666", 6),
+    FIVE("555", 7),
+    FOUR("444", 8),
+    FOURFAST("444fast", 9, false),
+    THREE("333", 10),
+    TWO("222", 11);
     public static final int CURRENT_SESSION = -1;
     public static final String CURRENT = "current_puzzletype";
 
@@ -36,23 +38,24 @@ public enum PuzzleType {
     private static PuzzleType sCurrentPuzzleType;
 
     private final String mScramblerSpec;
-    private final String mDisplayName;
+    private final int mIndex;
+    private String mDisplayName;
     private boolean mOfficial;
     private Session mCurrentSession;
     private HistorySessions mHistorySessions;
     private Puzzle mPuzzle;
 
-    PuzzleType(String scramblerSpec, String displayName) {
-        this.mScramblerSpec = scramblerSpec;
-        this.mDisplayName = displayName;
+    PuzzleType(String scramblerSpec, int index) {
+        mScramblerSpec = scramblerSpec;
+        mIndex = index;
         mCurrentSession = new Session();
         mHistorySessions = new HistorySessions(mScramblerSpec + ".json");
         mOfficial = true;
     }
 
 
-    PuzzleType(String scramblerSpec, String displayName, boolean official) {
-        this(scramblerSpec, displayName);
+    PuzzleType(String scramblerSpec, int index, boolean official) {
+        this(scramblerSpec, index);
         mOfficial = official;
     }
 
@@ -76,8 +79,9 @@ public enum PuzzleType {
         return mHistorySessions;
     }
 
-    public void initHistorySessions(Context context) {
+    public void init(Context context) {
         mHistorySessions.init(context);
+        mDisplayName = context.getResources().getStringArray(R.array.puzzle_types)[mIndex];
     }
 
     public boolean isOfficial() {

@@ -120,6 +120,15 @@ public class SolveListFragment extends Fragment {
     }
 
     @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        //TODO: Delete once dialog editing is fully implemented
+        if (menu.findItem(R.id.menu_solvelist_add_menuitem) != null) {
+            menu.findItem(R.id.menu_solvelist_add_menuitem).setVisible(false);
+        }
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_solvelist, container, false);
 

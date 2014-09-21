@@ -135,7 +135,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         String s = "";
         for (int i : currentAverages) {
             if (PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION).getNumberOfSolves() >= i) {
-                s += context.getString(R.string.cao) + i + ": " + PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION).getStringCurrentAverageOf(i) + "\n";
+                s += String.format(context.getString(R.string.cao), i) + ": " + PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION).getStringCurrentAverageOf(i) + "\n";
             }
         }
         if (PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION).getNumberOfSolves() > 0) {
@@ -246,9 +246,9 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
     @Override
     public void onResume() {
         super.onResume();
-        mInspectionOn = PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(getString(R.string.pref_inspection_checkbox), true);
-        mHoldToStartOn = PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(getString(R.string.pref_holdtostart_checkbox), true);
-        if (PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(getString(R.string.pref_keepscreenon_checkbox), true)) {
+        mInspectionOn = PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(SettingsActivity.PREF_INSPECTION_CHECKBOX, true);
+        mHoldToStartOn = PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(SettingsActivity.PREF_HOLDTOSTART_CHECKBOX, true);
+        if (PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(SettingsActivity.PREF_KEEPSCREENON_CHECKBOX, true)) {
             getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         } else {
             getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);

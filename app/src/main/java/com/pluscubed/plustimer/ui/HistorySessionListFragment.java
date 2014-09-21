@@ -131,7 +131,7 @@ public class HistorySessionListFragment extends ListFragment {
         layoutParams.setMargins(0, (int) convertDpToPx(8), 0, (int) convertDpToPx(8));
         mGraph.setLayoutParams(layoutParams);
         mGraph.setShowLegend(true);
-        mGraph.getGraphViewStyle().setLegendWidth((int) convertDpToPx(70));
+        mGraph.getGraphViewStyle().setLegendWidth((int) convertDpToPx(85));
         mGraph.getGraphViewStyle().setLegendMarginBottom((int) convertDpToPx(12));
         mGraph.setLegendAlign(GraphView.LegendAlign.BOTTOM);
         mGraph.setCustomLabelFormatter(new CustomLabelFormatter() {
@@ -233,7 +233,7 @@ public class HistorySessionListFragment extends ListFragment {
                         case 1000:
                             lineColor = Color.YELLOW;
                     }
-                    bestAverageGraphViewSeries.add(new GraphViewSeries("Best Ao" + bestAverageMatrix.keyAt(i), new GraphViewSeries.GraphViewSeriesStyle(lineColor, (int) convertDpToPx(2)), bestTimesDataArray));
+                    bestAverageGraphViewSeries.add(new GraphViewSeries(String.format(getString(R.string.best_ao), bestAverageMatrix.keyAt(i)), new GraphViewSeries.GraphViewSeriesStyle(lineColor, (int) convertDpToPx(2)), bestTimesDataArray));
                 }
             }
 
@@ -250,7 +250,7 @@ public class HistorySessionListFragment extends ListFragment {
             for (int i = 0; i < bestSolvesTimes.size(); i++) {
                 bestTimesDataArray[i] = new GraphView.GraphViewData(sessionTimestamps.get(bestSolvesTimes.keyAt(i)), bestSolvesTimes.valueAt(i));
             }
-            GraphViewSeries bestTimesSeries = new GraphViewSeries("Best Times", new GraphViewSeries.GraphViewSeriesStyle(Color.BLUE, (int) convertDpToPx(2)), bestTimesDataArray);
+            GraphViewSeries bestTimesSeries = new GraphViewSeries(getString(R.string.best_times), new GraphViewSeries.GraphViewSeriesStyle(Color.BLUE, (int) convertDpToPx(2)), bestTimesDataArray);
 
             boolean averageMoreThanOne = false;
             for (int i = 0; i < bestAverageMatrix.size(); i++) {
@@ -329,7 +329,7 @@ public class HistorySessionListFragment extends ListFragment {
                 }
                 if (bestAverages.size() > 0) {
                     Long bestAverage = Collections.min(bestAverages);
-                    builder.append("\n").append(getString(R.string.pb)).append(" ").append(getString(R.string.ao)).append(number).append(": ").append(bestAverage == Long.MAX_VALUE ? "DNF" : Util.timeStringFromNanoseconds(bestAverage));
+                    builder.append("\n").append(getString(R.string.pb)).append(" ").append(String.format(getString(R.string.ao), number)).append(": ").append(bestAverage == Long.MAX_VALUE ? "DNF" : Util.timeStringFromNanoseconds(bestAverage));
                 }
             }
         }
@@ -379,7 +379,7 @@ public class HistorySessionListFragment extends ListFragment {
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         Intent i = new Intent(getActivity(), HistorySolveListActivity.class);
-        int index = PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions().getList().indexOf(getListView().getItemAtPosition(position));
+        int index = PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions().getList().indexOf(l.getItemAtPosition(position));
         i.putExtra(HistorySolveListActivity.EXTRA_HISTORY_SESSION_POSITION, index);
         i.putExtra(HistorySolveListActivity.EXTRA_HISTORY_PUZZLETYPE_DISPLAYNAME, mPuzzleTypeDisplayName);
         startActivity(i);
