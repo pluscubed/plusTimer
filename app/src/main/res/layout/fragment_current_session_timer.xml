@@ -5,13 +5,16 @@
                 android:layout_height="match_parent"
                 tools:context=".TimerActivity">
 
-    <TextView
+    <com.pluscubed.plustimer.ui.widget.AutoResizeTextView
         android:id="@id/fragment_current_session_timer_time_textview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:ellipsize="none"
         android:gravity="center"
+        android:maxLines="1"
+        android:padding="45dp"
         android:text="@string/ready"
-        android:textSize="70sp"/>
+        android:textSize="100sp" />
 
     <TextView
         android:id="@id/fragment_current_session_timer_inspecting_textview"
