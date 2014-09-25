@@ -12,8 +12,6 @@
 
     <item name="fragment_current_session_timer_scramble_imageview" type="id"/>
 
-    <item name="fragment_current_session_timer_inspecting_textview" type="id"/>
-
     <!--SolveDialog-->
     <item name="dialog_solve_timestamp_textview" type="id"/>
     <item name="dialog_solve_modify_penalty_spinner" type="id"/>
@@ -67,6 +65,8 @@
     <item name="fragment_about_github_button" type="id"/>
     <item name="fragment_about_email_button" type="id"/>
     <item name="fragment_about_rate_button" type="id"/>
+    <item name="fragment_current_session_timer_timeSecondary_textview" type="id"/>
+    <item name="fragment_current_session_timer_inspecting_textview" type="id"/>
 
 
 </resources>

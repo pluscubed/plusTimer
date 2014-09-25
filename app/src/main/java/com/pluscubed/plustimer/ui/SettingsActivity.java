@@ -21,6 +21,7 @@ public class SettingsActivity extends Activity {
     public static final String PREF_INSPECTION_CHECKBOX = "pref_inspection_checkbox";
     public static final String PREF_HOLDTOSTART_CHECKBOX = "pref_holdtostart_checkbox";
     public static final String PREF_KEEPSCREENON_CHECKBOX = "pref_keepscreenon_checkbox";
+    public static final String PREF_TWO_ROW_TIME_CHECKBOX = "pref_two_row_time_checkbox";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

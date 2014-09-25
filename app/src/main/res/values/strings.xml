@@ -27,7 +27,7 @@
     <string name="share">Share</string>
     <string name="share_dialog_title">Share times via…</string>
 
-    <string name="inspection">Inspection:</string>
+    <string name="inspection">Inspection</string>
 
     <string name="pref_inspection_title">Inspection</string>
     <string name="pref_inspection_summary">15-second WCA countdown for inspecting the cube</string>
@@ -96,5 +96,7 @@
     <string name="dialog_wip">Editing time and scramble doesn\'t work just yet. This is just a placeholder.</string>
     <string name="best_times">Best Times</string>
     <string name="best_ao">Best Ao%1$d</string>
+    <string name="pref_two_row_time_summary">Hours:Minutes:Seconds on top, milliseconds on the bottom</string>
+    <string name="pref_two_row_time_title">Two row time display</string>
 
 </resources>

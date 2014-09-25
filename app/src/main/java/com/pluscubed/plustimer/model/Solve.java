@@ -45,6 +45,21 @@ public class Solve {
         }
     }
 
+    public String[] getTimeStringArray() {
+        switch (mPenalty) {
+            case DNF:
+                return new String[]{"DNF", ""};
+            case PLUSTWO:
+                long nanoseconds = mRawTime + 2000000000L;
+                String[] timeStringsSplitByDecimal = Util.timeStringsSplitByDecimal(nanoseconds);
+                timeStringsSplitByDecimal[1] = timeStringsSplitByDecimal[1] + "+";
+                return timeStringsSplitByDecimal;
+            case NONE:
+            default:
+                return Util.timeStringsSplitByDecimal(mRawTime);
+        }
+    }
+
     public String getDescriptiveTimeString() {
         switch (mPenalty) {
             case DNF:

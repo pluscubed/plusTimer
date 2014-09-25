@@ -100,4 +100,6 @@
         
     <string name="best_times">單次最快</string>
     <string name="best_ao">%1$d次去尾最快</string>
+    <string name="pref_two_row_time_summary">Two row time display with milliseconds on the bottom</string>
+    <string name="pref_two_row_time_title">Large seconds digits</string>
 </resources>

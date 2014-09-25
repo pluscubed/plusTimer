@@ -3,6 +3,11 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <CheckBoxPreference
         android:defaultValue="true"
+        android:key="pref_two_row_time_checkbox"
+        android:summary="@string/pref_two_row_time_summary"
+        android:title="@string/pref_two_row_time_title"/>
+    <CheckBoxPreference
+        android:defaultValue="true"
         android:disableDependentsState="true"
         android:key="pref_inspection_checkbox"
         android:summary="@string/pref_inspection_summary"

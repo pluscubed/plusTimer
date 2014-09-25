@@ -27,7 +27,7 @@
     <string name="share">分享成績</string>
     <string name="share_dialog_title">分享成績至…</string>
         
-    <string name="inspection">觀察:</string>
+    <string name="inspection">觀察</string>
 
         
     <string name="pref_inspection_title">WCA觀察</string>
@@ -100,4 +100,6 @@
         
     <string name="best_times">單次最快</string>
     <string name="best_ao">%1$d次去尾最快</string>
+    <string name="pref_two_row_time_summary">時:分:秒在上，毫秒在下</string>
+    <string name="pref_two_row_time_title">兩行時間顯示</string>
 </resources>
