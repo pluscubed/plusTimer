@@ -31,6 +31,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
+            android:includeFontPadding="false"
             android:text="@string/ready"
             android:textSize="100sp"/>
 
@@ -39,6 +40,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
+            android:includeFontPadding="false"
             android:textSize="50sp"/>
     </LinearLayout>
 

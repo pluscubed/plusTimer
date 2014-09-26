@@ -6,10 +6,12 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
+import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NavUtils;
+import android.text.InputType;
 import android.view.MenuItem;
 
 import com.pluscubed.plustimer.R;
@@ -22,6 +24,7 @@ public class SettingsActivity extends Activity {
     public static final String PREF_HOLDTOSTART_CHECKBOX = "pref_holdtostart_checkbox";
     public static final String PREF_KEEPSCREENON_CHECKBOX = "pref_keepscreenon_checkbox";
     public static final String PREF_TWO_ROW_TIME_CHECKBOX = "pref_two_row_time_checkbox";
+    public static final String PREF_TIME_TEXT_SIZE_EDITTEXT = "pref_time_display_size_edittext";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +58,6 @@ public class SettingsActivity extends Activity {
             super.onCreate(paramBundle);
             addPreferencesFromResource(R.xml.preferences);
             CheckBoxPreference inspection = (CheckBoxPreference) findPreference(PREF_INSPECTION_CHECKBOX);
-
             inspection.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
@@ -67,6 +69,18 @@ public class SettingsActivity extends Activity {
                     return true;
                 }
             });
+            EditTextPreference size = (EditTextPreference) findPreference(PREF_TIME_TEXT_SIZE_EDITTEXT);
+            size.getEditText().setInputType(InputType.TYPE_CLASS_NUMBER);
+            size.setDialogTitle(getString(R.string.time_text_edittext_dialog_title));
+            size.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    EditTextPreference size = (EditTextPreference) findPreference(PREF_TIME_TEXT_SIZE_EDITTEXT);
+                    size.setSummary(newValue.toString());
+                    return true;
+                }
+            });
+            size.setSummary(PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(PREF_TIME_TEXT_SIZE_EDITTEXT, "100"));
         }
     }
 }

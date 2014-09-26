@@ -102,4 +102,6 @@
     <string name="best_ao">%1$d次去尾最快</string>
     <string name="pref_two_row_time_summary">Two row time display with milliseconds on the bottom</string>
     <string name="pref_two_row_time_title">Large seconds digits</string>
+    <string name="pref_time_text_size_title">Time Text Size</string>
+    <string name="time_text_edittext_dialog_title">Set time text size (default 100):</string>
 </resources>
