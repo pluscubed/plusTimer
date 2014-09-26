@@ -26,8 +26,6 @@
     <string name="puzzletype_no_sovles">該魔方無記錄!\n完成一些還原後，在成績列表頁面按保存至記錄。 </string>
     <string name="share">分享成績</string>
     <string name="share_dialog_title">分享成績至…</string>
-        
-    <string name="inspection">觀察</string>
 
         
     <string name="pref_inspection_title">WCA觀察</string>

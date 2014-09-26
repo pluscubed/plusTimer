@@ -61,7 +61,6 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
     private ImageView mScrambleImage;
     private TextView mStatsSolvesText;
     private TextView mStatsText;
-    private TextView mInspectingText;
 
     private Handler mUiHandler;
 
@@ -111,7 +110,6 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
                 if (17000000000L - (System.nanoTime() - mInspectionStartTimestamp) <= 0) {
                     mLateStartPenalty = false;
                     mInspecting = false;
-                    mInspectingText.setVisibility(View.INVISIBLE);
                     mHoldTimerStarted = false;
                     //stop the runnables
                     mUiHandler.removeCallbacksAndMessages(null);
@@ -362,7 +360,6 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         mInspecting = false;
 
         mTimerText.setTextColor(Color.BLACK);
-        mInspectingText.setVisibility(View.INVISIBLE);
     }
 
     @Override
@@ -410,9 +407,6 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         mScrambleText = (TextView) v.findViewById(R.id.fragment_current_session_timer_scramble_textview);
         mScrambleImage = (ImageView) v.findViewById(R.id.fragment_current_session_timer_scramble_imageview);
         mHListView = (HListView) v.findViewById(R.id.fragment_current_session_timer_bottom_hlistview);
-
-
-        mInspectingText = (TextView) v.findViewById(R.id.fragment_current_session_timer_inspecting_textview);
 
         mStatsText = (TextView) v.findViewById(R.id.fragment_current_session_timer_stats_textview);
         mStatsSolvesText = (TextView) v.findViewById(R.id.fragment_current_session_timer_stats_solves_number_textview);
@@ -485,7 +479,6 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
                         if (mInspectionOn && !mInspecting && !mRunning) {
                             mInspectionStartTimestamp = System.nanoTime();
                             mInspecting = true;
-                            mInspectingText.setVisibility(View.VISIBLE);
                             mUiHandler.post(mInspectionRunnable);
                             enableMenuItems(false);
                             //Set the scramble image to gone
@@ -497,7 +490,6 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
                             if (mHoldTimerStarted && 500000000L <= System.nanoTime() - mHoldTimerStartTimestamp) {
                                 mStartTimestamp = System.nanoTime();
                                 mInspecting = false;
-                                mInspectingText.setVisibility(View.INVISIBLE);
                                 mRunning = true;
                                 mUiHandler.removeCallbacksAndMessages(null);
                                 mUiHandler.post(mTimerRunnable);
@@ -546,7 +538,6 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         } else {
             if (mInspecting) {
                 mUiHandler.post(mInspectionRunnable);
-                mInspectingText.setVisibility(View.VISIBLE);
             }
             if (mRunning) {
                 mUiHandler.post(mTimerRunnable);

@@ -27,8 +27,6 @@
     <string name="share">分享成绩</string>
     <string name="share_dialog_title">分享成绩至…</string>
 
-    <string name="inspection">观察</string>
-
 
     <string name="pref_inspection_title">WCA观察</string>
     <string name="pref_inspection_summary">15秒观察魔方</string>

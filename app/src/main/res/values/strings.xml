@@ -27,7 +27,6 @@
     <string name="share">Share</string>
     <string name="share_dialog_title">Share times via…</string>
 
-    <string name="inspection">Inspection</string>
 
     <string name="pref_inspection_title">Inspection</string>
     <string name="pref_inspection_summary">15-second WCA countdown for inspecting the cube</string>
