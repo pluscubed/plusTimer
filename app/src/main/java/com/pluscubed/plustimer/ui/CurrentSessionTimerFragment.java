@@ -71,7 +71,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         @Override
         public void run() {
             updateTimerTextSize();
-            if (500000000L <= System.nanoTime() - mHoldTimerStartTimestamp) {
+            if (550000000L <= System.nanoTime() - mHoldTimerStartTimestamp) {
                 mTimerText.setTextColor(Color.GREEN);
             } else {
                 mUiHandler.postDelayed(this, 10);

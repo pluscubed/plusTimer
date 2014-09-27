@@ -5,7 +5,7 @@
     <string name="ready">準備就緒</string>
     <string name="settings">設置</string>
     <string name="submit">保存至記錄</string>
-    <string name="scrambling">打亂中…</string>
+    <string name="scrambling">打亂公式生成中…</string>
     <string name="puzzle_selection">魔方選擇</string>
     <string name="solves">"總數: "</string>
     <string name="cao">"當前%1$d次去尾"</string>
@@ -23,44 +23,41 @@
     <string name="session_no_solves">本組目前無成績!</string>
     <string name="session_submitted">保存本組成功</string>
     <string name="session_reset">本組重置成功</string>
-    <string name="puzzletype_no_sovles">該魔方無記錄!\n完成一些還原後，在成績列表頁面按保存至記錄。 </string>
+    <string name="puzzletype_no_sovles">該魔方無記錄!\n完成一些還原後，在 成績列表 頁面按 保存至記錄。</string>
     <string name="share">分享成績</string>
     <string name="share_dialog_title">分享成績至…</string>
-        
-    <string name="inspection">觀察:</string>
 
-        
+
     <string name="pref_inspection_title">WCA觀察</string>
     <string name="pref_inspection_summary">15秒觀察魔方</string>
-        
+
     <string name="pref_holdtostart_title">長按開始</string>
-    <string name="pref_holdtostart_summary">開始前按住半秒鐘(類似Speed​​Stacks計時器)</string>
-        
+    <string name="pref_holdtostart_summary">開始前按住0.55秒 (類似SpeedStacks計時器)</string>
+
     <string name="pref_keepscreenon_summary">防止屏幕自動休眠</string>
     <string name="pref_keepscreenon_title">屏幕常亮</string>
-        
+
     <string-array name="penalty_array">
         <item>無</item>
         <item>+2</item>
         <item>DNF</item>
     </string-array>
-        
+
     <string-array name="drawer_array">
         <item>當前組</item>
         <item>歷史記錄</item>
     </string-array>
-        
+
     <string-array name="drawer_actionbar_array">
         <item>當前組</item>
         <item>歷史記錄</item>
     </string-array>
 
-        
     <string-array name="current_s_page_titles">
         <item>計時</item>
         <item>成績列表</item>
     </string-array>
-        
+
     <string-array name="puzzle_types">
         <item>SQ1</item>
         <item>斜轉</item>
@@ -76,9 +73,15 @@
         <item>2x2</item>
     </string-array>
 
+    <string-array name="pref_update_time_list_entries">
+        <item>實時</item>
+        <item>到秒</item>
+        <item>隱藏</item>
+    </string-array>
+
     <string name="drawer_open">打開側欄</string>
     <string name="drawer_close">關閉側欄</string>
-        
+
     <string name="pb">PB</string>
     <string name="ao">%1$d次去尾</string>
     <string name="help">幫助</string>
@@ -96,13 +99,13 @@
     <string name="time">時間:</string>
     <string name="scramble_colon">打亂:</string>
     <string name="dialog_wip">目前還不支持修改時間或打亂，修改框是框架</string>
-
-        
     <string name="best_times">單次最快</string>
     <string name="best_ao">%1$d次去尾最快</string>
-    <string name="pref_two_row_time_summary">Two row time display with milliseconds on the bottom</string>
-    <string name="pref_two_row_time_title">Large seconds digits</string>
-    <string name="pref_time_text_size_title">Time Text Size</string>
-    <string name="time_text_edittext_dialog_title">Set time text size (default 100):</string>
-    <string name="timing">Timing</string>
+    <string name="pref_two_row_time_summary">時:分:秒在上，毫秒在下</string>
+    <string name="pref_two_row_time_title">計時器兩行顯示</string>
+    <string name="pref_time_text_size_title">計時器字體大小</string>
+    <string name="time_text_edittext_dialog_title">計時器字體大小 (默認100):</string>
+    <string name="pref_update_time_title">計時器更新</string>
+    <string name="timing">還原</string>
+
 </resources>
