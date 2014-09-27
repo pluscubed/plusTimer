@@ -73,6 +73,12 @@
         <item>2x2</item>
     </string-array>
 
+    <string-array name="pref_update_time_list_entries">
+        <item>On</item>
+        <item>On, by seconds</item>
+        <item>Off</item>
+    </string-array>
+
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
 
@@ -96,8 +102,10 @@
     <string name="best_times">Best Times</string>
     <string name="best_ao">Best Ao%1$d</string>
     <string name="pref_two_row_time_summary">Hours:Minutes:Seconds on top, milliseconds on the bottom</string>
-    <string name="pref_two_row_time_title">Two row time display</string>
+    <string name="pref_two_row_time_title">Two Row Time Display</string>
     <string name="pref_time_text_size_title">Time Text Size</string>
     <string name="time_text_edittext_dialog_title">Set time text size (default 100):</string>
+    <string name="pref_update_time_title">Update Timer Text While Timing</string>
+    <string name="timing">Timing</string>
 
 </resources>

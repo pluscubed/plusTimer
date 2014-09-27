@@ -51,6 +51,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
     private boolean mHoldToStartOn;
     private boolean mInspectionOn;
     private boolean mTwoRowTimeOn;
+    private int mUpdateTime;
 
     private CurrentSessionTimerRetainedFragment mRetainedFragment;
 
@@ -84,9 +85,14 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
     private final Runnable mTimerRunnable = new Runnable() {
         @Override
         public void run() {
-            updateTimerTextSize();
-            setTimerText(System.nanoTime() - mStartTimestamp);
-            mUiHandler.postDelayed(this, 10);
+            if (mUpdateTime != 2) {
+                updateTimerTextSize();
+                setTimerText(Util.timeStringsSplitByDecimal(System.nanoTime() - mStartTimestamp));
+                mUiHandler.postDelayed(this, 10);
+            } else {
+                setTimerText(new String[]{getString(R.string.timing), ""});
+                mTimerText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 100);
+            }
         }
     };
 
@@ -167,15 +173,12 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
      }
      */
 
-    public void setTimerText(long nanoseconds) {
-        setTimerText(Util.timeStringsSplitByDecimal(nanoseconds));
-    }
 
     public void setTimerText(String[] array) {
         if (mTwoRowTimeOn) {
             mTimerText.setText(array[0]);
             mTimerText2.setText(array[1]);
-            if (array[1].equals("")) {
+            if (array[1].equals("") || (mRunning && (mUpdateTime != 0))) {
                 mTimerText2.setVisibility(View.GONE);
             } else {
                 mTimerText2.setVisibility(View.VISIBLE);
@@ -183,7 +186,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         } else {
             mTimerText2.setVisibility(View.GONE);
             mTimerText.setText(array[0]);
-            if (!array[1].equals("")) {
+            if (!array[1].equals("") && !(mRunning && (mUpdateTime != 0))) {
                 mTimerText.append("." + array[1]);
             }
         }
@@ -291,6 +294,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         mInspectionOn = mDefaultSharedPreferences.getBoolean(SettingsActivity.PREF_INSPECTION_CHECKBOX, true);
         mHoldToStartOn = mDefaultSharedPreferences.getBoolean(SettingsActivity.PREF_HOLDTOSTART_CHECKBOX, true);
         mTwoRowTimeOn = getResources().getConfiguration().orientation == 1 && mDefaultSharedPreferences.getBoolean(SettingsActivity.PREF_TWO_ROW_TIME_CHECKBOX, true);
+        mUpdateTime = Integer.parseInt(mDefaultSharedPreferences.getString(SettingsActivity.PREF_UPDATE_TIME_LIST, "0"));
         return mDefaultSharedPreferences;
     }
 

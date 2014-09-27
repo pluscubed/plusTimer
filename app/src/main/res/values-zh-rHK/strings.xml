@@ -102,4 +102,5 @@
     <string name="pref_two_row_time_title">兩行時間顯示</string>
     <string name="pref_time_text_size_title">時間顯示字體大小</string>
     <string name="time_text_edittext_dialog_title">時間顯示字體大小(默認100):</string>
+    <string name="timing">Timing</string>
 </resources>
