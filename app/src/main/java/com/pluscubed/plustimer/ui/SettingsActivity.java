@@ -20,12 +20,20 @@ import com.pluscubed.plustimer.R;
  * Settings Activity and Fragment
  */
 public class SettingsActivity extends Activity {
+
     public static final String PREF_INSPECTION_CHECKBOX = "pref_inspection_checkbox";
+
     public static final String PREF_HOLDTOSTART_CHECKBOX = "pref_holdtostart_checkbox";
+
     public static final String PREF_KEEPSCREENON_CHECKBOX = "pref_keepscreenon_checkbox";
+
     public static final String PREF_TWO_ROW_TIME_CHECKBOX = "pref_two_row_time_checkbox";
+
     public static final String PREF_TIME_TEXT_SIZE_EDITTEXT = "pref_time_display_size_edittext";
+
     public static final String PREF_UPDATE_TIME_LIST = "pref_update_time_list";
+
+    public static final String PREF_MILLISECONDS_CHECKBOX = "pref_milliseconds_checkbox";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,23 +62,28 @@ public class SettingsActivity extends Activity {
     }
 
     public static class SettingsFragment extends PreferenceFragment {
+
         @Override
         public void onCreate(Bundle paramBundle) {
             super.onCreate(paramBundle);
             addPreferencesFromResource(R.xml.preferences);
-            CheckBoxPreference inspection = (CheckBoxPreference) findPreference(PREF_INSPECTION_CHECKBOX);
+            CheckBoxPreference inspection = (CheckBoxPreference) findPreference(
+                    PREF_INSPECTION_CHECKBOX);
             inspection.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
                     if (newValue.toString().equals("true")) {
-                        PreferenceManager.getDefaultSharedPreferences(getActivity()).edit().putBoolean(PREF_HOLDTOSTART_CHECKBOX, true).commit();
-                        CheckBoxPreference hold = (CheckBoxPreference) findPreference(PREF_HOLDTOSTART_CHECKBOX);
+                        PreferenceManager.getDefaultSharedPreferences(getActivity()).edit()
+                                .putBoolean(PREF_HOLDTOSTART_CHECKBOX, true).commit();
+                        CheckBoxPreference hold = (CheckBoxPreference) findPreference(
+                                PREF_HOLDTOSTART_CHECKBOX);
                         hold.setChecked(true);
                     }
                     return true;
                 }
             });
-            EditTextPreference size = (EditTextPreference) findPreference(PREF_TIME_TEXT_SIZE_EDITTEXT);
+            EditTextPreference size = (EditTextPreference) findPreference(
+                    PREF_TIME_TEXT_SIZE_EDITTEXT);
             size.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
@@ -86,7 +99,8 @@ public class SettingsActivity extends Activity {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
                     ListPreference updateTime = (ListPreference) preference;
-                    updateTime.setSummary(updateTime.getEntries()[Integer.parseInt(newValue.toString())]);
+                    updateTime.setSummary(
+                            updateTime.getEntries()[Integer.parseInt(newValue.toString())]);
                     return true;
                 }
             });

@@ -27,7 +27,9 @@ public enum PuzzleType {
     FOURFAST("444fast", 9, false),
     THREE("333", 10),
     TWO("222", 11);
+
     public static final int CURRENT_SESSION = -1;
+
     public static final String CURRENT = "current_puzzletype";
 
     static {
@@ -38,11 +40,17 @@ public enum PuzzleType {
     private static PuzzleType sCurrentPuzzleType;
 
     private final String mScramblerSpec;
+
     private final int mIndex;
+
     private String mDisplayName;
+
     private boolean mOfficial;
+
     private Session mCurrentSession;
+
     private HistorySessions mHistorySessions;
+
     private Puzzle mPuzzle;
 
     PuzzleType(String scramblerSpec, int index) {
@@ -116,7 +124,9 @@ public enum PuzzleType {
 
     public Session getSession(int index) {
         if (index == CURRENT_SESSION) {
-            if (mCurrentSession == null) mCurrentSession = new Session();
+            if (mCurrentSession == null) {
+                mCurrentSession = new Session();
+            }
             return mCurrentSession;
         } else {
             return mHistorySessions.getList().get(index);
@@ -126,6 +136,5 @@ public enum PuzzleType {
     public void resetCurrentSession() {
         mCurrentSession = null;
     }
-
 
 }

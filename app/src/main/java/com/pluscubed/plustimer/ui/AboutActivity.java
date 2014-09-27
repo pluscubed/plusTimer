@@ -23,6 +23,7 @@ import com.pluscubed.plustimer.R;
  * About Page
  */
 public class AboutActivity extends Activity {
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,9 +51,11 @@ public class AboutActivity extends Activity {
     }
 
     public static class AboutFragment extends Fragment {
+
         @Nullable
         @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
             View view = inflater.inflate(R.layout.fragment_about, container, false);
             Button licenses = (Button) view.findViewById(R.id.fragment_about_licenses_button);
             licenses.setOnClickListener(new View.OnClickListener() {
@@ -80,7 +83,8 @@ public class AboutActivity extends Activity {
                 public void onClick(View v) {
                     Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(
                             "mailto", "plusCubed@gmail.com", null));
-                    startActivity(Intent.createChooser(intent, "Send email to the developer using..."));
+                    startActivity(
+                            Intent.createChooser(intent, "Send email to the developer using..."));
                 }
             });
 
@@ -92,7 +96,8 @@ public class AboutActivity extends Activity {
                         Uri uri = Uri.parse("market://details?id=com.pluscubed.plustimer");
                         startActivity(new Intent(Intent.ACTION_VIEW, uri));
                     } catch (ActivityNotFoundException e) {
-                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://play.google.com/store/apps/details?id=com.pluscubed.plustimer")));
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(
+                                "http://play.google.com/store/apps/details?id=com.pluscubed.plustimer")));
                     }
                 }
             });

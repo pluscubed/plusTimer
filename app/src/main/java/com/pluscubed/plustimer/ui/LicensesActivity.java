@@ -23,6 +23,7 @@ import java.io.InputStreamReader;
  * Licenses Activity
  */
 public class LicensesActivity extends Activity {
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,13 +51,17 @@ public class LicensesActivity extends Activity {
     }
 
     public static class LicensesFragment extends Fragment {
+
         @Nullable
         @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
             View view = inflater.inflate(R.layout.fragment_licenses, container, false);
-            TextView licensesTextView = (TextView) view.findViewById(R.id.fragment_licenses_textview);
+            TextView licensesTextView = (TextView) view
+                    .findViewById(R.id.fragment_licenses_textview);
 
-            InputStream inputStream = getActivity().getResources().openRawResource(R.raw.open_source_licenses);
+            InputStream inputStream = getActivity().getResources()
+                    .openRawResource(R.raw.open_source_licenses);
 
             InputStreamReader inputreader = new InputStreamReader(inputStream);
             BufferedReader buffreader = new BufferedReader(inputreader);
@@ -71,7 +76,6 @@ public class LicensesActivity extends Activity {
                 return null;
             }
             licensesTextView.setText(disclaimerText.toString());
-
 
             return view;
         }

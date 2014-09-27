@@ -5,6 +5,7 @@ import android.app.Fragment;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -35,29 +36,42 @@ import java.util.List;
  * Session tab
  */
 public class SolveListFragment extends Fragment {
+
     public static final String TAG = "SOLVE_LIST_FRAGMENT";
 
-    private static final String ARG_PUZZLETYPE_DISPLAYNAME = "com.pluscubed.plustimer.solvelist.display_name";
-    private static final String ARG_SESSION_POSITION = "com.pluscubed.plustimer.solvelist.session_position";
-    private static final String ARG_CURRENT_BOOLEAN = "com.pluscubed.plustimer.solvelist.current_boolean";
+    private static final String ARG_PUZZLETYPE_DISPLAYNAME
+            = "com.pluscubed.plustimer.solvelist.display_name";
+
+    private static final String ARG_SESSION_POSITION
+            = "com.pluscubed.plustimer.solvelist.session_position";
+
+    private static final String ARG_CURRENT_BOOLEAN
+            = "com.pluscubed.plustimer.solvelist.current_boolean";
 
     private Session mSession;
 
+    private boolean mMilliseconds;
+
     private TextView mQuickStats;
+
     private ListView mListView;
+
     private TextView mEmptyView;
 
     private SolveListAdapter mListAdapter;
 
     private int mSessionIndex;
+
     private String mPuzzleTypeDisplayName;
+
     private boolean mCurrentToggle;
 
     private ActionMode mActionMode;
 
     private LinearLayout mResetSubmitLinearLayout;
 
-    public static SolveListFragment newInstance(boolean current, String displayName, int sessionIndex) {
+    public static SolveListFragment newInstance(boolean current, String displayName,
+                                                int sessionIndex) {
         SolveListFragment f = new SolveListFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_SESSION_POSITION, sessionIndex);
@@ -65,6 +79,14 @@ public class SolveListFragment extends Fragment {
         args.putBoolean(ARG_CURRENT_BOOLEAN, current);
         f.setArguments(args);
         return f;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        onSessionSolvesChanged();
+        mMilliseconds = PreferenceManager.getDefaultSharedPreferences(getActivity())
+                .getBoolean(SettingsActivity.PREF_MILLISECONDS_CHECKBOX, true);
     }
 
     @Override
@@ -78,9 +100,11 @@ public class SolveListFragment extends Fragment {
         intent.setType("text/plain");
         intent.putExtra(
                 Intent.EXTRA_TEXT,
-                mSession.toString(getActivity(), PuzzleType.get(mPuzzleTypeDisplayName).toString(), mCurrentToggle, true)
+                mSession.toString(getActivity(), PuzzleType.get(mPuzzleTypeDisplayName).toString(),
+                        mCurrentToggle, true, mMilliseconds)
         );
-        startActivity(Intent.createChooser(intent, getResources().getString(R.string.share_dialog_title)));
+        startActivity(Intent.createChooser(intent,
+                getResources().getString(R.string.share_dialog_title)));
     }
 
     @Override
@@ -100,7 +124,8 @@ public class SolveListFragment extends Fragment {
                 share();
                 return true;
             case R.id.menu_history_solvelist_delete_menuitem:
-                PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions().deleteSession(mSessionIndex, getActivity());
+                PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions()
+                        .deleteSession(mSessionIndex, getActivity());
                 getActivity().finish();
                 return true;
             default:
@@ -110,7 +135,9 @@ public class SolveListFragment extends Fragment {
 
 
     public void updateStats() {
-        mQuickStats.setText(mSession.toString(getActivity(), PuzzleType.get(mPuzzleTypeDisplayName).toString(), mCurrentToggle, false));
+        mQuickStats.setText(
+                mSession.toString(getActivity(), PuzzleType.get(mPuzzleTypeDisplayName).toString(),
+                        mCurrentToggle, false, mMilliseconds));
     }
 
     public void finishActionMode() {
@@ -129,12 +156,13 @@ public class SolveListFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_solvelist, container, false);
 
-
         if (mCurrentToggle) {
-            mResetSubmitLinearLayout = (LinearLayout) v.findViewById(R.id.fragment_solvelist_submit_reset_linearlayout);
+            mResetSubmitLinearLayout = (LinearLayout) v
+                    .findViewById(R.id.fragment_solvelist_submit_reset_linearlayout);
 
             Button reset = (Button) v.findViewById(R.id.fragment_solvelist_reset_button);
             reset.setOnClickListener(new View.OnClickListener() {
@@ -144,17 +172,22 @@ public class SolveListFragment extends Fragment {
                     builder.setMessage(getString(R.string.reset_warning_message))
                             .setIcon(R.drawable.ic_action_warning)
                             .setTitle(getString(R.string.reset_warning))
-                            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    PuzzleType.get(mPuzzleTypeDisplayName).resetCurrentSession();
-                                    Toast.makeText(getActivity().getApplicationContext(), getResources().getText(R.string.session_reset), Toast.LENGTH_SHORT).show();
-                                    onSessionSolvesChanged();
-                                }
-                            })
-                            .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                }
-                            });
+                            .setPositiveButton(android.R.string.ok,
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            PuzzleType.get(mPuzzleTypeDisplayName)
+                                                    .resetCurrentSession();
+                                            Toast.makeText(getActivity().getApplicationContext(),
+                                                    getResources().getText(R.string.session_reset),
+                                                    Toast.LENGTH_SHORT).show();
+                                            onSessionSolvesChanged();
+                                        }
+                                    })
+                            .setNegativeButton(android.R.string.cancel,
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                        }
+                                    });
                     builder.create().show();
                 }
             });
@@ -163,11 +196,15 @@ public class SolveListFragment extends Fragment {
                 @Override
                 public void onClick(View v) {
                     if (mSession.getNumberOfSolves() == 0) {
-                        Toast.makeText(getActivity().getApplicationContext(), getResources().getText(R.string.session_no_solves), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity().getApplicationContext(),
+                                getResources().getText(R.string.session_no_solves),
+                                Toast.LENGTH_SHORT).show();
                         return;
                     }
 
-                    Toast.makeText(getActivity().getApplicationContext(), getResources().getText(R.string.session_submitted), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity().getApplicationContext(),
+                            getResources().getText(R.string.session_submitted), Toast.LENGTH_SHORT)
+                            .show();
 
                     PuzzleType.get(mPuzzleTypeDisplayName).submitCurrentSession(getActivity());
 
@@ -191,7 +228,8 @@ public class SolveListFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 try {
                     CreateDialogCallback callback = (CreateDialogCallback) getActivity();
-                    callback.createSolveDialog(mPuzzleTypeDisplayName, mSessionIndex, mSession.getPosition((Solve) mListView.getItemAtPosition(position)));
+                    callback.createSolveDialog(mPuzzleTypeDisplayName, mSessionIndex,
+                            mSession.getPosition((Solve) mListView.getItemAtPosition(position)));
                 } catch (ClassCastException e) {
                     throw new ClassCastException(getActivity().toString()
                             + " must implement CreateDialogCallback");
@@ -203,7 +241,8 @@ public class SolveListFragment extends Fragment {
 
         mListView.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
             @Override
-            public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
+            public void onItemCheckedStateChanged(ActionMode mode, int position, long id,
+                                                  boolean checked) {
 
             }
 
@@ -259,7 +298,8 @@ public class SolveListFragment extends Fragment {
     public void onSessionSolvesChanged() {
         mSession = PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex);
         if (!mCurrentToggle && mSession.getNumberOfSolves() <= 0) {
-            PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions().deleteSession(mSessionIndex, getActivity());
+            PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions()
+                    .deleteSession(mSessionIndex, getActivity());
             getActivity().finish();
             return;
         }
@@ -272,8 +312,11 @@ public class SolveListFragment extends Fragment {
             mEmptyView.setVisibility(View.GONE);
         }
         updateStats();
-        if (mCurrentToggle)
-            enableResetSubmitButtons(PuzzleType.get(mPuzzleTypeDisplayName).getSession(PuzzleType.CURRENT_SESSION).getNumberOfSolves() > 0);
+        if (mCurrentToggle) {
+            enableResetSubmitButtons(
+                    PuzzleType.get(mPuzzleTypeDisplayName).getSession(PuzzleType.CURRENT_SESSION)
+                            .getNumberOfSolves() > 0);
+        }
     }
 
     public void onSessionChanged() {
@@ -293,23 +336,25 @@ public class SolveListFragment extends Fragment {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
-                convertView = getActivity().getLayoutInflater().inflate(R.layout.list_item_solvelist, parent, false);
+                convertView = getActivity().getLayoutInflater()
+                        .inflate(R.layout.list_item_solvelist, parent, false);
             }
             Solve s = getItem(position);
-            TextView time = (TextView) convertView.findViewById(R.id.list_item_solvelist_title_textview);
-            TextView desc = (TextView) convertView.findViewById(R.id.list_item_solvelist_desc_textview);
-
+            TextView time = (TextView) convertView
+                    .findViewById(R.id.list_item_solvelist_title_textview);
+            TextView desc = (TextView) convertView
+                    .findViewById(R.id.list_item_solvelist_desc_textview);
 
             time.setText("");
 
             for (Solve a : mBestAndWorstSolves) {
                 if (a == s) {
-                    time.setText("(" + s.getDescriptiveTimeString() + ")");
+                    time.setText("(" + s.getDescriptiveTimeString(mMilliseconds) + ")");
                 }
             }
 
             if (time.getText() == "") {
-                time.setText(s.getDescriptiveTimeString());
+                time.setText(s.getDescriptiveTimeString(mMilliseconds));
             }
 
             desc.setText(s.getScrambleAndSvg().scramble);

@@ -15,7 +15,9 @@ import java.lang.reflect.Type;
  */
 
 public class ScrambleAndSvg {
+
     public String scramble;
+
     public String svg;
 
     public ScrambleAndSvg(String scramble, String svg) {
@@ -24,15 +26,19 @@ public class ScrambleAndSvg {
     }
 
     public static class Serializer implements JsonSerializer<ScrambleAndSvg> {
+
         @Override
-        public JsonElement serialize(ScrambleAndSvg src, Type typeOfSrc, JsonSerializationContext context) {
+        public JsonElement serialize(ScrambleAndSvg src, Type typeOfSrc,
+                                     JsonSerializationContext context) {
             return new JsonPrimitive(src.scramble);
         }
     }
 
     public static class Deserializer implements JsonDeserializer<ScrambleAndSvg> {
+
         @Override
-        public ScrambleAndSvg deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+        public ScrambleAndSvg deserialize(JsonElement json, Type typeOfT,
+                                          JsonDeserializationContext context) throws JsonParseException {
             return new ScrambleAndSvg(json.getAsJsonPrimitive().getAsString(), null);
         }
     }

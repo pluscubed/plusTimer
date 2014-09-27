@@ -25,8 +25,12 @@ public class HistorySessionListActivity extends BaseActivity {
             @Override
             public void onDrawerSlide(View drawerView, float slideOffset) {
                 super.onDrawerSlide(drawerView, slideOffset);
-                if (getFragmentManager().findFragmentById(R.id.activity_history_sessionlist_main_framelayout) != null) {
-                    ((HistorySessionListFragment) getFragmentManager().findFragmentById(R.id.activity_history_sessionlist_main_framelayout)).finishActionMode();
+                if (getFragmentManager()
+                        .findFragmentById(R.id.activity_history_sessionlist_main_framelayout)
+                        != null) {
+                    ((HistorySessionListFragment) getFragmentManager()
+                            .findFragmentById(R.id.activity_history_sessionlist_main_framelayout))
+                            .finishActionMode();
                 }
             }
         };
@@ -40,7 +44,8 @@ public class HistorySessionListActivity extends BaseActivity {
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         if (menu.findItem(R.id.menu_activity_history_sessionlist_puzzletype_spinner) != null) {
-            menu.findItem(R.id.menu_activity_history_sessionlist_puzzletype_spinner).setVisible(true);
+            menu.findItem(R.id.menu_activity_history_sessionlist_puzzletype_spinner)
+                    .setVisible(true);
         }
         return super.onPrepareOptionsMenu(menu);
     }
@@ -54,7 +59,8 @@ public class HistorySessionListActivity extends BaseActivity {
         Fragment fragment = fm.findFragmentById(R.id.activity_history_sessionlist_main_framelayout);
         if (fragment == null) {
             fragment = new HistorySessionListFragment();
-            fm.beginTransaction().add(R.id.activity_history_sessionlist_main_framelayout, fragment).commit();
+            fm.beginTransaction().add(R.id.activity_history_sessionlist_main_framelayout, fragment)
+                    .commit();
         }
     }
 }

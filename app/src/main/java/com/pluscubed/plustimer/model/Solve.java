@@ -6,9 +6,13 @@ import com.pluscubed.plustimer.Util;
  * solve times data object
  */
 public class Solve {
+
     private ScrambleAndSvg mScrambleAndSvg;
+
     private Penalty mPenalty;
+
     private long mRawTime;
+
     private long mTimestamp;
 
     public Solve(ScrambleAndSvg scramble, long time) {
@@ -33,39 +37,42 @@ public class Solve {
         return mRawTime;
     }
 
-    public String getTimeString() {
+    public String getTimeString(boolean milliseconds) {
         switch (mPenalty) {
             case DNF:
                 return "DNF";
             case PLUSTWO:
-                return Util.timeStringFromNanoseconds(mRawTime + 2000000000L) + "+";
+                return Util.timeStringFromNanoseconds(mRawTime + 2000000000L, milliseconds) + "+";
             case NONE:
             default:
-                return Util.timeStringFromNanoseconds(mRawTime);
+                return Util.timeStringFromNanoseconds(mRawTime, milliseconds);
         }
     }
 
-    public String[] getTimeStringArray() {
+    public String[] getTimeStringArray(boolean milliseconds) {
         switch (mPenalty) {
             case DNF:
                 return new String[]{"DNF", ""};
             case PLUSTWO:
                 long nanoseconds = mRawTime + 2000000000L;
-                String[] timeStringsSplitByDecimal = Util.timeStringsSplitByDecimal(nanoseconds);
+                String[] timeStringsSplitByDecimal = Util
+                        .timeStringsSplitByDecimal(nanoseconds, milliseconds);
                 timeStringsSplitByDecimal[1] = timeStringsSplitByDecimal[1] + "+";
                 return timeStringsSplitByDecimal;
             case NONE:
             default:
-                return Util.timeStringsSplitByDecimal(mRawTime);
+                return Util.timeStringsSplitByDecimal(mRawTime, milliseconds);
         }
     }
 
-    public String getDescriptiveTimeString() {
+    public String getDescriptiveTimeString(boolean milliseconds) {
         switch (mPenalty) {
             case DNF:
-                if (mRawTime != 0) return "DNF (" + Util.timeStringFromNanoseconds(mRawTime) + ")";
+                if (mRawTime != 0) {
+                    return "DNF (" + Util.timeStringFromNanoseconds(mRawTime, milliseconds) + ")";
+                }
             default:
-                return getTimeString();
+                return getTimeString(milliseconds);
         }
     }
 

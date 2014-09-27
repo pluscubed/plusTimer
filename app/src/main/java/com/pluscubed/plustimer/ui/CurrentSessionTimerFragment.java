@@ -39,34 +39,53 @@ import it.sephiroth.android.library.widget.HListView;
  * TimerFragment
  */
 
-public class CurrentSessionTimerFragment extends Fragment implements CurrentSessionTimerRetainedFragment.Callback {
+public class CurrentSessionTimerFragment extends Fragment
+        implements CurrentSessionTimerRetainedFragment.Callback {
+
     public static final String TAG = "CURRENT_SESSION_TIMER_FRAGMENT";
 
     private static final String STATE_IMAGE_DISPLAYED = "scramble_image_displayed_boolean";
+
     private static final String STATE_START_TIME = "start_time_long";
+
     private static final String STATE_RUNNING = "running_boolean";
+
     private static final String STATE_INSPECTING = "inspecting_boolean";
+
     private static final String STATE_INSPECTION_START_TIME = "inspection_start_time_long";
 
     private boolean mHoldToStartOn;
+
     private boolean mInspectionOn;
+
     private boolean mTwoRowTimeOn;
+
     private int mUpdateTime;
+
+    private boolean mMilliseconds;
 
     private CurrentSessionTimerRetainedFragment mRetainedFragment;
 
     private TextView mTimerText;
+
     private TextView mTimerText2;
+
     private TextView mScrambleText;
+
     private HListView mHListView;
+
     private ImageView mScrambleImage;
+
     private TextView mStatsSolvesText;
+
     private TextView mStatsText;
 
     private Handler mUiHandler;
 
     private boolean mHoldTimerStarted;
+
     private long mHoldTimerStartTimestamp;
+
     private final Runnable mHoldTimerRunnable = new Runnable() {
         @Override
         public void run() {
@@ -80,14 +99,18 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
     };
 
     private boolean mInspecting;
+
     private long mInspectionStartTimestamp;
+
     private long mStartTimestamp;
+
     private final Runnable mTimerRunnable = new Runnable() {
         @Override
         public void run() {
             if (mUpdateTime != 2) {
                 updateTimerTextSize();
-                setTimerText(Util.timeStringsSplitByDecimal(System.nanoTime() - mStartTimestamp));
+                setTimerText(Util.timeStringsSplitByDecimal(System.nanoTime() - mStartTimestamp,
+                        mMilliseconds));
                 mUiHandler.postDelayed(this, 10);
             } else {
                 setTimerText(new String[]{getString(R.string.timing), ""});
@@ -98,16 +121,23 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
 
 
     private long mEndTimestamp;
+
     private long mFinalTime;
+
     private boolean mFromSavedInstanceState;
+
     private boolean mRunning;
+
     private boolean mScrambleImageDisplay;
+
     private boolean mLateStartPenalty;
+
     private final Runnable mInspectionRunnable = new Runnable() {
         @Override
         public void run() {
             updateTimerTextSize();
-            String[] array = Util.timeStringsSplitByDecimal(16000000000L - (System.nanoTime() - mInspectionStartTimestamp));
+            String[] array = Util.timeStringsSplitByDecimal(
+                    16000000000L - (System.nanoTime() - mInspectionStartTimestamp), mMilliseconds);
             array[1] = "";
             setTimerText(array);
             if (15000000000L - (System.nanoTime() - mInspectionStartTimestamp) <= 0) {
@@ -124,7 +154,8 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
                     s.setPenalty(Solve.Penalty.DNF);
 
                     //Add the solve to the current session with the current scramble/scramble image and DNF
-                    PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION).addSolve(s);
+                    PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION)
+                            .addSolve(s);
                     updateTimerTextToLastSolveTime();
 
                     //Update stats and HListView
@@ -141,6 +172,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
             mUiHandler.postDelayed(this, 10);
         }
     };
+
     private SharedPreferences mDefaultSharedPreferences;
 
     //Generate string with specified current averages and mean of current session
@@ -148,12 +180,17 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         Arrays.sort(currentAverages, Collections.reverseOrder());
         String s = "";
         for (int i : currentAverages) {
-            if (PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION).getNumberOfSolves() >= i) {
-                s += String.format(context.getString(R.string.cao), i) + ": " + PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION).getStringCurrentAverageOf(i) + "\n";
+            if (PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION)
+                    .getNumberOfSolves() >= i) {
+                s += String.format(context.getString(R.string.cao), i) + ": " + PuzzleType
+                        .get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION)
+                        .getStringCurrentAverageOf(i, mMilliseconds) + "\n";
             }
         }
-        if (PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION).getNumberOfSolves() > 0) {
-            s += context.getString(R.string.mean) + PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION).getStringMean();
+        if (PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION)
+                .getNumberOfSolves() > 0) {
+            s += context.getString(R.string.mean) + PuzzleType.get(PuzzleType.CURRENT)
+                    .getSession(PuzzleType.CURRENT_SESSION).getStringMean(mMilliseconds);
         }
         return s;
     }
@@ -213,8 +250,9 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
             e.printStackTrace();
         }
         Drawable drawable = new PictureDrawable(svg.renderToPicture());
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             mScrambleImage.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        }
         mScrambleImage.setImageDrawable(drawable);
 
         mScrambleText.setText(mRetainedFragment.getCurrentScrambleAndSvg().scramble);
@@ -258,7 +296,8 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
 
     public void onSessionSolvesChanged() {
         //Update stats
-        mStatsSolvesText.setText(getString(R.string.solves) + PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION).getNumberOfSolves());
+        mStatsSolvesText.setText(getString(R.string.solves) + PuzzleType.get(PuzzleType.CURRENT)
+                .getSession(PuzzleType.CURRENT_SESSION).getNumberOfSolves());
         mStatsText.setText(buildStatsWithAveragesOf(getActivity(), 5, 12, 100));
         //Update HListView
         ((SolveHListViewAdapter) mHListView.getAdapter()).updateSolvesList();
@@ -287,21 +326,30 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         } else {
             getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
+        onSessionSolvesChanged();
     }
 
     public SharedPreferences initSharedPrefs() {
         mDefaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        mInspectionOn = mDefaultSharedPreferences.getBoolean(SettingsActivity.PREF_INSPECTION_CHECKBOX, true);
-        mHoldToStartOn = mDefaultSharedPreferences.getBoolean(SettingsActivity.PREF_HOLDTOSTART_CHECKBOX, true);
-        mTwoRowTimeOn = getResources().getConfiguration().orientation == 1 && mDefaultSharedPreferences.getBoolean(SettingsActivity.PREF_TWO_ROW_TIME_CHECKBOX, true);
-        mUpdateTime = Integer.parseInt(mDefaultSharedPreferences.getString(SettingsActivity.PREF_UPDATE_TIME_LIST, "0"));
+        mInspectionOn = mDefaultSharedPreferences
+                .getBoolean(SettingsActivity.PREF_INSPECTION_CHECKBOX, true);
+        mHoldToStartOn = mDefaultSharedPreferences
+                .getBoolean(SettingsActivity.PREF_HOLDTOSTART_CHECKBOX, true);
+        mTwoRowTimeOn = getResources().getConfiguration().orientation == 1
+                && mDefaultSharedPreferences
+                .getBoolean(SettingsActivity.PREF_TWO_ROW_TIME_CHECKBOX, true);
+        mUpdateTime = Integer.parseInt(
+                mDefaultSharedPreferences.getString(SettingsActivity.PREF_UPDATE_TIME_LIST, "0"));
+        mMilliseconds = mDefaultSharedPreferences
+                .getBoolean(SettingsActivity.PREF_MILLISECONDS_CHECKBOX, true);
         return mDefaultSharedPreferences;
     }
 
     public void updateTimerTextSize() {
         if (mTimerText.getText() != getString(R.string.ready)) {
             if (mTimerText != null && mTimerText2 != null) {
-                int size = Integer.parseInt(mDefaultSharedPreferences.getString(SettingsActivity.PREF_TIME_TEXT_SIZE_EDITTEXT, "100"));
+                int size = Integer.parseInt(mDefaultSharedPreferences
+                        .getString(SettingsActivity.PREF_TIME_TEXT_SIZE_EDITTEXT, "100"));
                 if (mTwoRowTimeOn) {
                     mTimerText.setTextSize(TypedValue.COMPLEX_UNIT_SP, size);
                 } else {
@@ -372,7 +420,8 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         try {
             callback = (MenuItemsEnableCallback) getActivity();
         } catch (ClassCastException e) {
-            throw new ClassCastException(getActivity().toString() + " must implement MenuItemsCallback");
+            throw new ClassCastException(
+                    getActivity().toString() + " must implement MenuItemsCallback");
         }
         callback.enableMenuItems(enable);
     }
@@ -403,33 +452,41 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_current_session_timer, container, false);
 
         mTimerText = (TextView) v.findViewById(R.id.fragment_current_session_timer_time_textview);
-        mTimerText2 = (TextView) v.findViewById(R.id.fragment_current_session_timer_timeSecondary_textview);
-        mScrambleText = (TextView) v.findViewById(R.id.fragment_current_session_timer_scramble_textview);
-        mScrambleImage = (ImageView) v.findViewById(R.id.fragment_current_session_timer_scramble_imageview);
-        mHListView = (HListView) v.findViewById(R.id.fragment_current_session_timer_bottom_hlistview);
+        mTimerText2 = (TextView) v
+                .findViewById(R.id.fragment_current_session_timer_timeSecondary_textview);
+        mScrambleText = (TextView) v
+                .findViewById(R.id.fragment_current_session_timer_scramble_textview);
+        mScrambleImage = (ImageView) v
+                .findViewById(R.id.fragment_current_session_timer_scramble_imageview);
+        mHListView = (HListView) v
+                .findViewById(R.id.fragment_current_session_timer_bottom_hlistview);
 
         mStatsText = (TextView) v.findViewById(R.id.fragment_current_session_timer_stats_textview);
-        mStatsSolvesText = (TextView) v.findViewById(R.id.fragment_current_session_timer_stats_solves_number_textview);
+        mStatsSolvesText = (TextView) v
+                .findViewById(R.id.fragment_current_session_timer_stats_solves_number_textview);
 
         final SolveHListViewAdapter adapter = new SolveHListViewAdapter();
         mHListView.setAdapter(adapter);
-        mHListView.setOnItemClickListener(new it.sephiroth.android.library.widget.AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(it.sephiroth.android.library.widget.AdapterView<?> parent, View view, int position, long id) {
-                try {
-                    CreateDialogCallback callback = (CreateDialogCallback) getActivity();
-                    callback.createSolveDialog(null, 0, position);
-                } catch (ClassCastException e) {
-                    throw new ClassCastException(getActivity().toString()
-                            + " must implement OnDialogDismissedListener");
-                }
-            }
-        });
-
+        mHListView.setOnItemClickListener(
+                new it.sephiroth.android.library.widget.AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(
+                            it.sephiroth.android.library.widget.AdapterView<?> parent, View view,
+                            int position, long id) {
+                        try {
+                            CreateDialogCallback callback = (CreateDialogCallback) getActivity();
+                            callback.createSolveDialog(null, 0, position);
+                        } catch (ClassCastException e) {
+                            throw new ClassCastException(getActivity().toString()
+                                    + " must implement OnDialogDismissedListener");
+                        }
+                    }
+                });
 
         //When the root view is touched...
         v.setOnTouchListener(new View.OnTouchListener() {
@@ -446,13 +503,15 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
                             //Set the timer text to total time
                             mFinalTime = mEndTimestamp - mStartTimestamp;
 
-                            Solve s = new Solve(mRetainedFragment.getCurrentScrambleAndSvg(), mFinalTime);
+                            Solve s = new Solve(mRetainedFragment.getCurrentScrambleAndSvg(),
+                                    mFinalTime);
                             if (mInspectionOn && mLateStartPenalty) {
                                 s.setPenalty(Solve.Penalty.PLUSTWO);
                                 mLateStartPenalty = false;
                             }
                             //Add the solve to the current session with the current scramble/scramble image and time
-                            PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION).addSolve(s);
+                            PuzzleType.get(PuzzleType.CURRENT)
+                                    .getSession(PuzzleType.CURRENT_SESSION).addSolve(s);
 
                             updateTimerTextToLastSolveTime();
 
@@ -465,15 +524,18 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
 
                             mRetainedFragment.updateViews();
                             return false;
-                        } else if (mInspectionOn && !mInspecting && !mRetainedFragment.isScrambling()) {
+                        } else if (mInspectionOn && !mInspecting && !mRetainedFragment
+                                .isScrambling()) {
                             return true;
-                        } else if (mInspecting || (mHoldToStartOn && !mRetainedFragment.isScrambling())) {
+                        } else if (mInspecting || (mHoldToStartOn && !mRetainedFragment
+                                .isScrambling())) {
                             mHoldTimerStarted = true;
                             mHoldTimerStartTimestamp = System.nanoTime();
                             mTimerText.setTextColor(Color.RED);
                             mUiHandler.postDelayed(mHoldTimerRunnable, 450);
                             return true;
-                        } else if (!mInspectionOn && !mHoldToStartOn && !mRetainedFragment.isScrambling()) {
+                        } else if (!mInspectionOn && !mHoldToStartOn && !mRetainedFragment
+                                .isScrambling()) {
                             return true;
                         }
                         return false;
@@ -490,8 +552,10 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
                             mScrambleImageDisplay = false;
                             //Post to scrambler thread: generate the next scramble
                             mRetainedFragment.generateNextScramble();
-                        } else if (((mInspectionOn && mInspecting) || mHoldToStartOn) && !mRunning) {
-                            if (mHoldTimerStarted && 500000000L <= System.nanoTime() - mHoldTimerStartTimestamp) {
+                        } else if (((mInspectionOn && mInspecting) || mHoldToStartOn)
+                                && !mRunning) {
+                            if (mHoldTimerStarted
+                                    && 500000000L <= System.nanoTime() - mHoldTimerStartTimestamp) {
                                 mStartTimestamp = System.nanoTime();
                                 mInspecting = false;
                                 mRunning = true;
@@ -582,11 +646,14 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
     }
 
     /**
-     * Updates the timer text to last solve's time; if there are no solves, set to ready. Updates the timer text's size.
+     * Updates the timer text to last solve's time; if there are no solves, set to ready. Updates
+     * the timer text's size.
      */
     public void updateTimerTextToLastSolveTime() {
-        if (PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION).getNumberOfSolves() != 0) {
-            setTimerText(PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION).getLastSolve().getTimeStringArray());
+        if (PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION)
+                .getNumberOfSolves() != 0) {
+            setTimerText(PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION)
+                    .getLastSolve().getTimeStringArray(mMilliseconds));
         } else {
             setTimerText(new String[]{getString(R.string.ready), ""});
             mTimerText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 100);
@@ -601,10 +668,12 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
 
 
     public interface GetRetainedFragmentCallback {
+
         CurrentSessionTimerRetainedFragment getCurrentSessionTimerRetainedFragment();
     }
 
     public interface MenuItemsEnableCallback {
+
         void enableMenuItems(boolean enable);
     }
 
@@ -613,16 +682,23 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         private ArrayList<Solve> mBestAndWorstSolves;
 
         public SolveHListViewAdapter() {
-            super(getActivity(), 0, PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION).getSolves());
+            super(getActivity(), 0,
+                    PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION)
+                            .getSolves());
             mBestAndWorstSolves = new ArrayList<Solve>();
-            mBestAndWorstSolves.add(Util.getBestSolveOfList(PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION).getSolves()));
-            mBestAndWorstSolves.add(Util.getWorstSolveOfList(PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION).getSolves()));
+            mBestAndWorstSolves.add(Util.getBestSolveOfList(
+                    PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION)
+                            .getSolves()));
+            mBestAndWorstSolves.add(Util.getWorstSolveOfList(
+                    PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION)
+                            .getSolves()));
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
-                convertView = getActivity().getLayoutInflater().inflate(R.layout.hlist_item_solve, parent, false);
+                convertView = getActivity().getLayoutInflater()
+                        .inflate(R.layout.hlist_item_solve, parent, false);
             }
             Solve s = getItem(position);
             TextView time = (TextView) convertView.findViewById(R.id.hlist_item_solve_textview);
@@ -631,12 +707,12 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
 
             for (Solve a : mBestAndWorstSolves) {
                 if (a == s) {
-                    time.setText("(" + s.getTimeString() + ")");
+                    time.setText("(" + s.getTimeString(mMilliseconds) + ")");
                 }
             }
 
             if (time.getText() == "") {
-                time.setText(s.getTimeString());
+                time.setText(s.getTimeString(mMilliseconds));
             }
 
             return convertView;
@@ -644,17 +720,23 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
 
         public void updateSolvesList() {
             clear();
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
-                addAll(PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION).getSolves());
-            else {
-                for (Solve i : PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION).getSolves()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                addAll(PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION)
+                        .getSolves());
+            } else {
+                for (Solve i : PuzzleType.get(PuzzleType.CURRENT)
+                        .getSession(PuzzleType.CURRENT_SESSION).getSolves()) {
                     add(i);
                 }
             }
 
             mBestAndWorstSolves = new ArrayList<Solve>();
-            mBestAndWorstSolves.add(Util.getBestSolveOfList(PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION).getSolves()));
-            mBestAndWorstSolves.add(Util.getWorstSolveOfList(PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION).getSolves()));
+            mBestAndWorstSolves.add(Util.getBestSolveOfList(
+                    PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION)
+                            .getSolves()));
+            mBestAndWorstSolves.add(Util.getWorstSolveOfList(
+                    PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION)
+                            .getSolves()));
             notifyDataSetChanged();
         }
 

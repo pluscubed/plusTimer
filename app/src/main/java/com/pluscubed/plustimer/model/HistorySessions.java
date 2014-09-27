@@ -23,7 +23,9 @@ import java.util.List;
  * Container for history sessions
  */
 public class HistorySessions {
+
     private static final Type SESSION_LIST_TYPE;
+
     private static final Gson gson;
 
     static {
@@ -36,6 +38,7 @@ public class HistorySessions {
     }
 
     private final String mFilename;
+
     private List<Session> mHistorySessionsList;
 
     /**
@@ -83,10 +86,12 @@ public class HistorySessions {
         } catch (FileNotFoundException e) {
             //File not found: create new file
         } finally {
-            if (writer != null) try {
-                writer.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+            if (writer != null) {
+                try {
+                    writer.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -101,7 +106,8 @@ public class HistorySessions {
     }
 
     /**
-     * Load up the history sessions stored in the list. If the file doesn't exist, create an empty list.
+     * Load up the history sessions stored in the list. If the file doesn't exist, create an empty
+     * list.
      */
     public void init(Context context) {
         BufferedReader reader = null;
@@ -112,10 +118,12 @@ public class HistorySessions {
         } catch (FileNotFoundException e) {
             //File not found: create empty list
         } finally {
-            if (reader != null) try {
-                reader.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
             if (mHistorySessionsList == null) {
                 mHistorySessionsList = new ArrayList<Session>();

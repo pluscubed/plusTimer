@@ -15,7 +15,9 @@ import com.pluscubed.plustimer.model.PuzzleType;
  * An Adapter for a Spinner with values of the PuzzleTypes
  */
 public class SpinnerPuzzleTypeAdapter extends ArrayAdapter<PuzzleType> {
+
     LayoutInflater mLayoutInflater;
+
     Context mContext;
 
     public SpinnerPuzzleTypeAdapter(LayoutInflater inflater, Context context) {
@@ -27,7 +29,9 @@ public class SpinnerPuzzleTypeAdapter extends ArrayAdapter<PuzzleType> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
-        convertView = getItem(position).isOfficial() ? mLayoutInflater.inflate(R.layout.spinner_item, parent, false) : mLayoutInflater.inflate(R.layout.spinner_item2, parent, false);
+        convertView = getItem(position).isOfficial() ? mLayoutInflater
+                .inflate(R.layout.spinner_item, parent, false)
+                : mLayoutInflater.inflate(R.layout.spinner_item2, parent, false);
 
         TextView textView = (TextView) convertView.findViewById(android.R.id.text1);
         textView.setText(getItem(position).toString());
@@ -43,15 +47,19 @@ public class SpinnerPuzzleTypeAdapter extends ArrayAdapter<PuzzleType> {
 
     @Override
     public View getDropDownView(int position, View convertView, ViewGroup parent) {
-        convertView = getItem(position).isOfficial() ? mLayoutInflater.inflate(R.layout.spinner_item_dropdown, parent, false) : mLayoutInflater.inflate(R.layout.spinner_item_dropdown2, parent, false);
+        convertView = getItem(position).isOfficial() ? mLayoutInflater
+                .inflate(R.layout.spinner_item_dropdown, parent, false)
+                : mLayoutInflater.inflate(R.layout.spinner_item_dropdown2, parent, false);
 
         TextView textView = (TextView) convertView.findViewById(android.R.id.text1);
         textView.setText(getItem(position).toString());
-        textView.setTextColor(mContext.getResources().getColorStateList(R.color.list_dropdown_color_dark));
+        textView.setTextColor(
+                mContext.getResources().getColorStateList(R.color.list_dropdown_color_dark));
         if (!getItem(position).isOfficial()) {
             TextView textView2 = (TextView) convertView.findViewById(android.R.id.text2);
             textView2.setText(mContext.getString(R.string.unofficial));
-            textView2.setTextColor(mContext.getResources().getColorStateList(R.color.list_dropdown_color_dark));
+            textView2.setTextColor(
+                    mContext.getResources().getColorStateList(R.color.list_dropdown_color_dark));
         }
         return convertView;
     }

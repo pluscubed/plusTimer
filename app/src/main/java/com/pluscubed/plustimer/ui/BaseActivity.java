@@ -30,22 +30,35 @@ import com.pluscubed.plustimer.R;
  * Base Activity with the Navigation Drawer
  */
 public abstract class BaseActivity extends Activity {
+
     protected static final int NAVDRAWER_ITEM_CURRENT_SESSION = 0;
+
     protected static final int NAVDRAWER_ITEM_HISTORY = 1;
+
     protected static final int NAVDRAWER_ITEM_INVALID = -1;
+
     private static final String PREF_WELCOME_DONE = "welcome_done";
+
     private static final int NAVDRAWER_LAUNCH_DELAY = 250;
+
     // fade in and fade out durations for the main content when switching between
     // different Activities of the app through the Nav Drawer
     private static final int MAIN_CONTENT_FADEOUT_DURATION = 150;
+
     private static final int MAIN_CONTENT_FADEIN_DURATION = 250;
 
     private static String[] sSectionTitles;
+
     private static CharSequence sDrawerTitle;
+
     private static String[] sSectionAbTitles;
+
     private DrawerLayout mDrawerLayout;
+
     private ListView mDrawerListView;
+
     private ActionBarDrawerToggle mDrawerToggle;
+
     private Handler mHandler;
 
     public static boolean isWelcomeDone(final Context context) {
@@ -92,7 +105,6 @@ public abstract class BaseActivity extends Activity {
         sDrawerTitle = getResources().getString(R.string.app_name);
         sSectionAbTitles = getResources().getStringArray(R.array.drawer_actionbar_array);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.activity_base_drawerlayout);
-
 
         if (mDrawerLayout == null) {
             return;
@@ -142,7 +154,8 @@ public abstract class BaseActivity extends Activity {
 
         @SuppressLint("InflateParams")
         View nav_drawer_footer = getLayoutInflater().inflate(R.layout.nav_drawer_footer, null);
-        LinearLayout nav_drawer_settings = (LinearLayout) nav_drawer_footer.findViewById(R.id.nav_drawer_footer_settings_linearlayout);
+        LinearLayout nav_drawer_settings = (LinearLayout) nav_drawer_footer
+                .findViewById(R.id.nav_drawer_footer_settings_linearlayout);
         nav_drawer_settings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -155,14 +168,17 @@ public abstract class BaseActivity extends Activity {
                 mDrawerLayout.closeDrawer(mDrawerListView);
             }
         });
-        LinearLayout nav_drawer_help = (LinearLayout) nav_drawer_footer.findViewById(R.id.nav_drawer_footer_help_linearlayout);
+        LinearLayout nav_drawer_help = (LinearLayout) nav_drawer_footer
+                .findViewById(R.id.nav_drawer_footer_help_linearlayout);
         nav_drawer_help.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getApplicationContext(), "Work in Progress", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Work in Progress", Toast.LENGTH_SHORT)
+                        .show();
             }
         });
-        LinearLayout nav_drawer_about = (LinearLayout) nav_drawer_footer.findViewById(R.id.nav_drawer_footer_about_linearlayout);
+        LinearLayout nav_drawer_about = (LinearLayout) nav_drawer_footer
+                .findViewById(R.id.nav_drawer_footer_about_linearlayout);
         nav_drawer_about.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -190,7 +206,6 @@ public abstract class BaseActivity extends Activity {
 
         mDrawerListView.setAdapter(new NavDrawerAdapater());
         setTitle(sSectionAbTitles[getSelfNavDrawerItem()]);
-
 
         if (!isWelcomeDone(this)) {
             markWelcomeDone(this);
@@ -286,7 +301,8 @@ public abstract class BaseActivity extends Activity {
                 i = new Intent(this, HistorySessionListActivity.class);
                 break;
             default:
-                Toast.makeText(getApplicationContext(), "Work in Progress", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Work in Progress", Toast.LENGTH_SHORT)
+                        .show();
                 return;
         }
 
@@ -296,6 +312,7 @@ public abstract class BaseActivity extends Activity {
     }
 
     public class ActionBarWrappedDrawerToggle {
+
         public void onDrawerClosed(View view) {
         }
 
@@ -307,6 +324,7 @@ public abstract class BaseActivity extends Activity {
     }
 
     public class NavDrawerAdapater extends ArrayAdapter<String> {
+
         public NavDrawerAdapater() {
             super(BaseActivity.this, 0, sSectionTitles);
         }

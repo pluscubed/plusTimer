@@ -7,24 +7,24 @@
         android:actionLayout="@layout/actionview_spinner"
         android:orderInCategory="9999"
         android:showAsAction="always"
-        android:title="@string/puzzle_selection"/>
+        android:title="@string/puzzle_selection" />
 
     <item
         android:id="@id/menu_solvelist_add_menuitem"
         android:icon="@drawable/ic_action_new"
         android:showAsAction="ifRoom"
-        android:title="@string/manual_add_solve"/>
+        android:title="@string/manual_add_solve" />
 
     <item
         android:id="@id/menu_activity_current_session_scramble_image_menuitem"
         android:icon="@drawable/ic_action_picture"
         android:showAsAction="ifRoom|withText"
-        android:title="@string/scrambleimage"/>
+        android:title="@string/scrambleimage" />
 
     <item
         android:id="@id/menu_solvelist_share_menuitem"
         android:icon="@drawable/ic_action_share"
         android:showAsAction="ifRoom"
-        android:title="@string/share"/>
+        android:title="@string/share" />
 
 </menu>

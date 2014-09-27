@@ -15,22 +15,31 @@ import com.pluscubed.plustimer.model.PuzzleType;
 /**
  * History SolveList (started onListItemClick HistorySessionListFragment) activity
  */
-public class HistorySolveListActivity extends Activity implements SolveDialogFragment.OnDialogDismissedListener, CreateDialogCallback {
-    public static final String EXTRA_HISTORY_SESSION_POSITION = "com.pluscubed.plustimer.history_session_position";
-    public static final String EXTRA_HISTORY_PUZZLETYPE_DISPLAYNAME = "com.pluscubed.plustimer.history_puzzletype_displayname";
+public class HistorySolveListActivity extends Activity
+        implements SolveDialogFragment.OnDialogDismissedListener, CreateDialogCallback {
+
+    public static final String EXTRA_HISTORY_SESSION_POSITION
+            = "com.pluscubed.plustimer.history_session_position";
+
+    public static final String EXTRA_HISTORY_PUZZLETYPE_DISPLAYNAME
+            = "com.pluscubed.plustimer.history_puzzletype_displayname";
+
     public static final String HISTORY_DIALOG_SOLVE_TAG = "HISTORY_MODIFY_DIALOG";
 
     @Override
     public void createSolveDialog(String displayName, int sessionIndex, int solveIndex) {
-        DialogFragment dialog = (DialogFragment) getFragmentManager().findFragmentByTag(HISTORY_DIALOG_SOLVE_TAG);
+        DialogFragment dialog = (DialogFragment) getFragmentManager()
+                .findFragmentByTag(HISTORY_DIALOG_SOLVE_TAG);
         if (dialog == null) {
-            SolveDialogFragment d = SolveDialogFragment.newInstance(PuzzleType.get(displayName).toString(), sessionIndex, solveIndex);
+            SolveDialogFragment d = SolveDialogFragment
+                    .newInstance(PuzzleType.get(displayName).toString(), sessionIndex, solveIndex);
             d.show(getFragmentManager(), HISTORY_DIALOG_SOLVE_TAG);
         }
     }
 
     @Override
-    public void onDialogDismissed(String displayName, int sessionIndex, int solveIndex, int penalty) {
+    public void onDialogDismissed(String displayName, int sessionIndex, int solveIndex,
+                                  int penalty) {
         switch (penalty) {
             case SolveDialogFragment.DIALOG_RESULT_DELETE:
                 PuzzleType.get(displayName).getSession(sessionIndex).deleteSolve(solveIndex);

@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:orientation="vertical">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
 
-    <TextView
+    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@android:id/text1"
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ellipsize="end"
@@ -18,11 +17,10 @@
         android:paddingStart="16dp"
         android:paddingTop="4dp"
         android:singleLine="true"
-        android:textSize="16sp"/>
+        android:textSize="16sp" />
 
-    <TextView
+    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@android:id/text2"
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ellipsize="end"
@@ -33,6 +31,6 @@
         android:paddingRight="16dp"
         android:paddingStart="16dp"
         android:singleLine="true"
-        android:textSize="12sp"/>
+        android:textSize="12sp" />
 
 </LinearLayout>

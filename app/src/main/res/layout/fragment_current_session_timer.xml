@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                tools:context=".ui.CurrentSessionActivity">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.CurrentSessionActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -24,7 +24,7 @@
             android:gravity="center"
             android:includeFontPadding="false"
             android:text="@string/ready"
-            android:textSize="100sp"/>
+            android:textSize="100sp" />
 
         <TextView
             android:id="@id/fragment_current_session_timer_timeSecondary_textview"
@@ -32,7 +32,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:includeFontPadding="false"
-            android:textSize="50sp"/>
+            android:textSize="50sp" />
     </LinearLayout>
 
 
@@ -50,7 +50,7 @@
         android:paddingRight="7dp"
         android:paddingStart="7dp"
         android:paddingTop="5dp"
-        android:textSize="16sp"/>
+        android:textSize="16sp" />
 
 
     <TextView
@@ -67,7 +67,7 @@
         android:paddingRight="7dp"
         android:paddingStart="5dp"
         android:text="@string/solves"
-        android:textSize="16sp"/>
+        android:textSize="16sp" />
 
 
     <it.sephiroth.android.library.widget.HListView
@@ -77,7 +77,7 @@
         android:layout_alignParentBottom="true"
         android:background="@color/light_gray"
         android:listSelector="@drawable/background_button_bar"
-        android:overScrollMode="always"/>
+        android:overScrollMode="always" />
 
 
     <TextView
@@ -88,7 +88,7 @@
         android:gravity="center_horizontal"
         android:padding="6dp"
         android:text="@string/scrambling"
-        android:textSize="18sp"/>
+        android:textSize="18sp" />
 
 
     <ImageView
@@ -97,7 +97,7 @@
         android:layout_height="match_parent"
         android:layout_margin="8dp"
         android:contentDescription="@string/scrambleimage"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
 
 </RelativeLayout>
