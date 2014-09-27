@@ -16,6 +16,12 @@ repositories {
     }
 }
 
+task syncTask(type: Sync) {
+    from "src/main/res/values-zh-rTW"
+    into "src/main/res/values-zh-rHK"
+}
+
+preBuild.dependsOn('syncTask')
 
 android {
     compileSdkVersion 20
