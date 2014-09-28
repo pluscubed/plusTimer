@@ -16,21 +16,15 @@ import net.gnehzr.tnoodle.scrambles.InvalidScrambleException;
 public class CurrentSessionTimerRetainedFragment extends Fragment {
 
     private static final String STATE_CURRENT_SCRAMBLE = "current_scramble";
-
     private static final String STATE_CURRENT_SVG = "current_svg";
-
     private static final String STATE_NEXT_SCRAMBLE = "next_scramble";
-
     private static final String STATE_NEXT_SVG = "next_svg";
-
     private static final String STATE_SCRAMBLING = "scrambling";
 
     private Handler mScramblerThreadHandler;
-
     private HandlerThread mScramblerThread;
 
     private ScrambleAndSvg mCurrentScrambleAndSvg;
-
     private ScrambleAndSvg mNextScrambleAndSvg;
 
     private boolean mScrambling;
@@ -58,7 +52,7 @@ public class CurrentSessionTimerRetainedFragment extends Fragment {
 
     }
 
-    public void updateViews() {
+    public void postSetScrambleViewsToCurrent() {
         postToScrambleThread(new Runnable() {
             @Override
             public void run() {
@@ -68,7 +62,7 @@ public class CurrentSessionTimerRetainedFragment extends Fragment {
                     mCallback.getUiHandler().post(new Runnable() {
                         @Override
                         public void run() {
-                            mCallback.updateScrambleTextAndImageToCurrent();
+                            mCallback.setScrambleTextAndImageToCurrent();
                             mCallback.enableMenuItems(true);
                         }
                     });
@@ -147,7 +141,7 @@ public class CurrentSessionTimerRetainedFragment extends Fragment {
             mScrambling = savedInstanceState.getBoolean(STATE_SCRAMBLING);
             if (mScrambling) {
                 generateNextScramble();
-                updateViews();
+                postSetScrambleViewsToCurrent();
             }
         }
     }
@@ -176,7 +170,7 @@ public class CurrentSessionTimerRetainedFragment extends Fragment {
 
         Handler getUiHandler();
 
-        void updateScrambleTextAndImageToCurrent();
+        void setScrambleTextAndImageToCurrent();
 
         void enableMenuItems(boolean enable);
     }
