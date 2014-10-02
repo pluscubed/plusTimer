@@ -140,6 +140,8 @@ public class CurrentSessionTimerFragment extends Fragment
                     // image and DNF
                     PuzzleType.get(PuzzleType.CURRENT).getSession(PuzzleType.CURRENT_SESSION)
                             .addSolve(s);
+
+                    resetTimer();
                     setTimerTextToLastSolveTime();
 
                     onSessionSolvesChanged();
@@ -622,7 +624,6 @@ public class CurrentSessionTimerFragment extends Fragment
     }
 
     public void stopInspection() {
-        mLateStartPenalty = false;
         mInspectionStartTimestamp = 0;
         mInspecting = false;
         mUiHandler.removeCallbacks(mInspectionRunnable);
