@@ -58,8 +58,6 @@ public class SolveDialogFragment extends DialogFragment {
 
     private boolean mAddMode;
 
-    private boolean mMilliseconds;
-
     private OnDialogDismissedListener mListener;
 
     static SolveDialogFragment newInstance(String displayName, int sessionIndex, int solveIndex) {
@@ -92,13 +90,6 @@ public class SolveDialogFragment extends DialogFragment {
 
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        mMilliseconds = PreferenceManager.getDefaultSharedPreferences(getActivity())
-                .getBoolean(SettingsActivity.PREF_MILLISECONDS_CHECKBOX, true);
-    }
-
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -109,7 +100,8 @@ public class SolveDialogFragment extends DialogFragment {
         final Solve solve = PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex)
                 .getSolveByPosition(mSolveIndex);
 
-        String timeString = solve.getDescriptiveTimeString(mMilliseconds);
+        final boolean millisecondsEnabled = PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(SettingsActivity.PREF_MILLISECONDS_CHECKBOX, true);
+        String timeString = solve.getDescriptiveTimeString(millisecondsEnabled);
         String scramble = solve.getScrambleAndSvg().scramble;
         long timestamp = solve.getTimestamp();
         int penalty;
@@ -180,7 +172,7 @@ public class SolveDialogFragment extends DialogFragment {
                         solve.setPenalty(Solve.Penalty.DNF);
                         break;
                 }
-                getDialog().setTitle(solve.getDescriptiveTimeString(mMilliseconds));
+                getDialog().setTitle(solve.getDescriptiveTimeString(millisecondsEnabled));
             }
 
             @Override
