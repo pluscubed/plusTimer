@@ -66,13 +66,13 @@ public class Util {
      * @return the String converted from the nanoseconds
      */
     //TODO: Localization of timeStringFromNanoseconds
-    public static String timeStringFromNanoseconds(long nanoseconds, boolean milliseconds) {
-        String[] array = timeStringsSplitByDecimal(nanoseconds, milliseconds);
+    public static String timeStringFromNanoseconds(long nanoseconds, boolean enableMilliseconds) {
+        String[] array = timeStringsSplitByDecimal(nanoseconds, enableMilliseconds);
         return array[0] + "." + array[1];
     }
 
 
-    public static String[] timeStringsSplitByDecimal(long nanoseconds, boolean milliseconds) {
+    public static String[] timeStringsSplitByDecimal(long nanoseconds, boolean enableMilliseconds) {
         String[] array = new String[2];
 
         int hours = (int) ((nanoseconds / 1000000000L / 60 / 60) % 24);
@@ -88,7 +88,7 @@ public class Util {
             array[0] = String.format("%d", seconds);
         }
 
-        if (milliseconds) {
+        if (enableMilliseconds) {
             array[1] = String.format("%03d", (int) (((nanoseconds / 1000000.0) % 1000.0) + 0.5));
         } else {
             array[1] = String.format("%02d", (int) (((nanoseconds / 10000000.0) % 100.0) + 0.5));

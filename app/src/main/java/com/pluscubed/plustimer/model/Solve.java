@@ -84,6 +84,10 @@ public class Solve {
         mPenalty = penalty;
     }
 
+    public long getRawTime() {
+        return mRawTime;
+    }
+
     public void setRawTime(long time) {
         this.mRawTime = time;
     }
