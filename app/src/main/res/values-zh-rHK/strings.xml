@@ -58,19 +58,12 @@
         <item>成績列表</item>
     </string-array>
 
-    <string-array name="puzzle_types">
+    <string-array name="puzzles">
         <item>SQ1</item>
         <item>斜轉</item>
         <item>金字塔</item>
         <item>五魔</item>
         <item>魔表</item>
-        <item>7x7</item>
-        <item>6x6</item>
-        <item>5x5</item>
-        <item>4x4</item>
-        <item>4x4</item>
-        <item>3x3</item>
-        <item>2x2</item>
     </string-array>
 
     <string-array name="pref_update_time_list_entries">
@@ -108,5 +101,9 @@
     <string name="pref_update_time_title">計時器更新</string>
     <string name="timing">還原</string>
     <string name="pref_milliseconds_title">顯示到毫秒(0.001)</string>
+    <string name="puzzle_types_setup">啟用/禁用魔方類型</string>
+    <string name="oh">單手</string>
+    <string name="bld">盲擰</string>
+    <string name="feet">腳擰</string>
 
 </resources>

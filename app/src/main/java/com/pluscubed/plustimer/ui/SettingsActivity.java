@@ -4,6 +4,7 @@ package com.pluscubed.plustimer.ui;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.Intent;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
@@ -22,18 +23,13 @@ import com.pluscubed.plustimer.R;
 public class SettingsActivity extends Activity {
 
     public static final String PREF_INSPECTION_CHECKBOX = "pref_inspection_checkbox";
-
     public static final String PREF_HOLDTOSTART_CHECKBOX = "pref_holdtostart_checkbox";
-
     public static final String PREF_KEEPSCREENON_CHECKBOX = "pref_keepscreenon_checkbox";
-
     public static final String PREF_TWO_ROW_TIME_CHECKBOX = "pref_two_row_time_checkbox";
-
     public static final String PREF_TIME_TEXT_SIZE_EDITTEXT = "pref_time_display_size_edittext";
-
     public static final String PREF_UPDATE_TIME_LIST = "pref_update_time_list";
-
     public static final String PREF_MILLISECONDS_CHECKBOX = "pref_milliseconds_checkbox";
+    public static final String PREF_SOLVETYPES = "pref_activity_puzzletypes";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,6 +101,15 @@ public class SettingsActivity extends Activity {
                 }
             });
             updateTime.setSummary(updateTime.getEntry());
+
+            Preference puzzleTypes = findPreference(PREF_SOLVETYPES);
+            puzzleTypes.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    Intent intent = new Intent(getActivity(), PuzzleTypeSetupActivity.class);
+                    return true;
+                }
+            });
         }
     }
 }

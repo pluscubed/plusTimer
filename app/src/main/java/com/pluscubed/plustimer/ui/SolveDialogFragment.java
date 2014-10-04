@@ -48,7 +48,7 @@ public class SolveDialogFragment extends DialogFragment {
 
     public static final int DIALOG_RESULT_DELETE = 3;
 
-    private String mPuzzleTypeDisplayName;
+    private String mPuzzleTypeName;
 
     private int mSolveIndex;
 
@@ -60,12 +60,12 @@ public class SolveDialogFragment extends DialogFragment {
 
     private OnDialogDismissedListener mListener;
 
-    static SolveDialogFragment newInstance(String displayName, int sessionIndex, int solveIndex) {
+    static SolveDialogFragment newInstance(String puzzleTypeName, int sessionIndex, int solveIndex) {
         SolveDialogFragment d = new SolveDialogFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_DIALOG_INIT_SESSION_INDEX, sessionIndex);
         args.putInt(ARG_DIALOG_INIT_SOLVE_INDEX, solveIndex);
-        args.putString(ARG_DIALOG_INIT_PUZZLETYPE_DISPLAY_NAME, displayName);
+        args.putString(ARG_DIALOG_INIT_PUZZLETYPE_DISPLAY_NAME, puzzleTypeName);
         d.setArguments(args);
         return d;
     }
@@ -85,19 +85,17 @@ public class SolveDialogFragment extends DialogFragment {
     @Override
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);
-
-        mListener.onDialogDismissed(mPuzzleTypeDisplayName, mSessionIndex, mSolveIndex, mSelection);
-
+        mListener.onDialogDismissed(mPuzzleTypeName, mSessionIndex, mSolveIndex, mSelection);
     }
 
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         //SOLVE SETUP
-        mPuzzleTypeDisplayName = getArguments().getString(ARG_DIALOG_INIT_PUZZLETYPE_DISPLAY_NAME);
+        mPuzzleTypeName = getArguments().getString(ARG_DIALOG_INIT_PUZZLETYPE_DISPLAY_NAME);
         mSessionIndex = getArguments().getInt(ARG_DIALOG_INIT_SESSION_INDEX);
         mSolveIndex = getArguments().getInt(ARG_DIALOG_INIT_SOLVE_INDEX);
-        final Solve solve = PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex)
+        final Solve solve = PuzzleType.valueOf(mPuzzleTypeName).getSession(mSessionIndex)
                 .getSolveByPosition(mSolveIndex);
 
         final boolean millisecondsEnabled = PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(SettingsActivity.PREF_MILLISECONDS_CHECKBOX, true);
