@@ -39,11 +39,9 @@ public class HistorySolveListActivity extends Activity
 
     @Override
     public void onDialogDismissed(String puzzleTypeName, int sessionIndex, int solveIndex,
-                                  int penalty) {
-        switch (penalty) {
-            case SolveDialogFragment.DIALOG_RESULT_DELETE:
-                PuzzleType.valueOf(puzzleTypeName).getSession(sessionIndex).deleteSolve(solveIndex);
-                break;
+                                  boolean delete) {
+        if (delete) {
+            PuzzleType.valueOf(puzzleTypeName).getSession(sessionIndex).deleteSolve(solveIndex);
         }
 
         if (getSolveListFragment() != null) {

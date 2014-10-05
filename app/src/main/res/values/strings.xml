@@ -89,7 +89,7 @@
     <string name="reset_warning">Reset session?</string>
     <string name="reset_warning_message">You\'ll lose all solves recorded in this session!</string>
     <string name="manual_add_solve">Add Solve</string>
-    <string name="time">Time:</string>
+    <string name="time">Time (secs):</string>
     <string name="scramble_colon">Scramble:</string>
     <string name="dialog_wip">Editing time and scramble doesn\'t work just yet. This is just a placeholder.</string>
     <string name="best_times">Best Times</string>
@@ -105,5 +105,6 @@
     <string name="oh">OH</string>
     <string name="bld">BLD</string>
     <string name="feet">Feet</string>
+    <string name="timestamp">Timestamp:</string>
 
 </resources>

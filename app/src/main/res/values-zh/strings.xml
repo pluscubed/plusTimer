@@ -89,7 +89,7 @@
     <string name="reset_warning">重置本组?</string>
     <string name="reset_warning_message">当前组内所有成绩将被删除!</string>
     <string name="manual_add_solve">手动加成绩</string>
-    <string name="time">时间:</string>
+    <string name="time">时间（秒）:</string>
     <string name="scramble_colon">打乱:</string>
     <string name="dialog_wip">目前还不支持修改时间或打乱，修改框是框架</string>
     <string name="best_times">单次最快</string>
@@ -105,5 +105,6 @@
     <string name="oh">单手</string>
     <string name="bld">盲拧</string>
     <string name="feet">脚拧</string>
+    <string name="timestamp">时间戳:</string>
 
 </resources>
