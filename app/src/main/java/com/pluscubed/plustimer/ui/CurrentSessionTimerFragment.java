@@ -94,7 +94,7 @@ public class CurrentSessionTimerFragment extends Fragment
         @Override
         public void run() {
             if (mUpdateTimePref != 2) {
-                setTimerText(Util.timeStringsSplitByDecimal(System.nanoTime() -
+                setTimerText(Util.timeStringsFromNsSplitByDecimal(System.nanoTime() -
                                 mTimingStartTimestamp,
                         mMillisecondsEnabled));
                 setTimerTextToPrefSize();
@@ -116,7 +116,7 @@ public class CurrentSessionTimerFragment extends Fragment
     private final Runnable mInspectionRunnable = new Runnable() {
         @Override
         public void run() {
-            String[] array = Util.timeStringsSplitByDecimal(16000000000L - (System.nanoTime() -
+            String[] array = Util.timeStringsFromNsSplitByDecimal(16000000000L - (System.nanoTime() -
                     mInspectionStartTimestamp), mMillisecondsEnabled);
             array[1] = "";
 

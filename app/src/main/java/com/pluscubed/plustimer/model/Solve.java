@@ -42,10 +42,10 @@ public class Solve {
             case DNF:
                 return "DNF";
             case PLUSTWO:
-                return Util.timeStringFromNanoseconds(mRawTime + 2000000000L, milliseconds) + "+";
+                return Util.timeStringFromNs(mRawTime + 2000000000L, milliseconds) + "+";
             case NONE:
             default:
-                return Util.timeStringFromNanoseconds(mRawTime, milliseconds);
+                return Util.timeStringFromNs(mRawTime, milliseconds);
         }
     }
 
@@ -56,12 +56,12 @@ public class Solve {
             case PLUSTWO:
                 long nanoseconds = mRawTime + 2000000000L;
                 String[] timeStringsSplitByDecimal = Util
-                        .timeStringsSplitByDecimal(nanoseconds, milliseconds);
+                        .timeStringsFromNsSplitByDecimal(nanoseconds, milliseconds);
                 timeStringsSplitByDecimal[1] = timeStringsSplitByDecimal[1] + "+";
                 return timeStringsSplitByDecimal;
             case NONE:
             default:
-                return Util.timeStringsSplitByDecimal(mRawTime, milliseconds);
+                return Util.timeStringsFromNsSplitByDecimal(mRawTime, milliseconds);
         }
     }
 
@@ -69,7 +69,7 @@ public class Solve {
         switch (mPenalty) {
             case DNF:
                 if (mRawTime != 0) {
-                    return "DNF (" + Util.timeStringFromNanoseconds(mRawTime, milliseconds) + ")";
+                    return "DNF (" + Util.timeStringFromNs(mRawTime, milliseconds) + ")";
                 }
             default:
                 return getTimeString(milliseconds);
@@ -89,7 +89,7 @@ public class Solve {
     }
 
     public void setRawTime(long time) {
-        this.mRawTime = time;
+        mRawTime = time;
     }
 
     public enum Penalty {

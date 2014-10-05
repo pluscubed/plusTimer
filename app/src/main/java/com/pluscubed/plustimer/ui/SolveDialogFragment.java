@@ -25,6 +25,8 @@ import com.pluscubed.plustimer.Util;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Solve;
 
+import java.math.BigDecimal;
+
 /**
  * Solve modify dialog
  */
@@ -175,7 +177,7 @@ public class SolveDialogFragment extends DialogFragment {
 
         //TIME EDITTEXT SETUP
         mTimeEdit = (EditText) v.findViewById(R.id.dialog_solve_time_edittext);
-        mTimeEdit.setText(Util.timeStringFromNanoseconds(mSolve.getRawTime(), mMillisecondsEnabled));
+        mTimeEdit.setText(Util.timeStringSecondsFromNs(mSolve.getRawTime(), mMillisecondsEnabled));
         mTimeEdit.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -184,8 +186,13 @@ public class SolveDialogFragment extends DialogFragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                mSolve.setRawTime((long) (Float.parseFloat(s.toString()) * 1000000000));
-                updateTitle();
+                if (s.length() != 0) {
+                    BigDecimal timeEditTextDecimal = BigDecimal.valueOf(Double.parseDouble(s.toString()));
+                    mSolve.setRawTime(((timeEditTextDecimal.multiply(BigDecimal.valueOf(1000000000))).longValueExact()));
+                    updateTitle();
+                } else {
+                    getDialog().setTitle(Util.timeStringFromNs(0, mMillisecondsEnabled));
+                }
             }
 
             @Override
