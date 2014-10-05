@@ -96,7 +96,7 @@
     <string name="reset_warning">重置本组?</string>
     <string name="reset_warning_message">当前组内所有成绩将被删除!</string>
     <string name="manual_add_solve">手动加成绩</string>
-    <string name="time">时间:</string>
+    <string name="time">时间（秒）:</string>
     <string name="scramble_colon">打乱:</string>
     <string name="dialog_wip">目前还不支持修改时间或打乱，修改框是框架</string>
     <string name="best_times">单次最快</string>
@@ -108,5 +108,6 @@
     <string name="pref_update_time_title">计时器更新</string>
     <string name="timing">还原</string>
     <string name="pref_milliseconds_title">显示到毫秒(0.001)</string>
+    <string name="timestamp">时间戳:</string>
 
 </resources>

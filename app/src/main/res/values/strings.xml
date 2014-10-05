@@ -100,7 +100,7 @@
     <string name="reset_warning">Reset session?</string>
     <string name="reset_warning_message">You\'ll lose all solves recorded in this session!</string>
     <string name="manual_add_solve">Add Solve</string>
-    <string name="time">Time:</string>
+    <string name="time">Time (secs):</string>
     <string name="scramble_colon">Scramble:</string>
     <string name="dialog_wip">Editing time and scramble doesn\'t work just yet. This is just a
         placeholder.
@@ -116,5 +116,6 @@
     <string name="pref_update_time_title">Timer Text Updating</string>
     <string name="timing">Timing</string>
     <string name="pref_milliseconds_title">Use milliseconds (0.001)</string>
+    <string name="timestamp">Timestamp:</string>
 
 </resources>

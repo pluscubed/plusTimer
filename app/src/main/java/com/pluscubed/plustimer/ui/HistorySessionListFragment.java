@@ -154,7 +154,7 @@ public class HistorySessionListFragment extends ListFragment {
                     return Util.timeDateStringFromTimestamp(getActivity().getApplicationContext(),
                             (long) value);
                 } else {
-                    return Util.timeStringFromNanoseconds((long) value, mMilliseconds);
+                    return Util.timeStringFromNs((long) value, mMilliseconds);
                 }
 
             }
@@ -376,7 +376,7 @@ public class HistorySessionListFragment extends ListFragment {
                     builder.append("\n").append(getString(R.string.pb)).append(" ")
                             .append(String.format(getString(R.string.ao), number)).append(": ")
                             .append(bestAverage == Long.MAX_VALUE ? "DNF"
-                                    : Util.timeStringFromNanoseconds(bestAverage, mMilliseconds));
+                                    : Util.timeStringFromNs(bestAverage, mMilliseconds));
                 }
             }
         }

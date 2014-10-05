@@ -5,14 +5,13 @@
     android:layout_height="match_parent"
     android:fadeScrollbars="false">
 
-    <LinearLayout
+    <TableLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:divider="?android:attr/listDividerAlertDialog"
         android:orientation="vertical"
-        android:showDividers="middle">
+        android:shrinkColumns="1">
 
-        <LinearLayout
+        <TableRow
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
@@ -23,30 +22,24 @@
 
             <TextView
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
                 android:text="@string/time" />
 
             <EditText
                 android:id="@id/dialog_solve_time_edittext"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
                 android:layout_marginLeft="4dp"
                 android:layout_marginStart="4dp"
+                android:layout_weight="1"
                 android:imeOptions="actionDone"
-                android:inputType="numberDecimal"
+                android:inputType="numberDecimal|textNoSuggestions"
                 android:textSize="14sp" />
 
-        </LinearLayout>
+        </TableRow>
 
-        <TextView
-            android:id="@id/dialog_solve_timestamp_textview"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:gravity="center_horizontal"
-            android:textColor="?android:attr/textColorAlertDialogListItem" />
-
-        <LinearLayout
+        <TableRow
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
@@ -57,23 +50,48 @@
 
             <TextView
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:text="@string/timestamp" />
+
+            <TextView
+                android:id="@id/dialog_solve_timestamp_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_margin="8dp"
+                android:paddingLeft="4dp"
+                android:textColor="?android:attr/textColorAlertDialogListItem" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginStart="8dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
                 android:text="@string/scramble_colon" />
 
             <EditText
                 android:id="@id/dialog_solve_scramble_edittext"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
                 android:layout_marginLeft="4dp"
                 android:layout_marginStart="4dp"
+                android:layout_weight="1"
                 android:imeOptions="actionDone"
-                android:inputType="textMultiLine"
+                android:inputType="textMultiLine|textNoSuggestions"
                 android:textSize="14sp" />
 
-        </LinearLayout>
+        </TableRow>
 
-        <LinearLayout
+        <TableRow
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
@@ -92,7 +110,7 @@
             <Spinner
                 android:id="@id/dialog_solve_modify_penalty_spinner"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_marginBottom="4dp"
                 android:layout_marginLeft="4dp"
                 android:layout_marginStart="4dp"
@@ -101,8 +119,8 @@
                 android:background="?android:attr/selectableItemBackground"
                 android:paddingBottom="10dp"
                 android:paddingTop="10dp" />
-        </LinearLayout>
+        </TableRow>
 
 
-    </LinearLayout>
+    </TableLayout>
 </ScrollView>

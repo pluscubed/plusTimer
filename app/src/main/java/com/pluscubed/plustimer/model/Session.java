@@ -70,7 +70,7 @@ public class Session {
                 for (Solve i : solves) {
                     sum += i.getTimeTwo();
                 }
-                return Util.timeStringFromNanoseconds(sum / (number - 2L), milliseconds);
+                return Util.timeStringFromNs(sum / (number - 2L), milliseconds);
             } else {
                 return "DNF";
             }
@@ -113,7 +113,7 @@ public class Session {
         if (bestAverage == Long.MAX_VALUE) {
             return "DNF";
         }
-        return Util.timeStringFromNanoseconds(bestAverage, milliseconds);
+        return Util.timeStringFromNs(bestAverage, milliseconds);
     }
 
     public long getBestAverageOf(int number) {
@@ -146,7 +146,7 @@ public class Session {
             }
         }
         if (!dnf) {
-            return Util.timeStringFromNanoseconds(sum / mSolves.size(), milliseconds);
+            return Util.timeStringFromNs(sum / mSolves.size(), milliseconds);
         } else {
             return "DNF";
         }
@@ -190,7 +190,7 @@ public class Session {
                     long average = getAverageOf(mSolves, mSolves.size());
                     if (average != Long.MAX_VALUE) {
                         s.append("\n").append(context.getString(R.string.average))
-                                .append(Util.timeStringFromNanoseconds(average, milliseconds));
+                                .append(Util.timeStringFromNs(average, milliseconds));
                     } else {
                         s.append("\n").append(context.getString(R.string.average)).append("DNF");
                     }
