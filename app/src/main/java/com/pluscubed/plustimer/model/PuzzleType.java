@@ -81,14 +81,16 @@ public enum PuzzleType {
     }
 
     public Puzzle getPuzzle() {
-        try {
-            mPuzzle = PuzzlePlugins.getScramblers().get(scramblerSpec).cachedInstance();
-        } catch (LazyInstantiatorException e) {
-            e.printStackTrace();
-        } catch (BadLazyClassDescriptionException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if(mPuzzle==null) {
+            try {
+                mPuzzle = PuzzlePlugins.getScramblers().get(scramblerSpec).cachedInstance();
+            } catch (LazyInstantiatorException e) {
+                e.printStackTrace();
+            } catch (BadLazyClassDescriptionException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         return mPuzzle;
     }
