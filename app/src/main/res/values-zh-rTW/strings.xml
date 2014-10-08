@@ -64,13 +64,6 @@
         <item>金字塔</item>
         <item>五魔</item>
         <item>魔表</item>
-        <item>7x7</item>
-        <item>6x6</item>
-        <item>5x5</item>
-        <item>4x4</item>
-        <item>4x4</item>
-        <item>3x3</item>
-        <item>2x2</item>
     </string-array>
 
     <string-array name="pref_update_time_list_entries">
@@ -92,7 +85,7 @@
     <string name="email">發送反饋</string>
     <string name="rate">在Play Store上評價</string>
 
-    <string name="unofficial">(快,非WCA)</string>
+    <string name="unofficial">快，非WCA</string>
     <string name="reset_warning">重置本組?</string>
     <string name="reset_warning_message">當前組內所有成績將被刪除!</string>
     <string name="manual_add_solve">手動加成績</string>
@@ -108,6 +101,11 @@
     <string name="pref_update_time_title">計時器更新</string>
     <string name="timing">還原</string>
     <string name="pref_milliseconds_title">顯示到毫秒(0.001)</string>
+    <string name="puzzle_types_setup">啟用/禁用魔方類型</string>
+    <string name="oh">單手</string>
+    <string name="bld">盲擰</string>
+    <string name="feet">腳擰</string>
     <string name="timestamp">時間戳:</string>
+    <string name="no_disable_all_puzzletypes">不能禁用所有魔方類型！</string>
 
 </resources>

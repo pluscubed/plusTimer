@@ -21,7 +21,7 @@ public class SpinnerPuzzleTypeAdapter extends ArrayAdapter<PuzzleType> {
     Context mContext;
 
     public SpinnerPuzzleTypeAdapter(LayoutInflater inflater, Context context) {
-        super(context, 0, PuzzleType.values());
+        super(context, 0, PuzzleType.valuesExcludeDisabled());
         mLayoutInflater = inflater;
         mContext = context;
     }
@@ -29,15 +29,15 @@ public class SpinnerPuzzleTypeAdapter extends ArrayAdapter<PuzzleType> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
-        convertView = getItem(position).isOfficial() ? mLayoutInflater
+        convertView = getItem(position).official ? mLayoutInflater
                 .inflate(R.layout.spinner_item, parent, false)
                 : mLayoutInflater.inflate(R.layout.spinner_item2, parent, false);
 
         TextView textView = (TextView) convertView.findViewById(android.R.id.text1);
-        textView.setText(getItem(position).toString());
+        textView.setText(getItem(position).getUiName(mContext));
         textView.setTextColor(Color.WHITE);
 
-        if (!getItem(position).isOfficial()) {
+        if (!getItem(position).official) {
             TextView textView2 = (TextView) convertView.findViewById(android.R.id.text2);
             textView2.setText(mContext.getString(R.string.unofficial));
             textView2.setTextColor(Color.WHITE);
@@ -47,20 +47,24 @@ public class SpinnerPuzzleTypeAdapter extends ArrayAdapter<PuzzleType> {
 
     @Override
     public View getDropDownView(int position, View convertView, ViewGroup parent) {
-        convertView = getItem(position).isOfficial() ? mLayoutInflater
+        convertView = getItem(position).official ? mLayoutInflater
                 .inflate(R.layout.spinner_item_dropdown, parent, false)
                 : mLayoutInflater.inflate(R.layout.spinner_item_dropdown2, parent, false);
 
         TextView textView = (TextView) convertView.findViewById(android.R.id.text1);
-        textView.setText(getItem(position).toString());
-        textView.setTextColor(
-                mContext.getResources().getColorStateList(R.color.list_dropdown_color_dark));
-        if (!getItem(position).isOfficial()) {
+        textView.setText(getItem(position).getUiName(mContext));
+        textView.setTextColor(mContext.getResources().getColorStateList(R.color.list_dropdown_color_dark));
+        if (!getItem(position).official) {
             TextView textView2 = (TextView) convertView.findViewById(android.R.id.text2);
             textView2.setText(mContext.getString(R.string.unofficial));
-            textView2.setTextColor(
-                    mContext.getResources().getColorStateList(R.color.list_dropdown_color_dark));
+            textView2.setTextColor(mContext.getResources().getColorStateList(R.color.list_dropdown_color_dark));
         }
         return convertView;
+    }
+
+    public void onListChanged() {
+        clear();
+        addAll(PuzzleType.valuesExcludeDisabled());
+        notifyDataSetChanged();
     }
 }

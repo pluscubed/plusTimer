@@ -58,19 +58,12 @@
         <item>成绩列表</item>
     </string-array>
 
-    <string-array name="puzzle_types">
+    <string-array name="puzzles">
         <item>SQ1</item>
         <item>斜转</item>
         <item>金字塔</item>
         <item>五魔</item>
         <item>魔表</item>
-        <item>7x7</item>
-        <item>6x6</item>
-        <item>5x5</item>
-        <item>4x4</item>
-        <item>4x4</item>
-        <item>3x3</item>
-        <item>2x2</item>
     </string-array>
 
     <string-array name="pref_update_time_list_entries">
@@ -92,7 +85,7 @@
     <string name="email">发送反馈</string>
     <string name="rate">在Play Store上评价</string>
 
-    <string name="unofficial">(快,非WCA)</string>
+    <string name="unofficial">快，非WCA</string>
     <string name="reset_warning">重置本组?</string>
     <string name="reset_warning_message">当前组内所有成绩将被删除!</string>
     <string name="manual_add_solve">手动加成绩</string>
@@ -108,6 +101,11 @@
     <string name="pref_update_time_title">计时器更新</string>
     <string name="timing">还原</string>
     <string name="pref_milliseconds_title">显示到毫秒(0.001)</string>
+    <string name="puzzle_types_setup">启用/禁用魔方类型</string>
+    <string name="oh">单手</string>
+    <string name="bld">盲拧</string>
+    <string name="feet">脚拧</string>
     <string name="timestamp">时间戳:</string>
+    <string name="no_disable_all_puzzletypes">不能禁用所有魔方类型！</string>
 
 </resources>

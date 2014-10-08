@@ -2,6 +2,7 @@ package com.pluscubed.plustimer.ui;
 
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.os.Bundle;
@@ -11,10 +12,19 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.preference.PreferenceScreen;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewParent;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.pluscubed.plustimer.R;
+import com.pluscubed.plustimer.model.PuzzleType;
 
 /**
  * Settings Activity and Fragment
@@ -22,18 +32,14 @@ import com.pluscubed.plustimer.R;
 public class SettingsActivity extends Activity {
 
     public static final String PREF_INSPECTION_CHECKBOX = "pref_inspection_checkbox";
-
     public static final String PREF_HOLDTOSTART_CHECKBOX = "pref_holdtostart_checkbox";
-
     public static final String PREF_KEEPSCREENON_CHECKBOX = "pref_keepscreenon_checkbox";
-
     public static final String PREF_TWO_ROW_TIME_CHECKBOX = "pref_two_row_time_checkbox";
-
     public static final String PREF_TIME_TEXT_SIZE_EDITTEXT = "pref_time_display_size_edittext";
-
     public static final String PREF_UPDATE_TIME_LIST = "pref_update_time_list";
-
     public static final String PREF_MILLISECONDS_CHECKBOX = "pref_milliseconds_checkbox";
+    public static final String PREFSCREEN_PUZZLETYPES = "pref_puzzletypes";
+    public static final String PREF_PUZZLETYPE_ENABLE_PREFIX = "pref_puzzletype_enable_";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +69,52 @@ public class SettingsActivity extends Activity {
 
     public static class SettingsFragment extends PreferenceFragment {
 
+        /**
+         * Sets up the action bar for an {@link PreferenceScreen}
+         */
+        public static void initializeActionBar(PreferenceScreen preferenceScreen) {
+            final Dialog dialog = preferenceScreen.getDialog();
+            if (dialog != null) {
+                dialog.getActionBar().setDisplayHomeAsUpEnabled(true);
+                View homeBtn = dialog.findViewById(android.R.id.home);
+                if (homeBtn != null) {
+                    View.OnClickListener dismissDialogClickListener = new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            dialog.dismiss();
+                        }
+                    };
+
+                    ViewParent homeBtnContainer = homeBtn.getParent();
+
+                    if (homeBtnContainer instanceof FrameLayout) {
+                        ViewGroup containerParent = (ViewGroup) homeBtnContainer.getParent();
+
+                        if (containerParent instanceof LinearLayout) {
+                            containerParent.setOnClickListener(dismissDialogClickListener);
+                        } else {
+                            ((FrameLayout) homeBtnContainer).setOnClickListener(dismissDialogClickListener);
+                        }
+                    } else {
+                        homeBtn.setOnClickListener(dismissDialogClickListener);
+                    }
+                }
+            }
+        }
+
+        //Solution to setting up an action bar for a PreferenceScreen: http://stackoverflow.com/questions/16374820/action-bar-home-button-not-functional-with-nested-preferencescreen
+        @Override
+        public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, @NonNull Preference preference) {
+            super.onPreferenceTreeClick(preferenceScreen, preference);
+
+            // If the user has clicked on a preference screen, set up the action bar
+            if (preference instanceof PreferenceScreen) {
+                initializeActionBar((PreferenceScreen) preference);
+            }
+
+            return false;
+        }
+
         @Override
         public void onCreate(Bundle paramBundle) {
             super.onCreate(paramBundle);
@@ -73,10 +125,7 @@ public class SettingsActivity extends Activity {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
                     if (newValue.toString().equals("true")) {
-                        PreferenceManager.getDefaultSharedPreferences(getActivity()).edit()
-                                .putBoolean(PREF_HOLDTOSTART_CHECKBOX, true).commit();
-                        CheckBoxPreference hold = (CheckBoxPreference) findPreference(
-                                PREF_HOLDTOSTART_CHECKBOX);
+                        CheckBoxPreference hold = (CheckBoxPreference) findPreference(PREF_HOLDTOSTART_CHECKBOX);
                         hold.setChecked(true);
                     }
                     return true;
@@ -99,12 +148,43 @@ public class SettingsActivity extends Activity {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
                     ListPreference updateTime = (ListPreference) preference;
-                    updateTime.setSummary(
-                            updateTime.getEntries()[Integer.parseInt(newValue.toString())]);
+                    updateTime.setSummary(updateTime.getEntries()[Integer.parseInt(newValue.toString())]);
                     return true;
                 }
             });
             updateTime.setSummary(updateTime.getEntry());
+            PreferenceScreen puzzleTypeSetupScreen = (PreferenceScreen) findPreference(PREFSCREEN_PUZZLETYPES);
+            for (PuzzleType i : PuzzleType.values()) {
+                CheckBoxPreference puzzleTypeCheckBox = new CheckBoxPreference(getActivity());
+                String uiName = i.getUiName(getActivity());
+                if (!i.official) {
+                    uiName += " - " + getString(R.string.unofficial);
+                }
+                puzzleTypeCheckBox.setTitle(uiName);
+                puzzleTypeCheckBox.setChecked(i.isEnabled());
+                puzzleTypeCheckBox.setKey(PREF_PUZZLETYPE_ENABLE_PREFIX + i.name().toLowerCase());
+                puzzleTypeCheckBox.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                    @Override
+                    public boolean onPreferenceChange(Preference preference, Object newValue) {
+                        if (newValue.toString().equals("false")) {
+                            int numberEnabled = 0;
+                            for (PuzzleType i : PuzzleType.values()) {
+                                if (PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(PREF_PUZZLETYPE_ENABLE_PREFIX + i.name().toLowerCase(), true)) {
+                                    numberEnabled++;
+                                }
+                            }
+                            if (numberEnabled <= 1) {
+                                Toast.makeText(getActivity(), getString(R.string.no_disable_all_puzzletypes), Toast.LENGTH_SHORT).show();
+                                ((CheckBoxPreference) preference).setChecked(true);
+                                return false;
+                            }
+                        }
+                        PuzzleType.valueOf(preference.getKey().replace(PREF_PUZZLETYPE_ENABLE_PREFIX, "").toUpperCase()).setEnabled(newValue.toString().equals("true"));
+                        return true;
+                    }
+                });
+                puzzleTypeSetupScreen.addPreference(puzzleTypeCheckBox);
+            }
         }
     }
 }

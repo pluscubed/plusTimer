@@ -49,7 +49,7 @@ public class HistorySessionListFragment extends ListFragment {
 
     private static final String STATE_PUZZLETYPE_DISPLAYNAME = "puzzletype_displayname";
 
-    private String mPuzzleTypeDisplayName;
+    private String mPuzzleTypeName;
 
     private TextView mStatsText;
 
@@ -62,7 +62,7 @@ public class HistorySessionListFragment extends ListFragment {
     @Override
     public void onPause() {
         super.onPause();
-        PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions().save(getActivity());
+        PuzzleType.valueOf(mPuzzleTypeName).getHistorySessions().save(getActivity());
         super.onResume();
         mMilliseconds = PreferenceManager.getDefaultSharedPreferences(getActivity())
                 .getBoolean(SettingsActivity.PREF_MILLISECONDS_CHECKBOX, true);
@@ -71,7 +71,7 @@ public class HistorySessionListFragment extends ListFragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(STATE_PUZZLETYPE_DISPLAYNAME, mPuzzleTypeDisplayName);
+        outState.putString(STATE_PUZZLETYPE_DISPLAYNAME, mPuzzleTypeName);
     }
 
     @Override
@@ -79,9 +79,9 @@ public class HistorySessionListFragment extends ListFragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         if (savedInstanceState != null) {
-            mPuzzleTypeDisplayName = savedInstanceState.getString(STATE_PUZZLETYPE_DISPLAYNAME);
+            mPuzzleTypeName = savedInstanceState.getString(STATE_PUZZLETYPE_DISPLAYNAME);
         } else {
-            mPuzzleTypeDisplayName = PuzzleType.CURRENT;
+            mPuzzleTypeName = PuzzleType.getCurrent().name();
         }
     }
 
@@ -114,7 +114,7 @@ public class HistorySessionListFragment extends ListFragment {
                     case R.id.context_solvelist_delete_menuitem:
                         for (int i = getListView().getCount() - 1; i >= 0; i--) {
                             if (getListView().isItemChecked(i)) {
-                                PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions()
+                                PuzzleType.valueOf(mPuzzleTypeName).getHistorySessions()
                                         .deleteSession((Session) getListView().getItemAtPosition(i),
                                                 getActivity());
                             }
@@ -181,7 +181,7 @@ public class HistorySessionListFragment extends ListFragment {
     }
 
     public void updateStats() {
-        List<Session> historySessions = PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions()
+        List<Session> historySessions = PuzzleType.valueOf(mPuzzleTypeName).getHistorySessions()
                 .getList();
         if (historySessions.size() > 0) {
             StringBuilder s = new StringBuilder();
@@ -394,19 +394,16 @@ public class HistorySessionListFragment extends ListFragment {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.menu_history_sessionlist, menu);
 
-        final Spinner menuPuzzleSpinner = (Spinner) menu
-                .findItem(R.id.menu_activity_history_sessionlist_puzzletype_spinner)
-                .getActionView();
-        final ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter = new SpinnerPuzzleTypeAdapter(
-                getActivity().getLayoutInflater(), getActivity().getActionBar().getThemedContext());
+        Spinner menuPuzzleSpinner = (Spinner) menu.findItem(R.id.menu_activity_history_sessionlist_puzzletype_spinner).getActionView();
+        ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter = new SpinnerPuzzleTypeAdapter(getActivity().getLayoutInflater(), getActivity().getActionBar().getThemedContext());
         menuPuzzleSpinner.setAdapter(puzzleTypeSpinnerAdapter);
-        menuPuzzleSpinner.setSelection(
-                puzzleTypeSpinnerAdapter.getPosition(PuzzleType.get(PuzzleType.CURRENT)), true);
+        menuPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition(PuzzleType.getCurrent()), true);
         menuPuzzleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                mPuzzleTypeDisplayName = (parent.getItemAtPosition(position)).toString();
+                mPuzzleTypeName = (parent.getItemAtPosition(position)).toString();
                 onSessionListChanged();
+                PuzzleType.saveCurrentPuzzleType(getActivity());
             }
 
             @Override
@@ -426,16 +423,16 @@ public class HistorySessionListFragment extends ListFragment {
         super.onResume();
         //Update list when session is deleted in HistorySolveList
         onSessionListChanged();
+        //update puzzle spinner in case settings were changed
+        getActivity().invalidateOptionsMenu();
     }
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         Intent i = new Intent(getActivity(), HistorySolveListActivity.class);
-        int index = PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions().getList()
-                .indexOf(l.getItemAtPosition(position));
+        int index = PuzzleType.valueOf(mPuzzleTypeName).getHistorySessions().getList().indexOf(l.getItemAtPosition(position));
         i.putExtra(HistorySolveListActivity.EXTRA_HISTORY_SESSION_POSITION, index);
-        i.putExtra(HistorySolveListActivity.EXTRA_HISTORY_PUZZLETYPE_DISPLAYNAME,
-                mPuzzleTypeDisplayName);
+        i.putExtra(HistorySolveListActivity.EXTRA_HISTORY_PUZZLETYPE_DISPLAYNAME, mPuzzleTypeName);
         startActivity(i);
     }
 
@@ -449,12 +446,10 @@ public class HistorySessionListFragment extends ListFragment {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
-                convertView = getActivity().getLayoutInflater()
-                        .inflate(R.layout.list_item_history_sessionlist, parent, false);
+                convertView = getActivity().getLayoutInflater().inflate(R.layout.list_item_history_sessionlist, parent, false);
             }
             Session session = getItem(position);
-            TextView text = (TextView) convertView
-                    .findViewById(R.id.list_item_history_sessionlist_textview);
+            TextView text = (TextView) convertView.findViewById(R.id.list_item_history_sessionlist_textview);
             text.setText(session.getTimestampString(getActivity()));
 
             return convertView;
@@ -462,8 +457,7 @@ public class HistorySessionListFragment extends ListFragment {
 
         public void onSessionListChanged() {
             clear();
-            List<Session> sessions = PuzzleType.get(mPuzzleTypeDisplayName).getHistorySessions()
-                    .getList();
+            List<Session> sessions = PuzzleType.valueOf(mPuzzleTypeName).getHistorySessions().getList();
             Collections.reverse(sessions);
             addAll(sessions);
             notifyDataSetChanged();

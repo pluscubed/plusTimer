@@ -27,28 +27,28 @@ public class HistorySolveListActivity extends Activity
     public static final String HISTORY_DIALOG_SOLVE_TAG = "HISTORY_MODIFY_DIALOG";
 
     @Override
-    public void createSolveDialog(String displayName, int sessionIndex, int solveIndex) {
+    public void createSolveDialog(String puzzleTypeName, int sessionIndex, int solveIndex) {
         DialogFragment dialog = (DialogFragment) getFragmentManager()
                 .findFragmentByTag(HISTORY_DIALOG_SOLVE_TAG);
         if (dialog == null) {
             SolveDialogFragment d = SolveDialogFragment
-                    .newInstance(PuzzleType.get(displayName).toString(), sessionIndex, solveIndex);
+                    .newInstance(PuzzleType.valueOf(puzzleTypeName).toString(), sessionIndex, solveIndex);
             d.show(getFragmentManager(), HISTORY_DIALOG_SOLVE_TAG);
         }
     }
 
     @Override
-    public void onDialogDismissed(String displayName, int sessionIndex, int solveIndex,
+    public void onDialogDismissed(String puzzleTypeName, int sessionIndex, int solveIndex,
                                   boolean delete) {
         if (delete) {
-            PuzzleType.get(displayName).getSession(sessionIndex).deleteSolve(solveIndex);
+            PuzzleType.valueOf(puzzleTypeName).getSession(sessionIndex).deleteSolve(solveIndex);
         }
 
         if (getSolveListFragment() != null) {
             getSolveListFragment().onSessionSolvesChanged();
         }
 
-        setTitle(PuzzleType.get(displayName).getSession(sessionIndex).getTimestampString(this));
+        setTitle(PuzzleType.valueOf(puzzleTypeName).getSession(sessionIndex).getTimestampString(this));
 
     }
 
@@ -76,7 +76,7 @@ public class HistorySolveListActivity extends Activity
             fragment = SolveListFragment.newInstance(false, puzzleType, position);
             fm.beginTransaction().add(android.R.id.content, fragment).commit();
         }
-        setTitle(PuzzleType.get(puzzleType).getSession(position).getTimestampString(this));
+        setTitle(PuzzleType.valueOf(puzzleType).getSession(position).getTimestampString(this));
     }
 
 

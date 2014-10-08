@@ -50,10 +50,10 @@ public class CurrentSessionActivity extends BaseActivity
     }
 
     @Override
-    public void onDialogDismissed(String displayName, int sessionIndex, int solveIndex,
+    public void onDialogDismissed(String puzzleTypeName, int sessionIndex, int solveIndex,
                                   boolean delete) {
         if (delete) {
-            PuzzleType.get(displayName).getSession(sessionIndex).deleteSolve(solveIndex);
+            PuzzleType.valueOf(puzzleTypeName).getSession(sessionIndex).deleteSolve(solveIndex);
         }
         if (getCurrentSessionTimerFragment() != null) {
             getCurrentSessionTimerFragment().onSessionSolvesChanged();
@@ -61,6 +61,13 @@ public class CurrentSessionActivity extends BaseActivity
         if (getSolveListFragment() != null) {
             getSolveListFragment().onSessionSolvesChanged();
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //update puzzle spinner in case settings were changed
+        invalidateOptionsMenu();
     }
 
     @Override
@@ -97,8 +104,7 @@ public class CurrentSessionActivity extends BaseActivity
                 getResources().getStringArray(R.array.current_s_page_titles)));
 
         //Set up SlidingTabLayout
-        SlidingTabLayout slidingTabLayout = (SlidingTabLayout) findViewById(
-                R.id.activity_current_session_slidingtablayout);
+        SlidingTabLayout slidingTabLayout = (SlidingTabLayout) findViewById(R.id.activity_current_session_slidingtablayout);
         slidingTabLayout.setSelectedIndicatorColors(Color.parseColor("white"));
         slidingTabLayout.setDistributeEvenly(true);
         slidingTabLayout.setCustomTabView(R.layout.sliding_tab_textview, android.R.id.text1);
@@ -164,23 +170,17 @@ public class CurrentSessionActivity extends BaseActivity
         }
         getMenuInflater().inflate(R.menu.menu_current_session, menu);
 
-        final Spinner menuPuzzleSpinner = (Spinner) menu
-                .findItem(R.id.menu_activity_current_session_puzzletype_spinner).getActionView();
-        final ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter = new SpinnerPuzzleTypeAdapter(
-                getLayoutInflater(), this);
+        Spinner menuPuzzleSpinner = (Spinner) menu.findItem(R.id.menu_activity_current_session_puzzletype_spinner).getActionView();
+        ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter = new SpinnerPuzzleTypeAdapter(getLayoutInflater(), this);
         menuPuzzleSpinner.setAdapter(puzzleTypeSpinnerAdapter);
-        menuPuzzleSpinner.setSelection(
-                puzzleTypeSpinnerAdapter.getPosition(PuzzleType.get(PuzzleType.CURRENT)), true);
+        menuPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition(PuzzleType.getCurrent()), true);
         menuPuzzleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                PuzzleType.setCurrentPuzzleType((PuzzleType) parent.getItemAtPosition(position));
-                ((CurrentSessionTimerFragment) getFragmentManager().findFragmentByTag(
-                        makeFragmentName(R.id.activity_current_session_viewpager, 0)))
-                        .onSessionChanged();
-                ((SolveListFragment) getFragmentManager().findFragmentByTag(
-                        makeFragmentName(R.id.activity_current_session_viewpager, 1)))
-                        .onSessionChanged();
+                PuzzleType.setCurrent((PuzzleType) parent.getItemAtPosition(position));
+                ((CurrentSessionTimerFragment) getFragmentManager().findFragmentByTag(makeFragmentName(R.id.activity_current_session_viewpager, 0))).onSessionChanged();
+                ((SolveListFragment) getFragmentManager().findFragmentByTag(makeFragmentName(R.id.activity_current_session_viewpager, 1))).onSessionChanged();
+                PuzzleType.saveCurrentPuzzleType(CurrentSessionActivity.this);
             }
 
             @Override
@@ -249,8 +249,7 @@ public class CurrentSessionActivity extends BaseActivity
         DialogFragment dialog = (DialogFragment) getFragmentManager()
                 .findFragmentByTag(DIALOG_SOLVE_TAG);
         if (dialog == null) {
-            SolveDialogFragment d = SolveDialogFragment
-                    .newInstance(PuzzleType.CURRENT, PuzzleType.CURRENT_SESSION, solveIndex);
+            SolveDialogFragment d = SolveDialogFragment.newInstance(PuzzleType.getCurrent().name(), PuzzleType.CURRENT_SESSION, solveIndex);
             d.show(getFragmentManager(), DIALOG_SOLVE_TAG);
         }
     }
@@ -270,8 +269,7 @@ public class CurrentSessionActivity extends BaseActivity
                 case 0:
                     return new CurrentSessionTimerFragment();
                 case 1:
-                    return SolveListFragment
-                            .newInstance(true, PuzzleType.CURRENT, PuzzleType.CURRENT_SESSION);
+                    return SolveListFragment.newInstance(true, PuzzleType.getCurrent().name(), PuzzleType.CURRENT_SESSION);
             }
             return null;
         }

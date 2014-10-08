@@ -42,7 +42,7 @@ public class SolveDialogFragment extends DialogFragment {
     public static final int DIALOG_PENALTY_PLUSTWO = 1;
     public static final int DIALOG_PENALTY_DNF = 2;
 
-    private String mPuzzleTypeDisplayName;
+    private String mPuzzleTypeName;
     private int mSessionIndex;
     private int mSolveIndex;
 
@@ -56,12 +56,12 @@ public class SolveDialogFragment extends DialogFragment {
     private Solve mSolve;
     private boolean mMillisecondsEnabled;
 
-    static SolveDialogFragment newInstance(String displayName, int sessionIndex, int solveIndex) {
+    static SolveDialogFragment newInstance(String puzzleTypeName, int sessionIndex, int solveIndex) {
         SolveDialogFragment d = new SolveDialogFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_DIALOG_INIT_SESSION_INDEX, sessionIndex);
         args.putInt(ARG_DIALOG_INIT_SOLVE_INDEX, solveIndex);
-        args.putString(ARG_DIALOG_INIT_PUZZLETYPE_DISPLAY_NAME, displayName);
+        args.putString(ARG_DIALOG_INIT_PUZZLETYPE_DISPLAY_NAME, puzzleTypeName);
         d.setArguments(args);
         return d;
     }
@@ -83,7 +83,7 @@ public class SolveDialogFragment extends DialogFragment {
         super.onDismiss(dialog);
 
         mSolve.getScrambleAndSvg().scramble = mScrambleEdit.getText().toString();
-        mListener.onDialogDismissed(mPuzzleTypeDisplayName, mSessionIndex, mSolveIndex, mDelete);
+        mListener.onDialogDismissed(mPuzzleTypeName, mSessionIndex, mSolveIndex, mDelete);
 
     }
 
@@ -91,10 +91,10 @@ public class SolveDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         //SOLVE SETUP
-        mPuzzleTypeDisplayName = getArguments().getString(ARG_DIALOG_INIT_PUZZLETYPE_DISPLAY_NAME);
+        mPuzzleTypeName = getArguments().getString(ARG_DIALOG_INIT_PUZZLETYPE_DISPLAY_NAME);
         mSessionIndex = getArguments().getInt(ARG_DIALOG_INIT_SESSION_INDEX);
         mSolveIndex = getArguments().getInt(ARG_DIALOG_INIT_SOLVE_INDEX);
-        mSolve = PuzzleType.get(mPuzzleTypeDisplayName).getSession(mSessionIndex).getSolveByPosition(mSolveIndex);
+        mSolve = PuzzleType.valueOf(mPuzzleTypeName).getSession(mSessionIndex).getSolveByPosition(mSolveIndex);
 
         mMillisecondsEnabled = PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(SettingsActivity.PREF_MILLISECONDS_CHECKBOX, true);
         String timeString = mSolve.getDescriptiveTimeString(mMillisecondsEnabled);
