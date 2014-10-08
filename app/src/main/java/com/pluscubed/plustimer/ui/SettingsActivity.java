@@ -156,7 +156,11 @@ public class SettingsActivity extends Activity {
             PreferenceScreen puzzleTypeSetupScreen = (PreferenceScreen) findPreference(PREFSCREEN_PUZZLETYPES);
             for (PuzzleType i : PuzzleType.values()) {
                 CheckBoxPreference puzzleTypeCheckBox = new CheckBoxPreference(getActivity());
-                puzzleTypeCheckBox.setTitle(i.getUiName(getActivity()));
+                String uiName = i.getUiName(getActivity());
+                if (!i.official) {
+                    uiName += " - " + getString(R.string.unofficial);
+                }
+                puzzleTypeCheckBox.setTitle(uiName);
                 puzzleTypeCheckBox.setChecked(i.isEnabled());
                 puzzleTypeCheckBox.setKey(PREF_PUZZLETYPE_ENABLE_PREFIX + i.name().toLowerCase());
                 puzzleTypeCheckBox.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {

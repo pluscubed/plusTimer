@@ -85,7 +85,7 @@
     <string name="email">Send feedback</string>
     <string name="rate">Rate on the Play Store</string>
 
-    <string name="unofficial">(fast,unofficial)</string>
+    <string name="unofficial">Fast, Unofficial</string>
     <string name="reset_warning">Reset session?</string>
     <string name="reset_warning_message">You\'ll lose all solves recorded in this session!</string>
     <string name="manual_add_solve">Add Solve</string>

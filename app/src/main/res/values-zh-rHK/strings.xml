@@ -85,7 +85,7 @@
     <string name="email">發送反饋</string>
     <string name="rate">在Play Store上評價</string>
 
-    <string name="unofficial">(快,非WCA)</string>
+    <string name="unofficial">快，非WCA</string>
     <string name="reset_warning">重置本組?</string>
     <string name="reset_warning_message">當前組內所有成績將被刪除!</string>
     <string name="manual_add_solve">手動加成績</string>
