@@ -21,7 +21,7 @@ public class SpinnerPuzzleTypeAdapter extends ArrayAdapter<PuzzleType> {
     Context mContext;
 
     public SpinnerPuzzleTypeAdapter(LayoutInflater inflater, Context context) {
-        super(context, 0, PuzzleType.values());
+        super(context, 0, PuzzleType.valuesExcludeDisabled());
         mLayoutInflater = inflater;
         mContext = context;
     }
@@ -60,5 +60,11 @@ public class SpinnerPuzzleTypeAdapter extends ArrayAdapter<PuzzleType> {
             textView2.setTextColor(mContext.getResources().getColorStateList(R.color.list_dropdown_color_dark));
         }
         return convertView;
+    }
+
+    public void onListChanged() {
+        clear();
+        addAll(PuzzleType.valuesExcludeDisabled());
+        notifyDataSetChanged();
     }
 }

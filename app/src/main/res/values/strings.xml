@@ -106,5 +106,6 @@
     <string name="bld">BLD</string>
     <string name="feet">Feet</string>
     <string name="timestamp">Timestamp:</string>
+    <string name="no_disable_all_puzzletypes">You can\'t disable all puzzle types!</string>
 
 </resources>

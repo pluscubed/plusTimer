@@ -106,5 +106,6 @@
     <string name="bld">盲擰</string>
     <string name="feet">腳擰</string>
     <string name="timestamp">時間戳:</string>
+    <string name="no_disable_all_puzzletypes">不能禁用所有魔方類型！</string>
 
 </resources>

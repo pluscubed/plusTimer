@@ -1,8 +1,11 @@
 package com.pluscubed.plustimer.model;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 import com.pluscubed.plustimer.R;
+import com.pluscubed.plustimer.ui.SettingsActivity;
 
 import net.gnehzr.tnoodle.scrambles.Puzzle;
 import net.gnehzr.tnoodle.scrambles.PuzzlePlugins;
@@ -10,6 +13,8 @@ import net.gnehzr.tnoodle.utils.BadLazyClassDescriptionException;
 import net.gnehzr.tnoodle.utils.LazyInstantiatorException;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Enum for puzzle
@@ -42,6 +47,7 @@ public enum PuzzleType {
     private final int mStringIndex;
     private HistorySessions mHistorySessions;
     private Session mCurrentSession;
+    private boolean enabled;
     private Puzzle mPuzzle;
 
     PuzzleType(String scramblerSpec, int stringIndex) {
@@ -57,8 +63,13 @@ public enum PuzzleType {
 
     public static PuzzleType getCurrent() {
         if (sCurrentPuzzleType == null) {
-            //TODO: get from shared preferences
-            sCurrentPuzzleType = PuzzleType.THREE;
+            for (PuzzleType i : PuzzleType.values()) {
+                //TODO use shared preferences
+                if (i.enabled) {
+                    sCurrentPuzzleType = i;
+                    break;
+                }
+            }
         }
         return sCurrentPuzzleType;
     }
@@ -67,12 +78,24 @@ public enum PuzzleType {
         sCurrentPuzzleType = type;
     }
 
+    public static List<PuzzleType> valuesExcludeDisabled() {
+        List<PuzzleType> array = new ArrayList<PuzzleType>();
+        for (PuzzleType i : values()) {
+            if (i.isEnabled()) {
+                array.add(i);
+            }
+        }
+        return array;
+    }
+
     public HistorySessions getHistorySessions() {
         return mHistorySessions;
     }
 
     public void init(Context context) {
         mHistorySessions.init(context);
+        SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        enabled = defaultSharedPreferences.getBoolean(SettingsActivity.PREF_PUZZLETYPE_ENABLE_PREFIX + name().toLowerCase(), true);
     }
 
     public void submitCurrentSession(Context context) {
@@ -81,7 +104,7 @@ public enum PuzzleType {
     }
 
     public Puzzle getPuzzle() {
-        if(mPuzzle==null) {
+        if (mPuzzle == null) {
             try {
                 mPuzzle = PuzzlePlugins.getScramblers().get(scramblerSpec).cachedInstance();
             } catch (LazyInstantiatorException e) {
@@ -131,5 +154,21 @@ public enum PuzzleType {
 
     public void resetCurrentSession() {
         mCurrentSession = null;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+        if (this == sCurrentPuzzleType && !this.enabled) {
+            for (PuzzleType i : PuzzleType.values()) {
+                if (i.enabled) {
+                    sCurrentPuzzleType = i;
+                    break;
+                }
+            }
+        }
     }
 }

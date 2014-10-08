@@ -64,6 +64,13 @@ public class CurrentSessionActivity extends BaseActivity
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        //update puzzle spinner in case settings were changed
+        invalidateOptionsMenu();
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.activity_current_session);
         super.onCreate(savedInstanceState);
@@ -97,8 +104,7 @@ public class CurrentSessionActivity extends BaseActivity
                 getResources().getStringArray(R.array.current_s_page_titles)));
 
         //Set up SlidingTabLayout
-        SlidingTabLayout slidingTabLayout = (SlidingTabLayout) findViewById(
-                R.id.activity_current_session_slidingtablayout);
+        SlidingTabLayout slidingTabLayout = (SlidingTabLayout) findViewById(R.id.activity_current_session_slidingtablayout);
         slidingTabLayout.setSelectedIndicatorColors(Color.parseColor("white"));
         slidingTabLayout.setDistributeEvenly(true);
         slidingTabLayout.setCustomTabView(R.layout.sliding_tab_textview, android.R.id.text1);
@@ -164,12 +170,10 @@ public class CurrentSessionActivity extends BaseActivity
         }
         getMenuInflater().inflate(R.menu.menu_current_session, menu);
 
-        final Spinner menuPuzzleSpinner = (Spinner) menu
-                .findItem(R.id.menu_activity_current_session_puzzletype_spinner).getActionView();
-        final ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter = new SpinnerPuzzleTypeAdapter(getLayoutInflater(), this);
+        Spinner menuPuzzleSpinner = (Spinner) menu.findItem(R.id.menu_activity_current_session_puzzletype_spinner).getActionView();
+        ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter = new SpinnerPuzzleTypeAdapter(getLayoutInflater(), this);
         menuPuzzleSpinner.setAdapter(puzzleTypeSpinnerAdapter);
-        menuPuzzleSpinner.setSelection(
-                puzzleTypeSpinnerAdapter.getPosition(PuzzleType.getCurrent()), true);
+        menuPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition(PuzzleType.getCurrent()), true);
         menuPuzzleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
