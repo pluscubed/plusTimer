@@ -180,6 +180,7 @@ public class CurrentSessionActivity extends BaseActivity
                 PuzzleType.setCurrent((PuzzleType) parent.getItemAtPosition(position));
                 ((CurrentSessionTimerFragment) getFragmentManager().findFragmentByTag(makeFragmentName(R.id.activity_current_session_viewpager, 0))).onSessionChanged();
                 ((SolveListFragment) getFragmentManager().findFragmentByTag(makeFragmentName(R.id.activity_current_session_viewpager, 1))).onSessionChanged();
+                PuzzleType.saveCurrentPuzzleType(CurrentSessionActivity.this);
             }
 
             @Override

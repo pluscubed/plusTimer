@@ -403,6 +403,7 @@ public class HistorySessionListFragment extends ListFragment {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 mPuzzleTypeName = (parent.getItemAtPosition(position)).toString();
                 onSessionListChanged();
+                PuzzleType.saveCurrentPuzzleType(getActivity());
             }
 
             @Override

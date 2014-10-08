@@ -39,6 +39,7 @@ public enum PuzzleType {
     TWO("222");
 
     public static final int CURRENT_SESSION = -1;
+    public static final String PREF_CURRENT_PUZZLETYPE = "current_puzzletype";
 
     private static final int NOT_SPECIAL_STRING = -1;
     private static PuzzleType sCurrentPuzzleType;
@@ -62,15 +63,6 @@ public enum PuzzleType {
     }
 
     public static PuzzleType getCurrent() {
-        if (sCurrentPuzzleType == null) {
-            for (PuzzleType i : PuzzleType.values()) {
-                //TODO use shared preferences
-                if (i.enabled) {
-                    sCurrentPuzzleType = i;
-                    break;
-                }
-            }
-        }
         return sCurrentPuzzleType;
     }
 
@@ -88,6 +80,14 @@ public enum PuzzleType {
         return array;
     }
 
+    /**
+     * Save the current PuzzleType using shared preferences.
+     */
+    public static void saveCurrentPuzzleType(Context context) {
+        SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        defaultSharedPreferences.edit().putString(PREF_CURRENT_PUZZLETYPE, sCurrentPuzzleType.name()).apply();
+    }
+
     public HistorySessions getHistorySessions() {
         return mHistorySessions;
     }
@@ -96,6 +96,7 @@ public enum PuzzleType {
         mHistorySessions.init(context);
         SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         enabled = defaultSharedPreferences.getBoolean(SettingsActivity.PREF_PUZZLETYPE_ENABLE_PREFIX + name().toLowerCase(), true);
+        sCurrentPuzzleType = valueOf(defaultSharedPreferences.getString(PREF_CURRENT_PUZZLETYPE, THREE.name()));
     }
 
     public void submitCurrentSession(Context context) {
