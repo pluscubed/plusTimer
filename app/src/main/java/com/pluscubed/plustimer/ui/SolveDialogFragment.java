@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -55,6 +56,7 @@ public class SolveDialogFragment extends DialogFragment {
     private EditText mScrambleEdit;
     private Solve mSolve;
     private boolean mMillisecondsEnabled;
+    private boolean mSignEnabled;
 
     static SolveDialogFragment newInstance(String puzzleTypeName, int sessionIndex, int solveIndex) {
         SolveDialogFragment d = new SolveDialogFragment();
@@ -82,7 +84,7 @@ public class SolveDialogFragment extends DialogFragment {
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);
 
-        mSolve.getScrambleAndSvg().scramble = mScrambleEdit.getText().toString();
+        mSolve.getScrambleAndSvg().setScramble(mScrambleEdit.getText().toString());
         mListener.onDialogDismissed(mPuzzleTypeName, mSessionIndex, mSolveIndex, mDelete);
 
     }
@@ -96,9 +98,11 @@ public class SolveDialogFragment extends DialogFragment {
         mSolveIndex = getArguments().getInt(ARG_DIALOG_INIT_SOLVE_INDEX);
         mSolve = PuzzleType.valueOf(mPuzzleTypeName).getSession(mSessionIndex).getSolveByPosition(mSolveIndex);
 
-        mMillisecondsEnabled = PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(SettingsActivity.PREF_MILLISECONDS_CHECKBOX, true);
+        SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        mMillisecondsEnabled = defaultSharedPreferences.getBoolean(SettingsActivity.PREF_MILLISECONDS_CHECKBOX, true);
+        mSignEnabled = defaultSharedPreferences.getBoolean(SettingsActivity.PREF_SIGN_CHECKBOX, true);
         String timeString = mSolve.getDescriptiveTimeString(mMillisecondsEnabled);
-        String scramble = mSolve.getScrambleAndSvg().scramble;
+        String scramble = mSolve.getScrambleAndSvg().getScramble(mSignEnabled);
         long timestamp = mSolve.getTimestamp();
         int penalty;
         switch (mSolve.getPenalty()) {

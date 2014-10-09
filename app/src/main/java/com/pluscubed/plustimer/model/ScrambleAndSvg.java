@@ -7,6 +7,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import com.pluscubed.plustimer.Util;
 
 import java.lang.reflect.Type;
 
@@ -16,13 +17,20 @@ import java.lang.reflect.Type;
 
 public class ScrambleAndSvg {
 
-    public String scramble;
-
     public String svg;
+    private String mScramble;
 
     public ScrambleAndSvg(String scramble, String svg) {
-        this.scramble = scramble;
+        this.mScramble = scramble;
         this.svg = svg;
+    }
+
+    public String getScramble(boolean sign) {
+        return sign ? Util.wcaToSignNotation(mScramble) : mScramble;
+    }
+
+    public void setScramble(String scramble) {
+        mScramble = Util.signToWcaNotation(scramble);
     }
 
     public static class Serializer implements JsonSerializer<ScrambleAndSvg> {
@@ -30,7 +38,7 @@ public class ScrambleAndSvg {
         @Override
         public JsonElement serialize(ScrambleAndSvg src, Type typeOfSrc,
                                      JsonSerializationContext context) {
-            return new JsonPrimitive(src.scramble);
+            return new JsonPrimitive(src.mScramble);
         }
     }
 

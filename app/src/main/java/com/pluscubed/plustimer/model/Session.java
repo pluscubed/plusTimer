@@ -169,7 +169,7 @@ public class Session {
     }
 
     public String toString(Context context, String puzzleTypeDisplayName, boolean current,
-                           boolean displaySolves, boolean milliseconds) {
+                           boolean displaySolves, boolean milliseconds, boolean sign) {
         StringBuilder s = new StringBuilder();
         if (displaySolves) {
             s.append(puzzleTypeDisplayName).append("\n\n");
@@ -231,7 +231,7 @@ public class Session {
                             .append("     ")
                             .append(Util.timeDateStringFromTimestamp(context, i.getTimestamp()))
                             .append("\n")
-                            .append("     ").append(i.getScrambleAndSvg().scramble).append("\n\n");
+                            .append("     ").append(i.getScrambleAndSvg().getScramble(sign)).append("\n\n");
                     c++;
                 }
             }

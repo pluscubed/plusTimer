@@ -185,4 +185,39 @@ public class Util {
         }
         return null;
     }
+
+    public static String wcaToSignNotation(String wca) {
+        String[] moves = wca.split(" ");
+        for (int i = 0; i < moves.length; i++) {
+            if (moves[i].contains("w")) {
+                moves[i] = moves[i].replace("w", "");
+                moves[i] = moves[i].toLowerCase();
+            }
+        }
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < moves.length; i++) {
+            builder.append(moves[i]);
+            if (i != moves.length - 1) builder.append(" ");
+        }
+        return builder.toString();
+    }
+
+    public static String signToWcaNotation(String sign) {
+        String[] moves = sign.split(" ");
+        for (int i = 0; i < moves.length; i++) {
+            if (!moves[i].equals(moves[i].toUpperCase())) {
+                char[] possibleMoves = "udfrlb".toCharArray();
+                for (char move : possibleMoves) {
+                    moves[i] = moves[i].replace(String.valueOf(move), Character.toUpperCase(move) + "w");
+                }
+            }
+        }
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < moves.length; i++) {
+            builder.append(moves[i]);
+            if (i != moves.length - 1) builder.append(" ");
+        }
+        return builder.toString();
+    }
+
 }
