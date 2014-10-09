@@ -84,7 +84,9 @@ public class SolveDialogFragment extends DialogFragment {
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);
 
-        mSolve.getScrambleAndSvg().setScramble(mScrambleEdit.getText().toString());
+        String scramble = mScrambleEdit.getText().toString();
+        if(!mPuzzleTypeName.equals(PuzzleType.PYRAMINX.name())) scramble=Util.signToWcaNotation(scramble);
+        mSolve.getScrambleAndSvg().setScramble(scramble);
         mListener.onDialogDismissed(mPuzzleTypeName, mSessionIndex, mSolveIndex, mDelete);
 
     }

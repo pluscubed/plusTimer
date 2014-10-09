@@ -30,7 +30,7 @@ public class ScrambleAndSvg {
     }
 
     public void setScramble(String scramble) {
-        mScramble = Util.signToWcaNotation(scramble);
+        mScramble = scramble;
     }
 
     public static class Serializer implements JsonSerializer<ScrambleAndSvg> {

@@ -303,13 +303,6 @@ public class CurrentSessionTimerFragment extends Fragment
             getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
         onSessionSolvesChanged();
-        if (mInspecting || mTiming || !mRetainedFragment.isScrambling()) {
-            // If timer is timing/inspecting, then update text/image to current. If timer is
-            // not timing/inspecting and not scrambling, then update scramble views to current.
-            setScrambleTextAndImageToCurrent();
-        } else {
-            mScrambleText.setText(R.string.scrambling);
-        }
     }
 
     public void initSharedPrefs() {
