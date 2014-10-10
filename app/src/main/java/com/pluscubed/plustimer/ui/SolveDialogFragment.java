@@ -85,8 +85,8 @@ public class SolveDialogFragment extends DialogFragment {
         super.onDismiss(dialog);
 
         String scramble = mScrambleEdit.getText().toString();
-        if(!mPuzzleTypeName.equals(PuzzleType.PYRAMINX.name())) scramble=Util.signToWcaNotation(scramble);
-        mSolve.getScrambleAndSvg().setScramble(scramble);
+        scramble = Util.signToWcaNotation(scramble, mPuzzleTypeName);
+        mSolve.getScrambleAndSvg().setScramble(scramble, mPuzzleTypeName);
         mListener.onDialogDismissed(mPuzzleTypeName, mSessionIndex, mSolveIndex, mDelete);
 
     }
@@ -104,7 +104,7 @@ public class SolveDialogFragment extends DialogFragment {
         mMillisecondsEnabled = defaultSharedPreferences.getBoolean(SettingsActivity.PREF_MILLISECONDS_CHECKBOX, true);
         mSignEnabled = defaultSharedPreferences.getBoolean(SettingsActivity.PREF_SIGN_CHECKBOX, true);
         String timeString = mSolve.getDescriptiveTimeString(mMillisecondsEnabled);
-        String scramble = mSolve.getScrambleAndSvg().getScramble(mSignEnabled);
+        String scramble = mSolve.getScrambleAndSvg().getUiScramble(mSignEnabled, mPuzzleTypeName);
         long timestamp = mSolve.getTimestamp();
         int penalty;
         switch (mSolve.getPenalty()) {

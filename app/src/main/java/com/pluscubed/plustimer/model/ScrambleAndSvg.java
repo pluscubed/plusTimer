@@ -17,20 +17,28 @@ import java.lang.reflect.Type;
 
 public class ScrambleAndSvg {
 
-    public String svg;
+    private String mSvg;
     private String mScramble;
 
     public ScrambleAndSvg(String scramble, String svg) {
-        this.mScramble = scramble;
-        this.svg = svg;
-    }
-
-    public String getScramble(boolean sign) {
-        return sign ? Util.wcaToSignNotation(mScramble) : mScramble;
-    }
-
-    public void setScramble(String scramble) {
         mScramble = scramble;
+        mSvg = svg;
+    }
+
+    public String getUiScramble(boolean sign, String puzzleTypeName) {
+        return sign ? Util.wcaToSignNotation(mScramble, puzzleTypeName) : mScramble;
+    }
+
+    public String getScramble() {
+        return mScramble;
+    }
+
+    public void setScramble(String scramble, String puzzleTypeName) {
+        mScramble = Util.signToWcaNotation(scramble, puzzleTypeName);
+    }
+
+    public String getSvg() {
+        return mSvg;
     }
 
     public static class Serializer implements JsonSerializer<ScrambleAndSvg> {
@@ -38,7 +46,7 @@ public class ScrambleAndSvg {
         @Override
         public JsonElement serialize(ScrambleAndSvg src, Type typeOfSrc,
                                      JsonSerializationContext context) {
-            return new JsonPrimitive(src.mScramble);
+            return new JsonPrimitive(src.getScramble());
         }
     }
 

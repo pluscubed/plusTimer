@@ -221,7 +221,7 @@ public class CurrentSessionTimerFragment extends Fragment
     public void setScrambleTextAndImageToCurrent() {
         SVG svg = null;
         try {
-            svg = SVG.getFromString(mRetainedFragment.getCurrentScrambleAndSvg().svg);
+            svg = SVG.getFromString(mRetainedFragment.getCurrentScrambleAndSvg().getSvg());
         } catch (SVGParseException e) {
             e.printStackTrace();
         }
@@ -231,7 +231,7 @@ public class CurrentSessionTimerFragment extends Fragment
         }
         mScrambleImage.setImageDrawable(drawable);
 
-        mScrambleText.setText(mRetainedFragment.getCurrentScrambleAndSvg().getScramble(mSignEnabled));
+        mScrambleText.setText(mRetainedFragment.getCurrentScrambleAndSvg().getUiScramble(mSignEnabled, PuzzleType.getCurrent().name()));
     }
 
 

@@ -357,7 +357,7 @@ public class SolveListFragment extends Fragment {
                 time.setText(s.getDescriptiveTimeString(mMillisecondsEnabled));
             }
 
-            desc.setText(s.getScrambleAndSvg().getScramble(mSignEnabled));
+            desc.setText(s.getScrambleAndSvg().getUiScramble(mSignEnabled, mPuzzleTypeName));
 
             return convertView;
         }

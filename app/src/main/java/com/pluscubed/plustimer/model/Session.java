@@ -168,11 +168,10 @@ public class Session {
         mSolves.remove(i);
     }
 
-    public String toString(Context context, String puzzleTypeDisplayName, boolean current,
-                           boolean displaySolves, boolean milliseconds, boolean sign) {
+    public String toString(Context context, String puzzleTypeName, boolean current, boolean displaySolves, boolean milliseconds, boolean sign) {
         StringBuilder s = new StringBuilder();
         if (displaySolves) {
-            s.append(puzzleTypeDisplayName).append("\n\n");
+            s.append(puzzleTypeName).append("\n\n");
         }
         s.append(context.getString(R.string.number_solves)).append(getNumberOfSolves());
         if (getNumberOfSolves() > 0) {
@@ -231,7 +230,7 @@ public class Session {
                             .append("     ")
                             .append(Util.timeDateStringFromTimestamp(context, i.getTimestamp()))
                             .append("\n")
-                            .append("     ").append(i.getScrambleAndSvg().getScramble(sign)).append("\n\n");
+                            .append("     ").append(i.getScrambleAndSvg().getUiScramble(sign, puzzleTypeName)).append("\n\n");
                     c++;
                 }
             }
