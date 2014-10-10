@@ -60,6 +60,7 @@ public class CurrentSessionTimerFragment extends Fragment
     private boolean mMillisecondsEnabled;
     private int mPrefSize;
     private boolean mKeepScreenOn;
+    private boolean mSignEnabled;
 
     private CurrentSessionTimerRetainedFragment mRetainedFragment;
 
@@ -220,7 +221,7 @@ public class CurrentSessionTimerFragment extends Fragment
     public void setScrambleTextAndImageToCurrent() {
         SVG svg = null;
         try {
-            svg = SVG.getFromString(mRetainedFragment.getCurrentScrambleAndSvg().svg);
+            svg = SVG.getFromString(mRetainedFragment.getCurrentScrambleAndSvg().getSvg());
         } catch (SVGParseException e) {
             e.printStackTrace();
         }
@@ -230,7 +231,7 @@ public class CurrentSessionTimerFragment extends Fragment
         }
         mScrambleImage.setImageDrawable(drawable);
 
-        mScrambleText.setText(mRetainedFragment.getCurrentScrambleAndSvg().scramble);
+        mScrambleText.setText(mRetainedFragment.getCurrentScrambleAndSvg().getUiScramble(mSignEnabled, PuzzleType.getCurrent().name()));
     }
 
 
@@ -305,23 +306,24 @@ public class CurrentSessionTimerFragment extends Fragment
     }
 
     public void initSharedPrefs() {
-        SharedPreferences mDefaultSharedPreferences = PreferenceManager
+        SharedPreferences defaultSharedPreferences = PreferenceManager
                 .getDefaultSharedPreferences(getActivity());
-        mInspectionEnabled = mDefaultSharedPreferences
+        mInspectionEnabled = defaultSharedPreferences
                 .getBoolean(SettingsActivity.PREF_INSPECTION_CHECKBOX, true);
-        mHoldToStartEnabled = mDefaultSharedPreferences
+        mHoldToStartEnabled = defaultSharedPreferences
                 .getBoolean(SettingsActivity.PREF_HOLDTOSTART_CHECKBOX, true);
         mTwoRowTimeEnabled = getResources().getConfiguration().orientation == 1
-                && mDefaultSharedPreferences
+                && defaultSharedPreferences
                 .getBoolean(SettingsActivity.PREF_TWO_ROW_TIME_CHECKBOX, true);
         mUpdateTimePref = Integer.parseInt(
-                mDefaultSharedPreferences.getString(SettingsActivity.PREF_UPDATE_TIME_LIST, "0"));
-        mMillisecondsEnabled = mDefaultSharedPreferences
+                defaultSharedPreferences.getString(SettingsActivity.PREF_UPDATE_TIME_LIST, "0"));
+        mMillisecondsEnabled = defaultSharedPreferences
                 .getBoolean(SettingsActivity.PREF_MILLISECONDS_CHECKBOX, true);
-        mPrefSize = Integer.parseInt(mDefaultSharedPreferences
+        mPrefSize = Integer.parseInt(defaultSharedPreferences
                 .getString(SettingsActivity.PREF_TIME_TEXT_SIZE_EDITTEXT, "100"));
-        mKeepScreenOn = mDefaultSharedPreferences.getBoolean(SettingsActivity
+        mKeepScreenOn = defaultSharedPreferences.getBoolean(SettingsActivity
                 .PREF_KEEPSCREENON_CHECKBOX, true);
+        mSignEnabled = defaultSharedPreferences.getBoolean(SettingsActivity.PREF_SIGN_CHECKBOX, true);
     }
 
     public void setTimerTextToPrefSize() {

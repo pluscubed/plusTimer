@@ -37,6 +37,23 @@
     <string name="pref_keepscreenon_summary">防止屏幕自動休眠</string>
     <string name="pref_keepscreenon_title">屏幕常亮</string>
 
+    <string name="pref_two_row_time_summary">時:分:秒在上，毫秒在下</string>
+    <string name="pref_two_row_time_title">計時器兩行顯示</string>
+
+    <string name="pref_time_text_size_title">計時器字體大小</string>
+    <string name="time_text_edittext_dialog_title">計時器字體大小 (默認100):</string>
+
+    <string name="pref_update_time_title">計時器更新</string>
+
+    <string name="pref_timer_category_title">Timer</string>
+
+    <string name="pref_milliseconds_title">顯示到毫秒(0.001)</string>
+
+    <string name="puzzle_types_setup">啟用/禁用魔方類型</string>
+    <string name="no_disable_all_puzzletypes">不能禁用所有魔方類型！</string>
+
+    <string name="pref_sign_title">使用SiGN</string>
+
     <string-array name="penalty_array">
         <item>無</item>
         <item>+2</item>
@@ -58,7 +75,7 @@
         <item>成績列表</item>
     </string-array>
 
-    <string-array name="puzzle_types">
+    <string-array name="puzzles">
         <item>SQ1</item>
         <item>斜轉</item>
         <item>金字塔</item>
@@ -94,18 +111,10 @@
     <string name="dialog_wip">目前還不支持修改時間或打亂，修改框是框架</string>
     <string name="best_times">單次最快</string>
     <string name="best_ao">%1$d次去尾最快</string>
-    <string name="pref_two_row_time_summary">時:分:秒在上，毫秒在下</string>
-    <string name="pref_two_row_time_title">計時器兩行顯示</string>
-    <string name="pref_time_text_size_title">計時器字體大小</string>
-    <string name="time_text_edittext_dialog_title">計時器字體大小 (默認100):</string>
-    <string name="pref_update_time_title">計時器更新</string>
     <string name="timing">還原</string>
-    <string name="pref_milliseconds_title">顯示到毫秒(0.001)</string>
-    <string name="puzzle_types_setup">啟用/禁用魔方類型</string>
     <string name="oh">單手</string>
     <string name="bld">盲擰</string>
     <string name="feet">腳擰</string>
     <string name="timestamp">時間戳:</string>
-    <string name="no_disable_all_puzzletypes">不能禁用所有魔方類型！</string>
 
 </resources>

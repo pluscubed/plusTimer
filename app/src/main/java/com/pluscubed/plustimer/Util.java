@@ -2,6 +2,7 @@ package com.pluscubed.plustimer;
 
 import android.content.Context;
 
+import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Solve;
 
 import java.text.DateFormat;
@@ -185,4 +186,59 @@ public class Util {
         }
         return null;
     }
+
+    /**
+     * Converts a sequence of moves in WCA notation to SiGN notation
+     *
+     * @param wca the sequence of moves in WCA notation
+     * @return the converted sequence of moves in SiGN notation
+     */
+    public static String wcaToSignNotation(String wca, String puzzleTypeName) {
+        if (Character.isDigit(PuzzleType.valueOf(puzzleTypeName).scramblerSpec.charAt(0))) {
+            String[] moves = wca.split(" ");
+            for (int i = 0; i < moves.length; i++) {
+                if (moves[i].contains("w")) {
+                    moves[i] = moves[i].replace("w", "");
+                    moves[i] = moves[i].toLowerCase();
+                }
+            }
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < moves.length; i++) {
+                builder.append(moves[i]);
+                if (i != moves.length - 1) builder.append(" ");
+            }
+            return builder.toString();
+        } else {
+            return wca;
+        }
+    }
+
+    /**
+     * Converts a sequence of moves in SiGN notation to WCA notation
+     *
+     * @param sign the sequence of moves in SiGN notation
+     * @return the converted sequence of moves in WCA notation
+     */
+    public static String signToWcaNotation(String sign, String puzzleTypeName) {
+        if (Character.isDigit(PuzzleType.valueOf(puzzleTypeName).scramblerSpec.charAt(0))) {
+            String[] moves = sign.split(" ");
+            for (int i = 0; i < moves.length; i++) {
+                if (!moves[i].equals(moves[i].toUpperCase())) {
+                    char[] possibleMoves = "udfrlb".toCharArray();
+                    for (char move : possibleMoves) {
+                        moves[i] = moves[i].replace(String.valueOf(move), Character.toUpperCase(move) + "w");
+                    }
+                }
+            }
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < moves.length; i++) {
+                builder.append(moves[i]);
+                if (i != moves.length - 1) builder.append(" ");
+            }
+            return builder.toString();
+        } else {
+            return sign;
+        }
+    }
+
 }

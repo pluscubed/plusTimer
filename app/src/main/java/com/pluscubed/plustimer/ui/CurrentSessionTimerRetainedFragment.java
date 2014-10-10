@@ -154,12 +154,12 @@ public class CurrentSessionTimerRetainedFragment extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         if (mCurrentScrambleAndSvg != null) {
-            outState.putString(STATE_CURRENT_SCRAMBLE, mCurrentScrambleAndSvg.scramble);
-            outState.putString(STATE_CURRENT_SVG, mCurrentScrambleAndSvg.svg);
+            outState.putString(STATE_CURRENT_SCRAMBLE, mCurrentScrambleAndSvg.getScramble());
+            outState.putString(STATE_CURRENT_SVG, mCurrentScrambleAndSvg.getSvg());
         }
         if (mNextScrambleAndSvg != null) {
-            outState.putString(STATE_NEXT_SCRAMBLE, mNextScrambleAndSvg.scramble);
-            outState.putString(STATE_NEXT_SVG, mNextScrambleAndSvg.svg);
+            outState.putString(STATE_NEXT_SCRAMBLE, mNextScrambleAndSvg.getScramble());
+            outState.putString(STATE_NEXT_SVG, mNextScrambleAndSvg.getSvg());
         }
         outState.putBoolean(STATE_SCRAMBLING, mScrambling);
     }

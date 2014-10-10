@@ -51,6 +51,7 @@ public class SolveListFragment extends Fragment {
     private Session mSession;
 
     private boolean mMillisecondsEnabled;
+    private boolean mSignEnabled;
 
     private TextView mQuickStats;
     private ListView mListView;
@@ -83,6 +84,8 @@ public class SolveListFragment extends Fragment {
         onSessionSolvesChanged();
         mMillisecondsEnabled = PreferenceManager.getDefaultSharedPreferences(getActivity())
                 .getBoolean(SettingsActivity.PREF_MILLISECONDS_CHECKBOX, true);
+        mSignEnabled = mMillisecondsEnabled = PreferenceManager.getDefaultSharedPreferences(getActivity())
+                .getBoolean(SettingsActivity.PREF_SIGN_CHECKBOX, true);
     }
 
     @Override
@@ -96,7 +99,7 @@ public class SolveListFragment extends Fragment {
         intent.setType("text/plain");
         intent.putExtra(
                 Intent.EXTRA_TEXT,
-                mSession.toString(getActivity(), mPuzzleTypeName, mCurrentToggle, true, mMillisecondsEnabled)
+                mSession.toString(getActivity(), mPuzzleTypeName, mCurrentToggle, true, mMillisecondsEnabled, mSignEnabled)
         );
         startActivity(Intent.createChooser(intent, getResources().getString(R.string.share_dialog_title)));
     }
@@ -138,7 +141,7 @@ public class SolveListFragment extends Fragment {
     public void updateStats() {
         mQuickStats.setText(
                 mSession.toString(getActivity(), getPuzzleType().toString(),
-                        mCurrentToggle, false, mMillisecondsEnabled));
+                        mCurrentToggle, false, mMillisecondsEnabled, mSignEnabled));
     }
 
     public void finishActionMode() {
@@ -323,6 +326,7 @@ public class SolveListFragment extends Fragment {
     public class SolveListAdapter extends ArrayAdapter<Solve> {
 
         private ArrayList<Solve> mBestAndWorstSolves;
+        private boolean mSignEnabled;
 
         public SolveListAdapter() {
             super(getActivity(), 0, new ArrayList<Solve>());
@@ -353,7 +357,7 @@ public class SolveListFragment extends Fragment {
                 time.setText(s.getDescriptiveTimeString(mMillisecondsEnabled));
             }
 
-            desc.setText(s.getScrambleAndSvg().scramble);
+            desc.setText(s.getScrambleAndSvg().getUiScramble(mSignEnabled, mPuzzleTypeName));
 
             return convertView;
         }
@@ -366,6 +370,7 @@ public class SolveListFragment extends Fragment {
             mBestAndWorstSolves = new ArrayList<Solve>();
             mBestAndWorstSolves.add(Util.getBestSolveOfList(mSession.getSolves()));
             mBestAndWorstSolves.add(Util.getWorstSolveOfList(mSession.getSolves()));
+            mSignEnabled = PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(SettingsActivity.PREF_SIGN_CHECKBOX, true);
             notifyDataSetChanged();
         }
 

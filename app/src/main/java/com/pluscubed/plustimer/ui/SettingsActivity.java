@@ -38,6 +38,7 @@ public class SettingsActivity extends Activity {
     public static final String PREF_TIME_TEXT_SIZE_EDITTEXT = "pref_time_display_size_edittext";
     public static final String PREF_UPDATE_TIME_LIST = "pref_update_time_list";
     public static final String PREF_MILLISECONDS_CHECKBOX = "pref_milliseconds_checkbox";
+    public static final String PREF_SIGN_CHECKBOX = "pref_sign_checkbox";
     public static final String PREFSCREEN_PUZZLETYPES = "pref_puzzletypes";
     public static final String PREF_PUZZLETYPE_ENABLE_PREFIX = "pref_puzzletype_enable_";
 
