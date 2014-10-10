@@ -84,7 +84,7 @@ public class SolveListFragment extends Fragment {
         onSessionSolvesChanged();
         mMillisecondsEnabled = PreferenceManager.getDefaultSharedPreferences(getActivity())
                 .getBoolean(SettingsActivity.PREF_MILLISECONDS_CHECKBOX, true);
-        mSignEnabled = mMillisecondsEnabled = PreferenceManager.getDefaultSharedPreferences(getActivity())
+        mSignEnabled = PreferenceManager.getDefaultSharedPreferences(getActivity())
                 .getBoolean(SettingsActivity.PREF_SIGN_CHECKBOX, true);
     }
 
