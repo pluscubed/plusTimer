@@ -1,5 +1,6 @@
 package com.pluscubed.plustimer.ui;
 
+import android.animation.Animator;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -19,7 +20,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.caverock.androidsvg.SVG;
@@ -71,6 +74,9 @@ public class CurrentSessionTimerFragment extends Fragment
     private ImageView mScrambleImage;
     private TextView mStatsSolvesText;
     private TextView mStatsText;
+    private LinearLayout mPenaltyBarLinearLayout;
+    private Button mPenaltyDnfButton;
+    private Button mPenaltyPlusTwoButton;
 
     private Handler mUiHandler;
 
@@ -443,18 +449,33 @@ public class CurrentSessionTimerFragment extends Fragment
         View v = inflater.inflate(R.layout.fragment_current_session_timer, container, false);
 
         mTimerText = (TextView) v.findViewById(R.id.fragment_current_session_timer_time_textview);
-        mTimerText2 = (TextView) v
-                .findViewById(R.id.fragment_current_session_timer_timeSecondary_textview);
-        mScrambleText = (TextView) v
-                .findViewById(R.id.fragment_current_session_timer_scramble_textview);
-        mScrambleImage = (ImageView) v
-                .findViewById(R.id.fragment_current_session_timer_scramble_imageview);
-        mHListView = (HListView) v
-                .findViewById(R.id.fragment_current_session_timer_bottom_hlistview);
+        mTimerText2 = (TextView) v.findViewById(R.id.fragment_current_session_timer_timeSecondary_textview);
+        mScrambleText = (TextView) v.findViewById(R.id.fragment_current_session_timer_scramble_textview);
+        mScrambleImage = (ImageView) v.findViewById(R.id.fragment_current_session_timer_scramble_imageview);
+        mHListView = (HListView) v.findViewById(R.id.fragment_current_session_timer_bottom_hlistview);
 
         mStatsText = (TextView) v.findViewById(R.id.fragment_current_session_timer_stats_textview);
-        mStatsSolvesText = (TextView) v
-                .findViewById(R.id.fragment_current_session_timer_stats_solves_number_textview);
+        mStatsSolvesText = (TextView) v.findViewById(R.id.fragment_current_session_timer_stats_solves_number_textview);
+
+        mPenaltyBarLinearLayout = (LinearLayout) v.findViewById(R.id.fragment_current_session_timer_penalty_linearlayout);
+        mPenaltyDnfButton = (Button) v.findViewById(R.id.fragment_current_session_timer_penalty_dnf_button);
+        mPenaltyPlusTwoButton = (Button) v.findViewById(R.id.fragment_current_session_timer_penalty_plustwo_button);
+
+        mPenaltyDnfButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION).getLastSolve().setPenalty(Solve.Penalty.DNF);
+                onSessionSolvesChanged();
+            }
+        });
+
+        mPenaltyPlusTwoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION).getLastSolve().setPenalty(Solve.Penalty.PLUSTWO);
+                onSessionSolvesChanged();
+            }
+        });
 
         final SolveHListViewAdapter adapter = new SolveHListViewAdapter();
         mHListView.setAdapter(adapter);
@@ -494,6 +515,28 @@ public class CurrentSessionTimerFragment extends Fragment
                             // scramble/scramble image and time
                             PuzzleType.getCurrent()
                                     .getSession(PuzzleType.CURRENT_SESSION).addSolve(s);
+
+                            mPenaltyBarLinearLayout.setVisibility(View.VISIBLE);
+                            mPenaltyBarLinearLayout.animate().setStartDelay(1500).alpha(0f).setDuration(150).setListener(new Animator.AnimatorListener() {
+                                @Override
+                                public void onAnimationStart(Animator animation) {
+                                }
+
+                                @Override
+                                public void onAnimationEnd(Animator animation) {
+                                    mPenaltyBarLinearLayout.setVisibility(View.GONE);
+                                    mPenaltyBarLinearLayout.setAlpha(1f);
+                                }
+
+                                @Override
+                                public void onAnimationCancel(Animator animation) {
+                                }
+
+                                @Override
+                                public void onAnimationRepeat(Animator animation) {
+                                }
+                            });
+
 
                             resetTimer();
 

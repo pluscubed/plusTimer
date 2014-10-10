@@ -32,7 +32,8 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:includeFontPadding="false"
-            android:textSize="50sp" />
+            android:textSize="50sp"
+            android:visibility="gone" />
     </LinearLayout>
 
 
@@ -98,6 +99,35 @@
         android:layout_margin="8dp"
         android:contentDescription="@string/scrambleimage"
         android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@id/fragment_current_session_timer_penalty_linearlayout"
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:layout_above="@id/fragment_current_session_timer_bottom_hlistview"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <Button
+            android:id="@id/fragment_current_session_timer_penalty_dnf_button"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/background_button_bar"
+            android:text="DNF"
+            android:textSize="18sp"
+            tools:ignore="ButtonStyle,HardcodedText" />
+
+        <Button
+            android:id="@id/fragment_current_session_timer_penalty_plustwo_button"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/background_button_bar"
+            android:text="+2"
+            android:textSize="18sp"
+            tools:ignore="ButtonStyle,HardcodedText" />
+    </LinearLayout>
 
 
 </RelativeLayout>
