@@ -123,19 +123,14 @@ public class Session {
 
     public String getStringMean(boolean milliseconds) {
         long sum = 0;
-        boolean dnf = false;
         for (Solve i : mSolves) {
             if (!(i.getPenalty() == Solve.Penalty.DNF)) {
                 sum += i.getTimeTwo();
             } else {
-                dnf = true;
+                return "DNF";
             }
         }
-        if (!dnf) {
-            return Util.timeStringFromNs(sum / mSolves.size(), milliseconds);
-        } else {
-            return "DNF";
-        }
+        return Util.timeStringFromNs(sum / mSolves.size(), milliseconds);
     }
 
     public String getTimestampString(Context context) {

@@ -82,6 +82,10 @@ public class SolveListFragment extends Fragment {
     public void onResume() {
         super.onResume();
         onSessionSolvesChanged();
+        initSharedPrefs();
+    }
+
+    private void initSharedPrefs() {
         mMillisecondsEnabled = PreferenceManager.getDefaultSharedPreferences(getActivity())
                 .getBoolean(SettingsActivity.PREF_MILLISECONDS_CHECKBOX, true);
         mSignEnabled = PreferenceManager.getDefaultSharedPreferences(getActivity())
@@ -163,6 +167,7 @@ public class SolveListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_solvelist, container, false);
+        initSharedPrefs();
 
         if (mCurrentToggle) {
             mResetSubmitLinearLayout = (LinearLayout) v

@@ -57,15 +57,12 @@ public class HistorySessionListFragment extends ListFragment {
 
     private ActionMode mActionMode;
 
-    private boolean mMilliseconds;
+    private boolean mMillisecondsEnabled;
 
     @Override
     public void onPause() {
         super.onPause();
         PuzzleType.valueOf(mPuzzleTypeName).getHistorySessions().save(getActivity());
-        super.onResume();
-        mMilliseconds = PreferenceManager.getDefaultSharedPreferences(getActivity())
-                .getBoolean(SettingsActivity.PREF_MILLISECONDS_CHECKBOX, true);
     }
 
     @Override
@@ -88,6 +85,7 @@ public class HistorySessionListFragment extends ListFragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        initSharedPrefs();
         getListView().setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
         getListView().setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
             @Override
@@ -151,10 +149,9 @@ public class HistorySessionListFragment extends ListFragment {
             @Override
             public String formatLabel(double value, boolean isValueX) {
                 if (isValueX) {
-                    return Util.timeDateStringFromTimestamp(getActivity().getApplicationContext(),
-                            (long) value);
+                    return Util.timeDateStringFromTimestamp(getActivity().getApplicationContext(), (long) value);
                 } else {
-                    return Util.timeStringFromNs((long) value, mMilliseconds);
+                    return Util.timeStringFromNs((long) value, mMillisecondsEnabled);
                 }
 
             }
@@ -181,8 +178,7 @@ public class HistorySessionListFragment extends ListFragment {
     }
 
     public void updateStats() {
-        List<Session> historySessions = PuzzleType.valueOf(mPuzzleTypeName).getHistorySessions()
-                .getList();
+        List<Session> historySessions = PuzzleType.valueOf(mPuzzleTypeName).getHistorySessions().getList();
         if (historySessions.size() > 0) {
             StringBuilder s = new StringBuilder();
 
@@ -195,7 +191,7 @@ public class HistorySessionListFragment extends ListFragment {
             //Add PB of all historySessions
             s.append(getString(R.string.pb)).append(": ")
                     .append(Util.getBestSolveOfList(bestSolvesOfSessionsArray)
-                            .getTimeString(mMilliseconds));
+                            .getTimeString(mMillisecondsEnabled));
 
             //Add PB of Ao5,12,50,100,1000
             s.append(getBestAverageOfNumberOfSessions(new int[]{1000, 100, 50, 12, 5},
@@ -376,7 +372,7 @@ public class HistorySessionListFragment extends ListFragment {
                     builder.append("\n").append(getString(R.string.pb)).append(" ")
                             .append(String.format(getString(R.string.ao), number)).append(": ")
                             .append(bestAverage == Long.MAX_VALUE ? "DNF"
-                                    : Util.timeStringFromNs(bestAverage, mMilliseconds));
+                                    : Util.timeStringFromNs(bestAverage, mMillisecondsEnabled));
                 }
             }
         }
@@ -425,6 +421,11 @@ public class HistorySessionListFragment extends ListFragment {
         onSessionListChanged();
         //update puzzle spinner in case settings were changed
         getActivity().invalidateOptionsMenu();
+        initSharedPrefs();
+    }
+
+    private void initSharedPrefs() {
+        mMillisecondsEnabled = PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(SettingsActivity.PREF_MILLISECONDS_CHECKBOX, true);
     }
 
     @Override

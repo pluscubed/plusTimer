@@ -16,7 +16,6 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -102,7 +101,7 @@ public class HistorySessions {
      * @return a copy of the history sessions
      */
     public List<Session> getList() {
-        return new ArrayList<Session>(Collections.unmodifiableList(mHistorySessionsList));
+        return new ArrayList<Session>(mHistorySessionsList);
     }
 
     /**

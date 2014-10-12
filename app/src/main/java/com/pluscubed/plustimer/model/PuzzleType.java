@@ -48,7 +48,7 @@ public enum PuzzleType {
     private final int mStringIndex;
     private HistorySessions mHistorySessions;
     private Session mCurrentSession;
-    private boolean enabled;
+    private boolean mEnabled;
     private Puzzle mPuzzle;
 
     PuzzleType(String scramblerSpec, int stringIndex) {
@@ -95,7 +95,7 @@ public enum PuzzleType {
     public void init(Context context) {
         mHistorySessions.init(context);
         SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        enabled = defaultSharedPreferences.getBoolean(SettingsActivity.PREF_PUZZLETYPE_ENABLE_PREFIX + name().toLowerCase(), true);
+        mEnabled = defaultSharedPreferences.getBoolean(SettingsActivity.PREF_PUZZLETYPE_ENABLE_PREFIX + name().toLowerCase(), true);
         sCurrentPuzzleType = valueOf(defaultSharedPreferences.getString(PREF_CURRENT_PUZZLETYPE, THREE.name()));
     }
 
@@ -158,14 +158,14 @@ public enum PuzzleType {
     }
 
     public boolean isEnabled() {
-        return enabled;
+        return mEnabled;
     }
 
     public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-        if (this == sCurrentPuzzleType && !this.enabled) {
+        mEnabled = enabled;
+        if (this == sCurrentPuzzleType && !mEnabled) {
             for (PuzzleType i : PuzzleType.values()) {
-                if (i.enabled) {
+                if (i.mEnabled) {
                     sCurrentPuzzleType = i;
                     break;
                 }
