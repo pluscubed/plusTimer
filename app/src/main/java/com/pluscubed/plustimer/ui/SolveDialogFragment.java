@@ -47,8 +47,6 @@ public class SolveDialogFragment extends DialogFragment {
     private int mSessionIndex;
     private int mSolveIndex;
 
-    private boolean mDelete;
-
     private boolean mAddMode;
 
     private OnDialogDismissedListener mListener;
@@ -87,7 +85,7 @@ public class SolveDialogFragment extends DialogFragment {
         String scramble = mScrambleEdit.getText().toString();
         scramble = Util.signToWcaNotation(scramble, mPuzzleTypeName);
         mSolve.getScrambleAndSvg().setScramble(scramble, mPuzzleTypeName);
-        mListener.onDialogDismissed(mPuzzleTypeName, mSessionIndex, mSolveIndex, mDelete);
+        mListener.onDialogDismissed();
 
     }
 
@@ -223,7 +221,7 @@ public class SolveDialogFragment extends DialogFragment {
                 .setNegativeButton(R.string.delete, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        mDelete = true;
+                        PuzzleType.valueOf(mPuzzleTypeName).getSession(mSessionIndex).deleteSolve(mSolveIndex);
                     }
                 });
         return builder.create();
@@ -234,6 +232,6 @@ public class SolveDialogFragment extends DialogFragment {
     }
 
     public interface OnDialogDismissedListener {
-        public void onDialogDismissed(String displayName, int sessionIndex, int solveIndex, boolean delete);
+        public void onDialogDismissed();
     }
 }

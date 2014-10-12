@@ -50,11 +50,7 @@ public class CurrentSessionActivity extends BaseActivity
     }
 
     @Override
-    public void onDialogDismissed(String puzzleTypeName, int sessionIndex, int solveIndex,
-                                  boolean delete) {
-        if (delete) {
-            PuzzleType.valueOf(puzzleTypeName).getSession(sessionIndex).deleteSolve(solveIndex);
-        }
+    public void onDialogDismissed() {
         if (getCurrentSessionTimerFragment() != null) {
             getCurrentSessionTimerFragment().onSessionSolvesChanged();
         }

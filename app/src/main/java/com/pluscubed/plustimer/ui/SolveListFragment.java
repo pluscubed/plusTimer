@@ -317,9 +317,9 @@ public class SolveListFragment extends Fragment {
         }
         updateStats();
         if (mCurrentToggle) {
-            enableResetSubmitButtons(
-                    getPuzzleType().getSession(PuzzleType.CURRENT_SESSION)
-                            .getNumberOfSolves() > 0);
+            enableResetSubmitButtons(getPuzzleType().getSession(PuzzleType.CURRENT_SESSION).getNumberOfSolves() > 0);
+        } else {
+            getActivity().setTitle(PuzzleType.valueOf(mPuzzleTypeName).getSession(mSessionIndex).getTimestampString(getActivity()));
         }
     }
 

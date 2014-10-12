@@ -18,38 +18,25 @@ import com.pluscubed.plustimer.model.PuzzleType;
 public class HistorySolveListActivity extends Activity
         implements SolveDialogFragment.OnDialogDismissedListener, CreateDialogCallback {
 
-    public static final String EXTRA_HISTORY_SESSION_POSITION
-            = "com.pluscubed.plustimer.history_session_position";
-
-    public static final String EXTRA_HISTORY_PUZZLETYPE_DISPLAYNAME
-            = "com.pluscubed.plustimer.history_puzzletype_displayname";
+    public static final String EXTRA_HISTORY_SESSION_POSITION = "com.pluscubed.plustimer.history_session_position";
+    public static final String EXTRA_HISTORY_PUZZLETYPE_DISPLAYNAME = "com.pluscubed.plustimer.history_puzzletype_displayname";
 
     public static final String HISTORY_DIALOG_SOLVE_TAG = "HISTORY_MODIFY_DIALOG";
 
     @Override
     public void createSolveDialog(String puzzleTypeName, int sessionIndex, int solveIndex) {
-        DialogFragment dialog = (DialogFragment) getFragmentManager()
-                .findFragmentByTag(HISTORY_DIALOG_SOLVE_TAG);
+        DialogFragment dialog = (DialogFragment) getFragmentManager().findFragmentByTag(HISTORY_DIALOG_SOLVE_TAG);
         if (dialog == null) {
-            SolveDialogFragment d = SolveDialogFragment
-                    .newInstance(PuzzleType.valueOf(puzzleTypeName).toString(), sessionIndex, solveIndex);
+            SolveDialogFragment d = SolveDialogFragment.newInstance(PuzzleType.valueOf(puzzleTypeName).toString(), sessionIndex, solveIndex);
             d.show(getFragmentManager(), HISTORY_DIALOG_SOLVE_TAG);
         }
     }
 
     @Override
-    public void onDialogDismissed(String puzzleTypeName, int sessionIndex, int solveIndex,
-                                  boolean delete) {
-        if (delete) {
-            PuzzleType.valueOf(puzzleTypeName).getSession(sessionIndex).deleteSolve(solveIndex);
-        }
-
+    public void onDialogDismissed() {
         if (getSolveListFragment() != null) {
             getSolveListFragment().onSessionSolvesChanged();
         }
-
-        setTitle(PuzzleType.valueOf(puzzleTypeName).getSession(sessionIndex).getTimestampString(this));
-
     }
 
     private SolveListFragment getSolveListFragment() {
