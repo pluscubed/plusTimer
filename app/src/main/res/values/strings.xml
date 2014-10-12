@@ -109,7 +109,6 @@
     <string name="manual_add_solve">Add Solve</string>
     <string name="time">Time (secs):</string>
     <string name="scramble_colon">Scramble:</string>
-    <string name="dialog_wip">Editing time and scramble doesn\'t work just yet. This is just a placeholder.</string>
     <string name="best_times">Best Times</string>
     <string name="best_ao">Best Ao%1$d</string>
     <string name="timing">Timing</string>
@@ -117,5 +116,6 @@
     <string name="bld">BLD</string>
     <string name="feet">Feet</string>
     <string name="timestamp">Timestamp:</string>
+    <string name="invalid_scramble">Invalid scramble!</string>
 
 </resources>

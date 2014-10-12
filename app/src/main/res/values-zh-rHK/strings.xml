@@ -108,7 +108,6 @@
     <string name="manual_add_solve">手動加成績</string>
     <string name="time">時間（秒）:</string>
     <string name="scramble_colon">打亂:</string>
-    <string name="dialog_wip">目前還不支持修改時間或打亂，修改框是框架</string>
     <string name="best_times">單次最快</string>
     <string name="best_ao">%1$d次去尾最快</string>
     <string name="timing">還原</string>
@@ -116,5 +115,6 @@
     <string name="bld">盲擰</string>
     <string name="feet">腳擰</string>
     <string name="timestamp">時間戳:</string>
+    <string name="invalid_scramble">非正確打亂！</string>
 
 </resources>

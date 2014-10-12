@@ -17,14 +17,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.Util;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Solve;
+
+import net.gnehzr.tnoodle.scrambles.InvalidScrambleException;
 
 import java.math.BigDecimal;
 
@@ -50,11 +54,9 @@ public class SolveDialogFragment extends DialogFragment {
     private boolean mAddMode;
 
     private OnDialogDismissedListener mListener;
-    private EditText mTimeEdit;
     private EditText mScrambleEdit;
     private Solve mSolve;
     private boolean mMillisecondsEnabled;
-    private boolean mSignEnabled;
 
     static SolveDialogFragment newInstance(String puzzleTypeName, int sessionIndex, int solveIndex) {
         SolveDialogFragment d = new SolveDialogFragment();
@@ -78,17 +80,6 @@ public class SolveDialogFragment extends DialogFragment {
         }
     }
 
-    @Override
-    public void onDismiss(DialogInterface dialog) {
-        super.onDismiss(dialog);
-
-        String scramble = mScrambleEdit.getText().toString();
-        scramble = Util.signToWcaNotation(scramble, mPuzzleTypeName);
-        mSolve.getScrambleAndSvg().setScramble(scramble, mPuzzleTypeName);
-        mListener.onDialogDismissed();
-
-    }
-
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -100,9 +91,9 @@ public class SolveDialogFragment extends DialogFragment {
 
         SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         mMillisecondsEnabled = defaultSharedPreferences.getBoolean(SettingsActivity.PREF_MILLISECONDS_CHECKBOX, true);
-        mSignEnabled = defaultSharedPreferences.getBoolean(SettingsActivity.PREF_SIGN_CHECKBOX, true);
+        boolean signEnabled = defaultSharedPreferences.getBoolean(SettingsActivity.PREF_SIGN_CHECKBOX, true);
         String timeString = mSolve.getDescriptiveTimeString(mMillisecondsEnabled);
-        String scramble = mSolve.getScrambleAndSvg().getUiScramble(mSignEnabled, mPuzzleTypeName);
+        String scramble = mSolve.getScrambleAndSvg().getUiScramble(signEnabled, mPuzzleTypeName);
         long timestamp = mSolve.getTimestamp();
         int penalty;
         switch (mSolve.getPenalty()) {
@@ -124,14 +115,12 @@ public class SolveDialogFragment extends DialogFragment {
         View v = inflater.inflate(R.layout.dialog_solve, null);
 
         //TIMESTAMP TEXTVIEW SETUP
-        TextView timestampTextView = (TextView) v
-                .findViewById(R.id.dialog_solve_timestamp_textview);
+        TextView timestampTextView = (TextView) v.findViewById(R.id.dialog_solve_timestamp_textview);
         timestampTextView.setText(Util.timeDateStringFromTimestamp(getActivity().getApplicationContext(), timestamp));
 
         //PENALTY SPINNER SETUP
         Spinner penaltySpinner = (Spinner) v.findViewById(R.id.dialog_solve_modify_penalty_spinner);
-        ArrayAdapter<CharSequence> adapter = new ArrayAdapter<CharSequence>(getActivity(), 0,
-                getResources().getStringArray(R.array.penalty_array)) {
+        ArrayAdapter<CharSequence> adapter = new ArrayAdapter<CharSequence>(getActivity(), 0, getResources().getStringArray(R.array.penalty_array)) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 if (convertView == null) {
@@ -180,9 +169,9 @@ public class SolveDialogFragment extends DialogFragment {
         penaltySpinner.setSelection(penalty);
 
         //TIME EDITTEXT SETUP
-        mTimeEdit = (EditText) v.findViewById(R.id.dialog_solve_time_edittext);
-        mTimeEdit.setText(Util.timeStringSecondsFromNs(mSolve.getRawTime(), mMillisecondsEnabled));
-        mTimeEdit.addTextChangedListener(new TextWatcher() {
+        EditText timeEdit = (EditText) v.findViewById(R.id.dialog_solve_time_edittext);
+        timeEdit.setText(Util.timeStringSecondsFromNs(mSolve.getRawTime(), mMillisecondsEnabled));
+        timeEdit.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -222,6 +211,7 @@ public class SolveDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         PuzzleType.valueOf(mPuzzleTypeName).getSession(mSessionIndex).deleteSolve(mSolveIndex);
+                        mListener.onDialogDismissed();
                     }
                 });
         return builder.create();
@@ -229,6 +219,36 @@ public class SolveDialogFragment extends DialogFragment {
 
     public void updateTitle() {
         getDialog().setTitle(mSolve.getDescriptiveTimeString(mMillisecondsEnabled));
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        //Use workaround to prevent dialog closing without check:
+        //http://stackoverflow.com/questions/2620444/how-to-prevent-a-dialog-from-closing-when-a-button-is-clicked/15619098#15619098
+        AlertDialog dialog = (AlertDialog) getDialog();
+        if (dialog != null) {
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.setCancelable(false);
+            Button positiveButton = dialog.getButton(Dialog.BUTTON_POSITIVE);
+            positiveButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    try {
+                        String scrambleText = Util.signToWcaNotation(mScrambleEdit.getText().toString(), mPuzzleTypeName);
+                        if (!scrambleText.equals(mSolve.getScrambleAndSvg().getScramble())) {
+                            PuzzleType.valueOf(mPuzzleTypeName).getPuzzle().getSolvedState().applyAlgorithm(scrambleText);
+                        }
+                        mSolve.getScrambleAndSvg().setScramble(scrambleText, mPuzzleTypeName);
+                        mListener.onDialogDismissed();
+                        dismiss();
+                    } catch (InvalidScrambleException e) {
+                        Toast.makeText(getActivity(), getString(R.string.invalid_scramble), Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        }
     }
 
     public interface OnDialogDismissedListener {
