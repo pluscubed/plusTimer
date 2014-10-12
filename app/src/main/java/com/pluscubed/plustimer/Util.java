@@ -3,6 +3,7 @@ package com.pluscubed.plustimer;
 import android.content.Context;
 
 import com.pluscubed.plustimer.model.PuzzleType;
+import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
 
 import java.text.DateFormat;
@@ -241,4 +242,36 @@ public class Util {
         }
     }
 
+    /**
+     * Gets the average of a list of solves, excluding the best and worst solves (5%).
+     * Returns {@link Long#MAX_VALUE} for DNF and {@link Session#GET_AVERAGE_INVALID_NOT_ENOUGH} if the list size is less than 3.
+     *
+     * @param list the list of solves
+     * @return the average of the solves
+     */
+    public static long getAverageOf(List<Solve> list) {
+        if (list.size() >= 3) {
+            int trim = (int) Math.ceil(list.size() / 20d);
+
+            List<Long> times = getListTimeTwoNoDnf(list);
+
+            int dnfCount = 0;
+            for (Solve i : list) {
+                if (i.getPenalty() == Solve.Penalty.DNF) dnfCount++;
+            }
+
+            //If the number of DNFs can be cut off by the trim
+            if (dnfCount <= trim) {
+                Collections.sort(times);
+                times = times.subList(trim, times.size() - trim + dnfCount);
+                long sum = 0;
+                for (long i : times) {
+                    sum += i;
+                }
+                return sum / (times.size());
+            }
+            return Long.MAX_VALUE;
+        }
+        return Session.GET_AVERAGE_INVALID_NOT_ENOUGH;
+    }
 }

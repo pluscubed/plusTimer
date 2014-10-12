@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class Session {
 
-    public static final int GET_AVERAGE_INVALID = -2;
+    public static final int GET_AVERAGE_INVALID_NOT_ENOUGH = -1;
 
     private ArrayList<Solve> mSolves;
 
@@ -49,90 +49,76 @@ public class Session {
         return mSolves.get(position);
     }
 
-    public String getStringCurrentAverageOf(int number, boolean milliseconds) {
-        if (number >= 5) {
-            long sum = 0;
-            ArrayList<Solve> solves = new ArrayList<Solve>();
+    /**
+     * Returns a String of the current average of some number of solves.
+     * If the number less than 3 or if the number of solves is less than the number, it'll return a blank String.
+     *
+     * @param number              the number of solves to average
+     * @param millisecondsEnabled whether to display milliseconds
+     * @return the current average of some number of solves
+     */
+    public String getStringCurrentAverageOf(int number, boolean millisecondsEnabled) {
+        if (number >= 3 && mSolves.size() >= number) {
+            List<Solve> solves = new ArrayList<Solve>();
 
-            int dnfcount = 0;
-
-            for (int i = 1; i < number + 1; i++) {
-                Solve x = mSolves.get(mSolves.size() - i);
+            //Add the most recent solves
+            for (int i = 0; i < number; i++) {
+                Solve x = mSolves.get(mSolves.size() - i - 1);
                 solves.add(x);
-                if (x.getPenalty() == Solve.Penalty.DNF) {
-                    dnfcount++;
-                }
             }
 
-            if (dnfcount < 2) {
-                solves.remove(Util.getBestSolveOfList(new ArrayList<Solve>(solves)));
-                solves.remove(Util.getWorstSolveOfList(new ArrayList<Solve>(solves)));
-                for (Solve i : solves) {
-                    sum += i.getTimeTwo();
-                }
-                return Util.timeStringFromNs(sum / (number - 2L), milliseconds);
-            } else {
+            long result = Util.getAverageOf(solves);
+
+            if (result == Long.MAX_VALUE) {
                 return "DNF";
+            } else {
+                return Util.timeStringFromNs(result, millisecondsEnabled);
             }
         }
         return "";
     }
 
-    public long getAverageOf(List<Solve> list, int number) {
-        if (number > 2 && list.size() == number) {
-            long sum = 0;
-            ArrayList<Solve> solves = new ArrayList<Solve>(list);
-
-            int dnfcount = 0;
-
-            for (Solve s : list) {
-                if (s.getPenalty() == Solve.Penalty.DNF) {
-                    dnfcount++;
-                }
-            }
-
-            if (dnfcount < 2) {
-                solves.remove(Util.getBestSolveOfList(new ArrayList<Solve>(solves)));
-                solves.remove(Util.getWorstSolveOfList(new ArrayList<Solve>(solves)));
-                for (Solve i : solves) {
-                    sum += i.getTimeTwo();
-                }
-                return sum / (number - 2L);
-            } else {
-                return Long.MAX_VALUE;
-            }
-        }
-        return GET_AVERAGE_INVALID;
-    }
-
-    public String getStringBestAverageOf(int number, boolean milliseconds) {
+    /**
+     * Returns a String of the best average of some number of solves.
+     * Returns a blank String if the number is less than 3.
+     *
+     * @param number              the number of solves to average
+     * @param millisecondsEnabled whether to display milliseconds
+     * @return the best average of some number of solves
+     */
+    public String getStringBestAverageOf(int number, boolean millisecondsEnabled) {
         long bestAverage = getBestAverageOf(number);
-        if (bestAverage == GET_AVERAGE_INVALID) {
-            return null;
+        if (bestAverage == GET_AVERAGE_INVALID_NOT_ENOUGH) {
+            return "";
         }
         if (bestAverage == Long.MAX_VALUE) {
             return "DNF";
         }
-        return Util.timeStringFromNs(bestAverage, milliseconds);
+        return Util.timeStringFromNs(bestAverage, millisecondsEnabled);
     }
 
+    /**
+     * Returns the milliseconds value of the best average of some number of solves.
+     * Returns {@link Long#MAX_VALUE} for DNF and {@link Session#GET_AVERAGE_INVALID_NOT_ENOUGH} if the list size is less than 3 or if the number of solves is less than the number.
+     *
+     * @param number the number of solves to average
+     * @return the best average of some number of solves
+     */
     public long getBestAverageOf(int number) {
-        long bestAverage = -1;
-        for (int i = 0; mSolves.size() - (number + i) >= 0; i++) {
-            long average = getAverageOf(
-                    mSolves.subList(mSolves.size() - (number + i), mSolves.size() - i), number);
-            if (average != GET_AVERAGE_INVALID) {
-                if (average < bestAverage || bestAverage == -1) {
+        if (number >= 3 && mSolves.size() >= number) {
+            long bestAverage = 0;
+            //Iterates through the list, starting with the [number] most recent solves
+            for (int i = 0; mSolves.size() - (number + i) >= 0; i++) {
+                //Sublist the [number] of solves, offset by i from the most recent. Gets the average.
+                long average = Util.getAverageOf(mSolves.subList(mSolves.size() - (number + i), mSolves.size() - i));
+                //If the average is less than the current best (or on the first loop), set the best average to the average
+                if (i == 0 || average < bestAverage) {
                     bestAverage = average;
                 }
             }
-        }
-        if (bestAverage != -1 && bestAverage != Long.MAX_VALUE) {
-            return bestAverage;
-        } else if (bestAverage == Long.MAX_VALUE) {
             return bestAverage;
         }
-        return GET_AVERAGE_INVALID;
+        return GET_AVERAGE_INVALID_NOT_ENOUGH;
     }
 
     public String getStringMean(boolean milliseconds) {
@@ -175,21 +161,15 @@ public class Session {
         }
         s.append(context.getString(R.string.number_solves)).append(getNumberOfSolves());
         if (getNumberOfSolves() > 0) {
-            s.append("\n").append(context.getString(R.string.mean))
-                    .append(getStringMean(milliseconds));
+            s.append("\n").append(context.getString(R.string.mean)).append(getStringMean(milliseconds));
             if (getNumberOfSolves() > 1) {
-                s.append("\n").append(context.getString(R.string.best))
-                        .append(Util.getBestSolveOfList(mSolves)
-                                .getDescriptiveTimeString(milliseconds));
-                s.append("\n").append(context.getString(R.string.worst))
-                        .append(Util.getWorstSolveOfList(mSolves)
-                                .getDescriptiveTimeString(milliseconds));
+                s.append("\n").append(context.getString(R.string.best)).append(Util.getBestSolveOfList(mSolves).getTimeString(milliseconds));
+                s.append("\n").append(context.getString(R.string.worst)).append(Util.getWorstSolveOfList(mSolves).getTimeString(milliseconds));
 
                 if (getNumberOfSolves() > 2) {
-                    long average = getAverageOf(mSolves, mSolves.size());
+                    long average = Util.getAverageOf(mSolves);
                     if (average != Long.MAX_VALUE) {
-                        s.append("\n").append(context.getString(R.string.average))
-                                .append(Util.timeStringFromNs(average, milliseconds));
+                        s.append("\n").append(context.getString(R.string.average)).append(Util.timeStringFromNs(average, milliseconds));
                     } else {
                         s.append("\n").append(context.getString(R.string.average)).append("DNF");
                     }
@@ -198,18 +178,11 @@ public class Session {
                     for (int i : averages) {
                         if (getNumberOfSolves() >= i) {
                             if (current) {
-                                s.append("\n")
-                                        .append(String.format(context.getString(R.string.cao), i))
-                                        .append(": ")
-                                        .append(getStringCurrentAverageOf(i, milliseconds));
+                                s.append("\n").append(String.format(context.getString(R.string.cao), i)).append(": ").append(getStringCurrentAverageOf(i, milliseconds));
                             } else {
-                                s.append("\n")
-                                        .append(String.format(context.getString(R.string.lao), i))
-                                        .append(": ")
-                                        .append(getStringCurrentAverageOf(i, milliseconds));
+                                s.append("\n").append(String.format(context.getString(R.string.lao), i)).append(": ").append(getStringCurrentAverageOf(i, milliseconds));
                             }
-                            s.append("\n").append(String.format(context.getString(R.string.bao), i))
-                                    .append(": ").append(getStringBestAverageOf(i, milliseconds));
+                            s.append("\n").append(String.format(context.getString(R.string.bao), i)).append(": ").append(getStringBestAverageOf(i, milliseconds));
                         }
                     }
                 }
@@ -226,11 +199,9 @@ public class Session {
                     } else {
                         s.append(i.getDescriptiveTimeString(milliseconds));
                     }
-                    s.append("\n")
-                            .append("     ")
-                            .append(Util.timeDateStringFromTimestamp(context, i.getTimestamp()))
-                            .append("\n")
-                            .append("     ").append(i.getScrambleAndSvg().getUiScramble(sign, puzzleTypeName)).append("\n\n");
+                    s.append("\n").append("     ").append(Util.timeDateStringFromTimestamp(context, i.getTimestamp()))
+                            .append("\n").append("     ").append(i.getScrambleAndSvg().getUiScramble(sign, puzzleTypeName))
+                            .append("\n\n");
                     c++;
                 }
             }

@@ -174,8 +174,7 @@ public class CurrentSessionTimerFragment extends Fragment
         for (int i : currentAverages) {
             if (PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
                     .getNumberOfSolves() >= i) {
-                s += String.format(context.getString(R.string.cao), i) + ": " + PuzzleType
-                        .getCurrent().getSession(PuzzleType.CURRENT_SESSION)
+                s += String.format(context.getString(R.string.cao), i) + ": " + PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
                         .getStringCurrentAverageOf(i, mMillisecondsEnabled) + "\n";
             }
         }
@@ -513,8 +512,7 @@ public class CurrentSessionTimerFragment extends Fragment
                             }
                             //Add the solve to the current session with the current
                             // scramble/scramble image and time
-                            PuzzleType.getCurrent()
-                                    .getSession(PuzzleType.CURRENT_SESSION).addSolve(s);
+                            PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION).addSolve(s);
 
                             mPenaltyBarLinearLayout.setVisibility(View.VISIBLE);
                             mPenaltyBarLinearLayout.animate().setStartDelay(1500).alpha(0f).setDuration(150).setListener(new Animator.AnimatorListener() {

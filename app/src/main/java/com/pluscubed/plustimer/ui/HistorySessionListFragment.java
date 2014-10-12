@@ -195,7 +195,7 @@ public class HistorySessionListFragment extends ListFragment {
             //Add PB of all historySessions
             s.append(getString(R.string.pb)).append(": ")
                     .append(Util.getBestSolveOfList(bestSolvesOfSessionsArray)
-                            .getDescriptiveTimeString(mMilliseconds));
+                            .getTimeString(mMilliseconds));
 
             //Add PB of Ao5,12,50,100,1000
             s.append(getBestAverageOfNumberOfSessions(new int[]{1000, 100, 50, 12, 5},
@@ -218,7 +218,7 @@ public class HistorySessionListFragment extends ListFragment {
                     if (session.getNumberOfSolves() >= averageNumber) {
                         long bestAverage = session.getBestAverageOf(averageNumber);
                         if (bestAverage != Long.MAX_VALUE
-                                && bestAverage != Session.GET_AVERAGE_INVALID) {
+                                && bestAverage != Session.GET_AVERAGE_INVALID_NOT_ENOUGH) {
                             timesSparseArray.put(i, bestAverage);
                         }
                     }
@@ -353,12 +353,11 @@ public class HistorySessionListFragment extends ListFragment {
     }
 
     /**
-     * Returns string with best average of _ for each number specified out of all the session in the
-     * list
+     * Returns string with best averages of [numbers].
      *
-     * @param numbers  the number for the averages
+     * @param numbers  the numbers for the averages
      * @param sessions list of sessions
-     * @return String with the best average of _'s
+     * @return String with the best averages of [numbers]
      */
     public String getBestAverageOfNumberOfSessions(int[] numbers, List<Session> sessions) {
         StringBuilder builder = new StringBuilder();
@@ -367,7 +366,8 @@ public class HistorySessionListFragment extends ListFragment {
             if (sessions.size() > 0) {
                 for (Session session : sessions) {
                     long bestAverage = session.getBestAverageOf(number);
-                    if (bestAverage != Session.GET_AVERAGE_INVALID) {
+                    if (bestAverage != Session.GET_AVERAGE_INVALID_NOT_ENOUGH) {
+                        //If the average is possible for the number
                         bestAverages.add(bestAverage);
                     }
                 }
