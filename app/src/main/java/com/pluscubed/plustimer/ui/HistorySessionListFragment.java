@@ -393,7 +393,7 @@ public class HistorySessionListFragment extends ListFragment {
         Spinner menuPuzzleSpinner = (Spinner) menu.findItem(R.id.menu_activity_history_sessionlist_puzzletype_spinner).getActionView();
         ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter = new SpinnerPuzzleTypeAdapter(getActivity().getLayoutInflater(), getActivity().getActionBar().getThemedContext());
         menuPuzzleSpinner.setAdapter(puzzleTypeSpinnerAdapter);
-        menuPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition(PuzzleType.getCurrent()), true);
+        menuPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition(PuzzleType.valueOf(mPuzzleTypeName)), true);
         menuPuzzleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
