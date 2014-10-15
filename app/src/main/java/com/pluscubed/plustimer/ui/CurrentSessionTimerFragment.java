@@ -245,6 +245,8 @@ public class CurrentSessionTimerFragment extends Fragment
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
+        PuzzleType.initialize(getActivity());
+
         mRetainedFragment = getRetainedFragment();
         mRetainedFragment.setTimerFragmentCallback(this);
 

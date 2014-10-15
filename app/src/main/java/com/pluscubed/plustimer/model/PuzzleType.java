@@ -50,6 +50,7 @@ public enum PuzzleType {
     private Session mCurrentSession;
     private boolean mEnabled;
     private Puzzle mPuzzle;
+    private boolean mInitialized;
 
     PuzzleType(String scramblerSpec, int stringIndex) {
         this.scramblerSpec = scramblerSpec;
@@ -66,8 +67,10 @@ public enum PuzzleType {
         return sCurrentPuzzleType;
     }
 
-    public static void setCurrent(PuzzleType type) {
+    public static void setCurrent(PuzzleType type, Context context) {
         sCurrentPuzzleType = type;
+        SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        defaultSharedPreferences.edit().putString(PREF_CURRENT_PUZZLETYPE, sCurrentPuzzleType.name()).apply();
     }
 
     public static List<PuzzleType> valuesExcludeDisabled() {
@@ -80,23 +83,24 @@ public enum PuzzleType {
         return array;
     }
 
-    /**
-     * Save the current PuzzleType using shared preferences.
-     */
-    public static void saveCurrentPuzzleType(Context context) {
-        SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        defaultSharedPreferences.edit().putString(PREF_CURRENT_PUZZLETYPE, sCurrentPuzzleType.name()).apply();
+    public static void initialize(Context context) {
+        if (sCurrentPuzzleType == null)
+            sCurrentPuzzleType = valueOf(PreferenceManager.getDefaultSharedPreferences(context).getString(PREF_CURRENT_PUZZLETYPE, THREE.name()));
+        for (PuzzleType puzzleType : values()) {
+            puzzleType.init(context);
+        }
     }
 
     public HistorySessions getHistorySessions() {
         return mHistorySessions;
     }
 
-    public void init(Context context) {
-        mHistorySessions.init(context);
-        SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        mEnabled = defaultSharedPreferences.getBoolean(SettingsActivity.PREF_PUZZLETYPE_ENABLE_PREFIX + name().toLowerCase(), true);
-        sCurrentPuzzleType = valueOf(defaultSharedPreferences.getString(PREF_CURRENT_PUZZLETYPE, THREE.name()));
+    private void init(Context context) {
+        if (!mInitialized) {
+            mHistorySessions.init(context);
+            mEnabled = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(SettingsActivity.PREF_PUZZLETYPE_ENABLE_PREFIX + name().toLowerCase(), true);
+        }
+        mInitialized = true;
     }
 
     public void submitCurrentSession(Context context) {

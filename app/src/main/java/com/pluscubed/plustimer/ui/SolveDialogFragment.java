@@ -80,6 +80,12 @@ public class SolveDialogFragment extends DialogFragment {
         }
     }
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        PuzzleType.initialize(getActivity());
+    }
+
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {

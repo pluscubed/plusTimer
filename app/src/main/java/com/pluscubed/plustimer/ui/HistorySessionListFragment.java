@@ -75,6 +75,7 @@ public class HistorySessionListFragment extends ListFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        PuzzleType.initialize(getActivity());
         if (savedInstanceState != null) {
             mPuzzleTypeName = savedInstanceState.getString(STATE_PUZZLETYPE_DISPLAYNAME);
         } else {
@@ -399,7 +400,6 @@ public class HistorySessionListFragment extends ListFragment {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 mPuzzleTypeName = (parent.getItemAtPosition(position)).toString();
                 onSessionListChanged();
-                PuzzleType.saveCurrentPuzzleType(getActivity());
             }
 
             @Override

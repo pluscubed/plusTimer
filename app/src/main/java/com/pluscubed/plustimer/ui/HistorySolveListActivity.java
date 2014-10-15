@@ -53,6 +53,8 @@ public class HistorySolveListActivity extends Activity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        PuzzleType.initialize(this);
+
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
         FragmentManager fm = getFragmentManager();

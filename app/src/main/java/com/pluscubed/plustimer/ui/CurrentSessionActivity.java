@@ -71,16 +71,14 @@ public class CurrentSessionActivity extends BaseActivity
         setContentView(R.layout.activity_current_session);
         super.onCreate(savedInstanceState);
 
+        PuzzleType.initialize(this);
+
         if (BuildConfig.USE_CRASHLYTICS) {
             Crashlytics.start(this);
         }
 
         if (savedInstanceState != null) {
             mMenuItemsEnable = savedInstanceState.getBoolean(STATE_MENU_ITEMS_ENABLE_BOOLEAN);
-        } else {
-            for (PuzzleType p : PuzzleType.values()) {
-                p.init(this);
-            }
         }
 
         Fragment currentSessionRetainedFragment = getFragmentManager()
@@ -173,10 +171,9 @@ public class CurrentSessionActivity extends BaseActivity
         menuPuzzleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                PuzzleType.setCurrent((PuzzleType) parent.getItemAtPosition(position));
+                PuzzleType.setCurrent((PuzzleType) parent.getItemAtPosition(position), CurrentSessionActivity.this);
                 ((CurrentSessionTimerFragment) getFragmentManager().findFragmentByTag(makeFragmentName(R.id.activity_current_session_viewpager, 0))).onSessionChanged();
                 ((SolveListFragment) getFragmentManager().findFragmentByTag(makeFragmentName(R.id.activity_current_session_viewpager, 1))).onSessionChanged();
-                PuzzleType.saveCurrentPuzzleType(CurrentSessionActivity.this);
             }
 
             @Override

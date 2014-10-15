@@ -61,10 +61,4 @@ public class SpinnerPuzzleTypeAdapter extends ArrayAdapter<PuzzleType> {
         }
         return convertView;
     }
-
-    public void onListChanged() {
-        clear();
-        addAll(PuzzleType.valuesExcludeDisabled());
-        notifyDataSetChanged();
-    }
 }

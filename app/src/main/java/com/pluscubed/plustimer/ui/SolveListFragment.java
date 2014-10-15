@@ -111,6 +111,7 @@ public class SolveListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        PuzzleType.initialize(getActivity());
         mCurrentToggle = getArguments().getBoolean(ARG_CURRENT_BOOLEAN);
         mPuzzleTypeName = getArguments().getString(ARG_PUZZLETYPE_DISPLAYNAME);
         mSessionIndex = getArguments().getInt(ARG_SESSION_POSITION);
