@@ -24,17 +24,11 @@ import com.pluscubed.plustimer.ui.widget.SlidingTabLayout;
 /**
  * Current Session Activity
  */
-public class CurrentSessionActivity extends BaseActivity
-        implements CurrentSessionTimerFragment.GetRetainedFragmentCallback,
-        SolveDialogFragment.OnDialogDismissedListener, CreateDialogCallback,
-        CurrentSessionTimerFragment.MenuItemsEnableCallback {
+public class CurrentSessionActivity extends BaseActivity implements SolveDialogFragment.OnDialogDismissedListener, CreateDialogCallback, CurrentSessionTimerFragment.MenuItemsEnableCallback {
 
     public static final String DIALOG_SOLVE_TAG = "SOLVE_DIALOG";
 
     private static final String STATE_MENU_ITEMS_ENABLE_BOOLEAN = "menu_items_enable_boolean";
-
-    private static final String CURRENT_SESSION_TIMER_RETAINED_TAG
-            = "CURRENT_SESSION_TIMER_RETAINED";
 
     private boolean mMenuItemsEnable;
 
@@ -79,17 +73,6 @@ public class CurrentSessionActivity extends BaseActivity
 
         if (savedInstanceState != null) {
             mMenuItemsEnable = savedInstanceState.getBoolean(STATE_MENU_ITEMS_ENABLE_BOOLEAN);
-        }
-
-        Fragment currentSessionRetainedFragment = getFragmentManager()
-                .findFragmentByTag(CURRENT_SESSION_TIMER_RETAINED_TAG);
-        // If the Fragment is non-null, then it is currently being
-        // retained across a configuration change.
-        if (currentSessionRetainedFragment == null) {
-            currentSessionRetainedFragment = new CurrentSessionTimerRetainedFragment();
-            getFragmentManager().beginTransaction()
-                    .add(currentSessionRetainedFragment, CURRENT_SESSION_TIMER_RETAINED_TAG)
-                    .commit();
         }
 
         //Set up ViewPager with CurrentSessionAdapter
@@ -137,12 +120,6 @@ public class CurrentSessionActivity extends BaseActivity
     private SolveListFragment getSolveListFragment() {
         return (SolveListFragment) getFragmentManager()
                 .findFragmentByTag(makeFragmentName(R.id.activity_current_session_viewpager, 1));
-    }
-
-    @Override
-    public CurrentSessionTimerRetainedFragment getCurrentSessionTimerRetainedFragment() {
-        return (CurrentSessionTimerRetainedFragment) getFragmentManager()
-                .findFragmentByTag(CURRENT_SESSION_TIMER_RETAINED_TAG);
     }
 
     @Override

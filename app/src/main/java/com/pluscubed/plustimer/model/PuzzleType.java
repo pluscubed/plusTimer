@@ -104,8 +104,10 @@ public enum PuzzleType {
     }
 
     public void submitCurrentSession(Context context) {
-        mHistorySessions.addSession(mCurrentSession, context);
-        resetCurrentSession();
+        if (mCurrentSession != null && mCurrentSession.getNumberOfSolves() > 0) {
+            mHistorySessions.addSession(mCurrentSession, context);
+            resetCurrentSession();
+        }
     }
 
     public Puzzle getPuzzle() {

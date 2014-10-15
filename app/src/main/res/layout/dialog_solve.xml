@@ -60,8 +60,8 @@
                 android:layout_height="match_parent"
                 android:layout_margin="8dp"
                 android:paddingLeft="4dp"
-                android:textColor="?android:attr/textColorAlertDialogListItem"
-                android:paddingStart="4dp" />
+                android:paddingStart="4dp"
+                android:textColor="?android:attr/textColorAlertDialogListItem" />
         </TableRow>
 
         <TableRow

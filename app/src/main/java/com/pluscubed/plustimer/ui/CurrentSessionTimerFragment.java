@@ -42,14 +42,13 @@ import it.sephiroth.android.library.widget.HListView;
  * TimerFragment
  */
 
-public class CurrentSessionTimerFragment extends Fragment
-        implements CurrentSessionTimerRetainedFragment.Callback {
+public class CurrentSessionTimerFragment extends Fragment {
 
     public static final String TAG = "CURRENT_SESSION_TIMER_FRAGMENT";
-
     public static final long HOLD_TIME = 550000000L;
     public static final int REFRESH_RATE = 15;
-
+    private static final String CURRENT_SESSION_TIMER_RETAINED_TAG
+            = "CURRENT_SESSION_TIMER_RETAINED";
     private static final String STATE_IMAGE_DISPLAYED = "scramble_image_displayed_boolean";
     private static final String STATE_START_TIME = "start_time_long";
     private static final String STATE_RUNNING = "running_boolean";
@@ -222,21 +221,25 @@ public class CurrentSessionTimerFragment extends Fragment
     }
 
     //Set scramble text and scramble image to current ones
-    @Override
     public void setScrambleTextAndImageToCurrent() {
-        SVG svg = null;
-        try {
-            svg = SVG.getFromString(mRetainedFragment.getCurrentScrambleAndSvg().getSvg());
-        } catch (SVGParseException e) {
-            e.printStackTrace();
-        }
-        Drawable drawable = new PictureDrawable(svg.renderToPicture());
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            mScrambleImage.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-        }
-        mScrambleImage.setImageDrawable(drawable);
+        if (mRetainedFragment.getCurrentScrambleAndSvg() != null) {
+            SVG svg = null;
+            try {
+                svg = SVG.getFromString(mRetainedFragment.getCurrentScrambleAndSvg().getSvg());
+            } catch (SVGParseException e) {
+                e.printStackTrace();
+            }
+            Drawable drawable = new PictureDrawable(svg.renderToPicture());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                mScrambleImage.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+            }
+            mScrambleImage.setImageDrawable(drawable);
 
-        mScrambleText.setText(mRetainedFragment.getCurrentScrambleAndSvg().getUiScramble(mSignEnabled, PuzzleType.getCurrent().name()));
+            mScrambleText.setText(mRetainedFragment.getCurrentScrambleAndSvg().getUiScramble(mSignEnabled, PuzzleType.getCurrent().name()));
+        } else {
+            mRetainedFragment.generateNextScramble();
+            mRetainedFragment.postSetScrambleViewsToCurrent();
+        }
     }
 
 
@@ -248,7 +251,7 @@ public class CurrentSessionTimerFragment extends Fragment
         PuzzleType.initialize(getActivity());
 
         mRetainedFragment = getRetainedFragment();
-        mRetainedFragment.setTimerFragmentCallback(this);
+        mRetainedFragment.setTargetFragment(this, 0);
 
         //Set up UIHandler
         mUiHandler = new Handler(Looper.getMainLooper());
@@ -273,9 +276,19 @@ public class CurrentSessionTimerFragment extends Fragment
         super.onDestroy();
         //When destroyed, stop timer runnable
         mUiHandler.removeCallbacksAndMessages(null);
-        mRetainedFragment.setTimerFragmentCallback(null);
+        mRetainedFragment.setTargetFragment(null, 0);
     }
 
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        Fragment currentSessionRetainedFragment = getFragmentManager().findFragmentByTag(CURRENT_SESSION_TIMER_RETAINED_TAG);
+        // If the Fragment is null, create and add it
+        if (currentSessionRetainedFragment == null) {
+            currentSessionRetainedFragment = new CurrentSessionTimerRetainedFragment();
+            getFragmentManager().beginTransaction().add(currentSessionRetainedFragment, CURRENT_SESSION_TIMER_RETAINED_TAG).commit();
+        }
+    }
 
     public void onSessionSolvesChanged() {
         //Update stats
@@ -407,7 +420,6 @@ public class CurrentSessionTimerFragment extends Fragment
         mTimerText2.setTextColor(color);
     }
 
-    @Override
     public void enableMenuItems(boolean enable) {
         MenuItemsEnableCallback callback;
         try {
@@ -702,7 +714,6 @@ public class CurrentSessionTimerFragment extends Fragment
         setTimerTextToPrefSize();
     }
 
-    @Override
     public Handler getUiHandler() {
         return mUiHandler;
     }
