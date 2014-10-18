@@ -1,7 +1,6 @@
 package com.pluscubed.plustimer.ui;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -10,8 +9,9 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -29,7 +29,7 @@ import com.pluscubed.plustimer.R;
 /**
  * Base Activity with the Navigation Drawer
  */
-public abstract class BaseActivity extends Activity {
+public abstract class BaseActivity extends ActionBarActivity {
 
     protected static final int NAVDRAWER_ITEM_CURRENT_SESSION = 0;
 
@@ -119,8 +119,7 @@ public abstract class BaseActivity extends Activity {
             return;
         }
 
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
-                R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close) {
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.drawer_open, R.string.drawer_close) {
 
             private ActionBarWrappedDrawerToggle mWrapped = getWrappedDrawerToggle();
 
@@ -199,8 +198,8 @@ public abstract class BaseActivity extends Activity {
             }
         });
 
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
 
         mDrawerToggle.syncState();
 
@@ -217,9 +216,12 @@ public abstract class BaseActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(getContentViewId());
         mHandler = new Handler();
         setupNavDrawer();
     }
+
+    abstract int getContentViewId();
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
@@ -241,9 +243,9 @@ public abstract class BaseActivity extends Activity {
             }
         }
         if (drawerOpen) {
-            getActionBar().setTitle(sDrawerTitle);
+            getSupportActionBar().setTitle(sDrawerTitle);
         } else {
-            getActionBar().setTitle(sSectionAbTitles[getSelfNavDrawerItem()]);
+            getSupportActionBar().setTitle(sSectionAbTitles[getSelfNavDrawerItem()]);
         }
         return super.onPrepareOptionsMenu(menu);
     }

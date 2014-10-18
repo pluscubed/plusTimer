@@ -52,7 +52,6 @@ public class HistorySessionListActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setContentView(R.layout.activity_history_sessionlist);
         super.onCreate(savedInstanceState);
 
         FragmentManager fm = getFragmentManager();
@@ -62,5 +61,10 @@ public class HistorySessionListActivity extends BaseActivity {
             fm.beginTransaction().add(R.id.activity_history_sessionlist_main_framelayout, fragment)
                     .commit();
         }
+    }
+
+    @Override
+    protected int getContentViewId() {
+        return R.layout.activity_history_sessionlist;
     }
 }

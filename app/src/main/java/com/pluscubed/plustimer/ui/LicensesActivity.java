@@ -1,11 +1,11 @@
 package com.pluscubed.plustimer.ui;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NavUtils;
+import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,7 +22,7 @@ import java.io.InputStreamReader;
 /**
  * Licenses Activity
  */
-public class LicensesActivity extends Activity {
+public class LicensesActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,8 +34,8 @@ public class LicensesActivity extends Activity {
                     .replace(android.R.id.content, new LicensesFragment())
                     .commit();
         }
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
         setTitle(R.string.open_source_licenses);
     }
 

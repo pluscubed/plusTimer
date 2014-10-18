@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v13.app.FragmentPagerAdapter;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -62,7 +63,6 @@ public class CurrentSessionActivity extends BaseActivity implements SolveDialogF
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setContentView(R.layout.activity_current_session);
         super.onCreate(savedInstanceState);
 
         PuzzleType.initialize(this);
@@ -112,6 +112,11 @@ public class CurrentSessionActivity extends BaseActivity implements SolveDialogF
         viewPager.setCurrentItem(0);
     }
 
+    @Override
+    protected int getContentViewId() {
+        return R.layout.activity_current_session;
+    }
+
     private CurrentSessionTimerFragment getCurrentSessionTimerFragment() {
         return (CurrentSessionTimerFragment) getFragmentManager()
                 .findFragmentByTag(makeFragmentName(R.id.activity_current_session_viewpager, 0));
@@ -141,8 +146,8 @@ public class CurrentSessionActivity extends BaseActivity implements SolveDialogF
         }
         getMenuInflater().inflate(R.menu.menu_current_session, menu);
 
-        Spinner menuPuzzleSpinner = (Spinner) menu.findItem(R.id.menu_activity_current_session_puzzletype_spinner).getActionView();
-        ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter = new SpinnerPuzzleTypeAdapter(getLayoutInflater(), this);
+        Spinner menuPuzzleSpinner = (Spinner) MenuItemCompat.getActionView(menu.findItem(R.id.menu_activity_current_session_puzzletype_spinner));
+        ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter = new SpinnerPuzzleTypeAdapter(getLayoutInflater(), getSupportActionBar().getThemedContext());
         menuPuzzleSpinner.setAdapter(puzzleTypeSpinnerAdapter);
         menuPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition(PuzzleType.getCurrent()), true);
         menuPuzzleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {

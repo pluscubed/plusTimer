@@ -1,7 +1,6 @@
 package com.pluscubed.plustimer.ui;
 
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -15,6 +14,7 @@ import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NavUtils;
+import android.support.v7.app.ActionBarActivity;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,7 +29,7 @@ import com.pluscubed.plustimer.model.PuzzleType;
 /**
  * Settings Activity and Fragment
  */
-public class SettingsActivity extends Activity {
+public class SettingsActivity extends ActionBarActivity {
 
     public static final String PREF_INSPECTION_CHECKBOX = "pref_inspection_checkbox";
     public static final String PREF_HOLDTOSTART_CHECKBOX = "pref_holdtostart_checkbox";
@@ -52,8 +52,8 @@ public class SettingsActivity extends Activity {
                     .replace(android.R.id.content, new SettingsFragment())
                     .commit();
         }
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
         setTitle(R.string.settings);
     }
 

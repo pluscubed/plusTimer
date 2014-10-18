@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.ActionBarActivity;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
 import android.util.TypedValue;
@@ -391,8 +393,8 @@ public class HistorySessionListFragment extends ListFragment {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.menu_history_sessionlist, menu);
 
-        Spinner menuPuzzleSpinner = (Spinner) menu.findItem(R.id.menu_activity_history_sessionlist_puzzletype_spinner).getActionView();
-        ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter = new SpinnerPuzzleTypeAdapter(getActivity().getLayoutInflater(), getActivity().getActionBar().getThemedContext());
+        Spinner menuPuzzleSpinner = (Spinner) MenuItemCompat.getActionView(menu.findItem(R.id.menu_activity_history_sessionlist_puzzletype_spinner));
+        ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter = new SpinnerPuzzleTypeAdapter(getActivity().getLayoutInflater(), ((ActionBarActivity) getActivity()).getSupportActionBar().getThemedContext());
         menuPuzzleSpinner.setAdapter(puzzleTypeSpinnerAdapter);
         menuPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition(PuzzleType.valueOf(mPuzzleTypeName)), true);
         menuPuzzleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {

@@ -1,11 +1,11 @@
 package com.pluscubed.plustimer.ui;
 
-import android.app.Activity;
 import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -15,7 +15,7 @@ import com.pluscubed.plustimer.model.PuzzleType;
 /**
  * History SolveList (started onListItemClick HistorySessionListFragment) activity
  */
-public class HistorySolveListActivity extends Activity
+public class HistorySolveListActivity extends ActionBarActivity
         implements SolveDialogFragment.OnDialogDismissedListener, CreateDialogCallback {
 
     public static final String EXTRA_HISTORY_SESSION_POSITION = "com.pluscubed.plustimer.history_session_position";
@@ -55,8 +55,8 @@ public class HistorySolveListActivity extends Activity
 
         PuzzleType.initialize(this);
 
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
         FragmentManager fm = getFragmentManager();
         Fragment fragment = fm.findFragmentById(android.R.id.content);
         int position = getIntent().getIntExtra(EXTRA_HISTORY_SESSION_POSITION, 0);

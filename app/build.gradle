@@ -24,11 +24,11 @@ task syncTask(type: Sync) {
 preBuild.dependsOn('syncTask')
 
 android {
-    compileSdkVersion 20
-    buildToolsVersion '20.0.0'
+    compileSdkVersion 21
+    buildToolsVersion '21.0.1'
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 20
+        targetSdkVersion 21
         versionCode 10
         versionName '0.1.4'
     }
@@ -70,10 +70,11 @@ android {
 dependencies {
     compile project(':libraries:hlistviewlibrary')
     compile 'com.jjoe64:graphview:3.+'
-    compile 'com.android.support:support-v13:20.+'
+    compile 'com.android.support:appcompat-v7:21.+'
+    compile 'com.android.support:support-v13:21.+'
     compile 'com.github.cubing:tnoodle-android:0.+@aar'
     compile 'com.caverock:androidsvg:1.2.1'
-    compile 'com.android.support:support-annotations:20.+'
+    compile 'com.android.support:support-annotations:21.+'
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.crashlytics.android:crashlytics:1.+'
     compile 'com.google.code.gson:gson:2.+'
