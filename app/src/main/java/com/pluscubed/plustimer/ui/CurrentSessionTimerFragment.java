@@ -250,7 +250,12 @@ public class CurrentSessionTimerFragment extends Fragment {
 
         PuzzleType.initialize(getActivity());
 
-        mRetainedFragment = getRetainedFragment();
+        mRetainedFragment = (CurrentSessionTimerRetainedFragment) getFragmentManager().findFragmentByTag(CURRENT_SESSION_TIMER_RETAINED_TAG);
+        // If the Fragment is null, create and add it
+        if (mRetainedFragment == null) {
+            mRetainedFragment = new CurrentSessionTimerRetainedFragment();
+            getFragmentManager().beginTransaction().add(mRetainedFragment, CURRENT_SESSION_TIMER_RETAINED_TAG).commit();
+        }
         mRetainedFragment.setTargetFragment(this, 0);
 
         //Set up UIHandler
@@ -277,17 +282,6 @@ public class CurrentSessionTimerFragment extends Fragment {
         //When destroyed, stop timer runnable
         mUiHandler.removeCallbacksAndMessages(null);
         mRetainedFragment.setTargetFragment(null, 0);
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        Fragment currentSessionRetainedFragment = getFragmentManager().findFragmentByTag(CURRENT_SESSION_TIMER_RETAINED_TAG);
-        // If the Fragment is null, create and add it
-        if (currentSessionRetainedFragment == null) {
-            currentSessionRetainedFragment = new CurrentSessionTimerRetainedFragment();
-            getFragmentManager().beginTransaction().add(currentSessionRetainedFragment, CURRENT_SESSION_TIMER_RETAINED_TAG).commit();
-        }
     }
 
     public void onSessionSolvesChanged() {
@@ -357,17 +351,6 @@ public class CurrentSessionTimerFragment extends Fragment {
                 mTimerText2.setTextSize(TypedValue.COMPLEX_UNIT_SP, mPrefSize / 2);
             }
         }
-    }
-
-    private CurrentSessionTimerRetainedFragment getRetainedFragment() {
-        GetRetainedFragmentCallback callback;
-        try {
-            callback = (GetRetainedFragmentCallback) getActivity();
-        } catch (ClassCastException e) {
-            throw new ClassCastException(getActivity().toString()
-                    + " must implement GetRetainedFragmentCallback");
-        }
-        return callback.getCurrentSessionTimerRetainedFragment();
     }
 
     //Called when the session is changed to another one (action bar spinner)
@@ -716,12 +699,6 @@ public class CurrentSessionTimerFragment extends Fragment {
 
     public Handler getUiHandler() {
         return mUiHandler;
-    }
-
-
-    public interface GetRetainedFragmentCallback {
-
-        CurrentSessionTimerRetainedFragment getCurrentSessionTimerRetainedFragment();
     }
 
     public interface MenuItemsEnableCallback {
