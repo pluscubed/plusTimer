@@ -12,7 +12,7 @@ import java.util.List;
  */
 public class HistorySessions {
 
-    private final String mFilename;
+    private String mFilename;
 
     private List<Session> mHistorySessionsList;
 
@@ -22,6 +22,10 @@ public class HistorySessions {
      * @param filename the filename to use for saving and loading
      */
     public HistorySessions(String filename) {
+        mFilename = filename;
+    }
+
+    public void setFilename(String filename) {
         mFilename = filename;
     }
 

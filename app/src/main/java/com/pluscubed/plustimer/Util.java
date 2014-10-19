@@ -32,8 +32,7 @@ import java.util.List;
  */
 public class Util {
 
-    private static final Type SESSION_LIST_TYPE;
-    private static final Gson gson;
+    public static final String PREF_VERSION_CODE = "pref_version_code";
 
     static {
         gson = new GsonBuilder()
@@ -43,6 +42,9 @@ public class Util {
         SESSION_LIST_TYPE = new TypeToken<List<Session>>() {
         }.getType();
     }
+
+    private static final Type SESSION_LIST_TYPE;
+    private static final Gson gson;
 
     /**
      * Save a list of sessions to a file.
