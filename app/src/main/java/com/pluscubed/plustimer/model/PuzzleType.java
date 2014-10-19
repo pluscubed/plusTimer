@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import com.pluscubed.plustimer.R;
+import com.pluscubed.plustimer.Util;
 import com.pluscubed.plustimer.ui.SettingsActivity;
 
 import net.gnehzr.tnoodle.scrambles.Puzzle;
@@ -40,9 +41,9 @@ public enum PuzzleType {
 
     public static final int CURRENT_SESSION = -1;
     public static final String PREF_CURRENT_PUZZLETYPE = "current_puzzletype";
-
     private static final int NOT_SPECIAL_STRING = -1;
     private static PuzzleType sCurrentPuzzleType;
+    public final String currentSessionFileName;
     public final String scramblerSpec;
     public final boolean official;
     private final int mStringIndex;
@@ -57,6 +58,7 @@ public enum PuzzleType {
         mStringIndex = stringIndex;
         official = !this.scramblerSpec.contains("fast");
         mHistorySessions = new HistorySessions(scramblerSpec + ".json");
+        currentSessionFileName = scramblerSpec + "-current.json";
     }
 
     PuzzleType(String scramblerSpec) {
@@ -99,8 +101,18 @@ public enum PuzzleType {
         if (!mInitialized) {
             mHistorySessions.init(context);
             mEnabled = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(SettingsActivity.PREF_PUZZLETYPE_ENABLE_PREFIX + name().toLowerCase(), true);
+            List<Session> currentSessions = Util.getSessionListFromFile(context, currentSessionFileName);
+            if (currentSessions.size() > 0) {
+                mCurrentSession = currentSessions.get(0);
+            }
         }
         mInitialized = true;
+    }
+
+    public void saveCurrentSession(Context context) {
+        ArrayList<Session> session = new ArrayList<Session>();
+        session.add(mCurrentSession);
+        Util.saveSessionListToFile(context, currentSessionFileName, session);
     }
 
     public void submitCurrentSession(Context context) {
