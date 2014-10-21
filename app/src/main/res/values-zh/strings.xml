@@ -38,18 +38,18 @@
     <string name="pref_keepscreenon_title">屏幕常亮</string>
 
     <string name="pref_two_row_time_summary">时:分:秒在上，毫秒在下</string>
-    <string name="pref_two_row_time_title">计时器两行显示</string>
+    <string name="pref_two_row_time_title">两行显示</string>
 
-    <string name="pref_time_text_size_title">计时器字体大小</string>
+    <string name="pref_time_text_size_title">字体大小</string>
     <string name="time_text_edittext_dialog_title">计时器字体大小 (默认100):</string>
 
     <string name="pref_update_time_title">计时器更新</string>
 
-    <string name="pref_timer_category_title">Timer</string>
+    <string name="pref_timer_category_title">计时器</string>
 
     <string name="pref_milliseconds_title">显示到毫秒(0.001)</string>
 
-    <string name="puzzle_types_setup">启用/禁用魔方类型</string>
+    <string name="puzzle_types_setup">启用、禁用魔方类型</string>
     <string name="no_disable_all_puzzletypes">不能禁用所有魔方类型！</string>
 
     <string name="pref_sign_title">使用SiGN</string>
