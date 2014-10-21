@@ -37,6 +37,23 @@
     <string name="pref_keepscreenon_summary">防止屏幕自动休眠</string>
     <string name="pref_keepscreenon_title">屏幕常亮</string>
 
+    <string name="pref_two_row_time_summary">时:分:秒在上，毫秒在下</string>
+    <string name="pref_two_row_time_title">两行显示</string>
+
+    <string name="pref_time_text_size_title">字体大小</string>
+    <string name="time_text_edittext_dialog_title">计时器字体大小 (默认100):</string>
+
+    <string name="pref_update_time_title">计时器更新</string>
+
+    <string name="pref_timer_category_title">计时器</string>
+
+    <string name="pref_milliseconds_title">显示到毫秒(0.001)</string>
+
+    <string name="puzzle_types_setup">启用、禁用魔方类型</string>
+    <string name="no_disable_all_puzzletypes">不能禁用所有魔方类型！</string>
+
+    <string name="pref_sign_title">使用SiGN</string>
+
     <string-array name="penalty_array">
         <item>无</item>
         <item>+2</item>
@@ -58,19 +75,12 @@
         <item>成绩列表</item>
     </string-array>
 
-    <string-array name="puzzle_types">
+    <string-array name="puzzles">
         <item>SQ1</item>
         <item>斜转</item>
         <item>金字塔</item>
         <item>五魔</item>
         <item>魔表</item>
-        <item>7x7</item>
-        <item>6x6</item>
-        <item>5x5</item>
-        <item>4x4</item>
-        <item>4x4</item>
-        <item>3x3</item>
-        <item>2x2</item>
     </string-array>
 
     <string-array name="pref_update_time_list_entries">
@@ -92,21 +102,19 @@
     <string name="email">发送反馈</string>
     <string name="rate">在Play Store上评价</string>
 
-    <string name="unofficial">(快,非WCA)</string>
+    <string name="unofficial">快，非WCA</string>
     <string name="reset_warning">重置本组?</string>
     <string name="reset_warning_message">当前组内所有成绩将被删除!</string>
     <string name="manual_add_solve">手动加成绩</string>
-    <string name="time">时间:</string>
+    <string name="time">时间（秒）:</string>
     <string name="scramble_colon">打乱:</string>
-    <string name="dialog_wip">目前还不支持修改时间或打乱，修改框是框架</string>
     <string name="best_times">单次最快</string>
     <string name="best_ao">%1$d次去尾最快</string>
-    <string name="pref_two_row_time_summary">时:分:秒在上，毫秒在下</string>
-    <string name="pref_two_row_time_title">计时器两行显示</string>
-    <string name="pref_time_text_size_title">计时器字体大小</string>
-    <string name="time_text_edittext_dialog_title">计时器字体大小 (默认100):</string>
-    <string name="pref_update_time_title">计时器更新</string>
     <string name="timing">还原</string>
-    <string name="pref_milliseconds_title">显示到毫秒(0.001)</string>
+    <string name="oh">单手</string>
+    <string name="bld">盲拧</string>
+    <string name="feet">脚拧</string>
+    <string name="timestamp">时间戳:</string>
+    <string name="invalid_scramble">非正确打乱！</string>
 
 </resources>

@@ -23,9 +23,7 @@
     <string name="session_no_solves">Session is empty!\nGo do some solves!</string>
     <string name="session_submitted">Session has been submitted to history list.</string>
     <string name="session_reset">Session has been reset.</string>
-    <string name="puzzletype_no_sovles">This puzzle has no recorded sessions!\nGo do some solves and
-        click Submit in Session Details to record the session.
-    </string>
+    <string name="puzzletype_no_sovles">This puzzle has no recorded sessions!\nGo do some solves and click Submit in Session Details to record the session.</string>
     <string name="share">Share</string>
     <string name="share_dialog_title">Share times via…</string>
 
@@ -34,12 +32,28 @@
     <string name="pref_inspection_summary">15-second WCA countdown for inspecting the cube</string>
 
     <string name="pref_holdtostart_title">Hold to Start</string>
-    <string name="pref_holdtostart_summary">Touch and hold for 0.55 seconds before starting (like
-        SpeedStacks timer)
-    </string>
+    <string name="pref_holdtostart_summary">Touch and hold for 0.55 seconds before starting (like SpeedStacks timer)</string>
 
     <string name="pref_keepscreenon_summary">Prevent automatic sleep timeout</string>
     <string name="pref_keepscreenon_title">Keep Screen On</string>
+
+    <string name="pref_two_row_time_summary">Hours:Minutes:Seconds on top, milliseconds on the bottom</string>
+    <string name="pref_two_row_time_title">Two Row Display</string>
+
+    <string name="pref_time_text_size_title">Text Size</string>
+    <string name="time_text_edittext_dialog_title">Set timer text size (default 100):</string>
+
+    <string name="pref_update_time_title">Text Updating</string>
+
+    <string name="pref_timer_category_title">Timer</string>
+
+    <string name="pref_milliseconds_title">Use Milliseconds (0.001)</string>
+
+    <string name="puzzle_types_setup">Enable/Disable Puzzle Types</string>
+    <string name="no_disable_all_puzzletypes">You can\'t disable all puzzle types!</string>
+
+    <string name="pref_sign_title">Use SiGN Notation</string>
+
 
     <string-array name="penalty_array">
         <item>None</item>
@@ -62,19 +76,12 @@
         <item>SESSION DETAILS</item>
     </string-array>
 
-    <string-array name="puzzle_types">
+    <string-array name="puzzles">
         <item>Square-1</item>
         <item>Skewb</item>
         <item>Pyraminx</item>
         <item>Megaminx</item>
         <item>Clock</item>
-        <item>7x7</item>
-        <item>6x6</item>
-        <item>5x5</item>
-        <item>4x4</item>
-        <item>4x4</item>
-        <item>3x3</item>
-        <item>2x2</item>
     </string-array>
 
     <string-array name="pref_update_time_list_entries">
@@ -96,25 +103,19 @@
     <string name="email">Send feedback</string>
     <string name="rate">Rate on the Play Store</string>
 
-    <string name="unofficial">(fast,unofficial)</string>
+    <string name="unofficial">Fast, Unofficial</string>
     <string name="reset_warning">Reset session?</string>
     <string name="reset_warning_message">You\'ll lose all solves recorded in this session!</string>
     <string name="manual_add_solve">Add Solve</string>
-    <string name="time">Time:</string>
+    <string name="time">Time (secs):</string>
     <string name="scramble_colon">Scramble:</string>
-    <string name="dialog_wip">Editing time and scramble doesn\'t work just yet. This is just a
-        placeholder.
-    </string>
     <string name="best_times">Best Times</string>
     <string name="best_ao">Best Ao%1$d</string>
-    <string name="pref_two_row_time_summary">Hours:Minutes:Seconds on top, milliseconds on the
-        bottom
-    </string>
-    <string name="pref_two_row_time_title">Two Row Time Display</string>
-    <string name="pref_time_text_size_title">Time Text Size</string>
-    <string name="time_text_edittext_dialog_title">Set time text size (default 100):</string>
-    <string name="pref_update_time_title">Timer Text Updating</string>
     <string name="timing">Timing</string>
-    <string name="pref_milliseconds_title">Use milliseconds (0.001)</string>
+    <string name="oh">OH</string>
+    <string name="bld">BLD</string>
+    <string name="feet">Feet</string>
+    <string name="timestamp">Timestamp:</string>
+    <string name="invalid_scramble">Invalid scramble!</string>
 
 </resources>

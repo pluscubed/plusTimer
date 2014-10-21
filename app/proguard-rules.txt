@@ -36,7 +36,6 @@
 -keep class sun.misc.Unsafe { *; }
 #-keep class com.google.gson.stream.** { *; }
 
--keep class com.pluscubed.plustimer.model.PuzzleType { *; }
 -keep class com.pluscubed.plustimer.model.Session { *; }
 -keep class com.pluscubed.plustimer.model.Solve { *; }
 -keep class com.pluscubed.plustimer.model.ScrambleAndSvg { *; }

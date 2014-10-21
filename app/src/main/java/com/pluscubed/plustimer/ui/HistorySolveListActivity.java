@@ -18,40 +18,25 @@ import com.pluscubed.plustimer.model.PuzzleType;
 public class HistorySolveListActivity extends Activity
         implements SolveDialogFragment.OnDialogDismissedListener, CreateDialogCallback {
 
-    public static final String EXTRA_HISTORY_SESSION_POSITION
-            = "com.pluscubed.plustimer.history_session_position";
-
-    public static final String EXTRA_HISTORY_PUZZLETYPE_DISPLAYNAME
-            = "com.pluscubed.plustimer.history_puzzletype_displayname";
+    public static final String EXTRA_HISTORY_SESSION_POSITION = "com.pluscubed.plustimer.history_session_position";
+    public static final String EXTRA_HISTORY_PUZZLETYPE_DISPLAYNAME = "com.pluscubed.plustimer.history_puzzletype_displayname";
 
     public static final String HISTORY_DIALOG_SOLVE_TAG = "HISTORY_MODIFY_DIALOG";
 
     @Override
-    public void createSolveDialog(String displayName, int sessionIndex, int solveIndex) {
-        DialogFragment dialog = (DialogFragment) getFragmentManager()
-                .findFragmentByTag(HISTORY_DIALOG_SOLVE_TAG);
+    public void createSolveDialog(String puzzleTypeName, int sessionIndex, int solveIndex) {
+        DialogFragment dialog = (DialogFragment) getFragmentManager().findFragmentByTag(HISTORY_DIALOG_SOLVE_TAG);
         if (dialog == null) {
-            SolveDialogFragment d = SolveDialogFragment
-                    .newInstance(PuzzleType.get(displayName).toString(), sessionIndex, solveIndex);
+            SolveDialogFragment d = SolveDialogFragment.newInstance(PuzzleType.valueOf(puzzleTypeName).toString(), sessionIndex, solveIndex);
             d.show(getFragmentManager(), HISTORY_DIALOG_SOLVE_TAG);
         }
     }
 
     @Override
-    public void onDialogDismissed(String displayName, int sessionIndex, int solveIndex,
-                                  int penalty) {
-        switch (penalty) {
-            case SolveDialogFragment.DIALOG_RESULT_DELETE:
-                PuzzleType.get(displayName).getSession(sessionIndex).deleteSolve(solveIndex);
-                break;
-        }
-
+    public void onDialogDismissed() {
         if (getSolveListFragment() != null) {
             getSolveListFragment().onSessionSolvesChanged();
         }
-
-        setTitle(PuzzleType.get(displayName).getSession(sessionIndex).getTimestampString(this));
-
     }
 
     private SolveListFragment getSolveListFragment() {
@@ -68,6 +53,8 @@ public class HistorySolveListActivity extends Activity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        PuzzleType.initialize(this);
+
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
         FragmentManager fm = getFragmentManager();
@@ -78,7 +65,7 @@ public class HistorySolveListActivity extends Activity
             fragment = SolveListFragment.newInstance(false, puzzleType, position);
             fm.beginTransaction().add(android.R.id.content, fragment).commit();
         }
-        setTitle(PuzzleType.get(puzzleType).getSession(position).getTimestampString(this));
+        setTitle(PuzzleType.valueOf(puzzleType).getSession(position).getTimestampString(this));
     }
 
 

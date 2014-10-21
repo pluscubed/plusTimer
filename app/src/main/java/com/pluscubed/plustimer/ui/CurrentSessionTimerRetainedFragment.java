@@ -29,12 +29,6 @@ public class CurrentSessionTimerRetainedFragment extends Fragment {
 
     private boolean mScrambling;
 
-    private Callback mCallback;
-
-    public void setTimerFragmentCallback(Callback fragment) {
-        mCallback = fragment;
-    }
-
     public boolean isScrambling() {
         return mScrambling;
     }
@@ -58,12 +52,13 @@ public class CurrentSessionTimerRetainedFragment extends Fragment {
             public void run() {
                 mCurrentScrambleAndSvg = mNextScrambleAndSvg;
                 mNextScrambleAndSvg = null;
-                if (mCallback != null) {
-                    mCallback.getUiHandler().post(new Runnable() {
+                if (getTargetFragment() != null) {
+                    final CurrentSessionTimerFragment targetFragment = (CurrentSessionTimerFragment) getTargetFragment();
+                    targetFragment.getUiHandler().post(new Runnable() {
                         @Override
                         public void run() {
-                            mCallback.setScrambleTextAndImageToCurrent();
-                            mCallback.enableMenuItems(true);
+                            targetFragment.setScrambleTextAndImageToCurrent();
+                            targetFragment.enableMenuItems(true);
                         }
                     });
                 }
@@ -74,13 +69,11 @@ public class CurrentSessionTimerRetainedFragment extends Fragment {
 
     //Generate scramble image and text
     private ScrambleAndSvg generateScramble() {
-
-        String scramble = PuzzleType.get(PuzzleType.CURRENT).getPuzzle().generateScramble();
+        String scramble = PuzzleType.getCurrent().getPuzzle().generateScramble();
         ScrambleAndSvg scrambleAndSvg = null;
         try {
-            scrambleAndSvg = new ScrambleAndSvg(scramble,
-                    PuzzleType.get(PuzzleType.CURRENT).getPuzzle().drawScramble(scramble, null)
-                            .toString());
+            String svg = PuzzleType.getCurrent().getPuzzle().drawScramble(scramble, null).toString();
+            scrambleAndSvg = new ScrambleAndSvg(scramble, svg);
         } catch (InvalidScrambleException e) {
             e.printStackTrace();
         }
@@ -125,6 +118,8 @@ public class CurrentSessionTimerRetainedFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
 
+        PuzzleType.initialize(getActivity());
+
         startScramblerThread();
 
         if (savedInstanceState != null) {
@@ -156,22 +151,13 @@ public class CurrentSessionTimerRetainedFragment extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         if (mCurrentScrambleAndSvg != null) {
-            outState.putString(STATE_CURRENT_SCRAMBLE, mCurrentScrambleAndSvg.scramble);
-            outState.putString(STATE_CURRENT_SVG, mCurrentScrambleAndSvg.svg);
+            outState.putString(STATE_CURRENT_SCRAMBLE, mCurrentScrambleAndSvg.getScramble());
+            outState.putString(STATE_CURRENT_SVG, mCurrentScrambleAndSvg.getSvg());
         }
         if (mNextScrambleAndSvg != null) {
-            outState.putString(STATE_NEXT_SCRAMBLE, mNextScrambleAndSvg.scramble);
-            outState.putString(STATE_NEXT_SVG, mNextScrambleAndSvg.svg);
+            outState.putString(STATE_NEXT_SCRAMBLE, mNextScrambleAndSvg.getScramble());
+            outState.putString(STATE_NEXT_SVG, mNextScrambleAndSvg.getSvg());
         }
         outState.putBoolean(STATE_SCRAMBLING, mScrambling);
-    }
-
-    public interface Callback {
-
-        Handler getUiHandler();
-
-        void setScrambleTextAndImageToCurrent();
-
-        void enableMenuItems(boolean enable);
     }
 }
