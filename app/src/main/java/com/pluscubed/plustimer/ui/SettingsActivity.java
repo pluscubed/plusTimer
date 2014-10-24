@@ -162,6 +162,7 @@ public class SettingsActivity extends Activity {
                     uiName += " - " + getString(R.string.unofficial);
                 }
                 puzzleTypeCheckBox.setTitle(uiName);
+                puzzleTypeCheckBox.setDefaultValue(true);
                 puzzleTypeCheckBox.setChecked(i.isEnabled());
                 puzzleTypeCheckBox.setKey(PREF_PUZZLETYPE_ENABLE_PREFIX + i.name().toLowerCase());
                 puzzleTypeCheckBox.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
@@ -170,7 +171,7 @@ public class SettingsActivity extends Activity {
                         if (newValue.toString().equals("false")) {
                             int numberEnabled = 0;
                             for (PuzzleType i : PuzzleType.values()) {
-                                if (PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(PREF_PUZZLETYPE_ENABLE_PREFIX + i.name().toLowerCase(), true)) {
+                                if (preference.getSharedPreferences().getBoolean(PREF_PUZZLETYPE_ENABLE_PREFIX + i.name().toLowerCase(), true)) {
                                     numberEnabled++;
                                 }
                             }
