@@ -185,18 +185,26 @@ public class SolveDialogFragment extends DialogFragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (s.length() != 0) {
-                    BigDecimal timeEditTextDecimal = BigDecimal.valueOf(Double.parseDouble(s.toString()));
-                    mSolve.setRawTime(((timeEditTextDecimal.multiply(BigDecimal.valueOf(1000000000))).longValueExact()));
-                    updateTitle();
-                } else {
-                    getDialog().setTitle(Util.timeStringFromNs(0, mMillisecondsEnabled));
-                }
             }
 
             @Override
             public void afterTextChanged(Editable s) {
-
+                while (true) {
+                    try {
+                        if (s.length() != 0) {
+                            BigDecimal timeEditTextDecimal = BigDecimal.valueOf(Double.parseDouble(s.toString()));
+                            mSolve.setRawTime(((timeEditTextDecimal.multiply(BigDecimal.valueOf(1000000000))).longValueExact()));
+                            updateTitle();
+                            break;
+                        } else {
+                            getDialog().setTitle(Util.timeStringFromNs(0, mMillisecondsEnabled));
+                            mSolve.setRawTime(0);
+                            break;
+                        }
+                    } catch (NumberFormatException | ArithmeticException e) {
+                        s.delete(s.length() - 1, s.length());
+                    }
+                }
             }
         });
 
