@@ -93,4 +93,7 @@
     <string name="feet">Feet</string>
     <string name="timestamp">Fecha/Hora:</string>
     <string name="invalid_scramble">¡Scramble inválido!</string>
+
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
 </resources>
