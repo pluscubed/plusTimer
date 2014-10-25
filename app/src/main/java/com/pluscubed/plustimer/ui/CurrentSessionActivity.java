@@ -21,6 +21,8 @@ import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.ui.widget.SlidingTabLayout;
 
+import io.fabric.sdk.android.Fabric;
+
 /**
  * Current Session Activity
  */
@@ -68,7 +70,7 @@ public class CurrentSessionActivity extends BaseActivity implements SolveDialogF
         PuzzleType.initialize(this);
 
         if (BuildConfig.USE_CRASHLYTICS) {
-            Crashlytics.start(this);
+            Fabric.with(this, new Crashlytics());
         }
 
         if (savedInstanceState != null) {

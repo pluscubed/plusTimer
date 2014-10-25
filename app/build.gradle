@@ -1,19 +1,17 @@
 buildscript {
     repositories {
-        maven { url 'http://download.crashlytics.com/maven' }
+        maven { url 'https://maven.fabric.io/repo' }
     }
 
     dependencies {
-        classpath 'com.crashlytics.tools.gradle:crashlytics-gradle:1.+'
+        classpath 'io.fabric.tools:gradle:1.+'
     }
 }
 apply plugin: 'com.android.application'
-apply plugin: 'crashlytics'
+apply plugin: 'io.fabric'
 
 repositories {
-    maven {
-        url 'http://download.crashlytics.com/maven'
-    }
+    maven { url 'https://maven.fabric.io/repo' }
 }
 
 task syncTask(type: Sync) {
@@ -25,7 +23,7 @@ preBuild.dependsOn('syncTask')
 
 android {
     compileSdkVersion 21
-    buildToolsVersion '21.0.1'
+    buildToolsVersion '21.0.2'
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 21
@@ -65,6 +63,10 @@ android {
             ext.enableCrashlytics = false
         }
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
 }
 
 dependencies {
@@ -75,6 +77,8 @@ dependencies {
     compile 'com.caverock:androidsvg:1.2.1'
     compile 'com.android.support:support-annotations:21.+'
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.crashlytics.android:crashlytics:1.+'
     compile 'com.google.code.gson:gson:2.+'
+    compile('com.crashlytics.sdk.android:crashlytics:2.0.0@aar') {
+        transitive = true;
+    }
 }
