@@ -299,6 +299,7 @@ public class SolveListFragment extends Fragment {
     public void onPause() {
         super.onPause();
         getPuzzleType().getHistorySessions().save(getActivity());
+        if (mCurrentToggle) getPuzzleType().saveCurrentSession(getActivity());
     }
 
     public void onSessionSolvesChanged() {

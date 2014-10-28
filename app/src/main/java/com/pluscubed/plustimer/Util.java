@@ -2,10 +2,23 @@ package com.pluscubed.plustimer;
 
 import android.content.Context;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.pluscubed.plustimer.model.PuzzleType;
+import com.pluscubed.plustimer.model.ScrambleAndSvg;
 import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.lang.reflect.Type;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -18,6 +31,69 @@ import java.util.List;
  * Utitilies class
  */
 public class Util {
+
+    public static final String PREF_VERSION_CODE = "pref_version_code";
+
+    static {
+        gson = new GsonBuilder()
+                .registerTypeAdapter(ScrambleAndSvg.class, new ScrambleAndSvg.Serializer())
+                .registerTypeAdapter(ScrambleAndSvg.class, new ScrambleAndSvg.Deserializer())
+                .create();
+        SESSION_LIST_TYPE = new TypeToken<List<Session>>() {
+        }.getType();
+    }
+
+    private static final Type SESSION_LIST_TYPE;
+    private static final Gson gson;
+
+    /**
+     * Save a list of sessions to a file.
+     */
+    public static void saveSessionListToFile(Context context, String fileName, List<Session> sessionList) {
+        Writer writer = null;
+        try {
+            OutputStream out = context.openFileOutput(fileName, Context.MODE_PRIVATE);
+            writer = new OutputStreamWriter(out);
+            gson.toJson(sessionList, SESSION_LIST_TYPE, writer);
+        } catch (FileNotFoundException e) {
+            //File not found: create new file
+        } finally {
+            if (writer != null) {
+                try {
+                    writer.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    /**
+     * Load up the sessions stored in the list. If the file doesn't exist, create an empty
+     * list.
+     */
+    public static List<Session> getSessionListFromFile(Context context, String fileName) {
+        BufferedReader reader = null;
+        try {
+            InputStream in = context.openFileInput(fileName);
+            reader = new BufferedReader(new InputStreamReader(in));
+            List<Session> fileSessions = gson.fromJson(reader, SESSION_LIST_TYPE);
+            if (fileSessions != null) {
+                return fileSessions;
+            }
+        } catch (FileNotFoundException e) {
+            //File not found: create empty list
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return new ArrayList<Session>();
+    }
 
 
     /**

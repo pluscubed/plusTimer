@@ -437,6 +437,7 @@ public class CurrentSessionTimerFragment extends Fragment {
     public void onPause() {
         super.onPause();
         getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        PuzzleType.getCurrent().saveCurrentSession(getActivity());
     }
 
     @Override
