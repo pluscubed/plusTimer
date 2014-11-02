@@ -84,7 +84,8 @@ public class CurrentSessionActivity extends BaseActivity implements SolveDialogF
 
         //Set up SlidingTabLayout
         SlidingTabLayout slidingTabLayout = (SlidingTabLayout) findViewById(R.id.activity_current_session_slidingtablayout);
-        slidingTabLayout.setSelectedIndicatorColors(Color.parseColor("white"));
+        int[] attrs = {R.attr.colorAccent};
+        slidingTabLayout.setSelectedIndicatorColors(obtainStyledAttributes(attrs).getColor(0, Color.BLACK));
         slidingTabLayout.setDistributeEvenly(true);
         slidingTabLayout.setCustomTabView(R.layout.sliding_tab_textview, android.R.id.text1);
         slidingTabLayout.setViewPager(viewPager);
@@ -112,6 +113,8 @@ public class CurrentSessionActivity extends BaseActivity implements SolveDialogF
             }
         });
         viewPager.setCurrentItem(0);
+
+        getSupportActionBar().setElevation(0);
     }
 
     @Override

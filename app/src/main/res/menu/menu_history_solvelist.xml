@@ -6,7 +6,7 @@
 
     <item
         android:id="@id/menu_solvelist_share_menuitem"
-        android:icon="@drawable/ic_action_share"
+        android:icon="@drawable/ic_share_white_24dp"
         android:title="@string/share"
         app:showAsAction="ifRoom" />
 

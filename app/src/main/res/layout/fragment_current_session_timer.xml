@@ -70,17 +70,6 @@
         android:text="@string/solves"
         android:textSize="16sp" />
 
-
-    <it.sephiroth.android.library.widget.HListView
-        android:id="@id/fragment_current_session_timer_bottom_hlistview"
-        android:layout_width="match_parent"
-        android:layout_height="45dp"
-        android:layout_alignParentBottom="true"
-        android:background="@color/light_gray"
-        android:listSelector="@drawable/background_button_bar"
-        android:overScrollMode="always" />
-
-
     <TextView
         android:id="@id/fragment_current_session_timer_scramble_textview"
         android:layout_width="match_parent"
@@ -102,6 +91,7 @@
 
     <LinearLayout
         android:id="@id/fragment_current_session_timer_penalty_linearlayout"
+        style="?android:buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="45dp"
         android:layout_above="@id/fragment_current_session_timer_bottom_hlistview"
@@ -110,24 +100,33 @@
 
         <Button
             android:id="@id/fragment_current_session_timer_penalty_dnf_button"
+            style="?android:buttonBarButtonStyle"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@drawable/background_button_bar"
             android:text="DNF"
-            android:textSize="18sp"
-            tools:ignore="ButtonStyle,HardcodedText" />
+            tools:ignore="HardcodedText" />
 
         <Button
             android:id="@id/fragment_current_session_timer_penalty_plustwo_button"
+            style="?android:buttonBarButtonStyle"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@drawable/background_button_bar"
             android:text="+2"
-            android:textSize="18sp"
-            tools:ignore="ButtonStyle,HardcodedText" />
+            tools:ignore="HardcodedText" />
     </LinearLayout>
+
+    <it.sephiroth.android.library.widget.HListView
+        android:id="@id/fragment_current_session_timer_bottom_hlistview"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_alignParentBottom="true"
+        android:background="?colorPrimary"
+        android:listSelector="?selectableItemBackground"
+        android:overScrollMode="always" />
 
 
 </RelativeLayout>

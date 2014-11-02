@@ -31,6 +31,7 @@
       <sourceFolder url="file://$MODULE_DIR$/build/generated/source/buildConfig/crashlytics/debug" isTestSource="false" generated="true" />
       <sourceFolder url="file://$MODULE_DIR$/build/generated/source/rs/crashlytics/debug" isTestSource="false" generated="true" />
       <sourceFolder url="file://$MODULE_DIR$/build/generated/res/rs/crashlytics/debug" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/build/generated/res/generated/crashlytics/debug" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/src/crashlyticsDebug/res" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/src/crashlyticsDebug/resources" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/src/crashlyticsDebug/assets" type="java-resource" />
@@ -43,6 +44,7 @@
       <sourceFolder url="file://$MODULE_DIR$/build/generated/source/buildConfig/test/crashlytics/debug" isTestSource="true" generated="true" />
       <sourceFolder url="file://$MODULE_DIR$/build/generated/source/rs/test/crashlytics/debug" isTestSource="true" generated="true" />
       <sourceFolder url="file://$MODULE_DIR$/build/generated/res/rs/test/crashlytics/debug" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/build/generated/res/generated/test/crashlytics/debug" type="java-test-resource" />
       <sourceFolder url="file://$MODULE_DIR$/src/crashlytics/res" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/src/crashlytics/resources" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/src/crashlytics/assets" type="java-resource" />
@@ -103,17 +105,17 @@
     <orderEntry type="jdk" jdkName="Android API 21 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="tnoodle-android-0.8.9" level="project" />
-    <orderEntry type="library" exported="" name="fabric-1.0.0" level="project" />
-    <orderEntry type="library" exported="" name="answers-1.0.0" level="project" />
-    <orderEntry type="library" exported="" name="support-v13-21.0.0" level="project" />
+    <orderEntry type="library" exported="" name="answers-1.0.1" level="project" />
+    <orderEntry type="library" exported="" name="fabric-1.0.1" level="project" />
     <orderEntry type="library" exported="" name="support-v4-21.0.0" level="project" />
+    <orderEntry type="library" exported="" name="support-v13-21.0.0" level="project" />
     <orderEntry type="library" exported="" name="gson-2.3" level="project" />
     <orderEntry type="library" exported="" name="androidsvg-1.2.1" level="project" />
     <orderEntry type="library" exported="" name="graphview-3.1.3" level="project" />
-    <orderEntry type="library" exported="" name="crashlytics-2.0.0" level="project" />
-    <orderEntry type="library" exported="" name="beta-1.0.0" level="project" />
-    <orderEntry type="library" exported="" name="support-annotations-21.0.0" level="project" />
+    <orderEntry type="library" exported="" name="crashlytics-2.0.1" level="project" />
     <orderEntry type="library" exported="" name="appcompat-v7-21.0.0" level="project" />
+    <orderEntry type="library" exported="" name="beta-1.0.1" level="project" />
+    <orderEntry type="library" exported="" name="support-annotations-21.0.0" level="project" />
     <orderEntry type="module" module-name="hlistviewlibrary" exported="" />
   </component>
 </module>

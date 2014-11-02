@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item name="bg_color" type="color">#fff1f1f1</item>
-    <item name="light_gray" type="color">#ffcccccc</item>
-    <item name="ab_color" type="color">#222222</item>
+
+    <item name="primary_dark" type="color">#151515</item>
+    <item name="primary" type="color">#212121</item>
+    <item name="accent" type="color">#4d73ff</item>
+
 </resources>

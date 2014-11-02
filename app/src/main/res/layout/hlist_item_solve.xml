@@ -4,8 +4,11 @@
     android:id="@id/hlist_item_solve_textview"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
+    android:fontFamily="sans-serif-medium"
     android:gravity="center"
-    android:padding="5dp"
-    android:textSize="18sp">
+    android:paddingLeft="8dp"
+    android:paddingRight="8dp"
+    android:textColor="?colorAccent"
+    android:textSize="16sp">
 
 </TextView>

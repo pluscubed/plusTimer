@@ -18,7 +18,8 @@
             android:id="@id/activity_current_session_slidingtablayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/ab_color" />
+            android:background="?colorPrimary"
+            android:elevation="4dp" />
 
         <android.support.v4.view.ViewPager
             android:id="@id/activity_current_session_viewpager"
