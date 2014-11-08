@@ -8,9 +8,7 @@
     android:drawableEnd="@drawable/spinner_triangle_white"
     android:drawablePadding="8dp"
     android:drawableRight="@drawable/spinner_triangle_white"
-    android:paddingEnd="10dp"
-    android:paddingLeft="10dp"
-    android:paddingRight="10dp"
-    android:paddingStart="10dp"
+    android:gravity="center_vertical"
+    android:padding="8dp"
     android:textSize="16sp" />
 

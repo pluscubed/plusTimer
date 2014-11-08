@@ -1,7 +1,8 @@
 <resources>
 
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="@style/Theme.AppCompat.Light.DarkActionBar">
+    <style name="Theme.PlusTimer" parent="Theme.PlusTimer.Base" />
+
+    <style name="Theme.PlusTimer.Base" parent="@style/Theme.AppCompat.Light.DarkActionBar">
         <item name="hlv_listViewStyle">@style/HListView</item>
 
         <item name="colorPrimary">@color/primary</item>

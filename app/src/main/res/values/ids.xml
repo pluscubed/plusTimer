@@ -70,6 +70,7 @@
     <item name="fragment_about_github_button" type="id" />
     <item name="fragment_about_email_button" type="id" />
     <item name="fragment_about_rate_button" type="id" />
+    <item name="dialog_solve_time_desc_textview" type="id" />
 
 
 </resources>
