@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.CurrentSessionActivity">
+    tools:context=".ui.CurrentSessionTimerFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -41,7 +41,7 @@
         android:id="@id/fragment_current_session_timer_stats_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@id/fragment_current_session_timer_bottom_hlistview"
+        android:layout_above="@id/fragment_current_session_timer_timebar_recycler"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:background="@color/bg_color"
@@ -58,7 +58,7 @@
         android:id="@id/fragment_current_session_timer_stats_solves_number_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@id/fragment_current_session_timer_bottom_hlistview"
+        android:layout_above="@id/fragment_current_session_timer_timebar_recycler"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:background="@color/bg_color"
@@ -80,21 +80,12 @@
         android:text="@string/scrambling"
         android:textSize="18sp" />
 
-
-    <ImageView
-        android:id="@id/fragment_current_session_timer_scramble_imageview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_margin="8dp"
-        android:contentDescription="@string/scrambleimage"
-        android:visibility="gone" />
-
     <LinearLayout
         android:id="@id/fragment_current_session_timer_penalty_linearlayout"
         style="?android:buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="45dp"
-        android:layout_above="@id/fragment_current_session_timer_bottom_hlistview"
+        android:layout_above="@id/fragment_current_session_timer_timebar_recycler"
         android:orientation="horizontal"
         android:visibility="gone">
 
@@ -119,14 +110,21 @@
             tools:ignore="HardcodedText" />
     </LinearLayout>
 
-    <it.sephiroth.android.library.widget.HListView
-        android:id="@id/fragment_current_session_timer_bottom_hlistview"
+    <android.support.v7.widget.RecyclerView
+        android:id="@id/fragment_current_session_timer_timebar_recycler"
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:layout_alignParentBottom="true"
         android:background="?colorPrimary"
-        android:listSelector="?selectableItemBackground"
         android:overScrollMode="always" />
+
+    <ImageView
+        android:id="@id/fragment_current_session_timer_scramble_imageview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="8dp"
+        android:contentDescription="@string/scrambleimage"
+        android:visibility="gone" />
 
 
 </RelativeLayout>

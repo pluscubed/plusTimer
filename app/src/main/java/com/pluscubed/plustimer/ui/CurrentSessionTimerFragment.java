@@ -12,6 +12,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -19,7 +21,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -32,11 +33,9 @@ import com.pluscubed.plustimer.Util;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Solve;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-
-import it.sephiroth.android.library.widget.HListView;
+import java.util.List;
 
 /**
  * TimerFragment
@@ -69,7 +68,7 @@ public class CurrentSessionTimerFragment extends Fragment {
     private TextView mTimerText;
     private TextView mTimerText2;
     private TextView mScrambleText;
-    private HListView mHListView;
+    private RecyclerView mTimeBarRecycler;
     private ImageView mScrambleImage;
     private TextView mStatsSolvesText;
     private TextView mStatsText;
@@ -165,6 +164,7 @@ public class CurrentSessionTimerFragment extends Fragment {
             mUiHandler.postDelayed(this, REFRESH_RATE);
         }
     };
+    private LinearLayoutManager mTimeBarLayoutManager;
 
     //Generate string with specified current averages and mean of current session
     private String buildStatsWithAveragesOf(Context context, Integer... currentAverages) {
@@ -286,11 +286,13 @@ public class CurrentSessionTimerFragment extends Fragment {
 
     public void onSessionSolvesChanged() {
         //Update stats
-        mStatsSolvesText.setText(getString(R.string.solves) + PuzzleType.getCurrent()
-                .getSession(PuzzleType.CURRENT_SESSION).getNumberOfSolves());
+        mStatsSolvesText.setText(getString(R.string.solves) + PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION).getNumberOfSolves());
         mStatsText.setText(buildStatsWithAveragesOf(getActivity(), 5, 12, 100));
-        //Update HListView
-        ((SolveHListViewAdapter) mHListView.getAdapter()).updateSolvesList();
+
+        //Update RecyclerView
+        SolveRecyclerAdapter adapter = (SolveRecyclerAdapter) mTimeBarRecycler.getAdapter();
+        adapter.updateSolvesList();
+
         if (!mTiming && !mInspecting) setTimerTextToLastSolveTime();
     }
 
@@ -449,7 +451,7 @@ public class CurrentSessionTimerFragment extends Fragment {
         mTimerText2 = (TextView) v.findViewById(R.id.fragment_current_session_timer_timeSecondary_textview);
         mScrambleText = (TextView) v.findViewById(R.id.fragment_current_session_timer_scramble_textview);
         mScrambleImage = (ImageView) v.findViewById(R.id.fragment_current_session_timer_scramble_imageview);
-        mHListView = (HListView) v.findViewById(R.id.fragment_current_session_timer_bottom_hlistview);
+        mTimeBarRecycler = (RecyclerView) v.findViewById(R.id.fragment_current_session_timer_timebar_recycler);
 
         mStatsText = (TextView) v.findViewById(R.id.fragment_current_session_timer_stats_textview);
         mStatsSolvesText = (TextView) v.findViewById(R.id.fragment_current_session_timer_stats_solves_number_textview);
@@ -474,23 +476,10 @@ public class CurrentSessionTimerFragment extends Fragment {
             }
         });
 
-        final SolveHListViewAdapter adapter = new SolveHListViewAdapter();
-        mHListView.setAdapter(adapter);
-        mHListView.setOnItemClickListener(
-                new it.sephiroth.android.library.widget.AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(
-                            it.sephiroth.android.library.widget.AdapterView<?> parent, View view,
-                            int position, long id) {
-                        try {
-                            CreateDialogCallback callback = (CreateDialogCallback) getActivity();
-                            callback.createSolveDialog(null, 0, position);
-                        } catch (ClassCastException e) {
-                            throw new ClassCastException(getActivity().toString()
-                                    + " must implement OnDialogDismissedListener");
-                        }
-                    }
-                });
+        mTimeBarLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false);
+        mTimeBarRecycler.setLayoutManager(mTimeBarLayoutManager);
+        mTimeBarRecycler.setHasFixedSize(true);
+        mTimeBarRecycler.setAdapter(new SolveRecyclerAdapter());
 
         //When the root view is touched...
         v.setOnTouchListener(new View.OnTouchListener() {
@@ -707,60 +696,77 @@ public class CurrentSessionTimerFragment extends Fragment {
         void enableMenuItems(boolean enable);
     }
 
-    public class SolveHListViewAdapter extends ArrayAdapter<Solve> {
+    public class SolveRecyclerAdapter extends RecyclerView.Adapter<SolveRecyclerAdapter.ViewHolder> {
 
-        private ArrayList<Solve> mBestAndWorstSolves;
+        private List<Solve> mSolves;
 
-        public SolveHListViewAdapter() {
-            super(getActivity(), 0,
-                    PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
-                            .getSolves());
-            mBestAndWorstSolves = new ArrayList<Solve>();
-            mBestAndWorstSolves.add(Util.getBestSolveOfList(
-                    PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
-                            .getSolves()));
-            mBestAndWorstSolves.add(Util.getWorstSolveOfList(
-                    PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
-                            .getSolves()));
+        private Solve[] mBestAndWorstSolves;
+
+        public SolveRecyclerAdapter() {
+            mBestAndWorstSolves = new Solve[2];
+            updateSolvesList();
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            if (convertView == null) {
-                convertView = getActivity().getLayoutInflater()
-                        .inflate(R.layout.hlist_item_solve, parent, false);
-            }
-            Solve s = getItem(position);
-            TextView time = (TextView) convertView.findViewById(R.id.hlist_item_solve_textview);
+        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            TextView v = (TextView) LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_item_solve, parent, false);
+            return new ViewHolder(v);
+        }
 
-            time.setText("");
-
+        @Override
+        public void onBindViewHolder(ViewHolder holder, int position) {
+            Solve s = mSolves.get(position);
+            String timeString = s.getTimeString(mMillisecondsEnabled);
+            holder.textView.setText(timeString);
             for (Solve a : mBestAndWorstSolves) {
                 if (a == s) {
-                    time.setText("(" + s.getTimeString(mMillisecondsEnabled) + ")");
+                    holder.textView.setText("(" + timeString + ")");
                 }
             }
+        }
 
-            if (time.getText() == "") {
-                time.setText(s.getTimeString(mMillisecondsEnabled));
-            }
-
-            return convertView;
+        @Override
+        public int getItemCount() {
+            return mSolves.size();
         }
 
         public void updateSolvesList() {
-            clear();
-            addAll(PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
-                    .getSolves());
+            boolean scroll;
+            try {
+                scroll = mTimeBarLayoutManager.findLastCompletelyVisibleItemPosition() == mSolves.size() - 1;
+            } catch (NullPointerException e) {
+                //Not ready -> First start or rotation
+                scroll = true;
+            }
 
-            mBestAndWorstSolves = new ArrayList<Solve>();
-            mBestAndWorstSolves.add(Util.getBestSolveOfList(
-                    PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
-                            .getSolves()));
-            mBestAndWorstSolves.add(Util.getWorstSolveOfList(
-                    PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
-                            .getSolves()));
+            mSolves = PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION).getSolves();
+            mBestAndWorstSolves[0] = Util.getBestSolveOfList(mSolves);
+            mBestAndWorstSolves[1] = Util.getWorstSolveOfList(mSolves);
             notifyDataSetChanged();
+
+            if (scroll) {
+                mTimeBarLayoutManager.scrollToPosition(mSolves.size() - 1);
+            }
+        }
+
+        public class ViewHolder extends RecyclerView.ViewHolder {
+            public TextView textView;
+
+            public ViewHolder(TextView v) {
+                super(v);
+                textView = v;
+                textView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        try {
+                            CreateDialogCallback callback = (CreateDialogCallback) getActivity();
+                            callback.createSolveDialog(null, 0, getPosition());
+                        } catch (ClassCastException e) {
+                            throw new ClassCastException(getActivity().toString() + " must implement OnDialogDismissedListener");
+                        }
+                    }
+                });
+            }
         }
 
 

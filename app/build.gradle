@@ -70,10 +70,10 @@ android {
 }
 
 dependencies {
-    compile project(':libraries:hlistviewlibrary')
     compile 'com.jjoe64:graphview:3.+'
     compile 'com.android.support:appcompat-v7:21.+'
     compile 'com.android.support:support-v13:21.+'
+    compile 'com.android.support:recyclerview-v7:21.+'
     compile 'com.github.cubing:tnoodle-android:0.+@aar'
     compile 'com.caverock:androidsvg:1.2.1'
     compile 'com.android.support:support-annotations:21.+'
