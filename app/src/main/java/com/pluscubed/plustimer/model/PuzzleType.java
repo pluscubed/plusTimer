@@ -17,7 +17,9 @@ import net.gnehzr.tnoodle.utils.LazyInstantiatorException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Enum for puzzle
@@ -80,7 +82,7 @@ public enum PuzzleType {
     }
 
     public static List<PuzzleType> valuesExcludeDisabled() {
-        List<PuzzleType> array = new ArrayList<PuzzleType>();
+        List<PuzzleType> array = new ArrayList<>();
         for (PuzzleType i : values()) {
             if (i.isEnabled()) {
                 array.add(i);
@@ -122,7 +124,8 @@ public enum PuzzleType {
 
             }
             mHistorySessions.init(context);
-            mEnabled = defaultSharedPreferences.getBoolean(SettingsActivity.PREF_PUZZLETYPE_ENABLE_PREFIX + name().toLowerCase(), true);
+            Set<String> selected = defaultSharedPreferences.getStringSet(SettingsActivity.PREF_PUZZLETYPES_MULTISELECTLIST, new HashSet<String>());
+            mEnabled = selected.size() == 0 || selected.contains(name());
             List<Session> currentSessions = Util.getSessionListFromFile(context, currentSessionFileName);
             if (currentSessions.size() > 0) {
                 mCurrentSession = currentSessions.get(0);
@@ -132,7 +135,7 @@ public enum PuzzleType {
     }
 
     public void saveCurrentSession(Context context) {
-        ArrayList<Session> session = new ArrayList<Session>();
+        ArrayList<Session> session = new ArrayList<>();
         session.add(mCurrentSession);
         Util.saveSessionListToFile(context, currentSessionFileName, session);
     }

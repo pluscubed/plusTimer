@@ -186,7 +186,7 @@ public class HistorySessionListFragment extends ListFragment {
             StringBuilder s = new StringBuilder();
 
             //Get best solves of each history session and add to list
-            ArrayList<Solve> bestSolvesOfSessionsArray = new ArrayList<Solve>();
+            ArrayList<Solve> bestSolvesOfSessionsArray = new ArrayList<>();
             for (Session session : historySessions) {
                 bestSolvesOfSessionsArray.add(Util.getBestSolveOfList(session.getSolves()));
             }
@@ -203,15 +203,15 @@ public class HistorySessionListFragment extends ListFragment {
             mStatsText.setText(s.toString());
 
             //Get the timestamps of each session, and put in a SparseArray
-            ArrayList<Long> sessionTimestamps = new ArrayList<Long>();
+            ArrayList<Long> sessionTimestamps = new ArrayList<>();
             for (Session session : historySessions) {
                 sessionTimestamps.add(session.getTimestamp());
             }
 
             //This SparseArray contains any number of SparseArray<Long>, one for each average (5,12,etc)
-            SparseArray<SparseArray<Long>> bestAverageMatrix = new SparseArray<SparseArray<Long>>();
+            SparseArray<SparseArray<Long>> bestAverageMatrix = new SparseArray<>();
             for (int averageNumber : new int[]{5, 12, 50, 100, 1000}) {
-                SparseArray<Long> timesSparseArray = new SparseArray<Long>();
+                SparseArray<Long> timesSparseArray = new SparseArray<>();
                 for (int i = 0; i < historySessions.size(); i++) {
                     Session session = historySessions.get(i);
                     if (session.getNumberOfSolves() >= averageNumber) {
@@ -229,7 +229,7 @@ public class HistorySessionListFragment extends ListFragment {
             }
 
             ArrayList<GraphViewSeries> bestAverageGraphViewSeries
-                    = new ArrayList<GraphViewSeries>();
+                    = new ArrayList<>();
             for (int i = 0; i < bestAverageMatrix.size(); i++) {
                 SparseArray<Long> averageArray = bestAverageMatrix.valueAt(i);
                 if (averageArray.size() > 0) {
@@ -262,7 +262,7 @@ public class HistorySessionListFragment extends ListFragment {
             }
 
             //Get best times of each session excluding DNF, and create GraphViewData array bestTimes
-            SparseArray<Long> bestSolvesTimes = new SparseArray<Long>();
+            SparseArray<Long> bestSolvesTimes = new SparseArray<>();
             for (int i = 0; i < historySessions.size(); i++) {
                 Session session = historySessions.get(i);
                 if (Util.getBestSolveOfList(session.getSolves()).getPenalty()
@@ -296,7 +296,7 @@ public class HistorySessionListFragment extends ListFragment {
                     mGraph.addSeries(averageSeries);
                 }
 
-                ArrayList<Long> allPointsValue = new ArrayList<Long>();
+                ArrayList<Long> allPointsValue = new ArrayList<>();
                 for (int i = 0; i < bestAverageMatrix.size(); i++) {
                     for (int k = 0; k < bestAverageMatrix.valueAt(i).size(); k++) {
                         allPointsValue.add(bestAverageMatrix.valueAt(i).valueAt(k));
@@ -361,7 +361,7 @@ public class HistorySessionListFragment extends ListFragment {
     public String getBestAverageOfNumberOfSessions(int[] numbers, List<Session> sessions) {
         StringBuilder builder = new StringBuilder();
         for (int number : numbers) {
-            ArrayList<Long> bestAverages = new ArrayList<Long>();
+            ArrayList<Long> bestAverages = new ArrayList<>();
             if (sessions.size() > 0) {
                 for (Session session : sessions) {
                     long bestAverage = session.getBestAverageOf(number);

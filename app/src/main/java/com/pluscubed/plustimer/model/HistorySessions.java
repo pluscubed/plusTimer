@@ -66,7 +66,7 @@ public class HistorySessions {
      * @return a copy of the history sessions
      */
     public List<Session> getList() {
-        return new ArrayList<Session>(mHistorySessionsList);
+        return new ArrayList<>(mHistorySessionsList);
     }
 
     /**

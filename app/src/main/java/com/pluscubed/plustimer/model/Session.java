@@ -22,7 +22,7 @@ public class Session {
      * Constructs a Session with an empty list of Solves
      */
     public Session() {
-        mSolves = new ArrayList<Solve>();
+        mSolves = new ArrayList<>();
     }
 
     public int getPosition(Solve i) {
@@ -30,7 +30,7 @@ public class Session {
     }
 
     public List<Solve> getSolves() {
-        return new ArrayList<Solve>(Collections.unmodifiableList(mSolves));
+        return new ArrayList<>(Collections.unmodifiableList(mSolves));
     }
 
     public void addSolve(Solve s) {
@@ -59,7 +59,7 @@ public class Session {
      */
     public String getStringCurrentAverageOf(int number, boolean millisecondsEnabled) {
         if (number >= 3 && mSolves.size() >= number) {
-            List<Solve> solves = new ArrayList<Solve>();
+            List<Solve> solves = new ArrayList<>();
 
             //Add the most recent solves
             for (int i = 0; i < number; i++) {

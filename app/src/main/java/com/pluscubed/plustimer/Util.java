@@ -92,7 +92,7 @@ public class Util {
                 }
             }
         }
-        return new ArrayList<Session>();
+        return new ArrayList<>();
     }
 
 
@@ -196,7 +196,7 @@ public class Util {
      * @return the list of nanoseconds of times
      */
     public static List<Long> getListTimeTwoNoDnf(List<Solve> list) {
-        ArrayList<Long> timeTwo = new ArrayList<Long>();
+        ArrayList<Long> timeTwo = new ArrayList<>();
         for (Solve i : list) {
             if (!(i.getPenalty() == Solve.Penalty.DNF)) {
                 timeTwo.add(i.getTimeTwo());
@@ -215,7 +215,7 @@ public class Util {
      * @return the solve with the lowest time
      */
     public static Solve getBestSolveOfList(List<Solve> list) {
-        List<Solve> solveList = new ArrayList<Solve>(list);
+        List<Solve> solveList = new ArrayList<>(list);
         if (solveList.size() > 0) {
             Collections.reverse(solveList);
             List<Long> times = getListTimeTwoNoDnf(solveList);
@@ -243,7 +243,7 @@ public class Util {
      * @return the solve with the highest time
      */
     public static Solve getWorstSolveOfList(List<Solve> list) {
-        List<Solve> solveList = new ArrayList<Solve>(list);
+        List<Solve> solveList = new ArrayList<>(list);
         if (solveList.size() > 0) {
             Collections.reverse(solveList);
             for (Solve i : solveList) {

@@ -1,29 +1,27 @@
 package com.pluscubed.plustimer.ui;
 
 
-import android.app.Dialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
+import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
-import android.preference.PreferenceScreen;
-import android.support.annotation.NonNull;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBarActivity;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewParent;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Settings Activity and Fragment
@@ -38,8 +36,7 @@ public class SettingsActivity extends ActionBarActivity {
     public static final String PREF_UPDATE_TIME_LIST = "pref_update_time_list";
     public static final String PREF_MILLISECONDS_CHECKBOX = "pref_milliseconds_checkbox";
     public static final String PREF_SIGN_CHECKBOX = "pref_sign_checkbox";
-    public static final String PREFSCREEN_PUZZLETYPES = "pref_puzzletypes";
-    public static final String PREF_PUZZLETYPE_ENABLE_PREFIX = "pref_puzzletype_enable_";
+    public static final String PREF_PUZZLETYPES_MULTISELECTLIST = "pref_puzzletypes_multiselectlist";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,56 +66,11 @@ public class SettingsActivity extends ActionBarActivity {
 
     public static class SettingsFragment extends PreferenceFragment {
 
-        /**
-         * Sets up the action bar for an {@link PreferenceScreen}
-         */
-        public static void initializeActionBar(PreferenceScreen preferenceScreen) {
-            final Dialog dialog = preferenceScreen.getDialog();
-            if (dialog != null) {
-                dialog.getActionBar().setDisplayHomeAsUpEnabled(true);
-                View homeBtn = dialog.findViewById(android.R.id.home);
-                if (homeBtn != null) {
-                    View.OnClickListener dismissDialogClickListener = new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            dialog.dismiss();
-                        }
-                    };
-
-                    ViewParent homeBtnContainer = homeBtn.getParent();
-
-                    if (homeBtnContainer instanceof FrameLayout) {
-                        ViewGroup containerParent = (ViewGroup) homeBtnContainer.getParent();
-
-                        if (containerParent instanceof LinearLayout) {
-                            containerParent.setOnClickListener(dismissDialogClickListener);
-                        } else {
-                            ((FrameLayout) homeBtnContainer).setOnClickListener(dismissDialogClickListener);
-                        }
-                    } else {
-                        homeBtn.setOnClickListener(dismissDialogClickListener);
-                    }
-                }
-            }
-        }
-
-        //Solution to setting up an action bar for a PreferenceScreen: http://stackoverflow.com/questions/16374820/action-bar-home-button-not-functional-with-nested-preferencescreen
-        @Override
-        public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, @NonNull Preference preference) {
-            super.onPreferenceTreeClick(preferenceScreen, preference);
-
-            // If the user has clicked on a preference screen, set up the action bar
-            if (preference instanceof PreferenceScreen) {
-                initializeActionBar((PreferenceScreen) preference);
-            }
-
-            return false;
-        }
-
         @Override
         public void onCreate(Bundle paramBundle) {
             super.onCreate(paramBundle);
             addPreferencesFromResource(R.xml.preferences);
+
             CheckBoxPreference inspection = (CheckBoxPreference) findPreference(
                     PREF_INSPECTION_CHECKBOX);
             inspection.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
@@ -131,6 +83,7 @@ public class SettingsActivity extends ActionBarActivity {
                     return true;
                 }
             });
+
             EditTextPreference size = (EditTextPreference) findPreference(
                     PREF_TIME_TEXT_SIZE_EDITTEXT);
             size.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
@@ -142,9 +95,10 @@ public class SettingsActivity extends ActionBarActivity {
                 }
             });
             size.setSummary(size.getText());
-            ListPreference updateTime = (ListPreference) findPreference(PREF_UPDATE_TIME_LIST);
-            updateTime.setEntryValues(new String[]{"0", "1", "2"});
-            updateTime.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+
+            ListPreference updateOccurrence = (ListPreference) findPreference(PREF_UPDATE_TIME_LIST);
+            updateOccurrence.setEntryValues(new String[]{"0", "1", "2"});
+            updateOccurrence.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
                     ListPreference updateTime = (ListPreference) preference;
@@ -152,40 +106,49 @@ public class SettingsActivity extends ActionBarActivity {
                     return true;
                 }
             });
-            updateTime.setSummary(updateTime.getEntry());
-            PreferenceScreen puzzleTypeSetupScreen = (PreferenceScreen) findPreference(PREFSCREEN_PUZZLETYPES);
+            updateOccurrence.setSummary(updateOccurrence.getEntry());
+
+
+            MultiSelectListPreference puzzleTypeMultiList = (MultiSelectListPreference) findPreference(PREF_PUZZLETYPES_MULTISELECTLIST);
+
+            if (puzzleTypeMultiList.getValues().size() == 0) {
+                Set<String> all = new HashSet<>();
+                for (PuzzleType p : PuzzleType.values()) {
+                    all.add(p.name());
+                }
+                puzzleTypeMultiList.setValues(all);
+            }
+
+            List<String> entries = new ArrayList<>();
             for (PuzzleType i : PuzzleType.values()) {
-                CheckBoxPreference puzzleTypeCheckBox = new CheckBoxPreference(getActivity());
                 String uiName = i.getUiName(getActivity());
                 if (!i.official) {
                     uiName += " - " + getString(R.string.unofficial);
                 }
-                puzzleTypeCheckBox.setTitle(uiName);
-                puzzleTypeCheckBox.setDefaultValue(true);
-                puzzleTypeCheckBox.setChecked(i.isEnabled());
-                puzzleTypeCheckBox.setKey(PREF_PUZZLETYPE_ENABLE_PREFIX + i.name().toLowerCase());
-                puzzleTypeCheckBox.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-                    @Override
-                    public boolean onPreferenceChange(Preference preference, Object newValue) {
-                        if (newValue.toString().equals("false")) {
-                            int numberEnabled = 0;
-                            for (PuzzleType i : PuzzleType.values()) {
-                                if (preference.getSharedPreferences().getBoolean(PREF_PUZZLETYPE_ENABLE_PREFIX + i.name().toLowerCase(), true)) {
-                                    numberEnabled++;
-                                }
-                            }
-                            if (numberEnabled <= 1) {
-                                Toast.makeText(getActivity(), getString(R.string.no_disable_all_puzzletypes), Toast.LENGTH_SHORT).show();
-                                ((CheckBoxPreference) preference).setChecked(true);
-                                return false;
-                            }
-                        }
-                        PuzzleType.valueOf(preference.getKey().replace(PREF_PUZZLETYPE_ENABLE_PREFIX, "").toUpperCase()).setEnabled(newValue.toString().equals("true"));
-                        return true;
-                    }
-                });
-                puzzleTypeSetupScreen.addPreference(puzzleTypeCheckBox);
+                entries.add(uiName);
             }
+            puzzleTypeMultiList.setEntries(entries.toArray(new CharSequence[entries.size()]));
+
+            List<String> entryValues = new ArrayList<>();
+            for (PuzzleType p : PuzzleType.values()) {
+                entryValues.add(p.name());
+            }
+            puzzleTypeMultiList.setEntryValues(entryValues.toArray(new CharSequence[entryValues.size()]));
+
+            puzzleTypeMultiList.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    Set<String> selected = (Set<String>) newValue;
+                    if (selected.size() == 0) {
+                        Toast.makeText(getActivity(), getString(R.string.no_disable_all_puzzletypes), Toast.LENGTH_SHORT).show();
+                        return false;
+                    }
+                    for (PuzzleType p : PuzzleType.values()) {
+                        PuzzleType.valueOf(p.name()).setEnabled(selected.contains(p.name()));
+                    }
+                    return true;
+                }
+            });
         }
     }
 }

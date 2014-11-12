@@ -374,7 +374,7 @@ public class SolveListFragment extends Fragment {
             List<Solve> solves = mSession.getSolves();
             Collections.reverse(solves);
             addAll(solves);
-            mBestAndWorstSolves = new ArrayList<Solve>();
+            mBestAndWorstSolves = new ArrayList<>();
             mBestAndWorstSolves.add(Util.getBestSolveOfList(mSession.getSolves()));
             mBestAndWorstSolves.add(Util.getWorstSolveOfList(mSession.getSolves()));
             mSignEnabled = PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(SettingsActivity.PREF_SIGN_CHECKBOX, true);
