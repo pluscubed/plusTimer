@@ -84,8 +84,9 @@
         android:id="@id/fragment_current_session_timer_penalty_linearlayout"
         style="?android:buttonBarStyle"
         android:layout_width="match_parent"
-        android:layout_height="45dp"
+        android:layout_height="48dp"
         android:layout_above="@id/fragment_current_session_timer_timebar_recycler"
+        android:background="?colorPrimary"
         android:orientation="horizontal"
         android:visibility="gone">
 
@@ -95,7 +96,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@drawable/background_button_bar"
+            android:background="?android:selectableItemBackground"
             android:text="DNF"
             tools:ignore="HardcodedText" />
 
@@ -105,7 +106,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@drawable/background_button_bar"
+            android:background="?android:selectableItemBackground"
             android:text="+2"
             tools:ignore="HardcodedText" />
     </LinearLayout>

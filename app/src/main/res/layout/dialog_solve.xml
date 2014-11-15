@@ -90,9 +90,10 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|fill_horizontal"
-            android:background="?selectableItemBackground"
+            android:background="?android:selectableItemBackground"
             android:dropDownHorizontalOffset="500dp"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:translationX="-8dp" />
 
     </GridLayout>
 </ScrollView>

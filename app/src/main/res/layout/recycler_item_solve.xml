@@ -4,14 +4,15 @@
     android:id="@id/hlist_item_solve_textview"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
-    android:background="?selectableItemBackground"
-    android:fontFamily="sans-serif-medium"
+    android:background="?android:selectableItemBackground"
+    android:fontFamily="@string/font_fontFamily_medium"
     android:gravity="center"
     android:paddingEnd="8dp"
     android:paddingLeft="8dp"
     android:paddingRight="8dp"
     android:paddingStart="8dp"
     android:textColor="?colorAccent"
-    android:textSize="16sp">
+    android:textSize="16sp"
+    android:textStyle="@integer/font_textStyle_medium">
 
 </TextView>

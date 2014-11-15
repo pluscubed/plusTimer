@@ -4,8 +4,8 @@
     android:id="@android:id/text1"
     android:layout_width="wrap_content"
     android:layout_height="48dp"
-    android:background="?selectableItemBackground"
-    android:fontFamily="sans-serif-medium"
+    android:background="?android:selectableItemBackground"
+    android:fontFamily="@string/font_fontFamily_medium"
     android:gravity="center"
     android:paddingEnd="16dp"
     android:paddingLeft="16dp"
@@ -13,4 +13,5 @@
     android:paddingStart="16dp"
     android:textAllCaps="true"
     android:textColor="@color/sliding_tab_text_color"
-    android:textSize="12sp" />
+    android:textSize="12sp"
+    android:textStyle="@integer/font_textStyle_medium" />
