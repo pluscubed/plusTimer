@@ -3,12 +3,11 @@
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@id/list_item_history_sessionlist_textview"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@drawable/background_activated"
+    android:layout_height="48dp"
+    android:background="@drawable/selectable_background"
     android:gravity="center_vertical"
-    android:minHeight="?android:attr/listPreferredItemHeightSmall"
     android:paddingEnd="16dp"
     android:paddingLeft="16dp"
     android:paddingRight="16dp"
     android:paddingStart="16dp"
-    android:textAppearance="?android:attr/textAppearanceMedium" />
+    android:textSize="16sp" />

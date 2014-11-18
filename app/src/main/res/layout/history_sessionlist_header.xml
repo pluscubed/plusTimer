@@ -4,17 +4,21 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingBottom="4dp"
-    android:paddingEnd="16dp"
+    android:paddingBottom="8dp"
     android:paddingLeft="16dp"
-    android:paddingRight="16dp"
-    android:paddingStart="16dp"
-    android:paddingTop="4dp">
+    android:paddingRight="16dp">
 
 
     <TextView
         android:id="@id/history_sessionlist_header_stats_textview"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:paddingBottom="16dp" />
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="16dp"
+        android:background="#0c000000" />
 
 </LinearLayout>

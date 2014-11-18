@@ -140,9 +140,7 @@ public class HistorySessionListFragment extends ListFragment {
         mGraph = new LineGraphView(getActivity(), "");
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, (int) convertDpToPx(220));
-        layoutParams.setMargins(0, (int) convertDpToPx(8), 0, (int) convertDpToPx(8));
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) convertDpToPx(220));
         mGraph.setLayoutParams(layoutParams);
         mGraph.setShowLegend(true);
         mGraph.getGraphViewStyle().setLegendWidth((int) convertDpToPx(85));
@@ -161,7 +159,7 @@ public class HistorySessionListFragment extends ListFragment {
         });
         mGraph.setDrawDataPoints(true);
         mGraph.setDataPointsRadius(convertDpToPx(3));
-        headerView.addView(mGraph);
+        headerView.addView(mGraph, 1);
         getListView().addHeaderView(headerView, null, false);
         try {
             setListAdapter(new SessionListAdapter());

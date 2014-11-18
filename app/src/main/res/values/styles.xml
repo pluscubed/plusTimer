@@ -2,7 +2,6 @@
 
     <style name="Theme.PlusTimer" parent="Theme.PlusTimer.Base">
         <item name="android:windowContentOverlay">@null</item>
-        <item name="android:buttonBarButtonStyle">@style/ButtonBarButtonStyle</item>
     </style>
 
     <style name="Theme.PlusTimer.Base" parent="@style/Theme.AppCompat.Light.DarkActionBar">
@@ -13,6 +12,10 @@
         <item name="android:textColor">@android:color/black</item>
 
         <item name="android:windowBackground">@color/bg_color</item>
+
+        <item name="actionModeBackground">?colorPrimary</item>
+
+        <item name="android:buttonBarButtonStyle">@style/ButtonBarButtonStyle</item>
     </style>
 
     <style name="ButtonBarButtonStyle">
