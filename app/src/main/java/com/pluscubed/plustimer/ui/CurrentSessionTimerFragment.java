@@ -397,7 +397,7 @@ public class CurrentSessionTimerFragment extends Fragment {
         mInspectionStartTimestamp = 0;
         mTimingStartTimestamp = 0;
         mInspecting = false;
-        setTextColor(Color.BLACK);
+        setTextColor(getResources().getColor(R.color.primary_text_default_material_light));
     }
 
     public void setTextColor(int color) {
@@ -638,7 +638,7 @@ public class CurrentSessionTimerFragment extends Fragment {
         mHoldTiming = false;
         mHoldTimerStartTimestamp = 0;
         mUiHandler.removeCallbacks(mHoldTimerRunnable);
-        setTextColor(Color.BLACK);
+        setTextColor(getResources().getColor(R.color.primary_text_default_material_light));
     }
 
     /**

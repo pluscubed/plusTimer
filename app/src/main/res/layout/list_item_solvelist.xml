@@ -12,14 +12,15 @@
         android:id="@id/list_item_solvelist_title_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingTop="8dp"
+        android:paddingTop="16dp"
         android:textSize="16sp" />
 
     <TextView
         android:id="@id/list_item_solvelist_desc_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingBottom="8dp"
+        android:paddingBottom="16dp"
+        android:textColor="?android:textColorSecondary"
         android:textSize="14sp" />
 
 </LinearLayout>
