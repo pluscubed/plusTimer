@@ -124,7 +124,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="8dp"
-        android:contentDescription="@string/scrambleimage"
+        android:contentDescription="@string/scramble_image"
         android:visibility="gone" />
 
 

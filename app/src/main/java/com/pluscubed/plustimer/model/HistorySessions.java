@@ -70,7 +70,8 @@ public class HistorySessions {
     }
 
     /**
-     * Load up the history sessions stored in the list. If the file doesn't exist, create an empty
+     * Load up the history sessions stored in the list. If the file doesn't
+     * exist, create an empty
      * list.
      */
     public void init(Context context) {

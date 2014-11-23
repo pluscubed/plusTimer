@@ -18,11 +18,11 @@
     <string name="delete">Borrar</string>
     <string name="penalty">Penalización:</string>
     <string name="reset">Reiniciar</string>
-    <string name="scrambleimage">Imagen del Scramble</string>
+    <string name="scramble_image">Imagen del Scramble</string>
     <string name="session_no_solves">¡La sesión está vacía!\n¡Ve a hacer algunos tiempos!</string>
     <string name="session_submitted">Se ha enviado la sesión a la lista del historial.</string>
     <string name="session_reset">Se ha reiniciado la sesión.</string>
-    <string name="puzzletype_no_sovles">Éste puzzle no tiene sesiones registradas!\nVe a hacer algunos tiempos y haz click en Enviar dentro de \'Detalles de la Sesión\' para registrar la sesión.</string>
+    <string name="puzzletype_no_solves">Éste puzzle no tiene sesiones registradas!\nVe a hacer algunos tiempos y haz click en Enviar dentro de \'Detalles de la Sesión\' para registrar la sesión.</string>
     <string name="share">Compartir</string>
     <string name="share_dialog_title">Compartir tiempos vía…</string>
     <string name="pref_inspection_title">Inspección</string>

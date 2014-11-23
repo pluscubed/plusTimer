@@ -18,11 +18,11 @@
     <string name="delete">löschen</string>
     <string name="penalty">Zeitstrafe:</string>
     <string name="reset">zurücksetzen</string>
-    <string name="scrambleimage">Scramble-Bild</string>
+    <string name="scramble_image">Scramble-Bild</string>
     <string name="session_no_solves">Session ist leer!\nLos, mach ein paar Solves!</string>
     <string name="session_submitted">Session wurde zum Verlauf hinzugefügt.</string>
     <string name="session_reset">Session wurde zurückgesetzt.</string>
-    <string name="puzzletype_no_sovles">Dieses Puzzle hat keinen aufgezeichneten Verlauf!\nLos, mach ein paar Solves und drücke dann auf \"Abschicken\" in den Sitzungsdetails um die Sitzung in den Verlauf aufzunehmen.</string>
+    <string name="puzzletype_no_solves">Dieses Puzzle hat keinen aufgezeichneten Verlauf!\nLos, mach ein paar Solves und drücke dann auf \"Abschicken\" in den Sitzungsdetails um die Sitzung in den Verlauf aufzunehmen.</string>
     <string name="share">teilen</string>
     <string name="share_dialog_title">Zeiten teilen über…</string>
     <string name="pref_inspection_title">Inspection</string>

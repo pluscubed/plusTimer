@@ -40,45 +40,56 @@ class SlidingTabStrip extends LinearLayout {
         final float density = getResources().getDisplayMetrics().density;
 
         TypedValue outValue = new TypedValue();
-        context.getTheme().resolveAttribute(R.attr.colorForeground, outValue, true);
+        context.getTheme().resolveAttribute(R.attr.colorForeground, outValue,
+                true);
         final int themeForegroundColor = outValue.data;
 
         mDefaultBottomBorderColor = setColorAlpha(themeForegroundColor,
                 DEFAULT_BOTTOM_BORDER_COLOR_ALPHA);
 
         mDefaultTabColorizer = new SimpleTabColorizer();
-        mDefaultTabColorizer.setIndicatorColors(DEFAULT_SELECTED_INDICATOR_COLOR);
+        mDefaultTabColorizer.setIndicatorColors
+                (DEFAULT_SELECTED_INDICATOR_COLOR);
 
-        mBottomBorderThickness = (int) (DEFAULT_BOTTOM_BORDER_THICKNESS_DIPS * density);
+        mBottomBorderThickness = (int) (DEFAULT_BOTTOM_BORDER_THICKNESS_DIPS
+                * density);
         mBottomBorderPaint = new Paint();
         mBottomBorderPaint.setColor(mDefaultBottomBorderColor);
 
-        mSelectedIndicatorThickness = (int) (SELECTED_INDICATOR_THICKNESS_DIPS * density);
+        mSelectedIndicatorThickness = (int)
+                (SELECTED_INDICATOR_THICKNESS_DIPS * density);
         mSelectedIndicatorPaint = new Paint();
     }
 
     /**
-     * Set the alpha value of the {@code color} to be the given {@code alpha} value.
+     * Set the alpha value of the {@code color} to be the given {@code alpha}
+     * value.
      */
     private static int setColorAlpha(int color, byte alpha) {
-        return Color.argb(alpha, Color.red(color), Color.green(color), Color.blue(color));
+        return Color.argb(alpha, Color.red(color), Color.green(color),
+                Color.blue(color));
     }
 
     /**
      * Blend {@code color1} and {@code color2} using the given ratio.
      *
-     * @param ratio of which to blend. 1.0 will return {@code color1}, 0.5 will give an even blend,
+     * @param ratio of which to blend. 1.0 will return {@code color1},
+     *              0.5 will give an even blend,
      *              0.0 will return {@code color2}.
      */
     private static int blendColors(int color1, int color2, float ratio) {
         final float inverseRation = 1f - ratio;
-        float r = (Color.red(color1) * ratio) + (Color.red(color2) * inverseRation);
-        float g = (Color.green(color1) * ratio) + (Color.green(color2) * inverseRation);
-        float b = (Color.blue(color1) * ratio) + (Color.blue(color2) * inverseRation);
+        float r = (Color.red(color1) * ratio) + (Color.red(color2) *
+                inverseRation);
+        float g = (Color.green(color1) * ratio) + (Color.green(color2) *
+                inverseRation);
+        float b = (Color.blue(color1) * ratio) + (Color.blue(color2) *
+                inverseRation);
         return Color.rgb((int) r, (int) g, (int) b);
     }
 
-    void setCustomTabColorizer(SlidingTabLayout.TabColorizer customTabColorizer) {
+    void setCustomTabColorizer(SlidingTabLayout.TabColorizer
+                                       customTabColorizer) {
         mCustomTabColorizer = customTabColorizer;
         invalidate();
     }
@@ -100,9 +111,10 @@ class SlidingTabStrip extends LinearLayout {
     protected void onDraw(Canvas canvas) {
         final int height = getHeight();
         final int childCount = getChildCount();
-        final SlidingTabLayout.TabColorizer tabColorizer = mCustomTabColorizer != null
-                ? mCustomTabColorizer
-                : mDefaultTabColorizer;
+        final SlidingTabLayout.TabColorizer tabColorizer =
+                mCustomTabColorizer != null
+                        ? mCustomTabColorizer
+                        : mDefaultTabColorizer;
 
         // Thick colored underline below the current selection
         if (childCount > 0) {
@@ -111,8 +123,10 @@ class SlidingTabStrip extends LinearLayout {
             int right = selectedTitle.getRight();
             int color = tabColorizer.getIndicatorColor(mSelectedPosition);
 
-            if (mSelectionOffset > 0f && mSelectedPosition < (getChildCount() - 1)) {
-                int nextColor = tabColorizer.getIndicatorColor(mSelectedPosition + 1);
+            if (mSelectionOffset > 0f && mSelectedPosition < (getChildCount()
+                    - 1)) {
+                int nextColor = tabColorizer.getIndicatorColor
+                        (mSelectedPosition + 1);
                 if (color != nextColor) {
                     color = blendColors(nextColor, color, mSelectionOffset);
                 }
@@ -132,10 +146,12 @@ class SlidingTabStrip extends LinearLayout {
         }
 
         // Thin underline along the entire bottom edge
-        canvas.drawRect(0, height - mBottomBorderThickness, getWidth(), height, mBottomBorderPaint);
+        canvas.drawRect(0, height - mBottomBorderThickness, getWidth(),
+                height, mBottomBorderPaint);
     }
 
-    private static class SimpleTabColorizer implements SlidingTabLayout.TabColorizer {
+    private static class SimpleTabColorizer implements SlidingTabLayout
+            .TabColorizer {
         private int[] mIndicatorColors;
 
         @Override

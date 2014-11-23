@@ -2,7 +2,13 @@
 <resources>
 
     <style name="Theme.PlusTimer" parent="Theme.PlusTimer.Base">
-        <item name="android:alertDialogTheme">@style/Theme.PlusTimer.AlertDialog</item>
+        <item name="android:alertDialogTheme">
+            @style/Theme.PlusTimer.AlertDialog
+        </item>
+    </style>
+
+    <style name="Theme.PlusTimer.WithNavDrawer" parent="Theme.PlusTimer">
+        <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 
     <style name="Theme.PlusTimer.AlertDialog" parent="@android:style/Theme.Material.Light.Dialog.Alert">

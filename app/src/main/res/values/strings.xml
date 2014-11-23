@@ -1,33 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!--App-->
     <string name="app_name">plusTimer</string>
     <string name="ready">Ready</string>
     <string name="settings">Settings</string>
-    <string name="submit">Submit</string>
-    <string name="scrambling">Scrambling…</string>
+
+    <!--Puzzle Selection-->
     <string name="puzzle_selection">Puzzle Selection</string>
+    <string name="unofficial">Fast, Unofficial</string>
+    <string name="oh">OH</string>
+    <string name="bld">BLD</string>
+    <string name="feet">Feet</string>
+    <string-array name="puzzles">
+        <item>Square-1</item>
+        <item>Skewb</item>
+        <item>Pyraminx</item>
+        <item>Megaminx</item>
+        <item>Clock</item>
+    </string-array>
+
+
+    <!--Session Details-->
+    <string name="reset">Reset</string>
+    <string name="submit">Submit</string>
+    <string name="session_submitted">Session has been submitted to history list.</string>
+    <string name="session_reset">Session has been reset.</string>
+    <string name="reset_warning">Reset session?</string>
+    <string name="reset_warning_message">You\'ll lose all solves recorded in this session!</string>
+
+    <!--Timer-->
+    <string name="scrambling">Scrambling…</string>
+    <string name="scramble_image">Scramble Image</string>
+    <string name="session_no_solves">Session is empty!\nGo do some solves!</string>
+    <string name="timing">Timing</string>
+
+    <!--Stats-->
     <string name="solves">"Solves: "</string>
-    <string name="cao">"Current Ao%1$d"</string>
-    <string name="lao">"Last Ao%1$d"</string>
-    <string name="bao">"Best Ao%1$d"</string>
+    <string name="cao">Current Ao%1$d</string>
+    <string name="lao">Last Ao%1$d</string>
+    <string name="bao">Best Ao%1$d</string>
     <string name="number_solves">"Number of Solves: "</string>
     <string name="mean">"Mean: "</string>
     <string name="best">"Best: "</string>
     <string name="worst">"Worst: "</string>
     <string name="average">"Average: "</string>
+    <string name="pb">PB</string>
+    <string name="ao">Ao%1$d</string>
+    <string name="best_times">Best Times</string>
+    <string name="best_ao">Best Ao%1$d</string>
+
+    <!--Dialog-->
     <string name="delete">Delete</string>
     <string name="penalty">Penalty:</string>
-    <string name="reset">Reset</string>
-    <string name="scrambleimage">Scramble Image</string>
-    <string name="session_no_solves">Session is empty!\nGo do some solves!</string>
-    <string name="session_submitted">Session has been submitted to history list.</string>
-    <string name="session_reset">Session has been reset.</string>
-    <string name="puzzletype_no_sovles">This puzzle has no recorded sessions!\nGo do some solves and click Submit in Session Details to record the session.</string>
-    <string name="share">Share</string>
-    <string name="share_dialog_title">Share times via…</string>
+    <string-array name="penalty_array">
+        <item>None</item>
+        <item>+2</item>
+        <item>DNF</item>
+    </string-array>
+    <string name="time">Time (secs):</string>
+    <string name="scramble_colon">Scramble:</string>
+    <string name="timestamp">Timestamp:</string>
+    <string name="invalid_scramble">Invalid scramble!</string>
 
+    <!--History-->
+    <string name="puzzletype_no_solves">This puzzle has no recorded sessions!\nGo do some solves and press Submit in Session Details to record the session.</string>
 
+    <!--Preferences-->
     <string name="pref_inspection_title">Inspection</string>
     <string name="pref_inspection_summary">15-second WCA countdown for inspecting the cube</string>
 
@@ -44,78 +83,44 @@
     <string name="time_text_edittext_dialog_title">Set timer text size (default 100):</string>
 
     <string name="pref_update_time_title">Text Updating</string>
-
-    <string name="pref_timer_category_title">Timer</string>
-
-    <string name="pref_milliseconds_title">Use Milliseconds (0.001)</string>
-
-    <string name="puzzle_types_setup">Enable/Disable Puzzle Types</string>
-    <string name="no_disable_all_puzzletypes">You can\'t disable all puzzle types!</string>
-
-    <string name="pref_sign_title">Use SiGN Notation</string>
-
-
-    <string-array name="penalty_array">
-        <item>None</item>
-        <item>+2</item>
-        <item>DNF</item>
-    </string-array>
-
-    <string-array name="drawer_array">
-        <item>Current Session</item>
-        <item>History</item>
-    </string-array>
-
-    <string-array name="drawer_actionbar_array">
-        <item>Current</item>
-        <item>History</item>
-    </string-array>
-
-    <string-array name="current_s_page_titles">
-        <item>TIMER</item>
-        <item>SESSION DETAILS</item>
-    </string-array>
-
-    <string-array name="puzzles">
-        <item>Square-1</item>
-        <item>Skewb</item>
-        <item>Pyraminx</item>
-        <item>Megaminx</item>
-        <item>Clock</item>
-    </string-array>
-
     <string-array name="pref_update_time_list_entries">
         <item>On</item>
         <item>On, to seconds</item>
         <item>Hide</item>
     </string-array>
 
-    <string name="drawer_open">Open navigation drawer</string>
-    <string name="drawer_close">Close navigation drawer</string>
+    <string name="pref_timer_category_title">Timer</string>
 
-    <string name="pb">PB</string>
-    <string name="ao">Ao%1$d</string>
+    <string name="pref_milliseconds_title">Use Milliseconds (0.001)</string>
+
+    <string name="pref_sign_title">Use SiGN Notation</string>
+
+    <string name="puzzle_types_setup">Enable/Disable Puzzle Types</string>
+    <string name="no_disable_all_puzzletypes">You can\'t disable all puzzle types!</string>
+
+
+    <!--Titles-->
+    <string name="current_session">Current Session</string>
+    <string name="history">History</string>
+    <string name="current">Current</string>
     <string name="help">Help</string>
     <string name="about">About</string>
+
+    <string-array name="current_session_page_titles">
+        <item>Timer</item>
+        <item>Session Details</item>
+    </string-array>
+
+    <!--About-->
     <string name="icon">Icon</string>
     <string name="open_source_licenses">Open Source Licenses</string>
     <string name="github">GitHub</string>
     <string name="email">Send feedback</string>
     <string name="rate">Rate on the Play Store</string>
 
-    <string name="unofficial">Fast, Unofficial</string>
-    <string name="reset_warning">Reset session?</string>
-    <string name="reset_warning_message">You\'ll lose all solves recorded in this session!</string>
+    <!--ToolBar-->
     <string name="manual_add_solve">Add Solve</string>
-    <string name="time">Time (secs):</string>
-    <string name="scramble_colon">Scramble:</string>
-    <string name="best_times">Best Times</string>
-    <string name="best_ao">Best Ao%1$d</string>
-    <string name="timing">Timing</string>
-    <string name="oh">OH</string>
-    <string name="bld">BLD</string>
-    <string name="feet">Feet</string>
-    <string name="timestamp">Timestamp:</string>
-    <string name="invalid_scramble">Invalid scramble!</string>
+    <string name="share">Share</string>
+    <string name="share_dialog_title">Share times via…</string>
 
 </resources>

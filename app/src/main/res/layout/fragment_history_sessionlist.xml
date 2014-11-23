@@ -21,6 +21,6 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:padding="16dp"
-        android:text="@string/puzzletype_no_sovles" />
+        android:text="@string/puzzletype_no_solves" />
 
 </LinearLayout>

@@ -6,6 +6,6 @@
         android:id="@id/menu_activity_history_sessionlist_puzzletype_spinner"
         android:orderInCategory="9999"
         android:title="@string/puzzle_selection"
-        app:actionLayout="@layout/actionview_spinner"
+        app:actionLayout="@layout/spinner"
         app:showAsAction="always" />
 </menu>
