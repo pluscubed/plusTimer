@@ -3,6 +3,7 @@ package com.pluscubed.plustimer.ui;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -18,7 +19,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.pluscubed.plustimer.R;
-import com.pluscubed.plustimer.Util;
 
 /**
  * Base Activity with the Navigation Drawer
@@ -107,7 +107,8 @@ public abstract class DrawerActivity extends ActionBarActivity {
         mDrawerLayout = (DrawerLayout) findViewById(R.id
                 .activity_base_drawerlayout);
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, Gravity.START);
-        mDrawerLayout.setStatusBarBackgroundColor(getResources().getColor(R
+        Resources resources = getResources();
+        mDrawerLayout.setStatusBarBackgroundColor(resources.getColor(R
                 .color.primary_dark));
         mDrawerLayout.setDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
@@ -133,9 +134,17 @@ public abstract class DrawerActivity extends ActionBarActivity {
 
         mDrawerScrollView = (ScrollView) findViewById(R.id
                 .activity_base_drawer_scrollview);
+        int actionBarSize = resources.getDimensionPixelSize(R.dimen
+                .abc_action_bar_default_height_material);
+        int navDrawerWidth = resources.getDisplayMetrics().widthPixels -
+                actionBarSize;
+        int limit = 5 * resources.getDimensionPixelSize(R.dimen
+                .navigation_drawer_margin);
+        if (navDrawerWidth > limit) {
+            navDrawerWidth = limit;
+        }
         mDrawerScrollView.setLayoutParams(new DrawerLayout.LayoutParams(
-                        getResources().getDisplayMetrics().widthPixels - Util
-                                .convertDpToPx(this, 56),
+                        navDrawerWidth,
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         Gravity.START)
         );
