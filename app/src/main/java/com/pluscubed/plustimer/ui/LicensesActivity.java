@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,15 +28,20 @@ public class LicensesActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_with_toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
+        setSupportActionBar(toolbar);
+
         FragmentManager fm = getFragmentManager();
-        Fragment f = fm.findFragmentById(android.R.id.content);
+        Fragment f = fm.findFragmentById(R.id
+                .activity_with_toolbar_content_framelayout);
         if (f == null) {
             fm.beginTransaction()
-                    .replace(android.R.id.content, new LicensesFragment())
+                    .replace(R.id.activity_with_toolbar_content_framelayout,
+                            new LicensesFragment())
                     .commit();
         }
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
         setTitle(R.string.open_source_licenses);
     }
 

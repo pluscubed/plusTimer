@@ -2,7 +2,7 @@
 
 <android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@id/activity_base_drawerlayout"
+    android:id="@id/activity_drawer_drawerlayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
@@ -10,7 +10,7 @@
     <!-- The main content view -->
 
     <LinearLayout
-        android:id="@id/activity_base_content_linearlayout"
+        android:id="@id/activity_drawer_content_linearlayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
@@ -42,7 +42,7 @@
     <!-- The navigation drawer (width is placeholder, dynamically adjusted to total width-56dp)-->
 
     <ScrollView
-        android:id="@id/activity_base_drawer_scrollview"
+        android:id="@id/activity_drawer_drawer_scrollview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="start"
@@ -51,7 +51,7 @@
         android:fitsSystemWindows="true">
 
         <LinearLayout
-            android:id="@id/activity_base_drawer_linearlayout"
+            android:id="@id/activity_drawer_drawer_linearlayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@android:color/white"

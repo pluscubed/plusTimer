@@ -105,7 +105,7 @@ public abstract class DrawerActivity extends ActionBarActivity {
      */
     private void setupNavDrawer() {
         mDrawerLayout = (DrawerLayout) findViewById(R.id
-                .activity_base_drawerlayout);
+                .activity_drawer_drawerlayout);
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, Gravity.START);
         Resources resources = getResources();
         mDrawerLayout.setStatusBarBackgroundColor(resources.getColor(R
@@ -133,7 +133,7 @@ public abstract class DrawerActivity extends ActionBarActivity {
         });
 
         mDrawerScrollView = (ScrollView) findViewById(R.id
-                .activity_base_drawer_scrollview);
+                .activity_drawer_drawer_scrollview);
         int actionBarSize = resources.getDimensionPixelSize(R.dimen
                 .abc_action_bar_default_height_material);
         int navDrawerWidth = resources.getDisplayMetrics().widthPixels -
@@ -150,7 +150,7 @@ public abstract class DrawerActivity extends ActionBarActivity {
         );
 
         mDrawerListLinearLayout = (LinearLayout) findViewById(R.id
-                .activity_base_drawer_linearlayout);
+                .activity_drawer_drawer_linearlayout);
 
         mActionBarToolbar.setNavigationIcon(R.drawable.ic_drawer);
         mActionBarToolbar.setNavigationOnClickListener(new View
@@ -217,7 +217,7 @@ public abstract class DrawerActivity extends ActionBarActivity {
         super.onPostCreate(savedInstanceState);
         setupNavDrawer();
         View mainContent = findViewById(R.id
-                .activity_base_content_linearlayout);
+                .activity_drawer_content_linearlayout);
         mainContent.setAlpha(0);
         mainContent.animate().alpha(1).setDuration
                 (MAIN_CONTENT_FADEIN_DURATION);
@@ -235,12 +235,9 @@ public abstract class DrawerActivity extends ActionBarActivity {
                 goToNavDrawerItem(itemId);
             }
         }, NAVDRAWER_LAUNCH_DELAY);
-
-
-        //TODO: After help is finished, remove check here
-        if (itemId != NAVDRAWER_ITEM_HELP) {
+        if (!isSpecialItem(itemId)) {
             View mainContent = findViewById(R.id
-                    .activity_base_content_linearlayout);
+                    .activity_drawer_content_linearlayout);
             if (mainContent != null) {
                 mainContent.animate().alpha(0).setDuration
                         (MAIN_CONTENT_FADEOUT_DURATION);
@@ -250,6 +247,10 @@ public abstract class DrawerActivity extends ActionBarActivity {
         mDrawerLayout.closeDrawer(Gravity.START);
     }
 
+    private boolean isSpecialItem(int itemId) {
+        return itemId == NAVDRAWER_ITEM_SETTINGS || itemId ==
+                NAVDRAWER_ITEM_HELP || itemId == NAVDRAWER_ITEM_ABOUT;
+    }
 
     protected boolean isNavDrawerOpen() {
         return mDrawerLayout != null && mDrawerLayout.isDrawerOpen(Gravity
@@ -284,6 +285,7 @@ public abstract class DrawerActivity extends ActionBarActivity {
         }
 
         startActivity(i);
-        finish();
+        //If it is not a special item, finish this activity
+        if (!isSpecialItem(itemId)) finish();
     }
 }

@@ -10,8 +10,8 @@ import android.preference.ListPreference;
 import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
-import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -38,21 +38,29 @@ public class SettingsActivity extends ActionBarActivity {
             "pref_two_row_time_checkbox";
     public static final String PREF_TIME_TEXT_SIZE_EDITTEXT =
             "pref_time_display_size_edittext";
-    public static final String PREF_UPDATE_TIME_LIST = "pref_update_time_list";
+    public static final String PREF_UPDATE_TIME_LIST =
+            "pref_update_time_list";
     public static final String PREF_MILLISECONDS_CHECKBOX =
             "pref_milliseconds_checkbox";
-    public static final String PREF_SIGN_CHECKBOX = "pref_sign_checkbox";
+    public static final String PREF_SIGN_CHECKBOX =
+            "pref_sign_checkbox";
     public static final String PREF_PUZZLETYPES_MULTISELECTLIST =
             "pref_puzzletypes_multiselectlist";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_with_toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
+        setSupportActionBar(toolbar);
+
         FragmentManager fm = getFragmentManager();
-        Fragment f = fm.findFragmentById(android.R.id.content);
+        Fragment f = fm.findFragmentById(R.id
+                .activity_with_toolbar_content_framelayout);
         if (f == null) {
             fm.beginTransaction()
-                    .replace(android.R.id.content, new SettingsFragment())
+                    .replace(R.id.activity_with_toolbar_content_framelayout,
+                            new SettingsFragment())
                     .commit();
         }
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -64,7 +72,7 @@ public class SettingsActivity extends ActionBarActivity {
         switch (item.getItemId()) {
             // Respond to the action bar's Up/Home button
             case android.R.id.home:
-                NavUtils.navigateUpFromSameTask(this);
+                finish();
                 return true;
         }
         return super.onOptionsItemSelected(item);

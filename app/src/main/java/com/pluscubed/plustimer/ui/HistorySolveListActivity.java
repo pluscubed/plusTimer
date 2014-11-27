@@ -6,6 +6,7 @@ import android.app.FragmentManager;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -64,20 +65,27 @@ public class HistorySolveListActivity extends ActionBarActivity
         super.onCreate(savedInstanceState);
 
         PuzzleType.initialize(this);
-
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
-        FragmentManager fm = getFragmentManager();
-        Fragment fragment = fm.findFragmentById(android.R.id.content);
         int position = getIntent().getIntExtra
                 (EXTRA_HISTORY_SESSION_POSITION, 0);
         String puzzleType = getIntent().getStringExtra
                 (EXTRA_HISTORY_PUZZLETYPE_DISPLAYNAME);
-        if (fragment == null) {
-            fragment = SolveListFragment.newInstance(false, puzzleType,
+
+        setContentView(R.layout.activity_with_toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
+        setSupportActionBar(toolbar);
+
+        FragmentManager fm = getFragmentManager();
+        Fragment f = fm.findFragmentById(R.id
+                .activity_with_toolbar_content_framelayout);
+        if (f == null) {
+            f = SolveListFragment.newInstance(false, puzzleType,
                     position);
-            fm.beginTransaction().add(android.R.id.content, fragment).commit();
+            fm.beginTransaction()
+                    .replace(R.id.activity_with_toolbar_content_framelayout, f)
+                    .commit();
         }
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         setTitle(PuzzleType.valueOf(puzzleType).getSession(position)
                 .getTimestampString(this));
     }

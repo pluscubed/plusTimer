@@ -41,11 +41,11 @@
 
 
     <!--BaseDrawerActivity-->
-    <item name="activity_base_drawerlayout" type="id" />
-    <item name="activity_base_content_linearlayout" type="id" />
+    <item name="activity_drawer_drawerlayout" type="id" />
+    <item name="activity_drawer_content_linearlayout" type="id" />
     <item name="toolbar_actionbar" type="id" />
-    <item name="activity_base_drawer_linearlayout" type="id" />
-    <item name="activity_base_drawer_scrollview" type="id" />
+    <item name="activity_drawer_drawer_linearlayout" type="id" />
+    <item name="activity_drawer_drawer_scrollview" type="id" />
 
     <!--CurrentSessionActivity-->
     <item name="activity_current_session_slidingtablayout" type="id" />
@@ -64,6 +64,9 @@
     <item name="fragment_about_github_button" type="id" />
     <item name="fragment_about_email_button" type="id" />
     <item name="fragment_about_rate_button" type="id" />
+
+    <!--activity_with_toolbar-->
+    <item name="activity_with_toolbar_content_framelayout" type="id" />
 
 
 </resources>
