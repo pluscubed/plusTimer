@@ -126,6 +126,14 @@ public class CurrentSessionActivity extends DrawerActivity implements
         overridePendingTransition(0, 0);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // TODO: Only update Spinner, not invalidate whole action bar
+        // When puzzle types are enabled/disabled, update Spinner
+        queueInvalidateOptionsMenu();
+    }
+
     private CurrentSessionTimerFragment getCurrentSessionTimerFragment() {
         return (CurrentSessionTimerFragment) getFragmentManager()
                 .findFragmentByTag(makeFragmentName(R.id
@@ -138,9 +146,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
                         .activity_current_session_viewpager, 1));
     }
 
-    @Override
-    public void enableMenuItems(boolean enable) {
-        mScrambleImageActionEnable = enable;
+    public void queueInvalidateOptionsMenu() {
         if (!isNavDrawerOpen()) {
             invalidateOptionsMenu();
         } else {
@@ -148,6 +154,11 @@ public class CurrentSessionActivity extends DrawerActivity implements
             // while nav drawer is open doesn't call onCreateOptionsMenu()
             mInvalidateActionBarOnDrawerClosed = true;
         }
+    }
+    @Override
+    public void enableMenuItems(boolean enable) {
+        mScrambleImageActionEnable = enable;
+        queueInvalidateOptionsMenu();
     }
 
     @Override
