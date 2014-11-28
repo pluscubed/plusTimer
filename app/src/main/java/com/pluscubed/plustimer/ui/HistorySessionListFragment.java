@@ -9,7 +9,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
-import android.util.DisplayMetrics;
 import android.util.SparseArray;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
@@ -147,12 +146,10 @@ public class HistorySessionListFragment extends ListFragment {
         mStatsText = (TextView) headerView
                 .findViewById(R.id.history_sessionlist_header_stats_textview);
         mGraph = new LineGraphView(getActivity(), "");
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        getActivity().getWindowManager().getDefaultDisplay().getMetrics
-                (displayMetrics);
         LinearLayout.LayoutParams layoutParams = new LinearLayout
                 .LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 Util.convertDpToPx(getActivity(), 220));
+        layoutParams.setMargins(0, 0, 0, Util.convertDpToPx(getActivity(), 20));
         mGraph.setLayoutParams(layoutParams);
         mGraph.setShowLegend(true);
         mGraph.getGraphViewStyle().setLegendWidth(Util.convertDpToPx
