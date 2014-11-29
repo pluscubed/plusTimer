@@ -43,7 +43,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="?android:selectableItemBackground"
+            android:background="@drawable/item_background_dark"
             android:text="@string/reset" />
 
         <Button
@@ -52,7 +52,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="?android:selectableItemBackground"
+            android:background="@drawable/item_background_dark"
             android:text="@string/submit" />
 
     </LinearLayout>

@@ -96,7 +96,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="?android:selectableItemBackground"
+            android:background="@drawable/item_background_dark"
             android:text="DNF"
             tools:ignore="HardcodedText" />
 
@@ -106,7 +106,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="?android:selectableItemBackground"
+            android:background="@drawable/item_background_dark"
             android:text="+2"
             tools:ignore="HardcodedText" />
     </LinearLayout>

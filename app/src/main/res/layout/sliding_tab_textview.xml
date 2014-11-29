@@ -5,7 +5,7 @@
     android:id="@android:id/text1"
     android:layout_width="wrap_content"
     android:layout_height="48dp"
-    android:background="?android:selectableItemBackground"
+    android:background="@drawable/item_background_dark"
     android:fontFamily="@string/font_fontFamily_medium"
     android:gravity="center"
     android:paddingEnd="16dp"
