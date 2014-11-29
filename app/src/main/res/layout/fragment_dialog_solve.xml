@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fadeScrollbars="false">
+
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:columnCount="2"
+        android:paddingBottom="16dp"
+        android:paddingEnd="20dp"
+        android:paddingLeft="24dp"
+        android:paddingRight="20dp"
+        android:paddingStart="24dp"
+        android:paddingTop="16dp"
+        android:rowCount="4">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="@string/time"
+            android:textColor="?android:attr/textColorAlertDialogListItem"
+            android:textSize="12sp" />
+
+        <EditText
+            android:id="@id/dialog_solve_time_edittext"
+            android:layout_width="0dp"
+            android:layout_gravity="fill_horizontal"
+            android:layout_marginBottom="8dp"
+            android:layout_marginLeft="4dp"
+            android:layout_marginStart="4dp"
+            android:imeOptions="actionDone"
+            android:inputType="numberDecimal|textNoSuggestions"
+            android:textColor="?android:attr/textColorAlertDialogListItem"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/timestamp"
+            android:textColor="?android:attr/textColorAlertDialogListItem"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@id/dialog_solve_timestamp_textview"
+            android:layout_width="0dp"
+            android:layout_gravity="fill_horizontal"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="4dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:textColor="?android:attr/textColorAlertDialogListItem"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/scramble_colon"
+            android:textColor="?android:attr/textColorAlertDialogListItem"
+            android:textSize="12sp" />
+
+        <EditText
+            android:id="@id/dialog_solve_scramble_edittext"
+            android:layout_width="0dp"
+            android:layout_gravity="fill_horizontal"
+            android:layout_marginBottom="8dp"
+            android:layout_marginLeft="4dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="8dp"
+            android:imeOptions="actionDone"
+            android:inputType="textMultiLine|textNoSuggestions"
+            android:textColor="?android:attr/textColorAlertDialogListItem"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="@string/penalty"
+            android:textColor="?android:attr/textColorAlertDialogListItem"
+            android:textSize="12sp" />
+
+        <Spinner
+            android:id="@id/dialog_solve_modify_penalty_spinner"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|fill_horizontal"
+            android:background="?android:selectableItemBackground"
+            android:dropDownHorizontalOffset="500dp"
+            android:textSize="16sp"
+            android:translationX="-8dp" />
+
+    </GridLayout>
+</ScrollView>

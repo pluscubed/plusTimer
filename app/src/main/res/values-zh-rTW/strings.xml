@@ -19,11 +19,11 @@
     <string name="delete">刪除</string>
     <string name="penalty">懲罰:</string>
     <string name="reset">重置</string>
-    <string name="scrambleimage">打亂圖</string>
+    <string name="scramble_image">打亂圖</string>
     <string name="session_no_solves">本組目前無成績!</string>
     <string name="session_submitted">保存本組成功</string>
     <string name="session_reset">本組重置成功</string>
-    <string name="puzzletype_no_sovles">該魔方無記錄!\n完成一些還原後，在 成績列表 頁面按 保存至記錄。</string>
+    <string name="puzzletype_no_solves">該魔方無記錄!\n完成一些還原後，在 成績列表 頁面按 保存至記錄。</string>
     <string name="share">分享成績</string>
     <string name="share_dialog_title">分享成績至…</string>
 

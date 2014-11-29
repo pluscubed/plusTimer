@@ -53,7 +53,8 @@ public class CurrentSessionTimerRetainedFragment extends Fragment {
                 mCurrentScrambleAndSvg = mNextScrambleAndSvg;
                 mNextScrambleAndSvg = null;
                 if (getTargetFragment() != null) {
-                    final CurrentSessionTimerFragment targetFragment = (CurrentSessionTimerFragment) getTargetFragment();
+                    final CurrentSessionTimerFragment targetFragment =
+                            (CurrentSessionTimerFragment) getTargetFragment();
                     targetFragment.getUiHandler().post(new Runnable() {
                         @Override
                         public void run() {
@@ -69,10 +70,12 @@ public class CurrentSessionTimerRetainedFragment extends Fragment {
 
     //Generate scramble image and text
     private ScrambleAndSvg generateScramble() {
-        String scramble = PuzzleType.getCurrent().getPuzzle().generateScramble();
+        String scramble = PuzzleType.getCurrent().getPuzzle()
+                .generateScramble();
         ScrambleAndSvg scrambleAndSvg = null;
         try {
-            String svg = PuzzleType.getCurrent().getPuzzle().drawScramble(scramble, null).toString();
+            String svg = PuzzleType.getCurrent().getPuzzle().drawScramble
+                    (scramble, null).toString();
             scrambleAndSvg = new ScrambleAndSvg(scramble, svg);
         } catch (InvalidScrambleException e) {
             e.printStackTrace();
@@ -123,12 +126,14 @@ public class CurrentSessionTimerRetainedFragment extends Fragment {
         startScramblerThread();
 
         if (savedInstanceState != null) {
-            String current_scramble = savedInstanceState.getString(STATE_CURRENT_SCRAMBLE);
+            String current_scramble = savedInstanceState.getString
+                    (STATE_CURRENT_SCRAMBLE);
             if (current_scramble != null) {
                 mCurrentScrambleAndSvg = new ScrambleAndSvg(current_scramble,
                         savedInstanceState.getString(STATE_CURRENT_SVG));
             }
-            String next_scramble = savedInstanceState.getString(STATE_NEXT_SCRAMBLE);
+            String next_scramble = savedInstanceState.getString
+                    (STATE_NEXT_SCRAMBLE);
             if (next_scramble != null) {
                 mNextScrambleAndSvg = new ScrambleAndSvg(next_scramble,
                         savedInstanceState.getString(STATE_NEXT_SVG));
@@ -151,11 +156,14 @@ public class CurrentSessionTimerRetainedFragment extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         if (mCurrentScrambleAndSvg != null) {
-            outState.putString(STATE_CURRENT_SCRAMBLE, mCurrentScrambleAndSvg.getScramble());
-            outState.putString(STATE_CURRENT_SVG, mCurrentScrambleAndSvg.getSvg());
+            outState.putString(STATE_CURRENT_SCRAMBLE, mCurrentScrambleAndSvg
+                    .getScramble());
+            outState.putString(STATE_CURRENT_SVG, mCurrentScrambleAndSvg
+                    .getSvg());
         }
         if (mNextScrambleAndSvg != null) {
-            outState.putString(STATE_NEXT_SCRAMBLE, mNextScrambleAndSvg.getScramble());
+            outState.putString(STATE_NEXT_SCRAMBLE,
+                    mNextScrambleAndSvg.getScramble());
             outState.putString(STATE_NEXT_SVG, mNextScrambleAndSvg.getSvg());
         }
         outState.putBoolean(STATE_SCRAMBLING, mScrambling);

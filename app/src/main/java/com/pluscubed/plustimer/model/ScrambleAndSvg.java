@@ -26,7 +26,8 @@ public class ScrambleAndSvg {
     }
 
     public String getUiScramble(boolean sign, String puzzleTypeName) {
-        return sign ? Util.wcaToSignNotation(mScramble, puzzleTypeName) : mScramble;
+        return sign ? Util.wcaToSignNotation(mScramble,
+                puzzleTypeName) : mScramble;
     }
 
     public String getScramble() {
@@ -50,12 +51,15 @@ public class ScrambleAndSvg {
         }
     }
 
-    public static class Deserializer implements JsonDeserializer<ScrambleAndSvg> {
+    public static class Deserializer implements
+            JsonDeserializer<ScrambleAndSvg> {
 
         @Override
         public ScrambleAndSvg deserialize(JsonElement json, Type typeOfT,
-                                          JsonDeserializationContext context) throws JsonParseException {
-            return new ScrambleAndSvg(json.getAsJsonPrimitive().getAsString(), null);
+                                          JsonDeserializationContext context)
+                throws JsonParseException {
+            return new ScrambleAndSvg(json.getAsJsonPrimitive().getAsString()
+                    , null);
         }
     }
 }

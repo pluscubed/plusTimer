@@ -22,7 +22,7 @@ public class Session {
      * Constructs a Session with an empty list of Solves
      */
     public Session() {
-        mSolves = new ArrayList<Solve>();
+        mSolves = new ArrayList<>();
     }
 
     public int getPosition(Solve i) {
@@ -30,7 +30,7 @@ public class Session {
     }
 
     public List<Solve> getSolves() {
-        return new ArrayList<Solve>(Collections.unmodifiableList(mSolves));
+        return new ArrayList<>(Collections.unmodifiableList(mSolves));
     }
 
     public void addSolve(Solve s) {
@@ -51,15 +51,17 @@ public class Session {
 
     /**
      * Returns a String of the current average of some number of solves.
-     * If the number less than 3 or if the number of solves is less than the number, it'll return a blank String.
+     * If the number less than 3 or if the number of solves is less than the
+     * number, it'll return a blank String.
      *
      * @param number              the number of solves to average
      * @param millisecondsEnabled whether to display milliseconds
      * @return the current average of some number of solves
      */
-    public String getStringCurrentAverageOf(int number, boolean millisecondsEnabled) {
+    public String getStringCurrentAverageOf(int number,
+                                            boolean millisecondsEnabled) {
         if (number >= 3 && mSolves.size() >= number) {
-            List<Solve> solves = new ArrayList<Solve>();
+            List<Solve> solves = new ArrayList<>();
 
             //Add the most recent solves
             for (int i = 0; i < number; i++) {
@@ -86,7 +88,8 @@ public class Session {
      * @param millisecondsEnabled whether to display milliseconds
      * @return the best average of some number of solves
      */
-    public String getStringBestAverageOf(int number, boolean millisecondsEnabled) {
+    public String getStringBestAverageOf(int number,
+                                         boolean millisecondsEnabled) {
         long bestAverage = getBestAverageOf(number);
         if (bestAverage == GET_AVERAGE_INVALID_NOT_ENOUGH) {
             return "";
@@ -98,8 +101,11 @@ public class Session {
     }
 
     /**
-     * Returns the milliseconds value of the best average of some number of solves.
-     * Returns {@link Long#MAX_VALUE} for DNF and {@link Session#GET_AVERAGE_INVALID_NOT_ENOUGH} if the list size is less than 3 or if the number of solves is less than the number.
+     * Returns the milliseconds value of the best average of some number of
+     * solves.
+     * Returns {@link Long#MAX_VALUE} for DNF and {@link
+     * Session#GET_AVERAGE_INVALID_NOT_ENOUGH} if the list size is less than
+     * 3 or if the number of solves is less than the number.
      *
      * @param number the number of solves to average
      * @return the best average of some number of solves
@@ -107,11 +113,15 @@ public class Session {
     public long getBestAverageOf(int number) {
         if (number >= 3 && mSolves.size() >= number) {
             long bestAverage = 0;
-            //Iterates through the list, starting with the [number] most recent solves
+            //Iterates through the list, starting with the [number] most
+            // recent solves
             for (int i = 0; mSolves.size() - (number + i) >= 0; i++) {
-                //Sublist the [number] of solves, offset by i from the most recent. Gets the average.
-                long average = Util.getAverageOf(mSolves.subList(mSolves.size() - (number + i), mSolves.size() - i));
-                //If the average is less than the current best (or on the first loop), set the best average to the average
+                //Sublist the [number] of solves, offset by i from the most
+                // recent. Gets the average.
+                long average = Util.getAverageOf(mSolves.subList(mSolves.size
+                        () - (number + i), mSolves.size() - i));
+                //If the average is less than the current best (or on the
+                // first loop), set the best average to the average
                 if (i == 0 || average < bestAverage) {
                     bestAverage = average;
                 }
@@ -134,7 +144,8 @@ public class Session {
     }
 
     public String getTimestampString(Context context) {
-        return Util.timeDateStringFromTimestamp(context, getLastSolve().getTimestamp());
+        return Util.timeDateStringFromTimestamp(context,
+                getLastSolve().getTimestamp());
     }
 
     public long getTimestamp() {
@@ -149,35 +160,57 @@ public class Session {
         mSolves.remove(i);
     }
 
-    public String toString(Context context, String puzzleTypeName, boolean current, boolean displaySolves, boolean milliseconds, boolean sign) {
+    public String toString(Context context, String puzzleTypeName,
+                           boolean current, boolean displaySolves,
+                           boolean milliseconds, boolean sign) {
         StringBuilder s = new StringBuilder();
         if (displaySolves) {
             s.append(puzzleTypeName).append("\n\n");
         }
-        s.append(context.getString(R.string.number_solves)).append(getNumberOfSolves());
+        s.append(context.getString(R.string.number_solves)).append
+                (getNumberOfSolves());
         if (getNumberOfSolves() > 0) {
-            s.append("\n").append(context.getString(R.string.mean)).append(getStringMean(milliseconds));
+            s.append("\n").append(context.getString(R.string.mean)).append
+                    (getStringMean(milliseconds));
             if (getNumberOfSolves() > 1) {
-                s.append("\n").append(context.getString(R.string.best)).append(Util.getBestSolveOfList(mSolves).getTimeString(milliseconds));
-                s.append("\n").append(context.getString(R.string.worst)).append(Util.getWorstSolveOfList(mSolves).getTimeString(milliseconds));
+                s.append("\n").append(context.getString(R.string.best))
+                        .append(Util.getBestSolveOfList(mSolves)
+                                .getTimeString(milliseconds));
+                s.append("\n").append(context.getString(R.string.worst))
+                        .append(Util.getWorstSolveOfList(mSolves)
+                                .getTimeString(milliseconds));
 
                 if (getNumberOfSolves() > 2) {
                     long average = Util.getAverageOf(mSolves);
                     if (average != Long.MAX_VALUE) {
-                        s.append("\n").append(context.getString(R.string.average)).append(Util.timeStringFromNs(average, milliseconds));
+                        s.append("\n").append(context.getString(R.string
+                                .average)).append(Util.timeStringFromNs
+                                (average, milliseconds));
                     } else {
-                        s.append("\n").append(context.getString(R.string.average)).append("DNF");
+                        s.append("\n").append(context.getString(R.string
+                                .average)).append("DNF");
                     }
 
                     int[] averages = {1000, 100, 50, 12, 5};
                     for (int i : averages) {
                         if (getNumberOfSolves() >= i) {
                             if (current) {
-                                s.append("\n").append(String.format(context.getString(R.string.cao), i)).append(": ").append(getStringCurrentAverageOf(i, milliseconds));
+                                s.append("\n").append(String.format(context
+                                                .getString(R.string.cao),
+                                        i)).append(": ").append
+                                        (getStringCurrentAverageOf(i,
+                                                milliseconds));
                             } else {
-                                s.append("\n").append(String.format(context.getString(R.string.lao), i)).append(": ").append(getStringCurrentAverageOf(i, milliseconds));
+                                s.append("\n").append(String.format(context
+                                                .getString(R.string.lao),
+                                        i)).append(": ").append
+                                        (getStringCurrentAverageOf(i,
+                                                milliseconds));
                             }
-                            s.append("\n").append(String.format(context.getString(R.string.bao), i)).append(": ").append(getStringBestAverageOf(i, milliseconds));
+                            s.append("\n").append(String.format(context
+                                            .getString(R.string.bao),
+                                    i)).append(": ").append
+                                    (getStringBestAverageOf(i, milliseconds));
                         }
                     }
                 }
@@ -190,12 +223,17 @@ public class Session {
                     Solve worst = Util.getWorstSolveOfList(mSolves);
                     s.append(c).append(". ");
                     if (i == best || i == worst) {
-                        s.append("(").append(i.getDescriptiveTimeString(milliseconds)).append(")");
+                        s.append("(").append(i.getDescriptiveTimeString
+                                (milliseconds)).append(")");
                     } else {
                         s.append(i.getDescriptiveTimeString(milliseconds));
                     }
-                    s.append("\n").append("     ").append(Util.timeDateStringFromTimestamp(context, i.getTimestamp()))
-                            .append("\n").append("     ").append(i.getScrambleAndSvg().getUiScramble(sign, puzzleTypeName))
+                    s.append("\n").append("     ").append(Util
+                            .timeDateStringFromTimestamp(context,
+                                    i.getTimestamp()))
+                            .append("\n").append("     ").append(i
+                            .getScrambleAndSvg().getUiScramble(sign,
+                                    puzzleTypeName))
                             .append("\n\n");
                     c++;
                 }

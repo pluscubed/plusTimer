@@ -17,7 +17,9 @@ import net.gnehzr.tnoodle.utils.LazyInstantiatorException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Enum for puzzle
@@ -75,12 +77,14 @@ public enum PuzzleType {
 
     public static void setCurrent(PuzzleType type, Context context) {
         sCurrentPuzzleType = type;
-        SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        defaultSharedPreferences.edit().putString(PREF_CURRENT_PUZZLETYPE, sCurrentPuzzleType.name()).apply();
+        SharedPreferences defaultSharedPreferences = PreferenceManager
+                .getDefaultSharedPreferences(context);
+        defaultSharedPreferences.edit().putString(PREF_CURRENT_PUZZLETYPE,
+                sCurrentPuzzleType.name()).apply();
     }
 
     public static List<PuzzleType> valuesExcludeDisabled() {
-        List<PuzzleType> array = new ArrayList<PuzzleType>();
+        List<PuzzleType> array = new ArrayList<>();
         for (PuzzleType i : values()) {
             if (i.isEnabled()) {
                 array.add(i);
@@ -91,11 +95,14 @@ public enum PuzzleType {
 
     public synchronized static void initialize(Context context) {
         if (sCurrentPuzzleType == null)
-            sCurrentPuzzleType = valueOf(PreferenceManager.getDefaultSharedPreferences(context).getString(PREF_CURRENT_PUZZLETYPE, THREE.name()));
+            sCurrentPuzzleType = valueOf(PreferenceManager
+                    .getDefaultSharedPreferences(context).getString
+                            (PREF_CURRENT_PUZZLETYPE, THREE.name()));
         for (PuzzleType puzzleType : values()) {
             puzzleType.init(context);
         }
-        PreferenceManager.getDefaultSharedPreferences(context).edit().putInt(Util.PREF_VERSION_CODE, BuildConfig.VERSION_CODE).apply();
+        PreferenceManager.getDefaultSharedPreferences(context).edit().putInt
+                (Util.PREF_VERSION_CODE, BuildConfig.VERSION_CODE).apply();
     }
 
     public HistorySessions getHistorySessions() {
@@ -104,26 +111,35 @@ public enum PuzzleType {
 
     private synchronized void init(Context context) {
         if (!mInitialized) {
-            SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-            switch (defaultSharedPreferences.getInt(Util.PREF_VERSION_CODE, 10)) {
+            SharedPreferences defaultSharedPreferences = PreferenceManager
+                    .getDefaultSharedPreferences(context);
+            switch (defaultSharedPreferences.getInt(Util.PREF_VERSION_CODE,
+                    10)) {
                 case 10:
-                    //Version 10- to 11+: Set up history sessions with old name first
-                    if (!scramblerSpec.equals("333") || name().equals("THREE")) {
+                    //Version 10- to 11+: Set up history sessions with old
+                    // name first
+                    if (!scramblerSpec.equals("333") || name().equals
+                            ("THREE")) {
                         mHistorySessions.setFilename(scramblerSpec + ".json");
                         mHistorySessions.init(context);
                         mHistorySessions.setFilename(historyFileName);
                         if (mHistorySessions.getList().size() > 0) {
                             mHistorySessions.save(context);
                         }
-                        File oldFile = new File(context.getFilesDir(), scramblerSpec + ".json");
+                        File oldFile = new File(context.getFilesDir(),
+                                scramblerSpec + ".json");
                         oldFile.delete();
                     }
                     break;
 
             }
             mHistorySessions.init(context);
-            mEnabled = defaultSharedPreferences.getBoolean(SettingsActivity.PREF_PUZZLETYPE_ENABLE_PREFIX + name().toLowerCase(), true);
-            List<Session> currentSessions = Util.getSessionListFromFile(context, currentSessionFileName);
+            Set<String> selected = defaultSharedPreferences.getStringSet
+                    (SettingsActivity.PREF_PUZZLETYPES_MULTISELECTLIST,
+                            new HashSet<String>());
+            mEnabled = selected.size() == 0 || selected.contains(name());
+            List<Session> currentSessions = Util.getSessionListFromFile
+                    (context, currentSessionFileName);
             if (currentSessions.size() > 0) {
                 mCurrentSession = currentSessions.get(0);
             }
@@ -132,13 +148,14 @@ public enum PuzzleType {
     }
 
     public void saveCurrentSession(Context context) {
-        ArrayList<Session> session = new ArrayList<Session>();
+        ArrayList<Session> session = new ArrayList<>();
         session.add(mCurrentSession);
         Util.saveSessionListToFile(context, currentSessionFileName, session);
     }
 
     public void submitCurrentSession(Context context) {
-        if (mCurrentSession != null && mCurrentSession.getNumberOfSolves() > 0) {
+        if (mCurrentSession != null && mCurrentSession.getNumberOfSolves() >
+                0) {
             mHistorySessions.addSession(mCurrentSession, context);
             resetCurrentSession();
         }
@@ -147,12 +164,10 @@ public enum PuzzleType {
     public Puzzle getPuzzle() {
         if (mPuzzle == null) {
             try {
-                mPuzzle = PuzzlePlugins.getScramblers().get(scramblerSpec).cachedInstance();
-            } catch (LazyInstantiatorException e) {
-                e.printStackTrace();
-            } catch (BadLazyClassDescriptionException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
+                mPuzzle = PuzzlePlugins.getScramblers().get(scramblerSpec)
+                        .cachedInstance();
+            } catch (LazyInstantiatorException |
+                    BadLazyClassDescriptionException | IOException e) {
                 e.printStackTrace();
             }
         }
@@ -178,12 +193,14 @@ public enum PuzzleType {
                 return order + "x" + order;
             }
         }
-        return context.getResources().getStringArray(R.array.puzzles)[mStringIndex];
+        return context.getResources().getStringArray(R.array.puzzles)
+                [mStringIndex];
     }
 
     public Session getSession(int index) {
         if (index == CURRENT_SESSION) {
-            //Check that if the current session is null (from reset or initializing)
+            //Check that if the current session is null (from reset or
+            // initializing)
             if (mCurrentSession == null) {
                 mCurrentSession = new Session();
             }

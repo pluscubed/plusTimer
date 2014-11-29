@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.PlusTimer" parent="Theme.PlusTimer.Base">
+        <item name="android:alertDialogTheme">
+            @style/Theme.PlusTimer.AlertDialog
+        </item>
+    </style>
+
+    <style name="Theme.PlusTimer.WithNavDrawer" parent="Theme.PlusTimer">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="Theme.PlusTimer.AlertDialog" parent="@android:style/Theme.Material.Light.Dialog.Alert">
+        <item name="android:colorPrimary">@color/primary</item>
+        <item name="android:colorPrimaryDark">@color/primary_dark</item>
+        <item name="android:colorAccent">@color/accent</item>
+    </style>
+
+    <style name="Widget.Spinner.DropDown.ActionBar" parent="Widget.AppCompat.Spinner.DropDown.ActionBar" />
+</resources>

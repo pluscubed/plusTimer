@@ -1,24 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
     <item
         android:id="@id/menu_solvelist_share_menuitem"
-        android:icon="@drawable/ic_action_share"
-        android:showAsAction="ifRoom"
-        android:title="@string/share" />
+        android:icon="@drawable/ic_share_white_24dp"
+        android:title="@string/share"
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@id/menu_solvelist_add_menuitem"
         android:icon="@drawable/ic_action_new"
-        android:showAsAction="ifRoom"
-        android:title="@string/manual_add_solve" />
+        android:title="@string/manual_add_solve"
+        app:showAsAction="ifRoom" />
 
 
     <item
         android:id="@id/menu_history_solvelist_delete_menuitem"
-        android:icon="@android:drawable/ic_menu_delete"
-        android:showAsAction="ifRoom"
-        android:title="@string/delete" />
+        android:icon="@drawable/ic_delete_white_24dp"
+        android:title="@string/delete"
+        app:showAsAction="ifRoom" />
 </menu>

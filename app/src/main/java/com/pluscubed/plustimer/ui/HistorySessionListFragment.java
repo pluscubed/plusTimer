@@ -2,15 +2,14 @@ package com.pluscubed.plustimer.ui;
 
 import android.app.ListFragment;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.DisplayMetrics;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.ActionBarActivity;
 import android.util.SparseArray;
-import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -47,7 +46,8 @@ import java.util.List;
 
 public class HistorySessionListFragment extends ListFragment {
 
-    private static final String STATE_PUZZLETYPE_DISPLAYNAME = "puzzletype_displayname";
+    private static final String STATE_PUZZLETYPE_DISPLAYNAME =
+            "puzzletype_displayname";
 
     private String mPuzzleTypeName;
 
@@ -62,7 +62,8 @@ public class HistorySessionListFragment extends ListFragment {
     @Override
     public void onPause() {
         super.onPause();
-        PuzzleType.valueOf(mPuzzleTypeName).getHistorySessions().save(getActivity());
+        PuzzleType.valueOf(mPuzzleTypeName).getHistorySessions().save
+                (getActivity());
     }
 
     @Override
@@ -77,7 +78,8 @@ public class HistorySessionListFragment extends ListFragment {
         setHasOptionsMenu(true);
         PuzzleType.initialize(getActivity());
         if (savedInstanceState != null) {
-            mPuzzleTypeName = savedInstanceState.getString(STATE_PUZZLETYPE_DISPLAYNAME);
+            mPuzzleTypeName = savedInstanceState.getString
+                    (STATE_PUZZLETYPE_DISPLAYNAME);
         } else {
             mPuzzleTypeName = PuzzleType.getCurrent().name();
         }
@@ -88,16 +90,19 @@ public class HistorySessionListFragment extends ListFragment {
         super.onViewCreated(view, savedInstanceState);
         initSharedPrefs();
         getListView().setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
-        getListView().setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
+        getListView().setMultiChoiceModeListener(new AbsListView
+                .MultiChoiceModeListener() {
             @Override
-            public void onItemCheckedStateChanged(ActionMode mode, int position, long id,
+            public void onItemCheckedStateChanged(ActionMode mode,
+                                                  int position, long id,
                                                   boolean checked) {
 
             }
 
             @Override
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-                getActivity().getMenuInflater().inflate(R.menu.context_solve_or_session_list, menu);
+                getActivity().getMenuInflater().inflate(R.menu
+                        .context_solve_or_session_list, menu);
                 mActionMode = mode;
                 return true;
             }
@@ -111,10 +116,13 @@ public class HistorySessionListFragment extends ListFragment {
             public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.context_solvelist_delete_menuitem:
-                        for (int i = getListView().getCount() - 1; i >= 0; i--) {
+                        for (int i = getListView().getCount() - 1; i >= 0;
+                             i--) {
                             if (getListView().isItemChecked(i)) {
-                                PuzzleType.valueOf(mPuzzleTypeName).getHistorySessions()
-                                        .deleteSession((Session) getListView().getItemAtPosition(i),
+                                PuzzleType.valueOf(mPuzzleTypeName)
+                                        .getHistorySessions()
+                                        .deleteSession((Session) getListView
+                                                        ().getItemAtPosition(i),
                                                 getActivity());
                             }
                         }
@@ -131,35 +139,40 @@ public class HistorySessionListFragment extends ListFragment {
                 mActionMode = null;
             }
         });
-        LinearLayout headerView = (LinearLayout) getActivity().getLayoutInflater()
-                .inflate(R.layout.history_sessionlist_header, getListView(), false);
+        LinearLayout headerView = (LinearLayout) getActivity()
+                .getLayoutInflater()
+                .inflate(R.layout.history_sessionlist_header, getListView(),
+                        false);
         mStatsText = (TextView) headerView
                 .findViewById(R.id.history_sessionlist_header_stats_textview);
         mGraph = new LineGraphView(getActivity(), "");
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, (int) convertDpToPx(220));
-        layoutParams.setMargins(0, (int) convertDpToPx(8), 0, (int) convertDpToPx(8));
+        LinearLayout.LayoutParams layoutParams = new LinearLayout
+                .LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                Util.convertDpToPx(getActivity(), 220));
+        layoutParams.setMargins(0, 0, 0, Util.convertDpToPx(getActivity(), 20));
         mGraph.setLayoutParams(layoutParams);
         mGraph.setShowLegend(true);
-        mGraph.getGraphViewStyle().setLegendWidth((int) convertDpToPx(85));
-        mGraph.getGraphViewStyle().setLegendMarginBottom((int) convertDpToPx(12));
+        mGraph.getGraphViewStyle().setLegendWidth(Util.convertDpToPx
+                (getActivity(), 85));
+        mGraph.getGraphViewStyle().setLegendMarginBottom(Util.convertDpToPx
+                (getActivity(), 12));
         mGraph.setLegendAlign(GraphView.LegendAlign.BOTTOM);
         mGraph.setCustomLabelFormatter(new CustomLabelFormatter() {
             @Override
             public String formatLabel(double value, boolean isValueX) {
                 if (isValueX) {
-                    return Util.timeDateStringFromTimestamp(getActivity().getApplicationContext(), (long) value);
+                    return Util.timeDateStringFromTimestamp(getActivity()
+                            .getApplicationContext(), (long) value);
                 } else {
-                    return Util.timeStringFromNs((long) value, mMillisecondsEnabled);
+                    return Util.timeStringFromNs((long) value,
+                            mMillisecondsEnabled);
                 }
 
             }
         });
         mGraph.setDrawDataPoints(true);
-        mGraph.setDataPointsRadius(convertDpToPx(3));
-        headerView.addView(mGraph);
+        mGraph.setDataPointsRadius(Util.convertDpToPx(getActivity(), 3));
+        headerView.addView(mGraph, 1);
         getListView().addHeaderView(headerView, null, false);
         try {
             setListAdapter(new SessionListAdapter());
@@ -168,25 +181,22 @@ public class HistorySessionListFragment extends ListFragment {
         }
     }
 
-    public float convertDpToPx(float dp) {
-        Resources r = getResources();
-        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, r.getDisplayMetrics());
-    }
-
     public void onSessionListChanged() {
         updateStats();
         ((SessionListAdapter) getListAdapter()).onSessionListChanged();
     }
 
     public void updateStats() {
-        List<Session> historySessions = PuzzleType.valueOf(mPuzzleTypeName).getHistorySessions().getList();
+        List<Session> historySessions = PuzzleType.valueOf(mPuzzleTypeName)
+                .getHistorySessions().getList();
         if (historySessions.size() > 0) {
             StringBuilder s = new StringBuilder();
 
             //Get best solves of each history session and add to list
-            ArrayList<Solve> bestSolvesOfSessionsArray = new ArrayList<Solve>();
+            ArrayList<Solve> bestSolvesOfSessionsArray = new ArrayList<>();
             for (Session session : historySessions) {
-                bestSolvesOfSessionsArray.add(Util.getBestSolveOfList(session.getSolves()));
+                bestSolvesOfSessionsArray.add(Util.getBestSolveOfList(session
+                        .getSolves()));
             }
 
             //Add PB of all historySessions
@@ -195,27 +205,32 @@ public class HistorySessionListFragment extends ListFragment {
                             .getTimeString(mMillisecondsEnabled));
 
             //Add PB of Ao5,12,50,100,1000
-            s.append(getBestAverageOfNumberOfSessions(new int[]{1000, 100, 50, 12, 5},
+            s.append(getBestAverageOfNumberOfSessions(new int[]{1000, 100,
+                            50, 12, 5},
                     historySessions));
 
             mStatsText.setText(s.toString());
 
             //Get the timestamps of each session, and put in a SparseArray
-            ArrayList<Long> sessionTimestamps = new ArrayList<Long>();
+            ArrayList<Long> sessionTimestamps = new ArrayList<>();
             for (Session session : historySessions) {
                 sessionTimestamps.add(session.getTimestamp());
             }
 
-            //This SparseArray contains any number of SparseArray<Long>, one for each average (5,12,etc)
-            SparseArray<SparseArray<Long>> bestAverageMatrix = new SparseArray<SparseArray<Long>>();
+            //This SparseArray contains any number of SparseArray<Long>,
+            // one for each average (5,12,etc)
+            SparseArray<SparseArray<Long>> bestAverageMatrix = new
+                    SparseArray<>();
             for (int averageNumber : new int[]{5, 12, 50, 100, 1000}) {
-                SparseArray<Long> timesSparseArray = new SparseArray<Long>();
+                SparseArray<Long> timesSparseArray = new SparseArray<>();
                 for (int i = 0; i < historySessions.size(); i++) {
                     Session session = historySessions.get(i);
                     if (session.getNumberOfSolves() >= averageNumber) {
-                        long bestAverage = session.getBestAverageOf(averageNumber);
+                        long bestAverage = session.getBestAverageOf
+                                (averageNumber);
                         if (bestAverage != Long.MAX_VALUE
-                                && bestAverage != Session.GET_AVERAGE_INVALID_NOT_ENOUGH) {
+                                && bestAverage != Session
+                                .GET_AVERAGE_INVALID_NOT_ENOUGH) {
                             timesSparseArray.put(i, bestAverage);
                         }
                     }
@@ -227,7 +242,7 @@ public class HistorySessionListFragment extends ListFragment {
             }
 
             ArrayList<GraphViewSeries> bestAverageGraphViewSeries
-                    = new ArrayList<GraphViewSeries>();
+                    = new ArrayList<>();
             for (int i = 0; i < bestAverageMatrix.size(); i++) {
                 SparseArray<Long> averageArray = bestAverageMatrix.valueAt(i);
                 if (averageArray.size() > 0) {
@@ -253,20 +268,24 @@ public class HistorySessionListFragment extends ListFragment {
                             lineColor = Color.YELLOW;
                     }
                     bestAverageGraphViewSeries.add(new GraphViewSeries(
-                            String.format(getString(R.string.best_ao), bestAverageMatrix.keyAt(i)),
+                            String.format(getString(R.string.best_ao),
+                                    bestAverageMatrix.keyAt(i)),
                             new GraphViewSeries.GraphViewSeriesStyle(lineColor,
-                                    (int) convertDpToPx(2)), bestTimesDataArray));
+                                    Util.convertDpToPx(getActivity(), 2)),
+                            bestTimesDataArray));
                 }
             }
 
-            //Get best times of each session excluding DNF, and create GraphViewData array bestTimes
-            SparseArray<Long> bestSolvesTimes = new SparseArray<Long>();
+            //Get best times of each session excluding DNF,
+            // and create GraphViewData array bestTimes
+            SparseArray<Long> bestSolvesTimes = new SparseArray<>();
             for (int i = 0; i < historySessions.size(); i++) {
                 Session session = historySessions.get(i);
                 if (Util.getBestSolveOfList(session.getSolves()).getPenalty()
                         != Solve.Penalty.DNF) {
                     bestSolvesTimes
-                            .put(i, Util.getBestSolveOfList(session.getSolves()).getTimeTwo());
+                            .put(i, Util.getBestSolveOfList(session.getSolves
+                                    ()).getTimeTwo());
                 }
             }
             GraphView.GraphViewData[] bestTimesDataArray
@@ -276,8 +295,10 @@ public class HistorySessionListFragment extends ListFragment {
                         sessionTimestamps.get(bestSolvesTimes.keyAt(i)),
                         bestSolvesTimes.valueAt(i));
             }
-            GraphViewSeries bestTimesSeries = new GraphViewSeries(getString(R.string.best_times),
-                    new GraphViewSeries.GraphViewSeriesStyle(Color.BLUE, (int) convertDpToPx(2)),
+            GraphViewSeries bestTimesSeries = new GraphViewSeries(getString(R
+                    .string.best_times),
+                    new GraphViewSeries.GraphViewSeriesStyle(Color.BLUE,
+                            Util.convertDpToPx(getActivity(), 2)),
                     bestTimesDataArray);
 
             boolean averageMoreThanOne = false;
@@ -290,14 +311,17 @@ public class HistorySessionListFragment extends ListFragment {
                 mGraph.setVisibility(View.VISIBLE);
                 mGraph.removeAllSeries();
                 mGraph.addSeries(bestTimesSeries);
-                for (GraphViewSeries averageSeries : bestAverageGraphViewSeries) {
+                for (GraphViewSeries averageSeries :
+                        bestAverageGraphViewSeries) {
                     mGraph.addSeries(averageSeries);
                 }
 
-                ArrayList<Long> allPointsValue = new ArrayList<Long>();
+                ArrayList<Long> allPointsValue = new ArrayList<>();
                 for (int i = 0; i < bestAverageMatrix.size(); i++) {
-                    for (int k = 0; k < bestAverageMatrix.valueAt(i).size(); k++) {
-                        allPointsValue.add(bestAverageMatrix.valueAt(i).valueAt(k));
+                    for (int k = 0; k < bestAverageMatrix.valueAt(i).size();
+                         k++) {
+                        allPointsValue.add(bestAverageMatrix.valueAt(i)
+                                .valueAt(k));
                     }
                 }
                 for (int i = 0; i < bestSolvesTimes.size(); i++) {
@@ -307,22 +331,28 @@ public class HistorySessionListFragment extends ListFragment {
                 //Set bounds for Y
                 long lowestValue = Collections.min(allPointsValue);
                 long highestValue = Collections.max(allPointsValue);
-                //Check to make sure the minimum bound is more than 0 (if yes, set bound to 0)
+                //Check to make sure the minimum bound is more than 0 (if
+                // yes, set bound to 0)
                 mGraph.setManualYMinBound(
-                        lowestValue - (highestValue - lowestValue) * 0.1 >= 0 ? lowestValue
+                        lowestValue - (highestValue - lowestValue) * 0.1 >= 0
+                                ? lowestValue
                                 - (highestValue - lowestValue) * 0.1 : 0);
-                mGraph.setManualYMaxBound(highestValue + (highestValue - lowestValue) * 0.1);
+                mGraph.setManualYMaxBound(highestValue + (highestValue -
+                        lowestValue) * 0.1);
 
                 long firstTimestamp = Long.MAX_VALUE;
                 for (int i = 0; i < bestAverageMatrix.size(); i++) {
-                    if (sessionTimestamps.get(bestAverageMatrix.valueAt(i).keyAt(0))
+                    if (sessionTimestamps.get(bestAverageMatrix.valueAt(i)
+                            .keyAt(0))
                             < firstTimestamp) {
                         firstTimestamp = sessionTimestamps
                                 .get(bestAverageMatrix.valueAt(i).keyAt(0));
                     }
                 }
-                if (sessionTimestamps.get(bestSolvesTimes.keyAt(0)) < firstTimestamp) {
-                    firstTimestamp = sessionTimestamps.get(bestSolvesTimes.keyAt(0));
+                if (sessionTimestamps.get(bestSolvesTimes.keyAt(0)) <
+                        firstTimestamp) {
+                    firstTimestamp = sessionTimestamps.get(bestSolvesTimes
+                            .keyAt(0));
                 }
 
                 //Set bounds for X
@@ -330,18 +360,26 @@ public class HistorySessionListFragment extends ListFragment {
                 long lastTimestamp = Long.MIN_VALUE;
                 for (int i = 0; i < bestAverageMatrix.size(); i++) {
                     if (sessionTimestamps.get(bestAverageMatrix.valueAt(i)
-                            .keyAt(bestAverageMatrix.valueAt(i).size() - 1)) > lastTimestamp) {
-                        lastTimestamp = sessionTimestamps.get(bestAverageMatrix.valueAt(i)
-                                .keyAt(bestAverageMatrix.valueAt(i).size() - 1));
+                            .keyAt(bestAverageMatrix.valueAt(i).size() - 1))
+                            > lastTimestamp) {
+                        lastTimestamp = sessionTimestamps.get
+                                (bestAverageMatrix.valueAt(i)
+                                        .keyAt(bestAverageMatrix.valueAt(i)
+                                                .size() -
+                                                1));
                     }
                 }
-                if (sessionTimestamps.get(bestSolvesTimes.keyAt(bestSolvesTimes.size() - 1))
+                if (sessionTimestamps.get(bestSolvesTimes.keyAt
+                        (bestSolvesTimes.size() - 1))
                         > lastTimestamp) {
                     lastTimestamp = sessionTimestamps
-                            .get(bestSolvesTimes.keyAt(bestSolvesTimes.size() - 1));
+                            .get(bestSolvesTimes.keyAt(bestSolvesTimes.size()
+                                    - 1));
                 }
-                mGraph.setViewPort(firstTimestamp - (lastTimestamp - firstTimestamp) * 0.1,
-                        (lastTimestamp + (lastTimestamp - firstTimestamp) * 0.1) - (firstTimestamp
+                mGraph.setViewPort(
+                        firstTimestamp - (lastTimestamp - firstTimestamp) * 0.1,
+                        (lastTimestamp + (lastTimestamp - firstTimestamp) * 0.1)
+                                - (firstTimestamp
                                 - (lastTimestamp - firstTimestamp) * 0.1));
             } else {
                 mGraph.setVisibility(View.GONE);
@@ -356,10 +394,11 @@ public class HistorySessionListFragment extends ListFragment {
      * @param sessions list of sessions
      * @return String with the best averages of [numbers]
      */
-    public String getBestAverageOfNumberOfSessions(int[] numbers, List<Session> sessions) {
+    public String getBestAverageOfNumberOfSessions(int[] numbers,
+                                                   List<Session> sessions) {
         StringBuilder builder = new StringBuilder();
         for (int number : numbers) {
-            ArrayList<Long> bestAverages = new ArrayList<Long>();
+            ArrayList<Long> bestAverages = new ArrayList<>();
             if (sessions.size() > 0) {
                 for (Session session : sessions) {
                     long bestAverage = session.getBestAverageOf(number);
@@ -370,10 +409,13 @@ public class HistorySessionListFragment extends ListFragment {
                 }
                 if (bestAverages.size() > 0) {
                     Long bestAverage = Collections.min(bestAverages);
-                    builder.append("\n").append(getString(R.string.pb)).append(" ")
-                            .append(String.format(getString(R.string.ao), number)).append(": ")
+                    builder.append("\n").append(getString(R.string.pb))
+                            .append(" ")
+                            .append(String.format(getString(R.string.ao),
+                                    number)).append(": ")
                             .append(bestAverage == Long.MAX_VALUE ? "DNF"
-                                    : Util.timeStringFromNs(bestAverage, mMillisecondsEnabled));
+                                    : Util.timeStringFromNs(bestAverage,
+                                    mMillisecondsEnabled));
                 }
             }
         }
@@ -391,14 +433,23 @@ public class HistorySessionListFragment extends ListFragment {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.menu_history_sessionlist, menu);
 
-        Spinner menuPuzzleSpinner = (Spinner) menu.findItem(R.id.menu_activity_history_sessionlist_puzzletype_spinner).getActionView();
-        ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter = new SpinnerPuzzleTypeAdapter(getActivity().getLayoutInflater(), getActivity().getActionBar().getThemedContext());
+        Spinner menuPuzzleSpinner = (Spinner) MenuItemCompat.getActionView
+                (menu.findItem(R.id
+                        .menu_activity_history_sessionlist_puzzletype_spinner));
+        ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter = new
+                SpinnerPuzzleTypeAdapter(getActivity().getLayoutInflater(),
+                ((ActionBarActivity) getActivity()).getSupportActionBar()
+                        .getThemedContext());
         menuPuzzleSpinner.setAdapter(puzzleTypeSpinnerAdapter);
-        menuPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition(PuzzleType.valueOf(mPuzzleTypeName)), true);
-        menuPuzzleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        menuPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition
+                (PuzzleType.valueOf(mPuzzleTypeName)), true);
+        menuPuzzleSpinner.setOnItemSelectedListener(new AdapterView
+                .OnItemSelectedListener() {
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                mPuzzleTypeName = (parent.getItemAtPosition(position)).toString();
+            public void onItemSelected(AdapterView<?> parent, View view,
+                                       int position, long id) {
+                mPuzzleTypeName = (parent.getItemAtPosition(position))
+                        .toString();
                 onSessionListChanged();
             }
 
@@ -409,9 +460,11 @@ public class HistorySessionListFragment extends ListFragment {
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_history_sessionlist, container, false);
+        return inflater.inflate(R.layout.fragment_history_sessionlist,
+                container, false);
     }
 
     @Override
@@ -425,15 +478,20 @@ public class HistorySessionListFragment extends ListFragment {
     }
 
     private void initSharedPrefs() {
-        mMillisecondsEnabled = PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(SettingsActivity.PREF_MILLISECONDS_CHECKBOX, true);
+        mMillisecondsEnabled = PreferenceManager.getDefaultSharedPreferences
+                (getActivity()).getBoolean(SettingsActivity
+                .PREF_MILLISECONDS_CHECKBOX, true);
     }
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         Intent i = new Intent(getActivity(), HistorySolveListActivity.class);
-        int index = PuzzleType.valueOf(mPuzzleTypeName).getHistorySessions().getList().indexOf(l.getItemAtPosition(position));
-        i.putExtra(HistorySolveListActivity.EXTRA_HISTORY_SESSION_POSITION, index);
-        i.putExtra(HistorySolveListActivity.EXTRA_HISTORY_PUZZLETYPE_DISPLAYNAME, mPuzzleTypeName);
+        int index = PuzzleType.valueOf(mPuzzleTypeName).getHistorySessions()
+                .getList().indexOf(l.getItemAtPosition(position));
+        i.putExtra(HistorySolveListActivity.EXTRA_HISTORY_SESSION_POSITION,
+                index);
+        i.putExtra(HistorySolveListActivity
+                .EXTRA_HISTORY_PUZZLETYPE_DISPLAYNAME, mPuzzleTypeName);
         startActivity(i);
     }
 
@@ -447,10 +505,12 @@ public class HistorySessionListFragment extends ListFragment {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
-                convertView = getActivity().getLayoutInflater().inflate(R.layout.list_item_history_sessionlist, parent, false);
+                convertView = getActivity().getLayoutInflater().inflate(R
+                        .layout.list_item_single_line, parent, false);
             }
             Session session = getItem(position);
-            TextView text = (TextView) convertView.findViewById(R.id.list_item_history_sessionlist_textview);
+            TextView text = (TextView) convertView.findViewById(android.R.id
+                    .text1);
             text.setText(session.getTimestampString(getActivity()));
 
             return convertView;
@@ -458,7 +518,8 @@ public class HistorySessionListFragment extends ListFragment {
 
         public void onSessionListChanged() {
             clear();
-            List<Session> sessions = PuzzleType.valueOf(mPuzzleTypeName).getHistorySessions().getList();
+            List<Session> sessions = PuzzleType.valueOf(mPuzzleTypeName)
+                    .getHistorySessions().getList();
             Collections.reverse(sessions);
             addAll(sessions);
             notifyDataSetChanged();

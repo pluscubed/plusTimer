@@ -10,7 +10,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:choiceMode="none"
-        android:divider="@null" />
+        android:clipToPadding="false"
+        android:divider="@null"
+        android:paddingBottom="8dp"
+        android:paddingTop="16dp" />
 
     <TextView
         android:id="@id/android:empty"
@@ -18,6 +21,6 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:padding="16dp"
-        android:text="@string/puzzletype_no_sovles" />
+        android:text="@string/puzzletype_no_solves" />
 
 </LinearLayout>

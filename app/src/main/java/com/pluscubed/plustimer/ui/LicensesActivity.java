@@ -1,11 +1,12 @@
 package com.pluscubed.plustimer.ui;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NavUtils;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,20 +23,25 @@ import java.io.InputStreamReader;
 /**
  * Licenses Activity
  */
-public class LicensesActivity extends Activity {
+public class LicensesActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_with_toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
+        setSupportActionBar(toolbar);
+
         FragmentManager fm = getFragmentManager();
-        Fragment f = fm.findFragmentById(android.R.id.content);
+        Fragment f = fm.findFragmentById(R.id
+                .activity_with_toolbar_content_framelayout);
         if (f == null) {
             fm.beginTransaction()
-                    .replace(android.R.id.content, new LicensesFragment())
+                    .replace(R.id.activity_with_toolbar_content_framelayout,
+                            new LicensesFragment())
                     .commit();
         }
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle(R.string.open_source_licenses);
     }
 
@@ -56,7 +62,8 @@ public class LicensesActivity extends Activity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            View view = inflater.inflate(R.layout.fragment_licenses, container, false);
+            View view = inflater.inflate(R.layout.fragment_licenses,
+                    container, false);
             TextView licensesTextView = (TextView) view
                     .findViewById(R.id.fragment_licenses_textview);
 

@@ -13,8 +13,10 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:divider="@android:color/transparent"
-        android:dividerHeight="0dp" />
+        android:clipToPadding="false"
+        android:divider="@null"
+        android:paddingBottom="8dp"
+        android:paddingTop="16dp" />
 
     <TextView
         android:id="@id/android:empty"
@@ -22,36 +24,36 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:gravity="center"
-        android:padding="6dp"
+        android:padding="16dp"
         android:text="@string/session_no_solves"
         android:visibility="gone" />
 
     <LinearLayout
         android:id="@id/fragment_solvelist_submit_reset_linearlayout"
+        style="?android:buttonBarStyle"
         android:layout_width="match_parent"
-        android:layout_height="45dp"
+        android:layout_height="48dp"
+        android:background="?colorPrimary"
         android:orientation="horizontal"
         android:visibility="gone">
 
         <Button
             android:id="@id/fragment_solvelist_reset_button"
+            style="?android:buttonBarButtonStyle"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@drawable/background_button_bar"
-            android:text="@string/reset"
-            android:textSize="18sp"
-            tools:ignore="ButtonStyle" />
+            android:background="@drawable/item_background_dark"
+            android:text="@string/reset" />
 
         <Button
             android:id="@id/fragment_solvelist_submit_button"
+            style="?android:buttonBarButtonStyle"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@drawable/background_button_bar"
-            android:text="@string/submit"
-            android:textSize="18sp"
-            tools:ignore="ButtonStyle" />
+            android:background="@drawable/item_background_dark"
+            android:text="@string/submit" />
 
     </LinearLayout>
 

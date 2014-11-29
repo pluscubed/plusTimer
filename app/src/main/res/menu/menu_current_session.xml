@@ -1,30 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
         android:id="@id/menu_activity_current_session_puzzletype_spinner"
-        android:actionLayout="@layout/actionview_spinner"
         android:orderInCategory="9999"
-        android:showAsAction="always"
-        android:title="@string/puzzle_selection" />
+        android:title="@string/puzzle_selection"
+        app:actionLayout="@layout/spinner"
+        app:showAsAction="always" />
 
     <item
         android:id="@id/menu_solvelist_add_menuitem"
         android:icon="@drawable/ic_action_new"
-        android:showAsAction="ifRoom"
-        android:title="@string/manual_add_solve" />
+        android:title="@string/manual_add_solve"
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@id/menu_activity_current_session_scramble_image_menuitem"
-        android:icon="@drawable/ic_action_picture"
-        android:showAsAction="ifRoom|withText"
-        android:title="@string/scrambleimage" />
+        android:icon="@drawable/ic_image_white_24dp"
+        android:title="@string/scramble_image"
+        app:showAsAction="ifRoom|withText" />
 
     <item
         android:id="@id/menu_solvelist_share_menuitem"
-        android:icon="@drawable/ic_action_share"
-        android:showAsAction="ifRoom"
-        android:title="@string/share" />
+        android:icon="@drawable/ic_share_white_24dp"
+        android:title="@string/share"
+        app:showAsAction="ifRoom" />
 
 </menu>

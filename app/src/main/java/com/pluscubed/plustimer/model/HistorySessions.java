@@ -66,11 +66,12 @@ public class HistorySessions {
      * @return a copy of the history sessions
      */
     public List<Session> getList() {
-        return new ArrayList<Session>(mHistorySessionsList);
+        return new ArrayList<>(mHistorySessionsList);
     }
 
     /**
-     * Load up the history sessions stored in the list. If the file doesn't exist, create an empty
+     * Load up the history sessions stored in the list. If the file doesn't
+     * exist, create an empty
      * list.
      */
     public void init(Context context) {
