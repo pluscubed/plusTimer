@@ -31,23 +31,10 @@
                 android:value="com.pluscubed.plustimer.ui.HistorySessionListActivity" />
         </activity>
 
-        <activity
-            android:name="com.pluscubed.plustimer.ui.SettingsActivity"
-            android:parentActivityName="com.pluscubed.plustimer.ui.CurrentSessionActivity">
-            <!-- Parent activity meta-data to support 4.0 and lower -->
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.pluscubed.plustimer.ui.CurrentSessionActivity" />
-        </activity>
+        <activity android:name="com.pluscubed.plustimer.ui.SettingsActivity" />
         <activity
             android:name="com.pluscubed.plustimer.ui.AboutActivity"
-            android:launchMode="singleTop"
-            android:parentActivityName="com.pluscubed.plustimer.ui.CurrentSessionActivity">
-            <!-- Parent activity meta-data to support 4.0 and lower -->
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.pluscubed.plustimer.ui.CurrentSessionActivity" />
-        </activity>
+            android:launchMode="singleTop" />
         <activity
             android:name="com.pluscubed.plustimer.ui.LicensesActivity"
             android:parentActivityName="com.pluscubed.plustimer.ui.AboutActivity">
