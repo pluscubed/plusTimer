@@ -1,6 +1,7 @@
 package com.pluscubed.plustimer.model;
 
 import android.content.Context;
+import android.database.DataSetObserver;
 
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.Util;
@@ -16,13 +17,26 @@ public class Session {
 
     public static final int GET_AVERAGE_INVALID_NOT_ENOUGH = -1;
 
-    private ArrayList<Solve> mSolves;
+    private List<Solve> mSolves;
+
+    private transient List<SessionObserver> mSessionObservers;
 
     /**
      * Constructs a Session with an empty list of Solves
      */
     public Session() {
+        mSessionObservers = new ArrayList<>();
         mSolves = new ArrayList<>();
+
+        for (final Solve s : mSolves) {
+            s.registerObserver(new DataSetObserver() {
+                @Override
+                public void onChanged() {
+                    super.onChanged();
+                    notifySolveChanged(mSolves.indexOf(s));
+                }
+            });
+        }
     }
 
     public int getPosition(Solve i) {
@@ -33,8 +47,41 @@ public class Session {
         return new ArrayList<>(Collections.unmodifiableList(mSolves));
     }
 
-    public void addSolve(Solve s) {
+    private void notifySolveAdded() {
+        for (SessionObserver s : mSessionObservers) {
+            s.onSolveAdded();
+        }
+    }
+
+    private void notifySolveDeleted(int index) {
+        for (SessionObserver s : mSessionObservers) {
+            s.onSolveRemoved(index);
+        }
+    }
+
+    private void notifySolveChanged(int index) {
+        for (SessionObserver s : mSessionObservers) {
+            s.onSolveChanged(index);
+        }
+    }
+
+    public void registerSessionObserver(SessionObserver observer) {
+        mSessionObservers.add(observer);
+    }
+
+    public void unregisterSessionObserver(SessionObserver observer) {
+        mSessionObservers.remove(observer);
+    }
+
+    public void unregisterAllObservers() {
+        mSessionObservers.clear();
+    }
+
+    public void addSolve(final Solve s) {
         mSolves.add(s);
+        s.unregisterAll();
+
+        notifySolveAdded();
     }
 
     public int getNumberOfSolves() {
@@ -154,9 +201,11 @@ public class Session {
 
     public void deleteSolve(int position) {
         mSolves.remove(position);
+        notifySolveDeleted(position);
     }
 
     public void deleteSolve(Solve i) {
+        notifySolveDeleted(mSolves.indexOf(i));
         mSolves.remove(i);
     }
 
@@ -240,6 +289,14 @@ public class Session {
             }
         }
         return s.toString();
+    }
+
+    public interface SessionObserver {
+        void onSolveAdded();
+
+        void onSolveChanged(int index);
+
+        void onSolveRemoved(int index);
     }
 
 }

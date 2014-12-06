@@ -3,10 +3,8 @@ package com.pluscubed.plustimer;
 import android.content.Context;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.pluscubed.plustimer.model.PuzzleType;
-import com.pluscubed.plustimer.model.ScrambleAndSvg;
 import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
 
@@ -35,12 +33,7 @@ public class Util {
     public static final String PREF_VERSION_CODE = "pref_version_code";
 
     static {
-        gson = new GsonBuilder()
-                .registerTypeAdapter(ScrambleAndSvg.class,
-                        new ScrambleAndSvg.Serializer())
-                .registerTypeAdapter(ScrambleAndSvg.class,
-                        new ScrambleAndSvg.Deserializer())
-                .create();
+        gson = new Gson();
         SESSION_LIST_TYPE = new TypeToken<List<Session>>() {
         }.getType();
     }

@@ -31,6 +31,7 @@ import com.caverock.androidsvg.SVGParseException;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.Util;
 import com.pluscubed.plustimer.model.PuzzleType;
+import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
 
 import java.util.Arrays;
@@ -55,7 +56,23 @@ public class CurrentSessionTimerFragment extends Fragment {
     private static final String STATE_INSPECTING = "inspecting_boolean";
     private static final String STATE_INSPECTION_START_TIME =
             "inspection_start_time_long";
+    private final Session.SessionObserver sessionObserver = new Session
+            .SessionObserver() {
+        @Override
+        public void onSolveAdded() {
+            onSessionSolvesChanged();
+        }
 
+        @Override
+        public void onSolveChanged(int index) {
+            onSessionSolvesChanged();
+        }
+
+        @Override
+        public void onSolveRemoved(int index) {
+            onSessionSolvesChanged();
+        }
+    };
     private boolean mHoldToStartEnabled;
     private boolean mInspectionEnabled;
     private boolean mTwoRowTimeEnabled;
@@ -64,9 +81,7 @@ public class CurrentSessionTimerFragment extends Fragment {
     private int mPrefSize;
     private boolean mKeepScreenOn;
     private boolean mSignEnabled;
-
     private CurrentSessionTimerRetainedFragment mRetainedFragment;
-
     private TextView mTimerText;
     private TextView mTimerText2;
     private TextView mScrambleText;
@@ -77,9 +92,7 @@ public class CurrentSessionTimerFragment extends Fragment {
     private LinearLayout mPenaltyBarLinearLayout;
     private Button mPenaltyDnfButton;
     private Button mPenaltyPlusTwoButton;
-
     private Handler mUiHandler;
-
     private boolean mHoldTiming;
     private long mHoldTimerStartTimestamp;
     private final Runnable mHoldTimerRunnable = new Runnable() {
@@ -93,7 +106,6 @@ public class CurrentSessionTimerFragment extends Fragment {
             setTimerTextToPrefSize();
         }
     };
-
     private boolean mInspecting;
     private long mInspectionStartTimestamp;
     private long mTimingStartTimestamp;
@@ -113,13 +125,9 @@ public class CurrentSessionTimerFragment extends Fragment {
             }
         }
     };
-
     private boolean mFromSavedInstanceState;
-
     private boolean mTiming;
-
     private boolean mScrambleImageDisplay;
-
     private boolean mLateStartPenalty;
     private final Runnable mInspectionRunnable = new Runnable() {
         @Override
@@ -158,7 +166,6 @@ public class CurrentSessionTimerFragment extends Fragment {
                     resetTimer();
                     setTimerTextToLastSolveTime();
 
-                    onSessionSolvesChanged();
 
                     if (mRetainedFragment.isScrambling()) {
                         mScrambleText.setText(R.string.scrambling);
@@ -350,7 +357,9 @@ public class CurrentSessionTimerFragment extends Fragment {
             getActivity().getWindow().clearFlags(WindowManager.LayoutParams
                     .FLAG_KEEP_SCREEN_ON);
         }
-        onSessionSolvesChanged();
+
+        PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
+                .registerSessionObserver(sessionObserver);
     }
 
     public void initSharedPrefs() {
@@ -481,6 +490,9 @@ public class CurrentSessionTimerFragment extends Fragment {
         getActivity().getWindow().clearFlags(WindowManager.LayoutParams
                 .FLAG_KEEP_SCREEN_ON);
         PuzzleType.getCurrent().saveCurrentSession(getActivity());
+
+        PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
+                .unregisterSessionObserver(sessionObserver);
     }
 
     @Override
@@ -518,7 +530,6 @@ public class CurrentSessionTimerFragment extends Fragment {
                 PuzzleType.getCurrent().getSession(PuzzleType
                         .CURRENT_SESSION).getLastSolve().setPenalty(Solve
                         .Penalty.DNF);
-                onSessionSolvesChanged();
             }
         });
 
@@ -528,7 +539,6 @@ public class CurrentSessionTimerFragment extends Fragment {
                 PuzzleType.getCurrent().getSession(PuzzleType
                         .CURRENT_SESSION).getLastSolve().setPenalty(Solve
                         .Penalty.PLUSTWO);
-                onSessionSolvesChanged();
             }
         });
 
@@ -598,7 +608,6 @@ public class CurrentSessionTimerFragment extends Fragment {
                             setTimerTextToLastSolveTime();
 
                             //Update stats and HListView
-                            onSessionSolvesChanged();
 
                             if (scrambling) {
                                 mScrambleText.setText(R.string.scrambling);
@@ -703,7 +712,6 @@ public class CurrentSessionTimerFragment extends Fragment {
             }
         });
 
-        onSessionSolvesChanged();
 
         return v;
     }

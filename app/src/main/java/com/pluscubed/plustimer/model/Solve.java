@@ -1,5 +1,8 @@
 package com.pluscubed.plustimer.model;
 
+import android.database.DataSetObservable;
+import android.database.DataSetObserver;
+
 import com.pluscubed.plustimer.Util;
 
 /**
@@ -15,11 +18,21 @@ public class Solve {
 
     private long mTimestamp;
 
+    private transient DataSetObservable mDataSetObservable;
+
+    /**
+     * No-args constructor for GSON
+     */
+    public Solve() {
+        mDataSetObservable = new DataSetObservable();
+    }
+
     public Solve(ScrambleAndSvg scramble, long time) {
         mScrambleAndSvg = scramble;
         mRawTime = time;
         mPenalty = Penalty.NONE;
         mTimestamp = System.currentTimeMillis();
+        mDataSetObservable = new DataSetObservable();
     }
 
     public ScrambleAndSvg getScrambleAndSvg() {
@@ -86,6 +99,9 @@ public class Solve {
     }
 
     public void setPenalty(Penalty penalty) {
+        if (mPenalty != penalty) {
+            mDataSetObservable.notifyChanged();
+        }
         mPenalty = penalty;
     }
 
@@ -94,7 +110,22 @@ public class Solve {
     }
 
     public void setRawTime(long time) {
+        if (mRawTime != time) {
+            mDataSetObservable.notifyChanged();
+        }
         mRawTime = time;
+    }
+
+    public void registerObserver(DataSetObserver observer) {
+        mDataSetObservable.registerObserver(observer);
+    }
+
+    public void unregisterAll() {
+        mDataSetObservable.unregisterAll();
+    }
+
+    public void unregisterObserver(DataSetObserver observer) {
+        mDataSetObservable.unregisterObserver(observer);
     }
 
     public enum Penalty {
