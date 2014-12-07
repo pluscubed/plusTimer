@@ -171,9 +171,9 @@ public class Util {
                                                  boolean enableMilliseconds) {
         double seconds;
         if (enableMilliseconds) {
-            seconds = (nanoseconds / 1000000000.0 * 1000.0) / 1000.0;
+            seconds = Math.floor(nanoseconds / 1000000000.0 * 1000.0) / 1000.0;
         } else {
-            seconds = (nanoseconds / 1000000000.0 * 100.0) / 100.0;
+            seconds = Math.floor(nanoseconds / 1000000000.0 * 100.0) / 100.0;
         }
         if (seconds == (long) seconds)
             return String.format("%d", (long) seconds);
