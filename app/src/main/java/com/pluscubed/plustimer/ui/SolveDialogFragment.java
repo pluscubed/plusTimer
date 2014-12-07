@@ -23,6 +23,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.Util;
 import com.pluscubed.plustimer.model.PuzzleType;
@@ -245,28 +247,54 @@ public class SolveDialogFragment extends DialogFragment {
         mScrambleEdit.setText(scramble);
 
         //Return
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setView(v)
-                .setTitle(timeString)
-                .setPositiveButton(android.R.string.ok,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog,
-                                                int which) {
-                            }
-                        })
-                .setNegativeButton(R.string.delete,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog,
-                                                int which) {
-                                PuzzleType.valueOf(mPuzzleTypeName).getSession
-                                        (mSessionIndex).deleteSolve
-                                        (mSolveIndex);
-                                mListener.onDialogDismissed();
-                            }
-                        });
-        return builder.create();
+        MaterialDialog.Builder builder = new MaterialDialog.Builder
+                (getActivity());
+        builder.customView(v)
+                .title(timeString)
+                .autoDismiss(false)
+                .positiveText(android.R.string.ok)
+                .neutralText(R.string.delete)
+                .negativeText(android.R.string.cancel)
+        .callback(new MaterialDialog.FullCallback() {
+            @Override
+            public void onPositive(MaterialDialog materialDialog) {
+                try {
+                    String scrambleText = Util.signToWcaNotation
+                            (mScrambleEdit.getText().toString(),
+                                    mPuzzleTypeName);
+                    if (!scrambleText.equals(mSolve.getScrambleAndSvg()
+                            .getScramble())) {
+                        PuzzleType.valueOf(mPuzzleTypeName).getPuzzle()
+                                .getSolvedState().applyAlgorithm
+                                (scrambleText);
+                    }
+                    mSolve.getScrambleAndSvg().setScramble(scrambleText,
+                            mPuzzleTypeName);
+                    mListener.onDialogDismissed();
+                    dismiss();
+                } catch (InvalidScrambleException e) {
+                    Toast.makeText(getActivity(),
+                            getString(R.string.invalid_scramble),
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onNegative(MaterialDialog materialDialog) {
+                mListener.onDialogDismissed();
+                dismiss();
+            }
+
+            @Override
+            public void onNeutral(MaterialDialog materialDialog) {
+                PuzzleType.valueOf(mPuzzleTypeName).getSession
+                        (mSessionIndex).deleteSolve
+                        (mSolveIndex);
+                mListener.onDialogDismissed();
+                dismiss();
+            }
+        });
+        return builder.build();
     }
 
     public void updateTitle() {
@@ -281,35 +309,10 @@ public class SolveDialogFragment extends DialogFragment {
         //Use workaround to prevent dialog closing without check:
         //http://stackoverflow.com/questions/2620444/how-to-prevent-a-dialog
         // -from-closing-when-a-button-is-clicked/15619098#15619098
-        AlertDialog dialog = (AlertDialog) getDialog();
+        MaterialDialog dialog = (MaterialDialog) getDialog();
         if (dialog != null) {
             dialog.setCanceledOnTouchOutside(false);
             dialog.setCancelable(false);
-            Button positiveButton = dialog.getButton(Dialog.BUTTON_POSITIVE);
-            positiveButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    try {
-                        String scrambleText = Util.signToWcaNotation
-                                (mScrambleEdit.getText().toString(),
-                                        mPuzzleTypeName);
-                        if (!scrambleText.equals(mSolve.getScrambleAndSvg()
-                                .getScramble())) {
-                            PuzzleType.valueOf(mPuzzleTypeName).getPuzzle()
-                                    .getSolvedState().applyAlgorithm
-                                    (scrambleText);
-                        }
-                        mSolve.getScrambleAndSvg().setScramble(scrambleText,
-                                mPuzzleTypeName);
-                        mListener.onDialogDismissed();
-                        dismiss();
-                    } catch (InvalidScrambleException e) {
-                        Toast.makeText(getActivity(),
-                                getString(R.string.invalid_scramble),
-                                Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
         }
     }
 
