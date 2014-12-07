@@ -2,10 +2,8 @@ package com.pluscubed.plustimer.ui;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -17,13 +15,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.Util;
@@ -255,45 +251,45 @@ public class SolveDialogFragment extends DialogFragment {
                 .positiveText(android.R.string.ok)
                 .neutralText(R.string.delete)
                 .negativeText(android.R.string.cancel)
-        .callback(new MaterialDialog.FullCallback() {
-            @Override
-            public void onPositive(MaterialDialog materialDialog) {
-                try {
-                    String scrambleText = Util.signToWcaNotation
-                            (mScrambleEdit.getText().toString(),
+                .callback(new MaterialDialog.FullCallback() {
+                    @Override
+                    public void onPositive(MaterialDialog materialDialog) {
+                        try {
+                            String scrambleText = Util.signToWcaNotation
+                                    (mScrambleEdit.getText().toString(),
+                                            mPuzzleTypeName);
+                            if (!scrambleText.equals(mSolve.getScrambleAndSvg()
+                                    .getScramble())) {
+                                PuzzleType.valueOf(mPuzzleTypeName).getPuzzle()
+                                        .getSolvedState().applyAlgorithm
+                                        (scrambleText);
+                            }
+                            mSolve.getScrambleAndSvg().setScramble(scrambleText,
                                     mPuzzleTypeName);
-                    if (!scrambleText.equals(mSolve.getScrambleAndSvg()
-                            .getScramble())) {
-                        PuzzleType.valueOf(mPuzzleTypeName).getPuzzle()
-                                .getSolvedState().applyAlgorithm
-                                (scrambleText);
+                            mListener.onDialogDismissed();
+                            dismiss();
+                        } catch (InvalidScrambleException e) {
+                            Toast.makeText(getActivity(),
+                                    getString(R.string.invalid_scramble),
+                                    Toast.LENGTH_SHORT).show();
+                        }
                     }
-                    mSolve.getScrambleAndSvg().setScramble(scrambleText,
-                            mPuzzleTypeName);
-                    mListener.onDialogDismissed();
-                    dismiss();
-                } catch (InvalidScrambleException e) {
-                    Toast.makeText(getActivity(),
-                            getString(R.string.invalid_scramble),
-                            Toast.LENGTH_SHORT).show();
-                }
-            }
 
-            @Override
-            public void onNegative(MaterialDialog materialDialog) {
-                mListener.onDialogDismissed();
-                dismiss();
-            }
+                    @Override
+                    public void onNegative(MaterialDialog materialDialog) {
+                        mListener.onDialogDismissed();
+                        dismiss();
+                    }
 
-            @Override
-            public void onNeutral(MaterialDialog materialDialog) {
-                PuzzleType.valueOf(mPuzzleTypeName).getSession
-                        (mSessionIndex).deleteSolve
-                        (mSolveIndex);
-                mListener.onDialogDismissed();
-                dismiss();
-            }
-        });
+                    @Override
+                    public void onNeutral(MaterialDialog materialDialog) {
+                        PuzzleType.valueOf(mPuzzleTypeName).getSession
+                                (mSessionIndex).deleteSolve
+                                (mSolveIndex);
+                        mListener.onDialogDismissed();
+                        dismiss();
+                    }
+                });
         return builder.build();
     }
 
