@@ -47,6 +47,12 @@ public enum PuzzleType {
     public static final String PREF_CURRENT_PUZZLETYPE = "current_puzzletype";
     private static final int NOT_SPECIAL_STRING = -1;
     private static PuzzleType sCurrentPuzzleType;
+    private static List<Observer> mObservers;
+
+    static {
+        mObservers = new ArrayList<>();
+    }
+
     public final String currentSessionFileName;
     public final String scramblerSpec;
     public final boolean official;
@@ -71,12 +77,33 @@ public enum PuzzleType {
         this(scramblerSpec, NOT_SPECIAL_STRING);
     }
 
+    public static void registerObserver(Observer observer) {
+        mObservers.add(observer);
+    }
+
+    public static void unregisterObserver(Observer observer) {
+        mObservers.remove(observer);
+    }
+
+    public static void unregisterAllObservers() {
+        mObservers.clear();
+    }
+
+    private static void notifyPuzzleTypeChanged() {
+        for (Observer o : mObservers) {
+            o.onPuzzleTypeChanged();
+        }
+    }
+
     public static PuzzleType getCurrent() {
         return sCurrentPuzzleType;
     }
 
     public static void setCurrent(PuzzleType type, Context context) {
-        sCurrentPuzzleType = type;
+        if (type != sCurrentPuzzleType) {
+            sCurrentPuzzleType = type;
+            notifyPuzzleTypeChanged();
+        }
         SharedPreferences defaultSharedPreferences = PreferenceManager
                 .getDefaultSharedPreferences(context);
         defaultSharedPreferences.edit().putString(PREF_CURRENT_PUZZLETYPE,
@@ -142,6 +169,8 @@ public enum PuzzleType {
                     (context, currentSessionFileName);
             if (currentSessions.size() > 0) {
                 mCurrentSession = currentSessions.get(0);
+            } else {
+                mCurrentSession = new Session();
             }
         }
         mInitialized = true;
@@ -154,8 +183,8 @@ public enum PuzzleType {
     }
 
     public void submitCurrentSession(Context context) {
-        if (mCurrentSession != null && mCurrentSession.getNumberOfSolves() >
-                0) {
+        if (mCurrentSession != null &&
+                mCurrentSession.getNumberOfSolves() > 0) {
             mHistorySessions.addSession(mCurrentSession, context);
             resetCurrentSession();
         }
@@ -201,9 +230,6 @@ public enum PuzzleType {
         if (index == CURRENT_SESSION) {
             //Check that if the current session is null (from reset or
             // initializing)
-            if (mCurrentSession == null) {
-                mCurrentSession = new Session();
-            }
             return mCurrentSession;
         } else {
             return mHistorySessions.getList().get(index);
@@ -211,7 +237,7 @@ public enum PuzzleType {
     }
 
     public void resetCurrentSession() {
-        mCurrentSession = null;
+        mCurrentSession.reset();
     }
 
     public boolean isEnabled() {
@@ -224,9 +250,15 @@ public enum PuzzleType {
             for (PuzzleType i : PuzzleType.values()) {
                 if (i.mEnabled) {
                     sCurrentPuzzleType = i;
+                    notifyPuzzleTypeChanged();
                     break;
                 }
             }
+        }
+    }
+
+    public static class Observer {
+        public void onPuzzleTypeChanged() {
         }
     }
 }

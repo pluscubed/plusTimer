@@ -49,7 +49,7 @@ public class HistorySessions {
      * Adds the Session to the history list and save.
      */
     public void addSession(Session session, Context context) {
-        mHistorySessionsList.add(session);
+        mHistorySessionsList.add(new Session(session));
         Util.saveSessionListToFile(context, mFilename, mHistorySessionsList);
     }
 

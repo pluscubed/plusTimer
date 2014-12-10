@@ -54,12 +54,6 @@ public class CurrentSessionActivity extends DrawerActivity implements
 
     @Override
     public void onDialogDismissed() {
-        if (getCurrentSessionTimerFragment() != null) {
-            getCurrentSessionTimerFragment().onSessionSolvesChanged();
-        }
-        if (getSolveListFragment() != null) {
-            getSolveListFragment().onSessionSolvesChanged();
-        }
     }
 
     @Override
@@ -112,9 +106,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
             public void onPageScrollStateChanged(int state) {
                 if (state == ViewPager.SCROLL_STATE_DRAGGING || state ==
                         ViewPager.SCROLL_STATE_SETTLING) {
-                    getCurrentSessionTimerFragment().onSessionSolvesChanged();
                     getCurrentSessionTimerFragment().stopHoldTimer();
-                    getSolveListFragment().onSessionSolvesChanged();
                     getSolveListFragment().finishActionMode();
                 }
             }
@@ -155,6 +147,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
             mInvalidateActionBarOnDrawerClosed = true;
         }
     }
+
     @Override
     public void enableMenuItems(boolean enable) {
         mScrambleImageActionEnable = enable;
@@ -203,16 +196,11 @@ public class CurrentSessionActivity extends DrawerActivity implements
             @Override
             public void onItemSelected(AdapterView<?> parent, View view,
                                        int position, long id) {
+                PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
+                        .unregisterAllObservers();
                 PuzzleType.setCurrent((PuzzleType) parent.getItemAtPosition
                         (position), CurrentSessionActivity.this);
-                ((CurrentSessionTimerFragment) getFragmentManager()
-                        .findFragmentByTag(makeFragmentName(R.id
-                                        .activity_current_session_viewpager,
-                                0))).onSessionChanged();
-                ((SolveListFragment) getFragmentManager().findFragmentByTag
-                        (makeFragmentName(R.id
-                                        .activity_current_session_viewpager,
-                                1))).onSessionChanged();
+
             }
 
             @Override

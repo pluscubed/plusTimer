@@ -44,9 +44,6 @@ public class HistorySolveListActivity extends ActionBarActivity
 
     @Override
     public void onDialogDismissed() {
-        if (getSolveListFragment() != null) {
-            getSolveListFragment().onSessionSolvesChanged();
-        }
     }
 
     private SolveListFragment getSolveListFragment() {

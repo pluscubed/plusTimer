@@ -3,6 +3,7 @@ package com.pluscubed.plustimer;
 import android.content.Context;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Session;
@@ -26,14 +27,16 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Utitilies class
+ * Utilities class
  */
 public class Util {
 
     public static final String PREF_VERSION_CODE = "pref_version_code";
 
     static {
-        gson = new Gson();
+        gson = new GsonBuilder()
+                .registerTypeAdapter(Session.class, new Session.Deserializer())
+                .create();
         SESSION_LIST_TYPE = new TypeToken<List<Session>>() {
         }.getType();
     }

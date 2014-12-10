@@ -56,8 +56,7 @@ public class CurrentSessionTimerFragment extends Fragment {
     private static final String STATE_INSPECTING = "inspecting_boolean";
     private static final String STATE_INSPECTION_START_TIME =
             "inspection_start_time_long";
-    private final Session.SessionObserver sessionObserver = new Session
-            .SessionObserver() {
+    private final Session.Observer sessionObserver = new Session.Observer() {
         @Override
         public void onSolveAdded() {
             onSessionSolvesChanged();
@@ -72,7 +71,37 @@ public class CurrentSessionTimerFragment extends Fragment {
         public void onSolveRemoved(int index) {
             onSessionSolvesChanged();
         }
+
+        @Override
+        public void onReset() {
+            onSessionSolvesChanged();
+        }
     };
+
+    private final PuzzleType.Observer puzzleTypeObserver = new PuzzleType
+            .Observer() {
+        @Override
+        public void onPuzzleTypeChanged() {
+            //Update quick stats and hlistview
+            onSessionSolvesChanged();
+
+            //Set timer text to ready, scramble text to scrambling
+            mScrambleText.setText(R.string.scrambling);
+
+            //Update options menu (disable)
+            enableMenuItems(false);
+            showScrambleImage(false);
+
+
+            resetGenerateScramble();
+
+            resetTimer();
+
+            PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
+                    .registerObserver(sessionObserver);
+        }
+    };
+
     private boolean mHoldToStartEnabled;
     private boolean mInspectionEnabled;
     private boolean mTwoRowTimeEnabled;
@@ -275,7 +304,9 @@ public class CurrentSessionTimerFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-        PuzzleType.initialize(getActivity());
+        PuzzleType.registerObserver(puzzleTypeObserver);
+        PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
+                .registerObserver(sessionObserver);
 
         mRetainedFragment = (CurrentSessionTimerRetainedFragment)
                 getFragmentManager().findFragmentByTag
@@ -316,6 +347,10 @@ public class CurrentSessionTimerFragment extends Fragment {
         //When destroyed, stop timer runnable
         mUiHandler.removeCallbacksAndMessages(null);
         mRetainedFragment.setTargetFragment(null, 0);
+
+        PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
+                .unregisterObserver(sessionObserver);
+        PuzzleType.unregisterObserver(puzzleTypeObserver);
     }
 
     public void onSessionSolvesChanged() {
@@ -357,9 +392,6 @@ public class CurrentSessionTimerFragment extends Fragment {
             getActivity().getWindow().clearFlags(WindowManager.LayoutParams
                     .FLAG_KEEP_SCREEN_ON);
         }
-
-        PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
-                .registerSessionObserver(sessionObserver);
     }
 
     public void initSharedPrefs() {
@@ -402,23 +434,6 @@ public class CurrentSessionTimerFragment extends Fragment {
         }
     }
 
-    //Called when the session is changed to another one (action bar spinner)
-    public void onSessionChanged() {
-        //Update quick stats and hlistview
-        onSessionSolvesChanged();
-
-        //Set timer text to ready, scramble text to scrambling
-        mScrambleText.setText(R.string.scrambling);
-
-        //Update options menu (disable)
-        enableMenuItems(false);
-        showScrambleImage(false);
-
-
-        resetGenerateScramble();
-
-        resetTimer();
-    }
 
     public void showScrambleImage(boolean enable) {
         if (enable) {
@@ -490,9 +505,6 @@ public class CurrentSessionTimerFragment extends Fragment {
         getActivity().getWindow().clearFlags(WindowManager.LayoutParams
                 .FLAG_KEEP_SCREEN_ON);
         PuzzleType.getCurrent().saveCurrentSession(getActivity());
-
-        PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
-                .unregisterSessionObserver(sessionObserver);
     }
 
     @Override
@@ -712,6 +724,7 @@ public class CurrentSessionTimerFragment extends Fragment {
             }
         });
 
+        onSessionSolvesChanged();
 
         return v;
     }

@@ -1,11 +1,16 @@
 package com.pluscubed.plustimer.model;
 
 import android.content.Context;
-import android.database.DataSetObserver;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.Util;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -19,24 +24,19 @@ public class Session {
 
     private List<Solve> mSolves;
 
-    private transient List<SessionObserver> mSessionObservers;
+    private transient List<Observer> mObservers;
 
     /**
      * Constructs a Session with an empty list of Solves
      */
     public Session() {
-        mSessionObservers = new ArrayList<>();
+        mObservers = new ArrayList<>();
         mSolves = new ArrayList<>();
+    }
 
-        for (final Solve s : mSolves) {
-            s.registerObserver(new DataSetObserver() {
-                @Override
-                public void onChanged() {
-                    super.onChanged();
-                    notifySolveChanged(mSolves.indexOf(s));
-                }
-            });
-        }
+    public Session(Session s) {
+        this();
+        mSolves = new ArrayList<>(s.getSolves());
     }
 
     public int getPosition(Solve i) {
@@ -47,39 +47,50 @@ public class Session {
         return new ArrayList<>(Collections.unmodifiableList(mSolves));
     }
 
-    private void notifySolveAdded() {
-        for (SessionObserver s : mSessionObservers) {
+    public void reset() {
+        mSolves.clear();
+        notifyReset();
+    }
+
+    public void notifySolveAdded() {
+        for (Observer s : mObservers) {
             s.onSolveAdded();
         }
     }
 
-    private void notifySolveDeleted(int index) {
-        for (SessionObserver s : mSessionObservers) {
+    public void notifySolveDeleted(int index) {
+        for (Observer s : mObservers) {
             s.onSolveRemoved(index);
         }
     }
 
-    private void notifySolveChanged(int index) {
-        for (SessionObserver s : mSessionObservers) {
+    public void notifySolveChanged(int index) {
+        for (Observer s : mObservers) {
             s.onSolveChanged(index);
         }
     }
 
-    public void registerSessionObserver(SessionObserver observer) {
-        mSessionObservers.add(observer);
+    public void notifyReset() {
+        for (Observer s : mObservers) {
+            s.onReset();
+        }
     }
 
-    public void unregisterSessionObserver(SessionObserver observer) {
-        mSessionObservers.remove(observer);
+    public void registerObserver(Observer observer) {
+        mObservers.add(observer);
+    }
+
+    public void unregisterObserver(Observer observer) {
+        mObservers.remove(observer);
     }
 
     public void unregisterAllObservers() {
-        mSessionObservers.clear();
+        mObservers.clear();
     }
 
     public void addSolve(final Solve s) {
         mSolves.add(s);
-        s.unregisterAll();
+        s.attachSession(this);
 
         notifySolveAdded();
     }
@@ -291,12 +302,31 @@ public class Session {
         return s.toString();
     }
 
-    public interface SessionObserver {
-        void onSolveAdded();
+    public static class Observer {
+        public void onSolveAdded() {
+        }
 
-        void onSolveChanged(int index);
+        public void onSolveChanged(int index) {
+        }
 
-        void onSolveRemoved(int index);
+        public void onSolveRemoved(int index) {
+        }
+
+        public void onReset() {
+        }
+    }
+
+    public static class Deserializer implements JsonDeserializer<Session> {
+        @Override
+        public Session deserialize(JsonElement json, Type typeOfT,
+                                   JsonDeserializationContext context) throws
+                JsonParseException {
+            Session s = new Gson().fromJson(json, typeOfT);
+            for (final Solve solve : s.mSolves) {
+                solve.attachSession(s);
+            }
+            return s;
+        }
     }
 
 }

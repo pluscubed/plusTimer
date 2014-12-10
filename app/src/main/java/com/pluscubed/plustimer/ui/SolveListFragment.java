@@ -48,23 +48,49 @@ public class SolveListFragment extends Fragment {
     private static final String ARG_CURRENT_BOOLEAN
             = "com.pluscubed.plustimer.solvelist.current_boolean";
 
-    private Session mSession;
+    private final Session.Observer sessionObserver = new Session.Observer() {
+        @Override
+        public void onSolveAdded() {
+            onSessionSolvesChanged();
+        }
 
+        @Override
+        public void onSolveChanged(int index) {
+            onSessionSolvesChanged();
+        }
+
+        @Override
+        public void onSolveRemoved(int index) {
+            onSessionSolvesChanged();
+        }
+
+        @Override
+        public void onReset() {
+            onSessionSolvesChanged();
+        }
+    };
+
+    private final PuzzleType.Observer puzzleTypeObserver = new PuzzleType
+            .Observer() {
+        @Override
+        public void onPuzzleTypeChanged() {
+            onSessionSolvesChanged();
+            PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
+                    .registerObserver(sessionObserver);
+        }
+    };
+
+    private Session mSession;
     private boolean mMillisecondsEnabled;
     private boolean mSignEnabled;
-
     private TextView mQuickStats;
     private ListView mListView;
     private TextView mEmptyView;
-
     private SolveListAdapter mListAdapter;
     private int mSessionIndex;
     private String mPuzzleTypeName;
-
     private boolean mCurrentToggle;
-
     private ActionMode mActionMode;
-
     private LinearLayout mResetSubmitLinearLayout;
 
     public static SolveListFragment newInstance(boolean current,
@@ -82,7 +108,6 @@ public class SolveListFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        onSessionSolvesChanged();
         initSharedPrefs();
     }
 
@@ -117,7 +142,9 @@ public class SolveListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        PuzzleType.initialize(getActivity());
+        PuzzleType.registerObserver(puzzleTypeObserver);
+        PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
+                .registerObserver(sessionObserver);
         mCurrentToggle = getArguments().getBoolean(ARG_CURRENT_BOOLEAN);
         mPuzzleTypeName = getArguments().getString(ARG_PUZZLETYPE_DISPLAYNAME);
         mSessionIndex = getArguments().getInt(ARG_SESSION_POSITION);
@@ -208,7 +235,6 @@ public class SolveListFragment extends Fragment {
                                                             .string
                                                             .session_reset),
                                                     Toast.LENGTH_SHORT).show();
-                                            onSessionSolvesChanged();
                                         }
                                     })
                             .setNegativeButton(android.R.string.cancel,
@@ -240,8 +266,6 @@ public class SolveListFragment extends Fragment {
                             .show();
 
                     getPuzzleType().submitCurrentSession(getActivity());
-
-                    onSessionSolvesChanged();
                 }
             });
 
@@ -310,7 +334,6 @@ public class SolveListFragment extends Fragment {
                             }
                         }
                         mode.finish();
-                        onSessionSolvesChanged();
                         return true;
                     default:
                         return false;
@@ -325,6 +348,14 @@ public class SolveListFragment extends Fragment {
 
         onSessionSolvesChanged();
         return v;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
+                .unregisterObserver(sessionObserver);
+        PuzzleType.unregisterObserver(puzzleTypeObserver);
     }
 
     public void enableResetSubmitButtons(boolean enable) {
@@ -364,10 +395,6 @@ public class SolveListFragment extends Fragment {
                     .getSession(mSessionIndex).getTimestampString(getActivity
                             ()));
         }
-    }
-
-    public void onSessionChanged() {
-        onSessionSolvesChanged();
     }
 
 

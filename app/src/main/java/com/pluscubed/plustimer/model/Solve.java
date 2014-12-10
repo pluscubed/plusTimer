@@ -1,8 +1,5 @@
 package com.pluscubed.plustimer.model;
 
-import android.database.DataSetObservable;
-import android.database.DataSetObserver;
-
 import com.pluscubed.plustimer.Util;
 
 /**
@@ -18,21 +15,13 @@ public class Solve {
 
     private long mTimestamp;
 
-    private transient DataSetObservable mDataSetObservable;
-
-    /**
-     * No-args constructor for GSON
-     */
-    public Solve() {
-        mDataSetObservable = new DataSetObservable();
-    }
+    private transient Session mAttachedSession;
 
     public Solve(ScrambleAndSvg scramble, long time) {
         mScrambleAndSvg = scramble;
         mRawTime = time;
         mPenalty = Penalty.NONE;
         mTimestamp = System.currentTimeMillis();
-        mDataSetObservable = new DataSetObservable();
     }
 
     public ScrambleAndSvg getScrambleAndSvg() {
@@ -44,10 +33,7 @@ public class Solve {
     }
 
     public long getTimeTwo() {
-        if (mPenalty == Penalty.PLUSTWO) {
-            return mRawTime + 2000000000L;
-        }
-        return mRawTime;
+        return mRawTime + (mPenalty == Penalty.PLUSTWO ? 2000000000L : 0);
     }
 
     public String getTimeString(boolean milliseconds) {
@@ -94,15 +80,20 @@ public class Solve {
         }
     }
 
+    public void attachSession(Session session) {
+        mAttachedSession = session;
+    }
+
     public Penalty getPenalty() {
         return mPenalty;
     }
 
     public void setPenalty(Penalty penalty) {
-        if (mPenalty != penalty) {
-            mDataSetObservable.notifyChanged();
+        if (mPenalty != penalty && mAttachedSession != null) {
+            mPenalty = penalty;
+            mAttachedSession.notifySolveChanged(mAttachedSession.getSolves()
+                    .indexOf(this));
         }
-        mPenalty = penalty;
     }
 
     public long getRawTime() {
@@ -110,22 +101,11 @@ public class Solve {
     }
 
     public void setRawTime(long time) {
-        if (mRawTime != time) {
-            mDataSetObservable.notifyChanged();
+        if (mRawTime != time && mAttachedSession != null) {
+            mRawTime = time;
+            mAttachedSession.notifySolveChanged(mAttachedSession.getSolves()
+                    .indexOf(this));
         }
-        mRawTime = time;
-    }
-
-    public void registerObserver(DataSetObserver observer) {
-        mDataSetObservable.registerObserver(observer);
-    }
-
-    public void unregisterAll() {
-        mDataSetObservable.unregisterAll();
-    }
-
-    public void unregisterObserver(DataSetObserver observer) {
-        mDataSetObservable.unregisterObserver(observer);
     }
 
     public enum Penalty {
