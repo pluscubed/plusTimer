@@ -261,6 +261,9 @@ public class HistorySessionListFragment extends ListFragment {
                         case 12:
                             lineColor = Color.GREEN;
                             break;
+                        case 50:
+                            lineColor = Color.MAGENTA;
+                            break;
                         case 100:
                             lineColor = Color.BLACK;
                             break;
