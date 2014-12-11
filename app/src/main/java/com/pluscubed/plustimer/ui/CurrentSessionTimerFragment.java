@@ -1,6 +1,7 @@
 package com.pluscubed.plustimer.ui;
 
-import android.animation.Animator;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -21,6 +22,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -210,6 +213,7 @@ public class CurrentSessionTimerFragment extends Fragment {
         }
     };
     private LinearLayoutManager mTimeBarLayoutManager;
+    private AnimatorSet mPenaltyBarAnimationSet;
 
     //Generate string with specified current averages and mean of current
     // session
@@ -392,6 +396,7 @@ public class CurrentSessionTimerFragment extends Fragment {
             getActivity().getWindow().clearFlags(WindowManager.LayoutParams
                     .FLAG_KEEP_SCREEN_ON);
         }
+
     }
 
     public void initSharedPrefs() {
@@ -582,38 +587,21 @@ public class CurrentSessionTimerFragment extends Fragment {
                             // scramble/scramble image and time
                             PuzzleType.getCurrent().getSession(PuzzleType
                                     .CURRENT_SESSION).addSolve(s);
-
-                            mPenaltyBarLinearLayout.setVisibility(View.VISIBLE);
-                            mPenaltyBarLinearLayout.animate().setStartDelay
-                                    (1500).alpha(0f).setDuration(150)
-                                    .setListener(new Animator
-                                            .AnimatorListener() {
-                                        @Override
-                                        public void onAnimationStart(Animator
-                                                                             animation) {
-                                        }
-
-                                        @Override
-                                        public void onAnimationEnd(Animator
-                                                                           animation) {
-                                            mPenaltyBarLinearLayout
-                                                    .setVisibility
-                                                            (View.GONE);
-                                            mPenaltyBarLinearLayout.setAlpha
-                                                    (1f);
-                                        }
-
-                                        @Override
-                                        public void onAnimationCancel(Animator
-                                                                              animation) {
-                                        }
-
-                                        @Override
-                                        public void onAnimationRepeat(Animator
-                                                                              animation) {
-                                        }
-                                    });
-
+                            if (mPenaltyBarAnimationSet == null) {
+                                ObjectAnimator enter = ObjectAnimator.ofFloat(mPenaltyBarLinearLayout, View.TRANSLATION_Y, 0f, -mPenaltyBarLinearLayout.getHeight());
+                                ObjectAnimator exit = ObjectAnimator.ofFloat(mPenaltyBarLinearLayout, View.TRANSLATION_Y, -mPenaltyBarLinearLayout.getHeight(), 0f);
+                                enter.setDuration(75);
+                                exit.setDuration(75);
+                                exit.setStartDelay(1500);
+                                enter.setInterpolator(new AccelerateInterpolator());
+                                exit.setInterpolator(new DecelerateInterpolator());
+                                mPenaltyBarAnimationSet = new AnimatorSet();
+                                mPenaltyBarAnimationSet.playSequentially(enter, exit);
+                            }
+                            if (mPenaltyBarAnimationSet.isStarted()) {
+                                mPenaltyBarAnimationSet.cancel();
+                            }
+                            mPenaltyBarAnimationSet.start();
 
                             resetTimer();
 
