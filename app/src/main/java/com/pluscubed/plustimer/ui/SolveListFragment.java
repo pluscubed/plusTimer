@@ -75,8 +75,7 @@ public class SolveListFragment extends Fragment {
         @Override
         public void onPuzzleTypeChanged() {
             onSessionSolvesChanged();
-            PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
-                    .registerObserver(sessionObserver);
+            mSession.registerObserver(sessionObserver);
         }
     };
 
@@ -142,13 +141,12 @@ public class SolveListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        PuzzleType.registerObserver(puzzleTypeObserver);
-        PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
-                .registerObserver(sessionObserver);
         mCurrentToggle = getArguments().getBoolean(ARG_CURRENT_BOOLEAN);
         mPuzzleTypeName = getArguments().getString(ARG_PUZZLETYPE_DISPLAYNAME);
         mSessionIndex = getArguments().getInt(ARG_SESSION_POSITION);
         mSession = getPuzzleType().getSession(mSessionIndex);
+        PuzzleType.registerObserver(puzzleTypeObserver);
+        mSession.registerObserver(sessionObserver);
         setHasOptionsMenu(true);
     }
 
@@ -353,8 +351,7 @@ public class SolveListFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
-                .unregisterObserver(sessionObserver);
+        mSession.unregisterObserver(sessionObserver);
         PuzzleType.unregisterObserver(puzzleTypeObserver);
     }
 
