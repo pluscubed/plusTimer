@@ -42,4 +42,6 @@
         </item>
     </style>
 
+    <style name="EdgeEffectThemeOverlayDark" parent="ThemeOverlay.AppCompat.Dark" />
+
 </resources>

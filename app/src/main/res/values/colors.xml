@@ -7,4 +7,7 @@
     <item name="activated" type="color">#4c000000</item>
     <item name="accent" type="color">#4d73ff</item>
 
+    <color name="selector_dark">#20ffffff</color>
+    <color name="selector_light">#20000000</color>
+
 </resources>
