@@ -17,11 +17,29 @@ public class Solve {
 
     private transient Session mAttachedSession;
 
+    public Solve(Solve s) {
+        copy(s);
+    }
+
     public Solve(ScrambleAndSvg scramble, long time) {
         mScrambleAndSvg = scramble;
         mRawTime = time;
         mPenalty = Penalty.NONE;
         mTimestamp = System.currentTimeMillis();
+    }
+
+    public void copy(Solve s) {
+        mScrambleAndSvg = s.getScrambleAndSvg();
+        mRawTime = s.getRawTime();
+        mPenalty = s.getPenalty();
+        mTimestamp = s.getTimestamp();
+        notifyChanged();
+    }
+
+    private void notifyChanged() {
+        if (mAttachedSession != null) {
+            mAttachedSession.notifySolveChanged(mAttachedSession.getSolves().indexOf(this));
+        }
     }
 
     public ScrambleAndSvg getScrambleAndSvg() {
@@ -89,10 +107,9 @@ public class Solve {
     }
 
     public void setPenalty(Penalty penalty) {
-        if (mPenalty != penalty && mAttachedSession != null) {
+        if (mPenalty != penalty) {
             mPenalty = penalty;
-            mAttachedSession.notifySolveChanged(mAttachedSession.getSolves()
-                    .indexOf(this));
+            notifyChanged();
         }
     }
 
@@ -101,10 +118,9 @@ public class Solve {
     }
 
     public void setRawTime(long time) {
-        if (mRawTime != time && mAttachedSession != null) {
+        if (mRawTime != time) {
             mRawTime = time;
-            mAttachedSession.notifySolveChanged(mAttachedSession.getSolves()
-                    .indexOf(this));
+            notifyChanged();
         }
     }
 

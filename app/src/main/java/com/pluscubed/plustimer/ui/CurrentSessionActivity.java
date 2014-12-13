@@ -28,7 +28,6 @@ import io.fabric.sdk.android.Fabric;
  * Current Session Activity
  */
 public class CurrentSessionActivity extends DrawerActivity implements
-        SolveDialogFragment.OnDialogDismissedListener,
         CreateDialogCallback,
         CurrentSessionTimerFragment.ScrambleImageActionEnableCallback {
 
@@ -52,9 +51,6 @@ public class CurrentSessionActivity extends DrawerActivity implements
         return NAVDRAWER_ITEM_CURRENT_SESSION;
     }
 
-    @Override
-    public void onDialogDismissed() {
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -18,8 +18,7 @@ import com.pluscubed.plustimer.model.PuzzleType;
  * activity
  */
 public class HistorySolveListActivity extends ActionBarActivity
-        implements SolveDialogFragment.OnDialogDismissedListener,
-        CreateDialogCallback {
+        implements CreateDialogCallback {
 
     public static final String EXTRA_HISTORY_SESSION_POSITION = "com" +
             ".pluscubed.plustimer.history_session_position";
@@ -40,10 +39,6 @@ public class HistorySolveListActivity extends ActionBarActivity
                             sessionIndex, solveIndex);
             d.show(getFragmentManager(), HISTORY_DIALOG_SOLVE_TAG);
         }
-    }
-
-    @Override
-    public void onDialogDismissed() {
     }
 
     private SolveListFragment getSolveListFragment() {

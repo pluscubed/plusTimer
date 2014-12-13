@@ -69,4 +69,7 @@
     <item name="activity_with_toolbar_content_framelayout" type="id" />
 
 
+    <item name="spinner_item_imageview" type="id" />
+
+
 </resources>
