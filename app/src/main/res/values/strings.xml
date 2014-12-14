@@ -48,7 +48,6 @@
     <string name="pb">PB</string>
     <string name="ao">Ao%1$d</string>
     <string name="best_times">Best Times</string>
-    <string name="best_ao">Best Ao%1$d</string>
 
     <!--Dialog-->
     <string name="delete">Delete</string>

@@ -4,9 +4,32 @@
     <string name="app_name">plusTimer</string>
     <string name="ready">準備就緒</string>
     <string name="settings">設置</string>
-    <string name="submit">保存至記錄</string>
-    <string name="scrambling">打亂公式生成中…</string>
+
     <string name="puzzle_selection">魔方選擇</string>
+    <string name="unofficial">快，非WCA</string>
+    <string name="oh">單手</string>
+    <string name="bld">盲擰</string>
+    <string name="feet">腳擰</string>
+    <string-array name="puzzles">
+        <item>SQ1</item>
+        <item>斜轉</item>
+        <item>金字塔</item>
+        <item>五魔</item>
+        <item>魔表</item>
+    </string-array>
+
+    <string name="reset">重置</string>
+    <string name="submit">保存至記錄</string>
+    <string name="session_submitted">保存本組成功</string>
+    <string name="session_reset">本組重置成功</string>
+    <string name="reset_warning">重置本組?</string>
+    <string name="reset_warning_message">當前組內所有成績將被刪除!</string>
+
+    <string name="scrambling">打亂公式生成中…</string>
+    <string name="scramble_image">打亂圖</string>
+    <string name="session_no_solves">本組目前無成績!</string>
+    <string name="timing">還原</string>
+
     <string name="solves">"總數: "</string>
     <string name="cao">"當前%1$d次去尾"</string>
     <string name="lao">"當前%1$d次去尾"</string>
@@ -16,18 +39,23 @@
     <string name="best">"最快: "</string>
     <string name="worst">"最慢: "</string>
     <string name="average">"總去尾: "</string>
+    <string name="pb">PB</string>
+    <string name="ao">%1$d次去尾</string>
+    <string name="best_times">單次最快</string>
+
     <string name="delete">刪除</string>
     <string name="penalty">懲罰:</string>
-    <string name="reset">重置</string>
-    <string name="scramble_image">打亂圖</string>
-    <string name="session_no_solves">本組目前無成績!</string>
-    <string name="session_submitted">保存本組成功</string>
-    <string name="session_reset">本組重置成功</string>
+    <string-array name="penalty_array">
+        <item>無</item>
+        <item>+2</item>
+        <item>DNF</item>
+    </string-array>
+    <string name="time">時間（秒）:</string>
+    <string name="scramble_colon">打亂:</string>
+    <string name="timestamp">時間戳:</string>
+    <string name="invalid_scramble">非正確打亂！</string>
+
     <string name="puzzletype_no_solves">該魔方無記錄!\n完成一些還原後，在 成績列表 頁面按 保存至記錄。</string>
-    <string name="share">分享成績</string>
-    <string name="share_dialog_title">分享成績至…</string>
-
-
     <string name="pref_inspection_title">WCA觀察</string>
     <string name="pref_inspection_summary">15秒觀察魔方</string>
 
@@ -44,77 +72,40 @@
     <string name="time_text_edittext_dialog_title">計時器字體大小 (默認100):</string>
 
     <string name="pref_update_time_title">計時器更新</string>
-
-    <string name="pref_timer_category_title">計時器</string>
-
-    <string name="pref_milliseconds_title">顯示到毫秒(0.001)</string>
-
-    <string name="puzzle_types_setup">啟用、禁用魔方類型</string>
-    <string name="no_disable_all_puzzletypes">不能禁用所有魔方類型！</string>
-
-    <string name="pref_sign_title">使用SiGN</string>
-
-    <string-array name="penalty_array">
-        <item>無</item>
-        <item>+2</item>
-        <item>DNF</item>
-    </string-array>
-
-    <string-array name="drawer_array">
-        <item>當前組</item>
-        <item>歷史記錄</item>
-    </string-array>
-
-    <string-array name="drawer_actionbar_array">
-        <item>當前組</item>
-        <item>歷史記錄</item>
-    </string-array>
-
-    <string-array name="current_s_page_titles">
-        <item>計時</item>
-        <item>成績列表</item>
-    </string-array>
-
-    <string-array name="puzzles">
-        <item>SQ1</item>
-        <item>斜轉</item>
-        <item>金字塔</item>
-        <item>五魔</item>
-        <item>魔表</item>
-    </string-array>
-
     <string-array name="pref_update_time_list_entries">
         <item>實時</item>
         <item>到秒</item>
         <item>隱藏</item>
     </string-array>
 
-    <string name="drawer_open">打開側欄</string>
-    <string name="drawer_close">關閉側欄</string>
+    <string name="pref_timer_category_title">計時器</string>
 
-    <string name="pb">PB</string>
-    <string name="ao">%1$d次去尾</string>
+    <string name="pref_milliseconds_title">顯示到毫秒(0.001)</string>
+
+    <string name="pref_sign_title">使用SiGN</string>
+
+    <string name="puzzle_types_setup">啟用、禁用魔方類型</string>
+    <string name="no_disable_all_puzzletypes">不能禁用所有魔方類型！</string>
+
+    <string name="current_session">當前組</string>
+    <string name="history">歷史記錄</string>
+    <string name="current">當前組</string>
     <string name="help">幫助</string>
     <string name="about">關於</string>
+
+    <string-array name="current_session_page_titles">
+        <item>計時</item>
+        <item>成績列表</item>
+    </string-array>
+
     <string name="icon">圖標</string>
     <string name="open_source_licenses">開源代碼許可</string>
     <string name="github">GitHub</string>
     <string name="email">發送反饋</string>
-    <string name="rate">在Play Store上評價</string>
+    <string name="share">分享成績</string>
 
-    <string name="unofficial">快，非WCA</string>
-    <string name="reset_warning">重置本組?</string>
-    <string name="reset_warning_message">當前組內所有成績將被刪除!</string>
+    <string name="share_dialog_title">分享成績至…</string>
+    <string name="rate">在Play Store上評價</string>
     <string name="manual_add_solve">手動加成績</string>
-    <string name="time">時間（秒）:</string>
-    <string name="scramble_colon">打亂:</string>
-    <string name="best_times">單次最快</string>
-    <string name="best_ao">%1$d次去尾最快</string>
-    <string name="timing">還原</string>
-    <string name="oh">單手</string>
-    <string name="bld">盲擰</string>
-    <string name="feet">腳擰</string>
-    <string name="timestamp">時間戳:</string>
-    <string name="invalid_scramble">非正確打亂！</string>
 
 </resources>
