@@ -18,6 +18,12 @@ import android.widget.TextView;
 
 import com.pluscubed.plustimer.BuildConfig;
 import com.pluscubed.plustimer.R;
+import com.pluscubed.plustimer.model.PuzzleType;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 /**
  * About Page
@@ -119,6 +125,45 @@ public class AboutActivity extends ActionBarActivity {
                                         ".com/store/apps/details?id=com" +
                                         ".pluscubed.plustimer")));
                     }
+                }
+            });
+
+            //TODO: Remove once History bug fixed
+            Button bug = (Button) view.findViewById(R.id.fragment_about_email_history_button);
+            bug.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    BufferedReader r = null;
+                    StringBuilder total = new StringBuilder();
+                    for (PuzzleType p : PuzzleType.values()) {
+                        try {
+                            total.append("\n\n\n").append(p.name());
+                            InputStream in = getActivity().openFileInput(p.name() + ".json");
+                            r = new BufferedReader(new InputStreamReader(in));
+                            String line;
+                            while ((line = r.readLine()) != null) {
+                                total.append(line);
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        } finally {
+                            if (r != null) {
+                                try {
+                                    r.close();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    }
+                    Intent intent = new Intent(Intent.ACTION_SENDTO,
+                            Uri.fromParts(
+                                    "mailto", "plusCubed@gmail.com", null));
+                    intent.putExtra(Intent.EXTRA_TEXT, total.toString());
+                    startActivity(
+                            Intent.createChooser(intent,
+                                    "Send email using..."));
+
                 }
             });
 
