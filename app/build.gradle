@@ -30,20 +30,26 @@ android {
         versionCode 12
         versionName '0.1.6'
     }
-    signingConfigs {
-        release {
-            storeFile file(RELEASE_STORE_FILE)
-            storePassword RELEASE_STORE_PASSWORD
-            keyAlias RELEASE_KEY_ALIAS_PLUSTIMER
-            keyPassword RELEASE_KEY_PASSWORD_PLUSTIMER
+
+    if (project.hasProperty("RELEASE_STORE_FILE")) {
+        signingConfigs {
+            release {
+                storeFile file(RELEASE_STORE_FILE)
+                storePassword RELEASE_STORE_PASSWORD
+                keyAlias RELEASE_KEY_ALIAS_PLUSTIMER
+                keyPassword RELEASE_KEY_PASSWORD_PLUSTIMER
+            }
         }
     }
+
     buildTypes {
         release {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
+            if (project.hasProperty("RELEASE_STORE_FILE")) {
+                signingConfig signingConfigs.release
+            }
         }
         debug {
             minifyEnabled false
