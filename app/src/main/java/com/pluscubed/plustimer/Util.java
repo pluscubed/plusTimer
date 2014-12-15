@@ -42,7 +42,7 @@ public class Util {
     }
 
     private static final Type SESSION_LIST_TYPE;
-    private static final Gson gson;
+    private static Gson gson;
 
     public static int convertDpToPx(Context context, float dp) {
         return (int) (dp * context.getResources().getDisplayMetrics().density
@@ -75,9 +75,19 @@ public class Util {
     }
 
     /**
+     * For updating data w/ old JSON structure
+     */
+    public static void updateData(Context context, String fileName, Gson oldGson) {
+        Gson current = gson;
+        gson = oldGson;
+        List<Session> historySessions = getSessionListFromFile(context, fileName);
+        if (historySessions.size() >= 1) saveSessionListToFile(context, fileName, historySessions);
+        gson = current;
+    }
+
+    /**
      * Load up the sessions stored in the list. If the file doesn't exist,
-     * create an empty
-     * list.
+     * create an empty list.
      */
     public static List<Session> getSessionListFromFile(Context context,
                                                        String fileName) {
