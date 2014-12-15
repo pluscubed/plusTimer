@@ -4,6 +4,12 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
 import com.pluscubed.plustimer.BuildConfig;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.Util;
@@ -16,6 +22,7 @@ import net.gnehzr.tnoodle.utils.LazyInstantiatorException;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -52,10 +59,9 @@ public enum PuzzleType {
     static {
         mObservers = new ArrayList<>();
     }
-
-    public final String currentSessionFileName;
     public final String scramblerSpec;
     public final boolean official;
+    private final String currentSessionFileName;
     private final String historyFileName;
     private final int mStringIndex;
     private HistorySessions mHistorySessions;
@@ -140,26 +146,57 @@ public enum PuzzleType {
         if (!mInitialized) {
             SharedPreferences defaultSharedPreferences = PreferenceManager
                     .getDefaultSharedPreferences(context);
-            switch (defaultSharedPreferences.getInt(Util.PREF_VERSION_CODE,
-                    10)) {
-                case 10:
-                    //Version 10- to 11+: Set up history sessions with old
-                    // name first
-                    if (!scramblerSpec.equals("333") || name().equals
-                            ("THREE")) {
-                        mHistorySessions.setFilename(scramblerSpec + ".json");
-                        mHistorySessions.init(context);
-                        mHistorySessions.setFilename(historyFileName);
-                        if (mHistorySessions.getList().size() > 0) {
-                            mHistorySessions.save(context);
-                        }
-                        File oldFile = new File(context.getFilesDir(),
-                                scramblerSpec + ".json");
-                        oldFile.delete();
-                    }
-                    break;
 
+            //AFTER UPDATING APP////////////
+            int savedVersionCode = defaultSharedPreferences.getInt(Util.PREF_VERSION_CODE, 10);
+            if (savedVersionCode <= 13) {
+                //Version <=13: ScrambleAndSvg json structure changes
+                Gson gson = new GsonBuilder()
+                        .registerTypeAdapter(Session.class, new JsonDeserializer<Session>() {
+                            @Override
+                            public Session deserialize(JsonElement json, Type typeOfT,
+                                                       JsonDeserializationContext context)
+                                    throws JsonParseException {
+
+                                Gson gson = new GsonBuilder()
+                                        .registerTypeAdapter(ScrambleAndSvg.class, new JsonDeserializer<ScrambleAndSvg>() {
+                                            @Override
+                                            public ScrambleAndSvg deserialize(JsonElement json, Type typeOfT,
+                                                                              JsonDeserializationContext context)
+                                                    throws JsonParseException {
+                                                return new ScrambleAndSvg(json.getAsJsonPrimitive().getAsString(), null);
+                                            }
+                                        }).create();
+
+                                Session s = gson.fromJson(json, typeOfT);
+                                for (final Solve solve : s.getSolves()) {
+                                    solve.attachSession(s);
+                                }
+                                return s;
+                            }
+                        })
+                        .create();
+                Util.updateData(context, historyFileName, gson);
+                Util.updateData(context, currentSessionFileName, gson);
             }
+
+            if (savedVersionCode <= 10) {
+                //Version <=10: Set up history sessions with old
+                // name first
+                if (!scramblerSpec.equals("333") || name().equals("THREE")) {
+                    mHistorySessions.setFilename(scramblerSpec + ".json");
+                    mHistorySessions.init(context);
+                    mHistorySessions.setFilename(historyFileName);
+                    if (mHistorySessions.getList().size() > 0) {
+                        mHistorySessions.save(context);
+                    }
+                    File oldFile = new File(context.getFilesDir(),
+                            scramblerSpec + ".json");
+                    oldFile.delete();
+                }
+            }
+            ////////////////////////////
+
             mHistorySessions.init(context);
             Set<String> selected = defaultSharedPreferences.getStringSet
                     (SettingsActivity.PREF_PUZZLETYPES_MULTISELECTLIST,
