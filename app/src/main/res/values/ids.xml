@@ -4,8 +4,7 @@
     <item name="fragment_current_session_timer_scramble_textview" type="id" />
     <item name="fragment_current_session_timer_time_textview" type="id" />
 
-    <item name="fragment_current_session_timer_bottom_hlistview" type="id" />
-    <item name="hlist_item_solve_textview" type="id" />
+    <item name="fragment_current_session_timer_timebar_recycler" type="id" />
 
     <item name="fragment_current_session_timer_stats_solves_number_textview" type="id" />
     <item name="fragment_current_session_timer_stats_textview" type="id" />
@@ -41,25 +40,20 @@
     <item name="fragment_solvelist_submit_reset_linearlayout" type="id" />
 
 
-    <!--MainActivity-->
-    <item name="activity_base_drawerlayout" type="id" />
-    <item name="activity_base_content_framelayout" type="id" />
-    <item name="activity_base_drawer_listview" type="id" />
-
-    <item name="nav_drawer_footer_settings_linearlayout" type="id" />
+    <!--BaseDrawerActivity-->
+    <item name="activity_drawer_drawerlayout" type="id" />
+    <item name="activity_drawer_content_linearlayout" type="id" />
+    <item name="toolbar_actionbar" type="id" />
+    <item name="activity_drawer_drawer_linearlayout" type="id" />
+    <item name="activity_drawer_drawer_scrollview" type="id" />
 
     <!--CurrentSessionActivity-->
     <item name="activity_current_session_slidingtablayout" type="id" />
     <item name="activity_current_session_viewpager" type="id" />
 
-    <!--HistorySessionListFragment-->
-    <item name="list_item_history_sessionlist_textview" type="id" />
-
     <!--HistorySessionListActivity-->
     <item name="activity_history_sessionlist_main_framelayout" type="id" />
     <item name="history_sessionlist_header_stats_textview" type="id" />
-    <item name="nav_drawer_footer_help_linearlayout" type="id" />
-    <item name="nav_drawer_footer_about_linearlayout" type="id" />
 
     <!--LicensesFragment-->
     <item name="fragment_licenses_textview" type="id" />
@@ -70,6 +64,12 @@
     <item name="fragment_about_github_button" type="id" />
     <item name="fragment_about_email_button" type="id" />
     <item name="fragment_about_rate_button" type="id" />
+
+    <!--activity_with_toolbar-->
+    <item name="activity_with_toolbar_content_framelayout" type="id" />
+
+
+    <item name="spinner_item_imageview" type="id" />
 
 
 </resources>

@@ -15,11 +15,31 @@ public class Solve {
 
     private long mTimestamp;
 
+    private transient Session mAttachedSession;
+
+    public Solve(Solve s) {
+        copy(s);
+    }
+
     public Solve(ScrambleAndSvg scramble, long time) {
         mScrambleAndSvg = scramble;
         mRawTime = time;
         mPenalty = Penalty.NONE;
         mTimestamp = System.currentTimeMillis();
+    }
+
+    public void copy(Solve s) {
+        mScrambleAndSvg = s.getScrambleAndSvg();
+        mRawTime = s.getRawTime();
+        mPenalty = s.getPenalty();
+        mTimestamp = s.getTimestamp();
+        notifyChanged();
+    }
+
+    private void notifyChanged() {
+        if (mAttachedSession != null) {
+            mAttachedSession.notifySolveChanged(mAttachedSession.getSolves().indexOf(this));
+        }
     }
 
     public ScrambleAndSvg getScrambleAndSvg() {
@@ -31,10 +51,7 @@ public class Solve {
     }
 
     public long getTimeTwo() {
-        if (mPenalty == Penalty.PLUSTWO) {
-            return mRawTime + 2000000000L;
-        }
-        return mRawTime;
+        return mRawTime + (mPenalty == Penalty.PLUSTWO ? 2000000000L : 0);
     }
 
     public String getTimeString(boolean milliseconds) {
@@ -42,7 +59,8 @@ public class Solve {
             case DNF:
                 return "DNF";
             case PLUSTWO:
-                return Util.timeStringFromNs(mRawTime + 2000000000L, milliseconds) + "+";
+                return Util.timeStringFromNs(mRawTime + 2000000000L,
+                        milliseconds) + "+";
             case NONE:
             default:
                 return Util.timeStringFromNs(mRawTime, milliseconds);
@@ -56,12 +74,15 @@ public class Solve {
             case PLUSTWO:
                 long nanoseconds = mRawTime + 2000000000L;
                 String[] timeStringsSplitByDecimal = Util
-                        .timeStringsFromNsSplitByDecimal(nanoseconds, milliseconds);
-                timeStringsSplitByDecimal[1] = timeStringsSplitByDecimal[1] + "+";
+                        .timeStringsFromNsSplitByDecimal(nanoseconds,
+                                milliseconds);
+                timeStringsSplitByDecimal[1] = timeStringsSplitByDecimal[1] +
+                        "+";
                 return timeStringsSplitByDecimal;
             case NONE:
             default:
-                return Util.timeStringsFromNsSplitByDecimal(mRawTime, milliseconds);
+                return Util.timeStringsFromNsSplitByDecimal(mRawTime,
+                        milliseconds);
         }
     }
 
@@ -69,11 +90,16 @@ public class Solve {
         switch (mPenalty) {
             case DNF:
                 if (mRawTime != 0) {
-                    return "DNF (" + Util.timeStringFromNs(mRawTime, milliseconds) + ")";
+                    return "DNF (" + Util.timeStringFromNs(mRawTime,
+                            milliseconds) + ")";
                 }
             default:
                 return getTimeString(milliseconds);
         }
+    }
+
+    public void attachSession(Session session) {
+        mAttachedSession = session;
     }
 
     public Penalty getPenalty() {
@@ -81,7 +107,10 @@ public class Solve {
     }
 
     public void setPenalty(Penalty penalty) {
-        mPenalty = penalty;
+        if (mPenalty != penalty) {
+            mPenalty = penalty;
+            notifyChanged();
+        }
     }
 
     public long getRawTime() {
@@ -89,7 +118,10 @@ public class Solve {
     }
 
     public void setRawTime(long time) {
-        mRawTime = time;
+        if (mRawTime != time) {
+            mRawTime = time;
+            notifyChanged();
+        }
     }
 
     public enum Penalty {

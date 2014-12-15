@@ -49,7 +49,7 @@ public class HistorySessions {
      * Adds the Session to the history list and save.
      */
     public void addSession(Session session, Context context) {
-        mHistorySessionsList.add(session);
+        mHistorySessionsList.add(new Session(session));
         Util.saveSessionListToFile(context, mFilename, mHistorySessionsList);
     }
 
@@ -66,11 +66,12 @@ public class HistorySessions {
      * @return a copy of the history sessions
      */
     public List<Session> getList() {
-        return new ArrayList<Session>(mHistorySessionsList);
+        return new ArrayList<>(mHistorySessionsList);
     }
 
     /**
-     * Load up the history sessions stored in the list. If the file doesn't exist, create an empty
+     * Load up the history sessions stored in the list. If the file doesn't
+     * exist, create an empty
      * list.
      */
     public void init(Context context) {

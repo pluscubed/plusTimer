@@ -6,7 +6,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.pluscubed.plustimer.model.PuzzleType;
-import com.pluscubed.plustimer.model.ScrambleAndSvg;
 import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
 
@@ -28,7 +27,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Utitilies class
+ * Utilities class
  */
 public class Util {
 
@@ -36,8 +35,7 @@ public class Util {
 
     static {
         gson = new GsonBuilder()
-                .registerTypeAdapter(ScrambleAndSvg.class, new ScrambleAndSvg.Serializer())
-                .registerTypeAdapter(ScrambleAndSvg.class, new ScrambleAndSvg.Deserializer())
+                .registerTypeAdapter(Session.class, new Session.Deserializer())
                 .create();
         SESSION_LIST_TYPE = new TypeToken<List<Session>>() {
         }.getType();
@@ -46,13 +44,21 @@ public class Util {
     private static final Type SESSION_LIST_TYPE;
     private static final Gson gson;
 
+    public static int convertDpToPx(Context context, float dp) {
+        return (int) (dp * context.getResources().getDisplayMetrics().density
+                + 0.5f);
+    }
+
     /**
      * Save a list of sessions to a file.
      */
-    public static void saveSessionListToFile(Context context, String fileName, List<Session> sessionList) {
+    public static void saveSessionListToFile(Context context,
+                                             String fileName,
+                                             List<Session> sessionList) {
         Writer writer = null;
         try {
-            OutputStream out = context.openFileOutput(fileName, Context.MODE_PRIVATE);
+            OutputStream out = context.openFileOutput(fileName,
+                    Context.MODE_PRIVATE);
             writer = new OutputStreamWriter(out);
             gson.toJson(sessionList, SESSION_LIST_TYPE, writer);
         } catch (FileNotFoundException e) {
@@ -69,15 +75,18 @@ public class Util {
     }
 
     /**
-     * Load up the sessions stored in the list. If the file doesn't exist, create an empty
+     * Load up the sessions stored in the list. If the file doesn't exist,
+     * create an empty
      * list.
      */
-    public static List<Session> getSessionListFromFile(Context context, String fileName) {
+    public static List<Session> getSessionListFromFile(Context context,
+                                                       String fileName) {
         BufferedReader reader = null;
         try {
             InputStream in = context.openFileInput(fileName);
             reader = new BufferedReader(new InputStreamReader(in));
-            List<Session> fileSessions = gson.fromJson(reader, SESSION_LIST_TYPE);
+            List<Session> fileSessions = gson.fromJson(reader,
+                    SESSION_LIST_TYPE);
             if (fileSessions != null) {
                 return fileSessions;
             }
@@ -92,31 +101,37 @@ public class Util {
                 }
             }
         }
-        return new ArrayList<Session>();
+        return new ArrayList<>();
     }
 
 
     /**
-     * Returns a String containing the date and time according the device's settings and locale from
+     * Returns a String containing the date and time according the device's
+     * settings and locale from
      * the timestamp
      *
      * @param applicationContext the application context
-     * @param timestamp          the timestamp to convert into a date & time String
+     * @param timestamp          the timestamp to convert into a date & time
+     *                           String
      * @return the String converted from the timestamp
      * @see android.text.format.DateFormat
      * @see java.text.DateFormat
      */
     public static String timeDateStringFromTimestamp(Context applicationContext, long timestamp) {
         String timeDate;
-        String androidDateTime = android.text.format.DateFormat.getDateFormat(applicationContext)
+        String androidDateTime = android.text.format.DateFormat.getDateFormat
+                (applicationContext)
                 .format(new Date(timestamp)) + " " +
                 android.text.format.DateFormat.getTimeFormat(applicationContext)
                         .format(new Date(timestamp));
-        String javaDateTime = DateFormat.getDateTimeInstance().format(new Date(timestamp));
+        String javaDateTime = DateFormat.getDateTimeInstance().format(new
+                Date(timestamp));
         String AmPm = "";
-        if (!Character.isDigit(androidDateTime.charAt(androidDateTime.length() - 1))) {
+        if (!Character.isDigit(androidDateTime.charAt(androidDateTime.length
+                () - 1))) {
             if (androidDateTime.contains(
-                    new SimpleDateFormat().getDateFormatSymbols().getAmPmStrings()[Calendar.AM])) {
+                    new SimpleDateFormat().getDateFormatSymbols()
+                            .getAmPmStrings()[Calendar.AM])) {
                 AmPm = " " + new SimpleDateFormat().getDateFormatSymbols()
                         .getAmPmStrings()[Calendar.AM];
             } else {
@@ -125,10 +140,13 @@ public class Util {
             }
             androidDateTime = androidDateTime.replace(AmPm, "");
         }
-        if (!Character.isDigit(javaDateTime.charAt(javaDateTime.length() - 1))) {
-            javaDateTime = javaDateTime.replace(" " + new SimpleDateFormat().getDateFormatSymbols()
+        if (!Character.isDigit(javaDateTime.charAt(javaDateTime.length() - 1)
+        )) {
+            javaDateTime = javaDateTime.replace(" " + new SimpleDateFormat()
+                    .getDateFormatSymbols()
                     .getAmPmStrings()[Calendar.AM], "");
-            javaDateTime = javaDateTime.replace(" " + new SimpleDateFormat().getDateFormatSymbols()
+            javaDateTime = javaDateTime.replace(" " + new SimpleDateFormat()
+                    .getDateFormatSymbols()
                     .getAmPmStrings()[Calendar.PM], "");
         }
         javaDateTime = javaDateTime.substring(javaDateTime.length() - 3);
@@ -137,24 +155,28 @@ public class Util {
     }
 
     /**
-     * Returns a String containing hours, minutes, and seconds (to the millisecond) from a duration
+     * Returns a String containing hours, minutes,
+     * and seconds (to the millisecond) from a duration
      * in nanoseconds.
      *
      * @param nanoseconds the duration to be converted
      * @return the String converted from the nanoseconds
      */
     //TODO: Localization of timeStringFromNs
-    public static String timeStringFromNs(long nanoseconds, boolean enableMilliseconds) {
-        String[] array = timeStringsFromNsSplitByDecimal(nanoseconds, enableMilliseconds);
+    public static String timeStringFromNs(long nanoseconds,
+                                          boolean enableMilliseconds) {
+        String[] array = timeStringsFromNsSplitByDecimal(nanoseconds,
+                enableMilliseconds);
         return array[0] + "." + array[1];
     }
 
-    public static String timeStringSecondsFromNs(long nanoseconds, boolean enableMilliseconds) {
+    public static String timeStringSecondsFromNs(long nanoseconds,
+                                                 boolean enableMilliseconds) {
         double seconds;
         if (enableMilliseconds) {
-            seconds = Math.round(nanoseconds / 1000000000.0 * 1000.0) / 1000.0;
+            seconds = Math.floor(nanoseconds / 1000000000.0 * 1000.0) / 1000.0;
         } else {
-            seconds = Math.round(nanoseconds / 1000000000.0 * 100.0) / 100.0;
+            seconds = Math.floor(nanoseconds / 1000000000.0 * 100.0) / 100.0;
         }
         if (seconds == (long) seconds)
             return String.format("%d", (long) seconds);
@@ -163,7 +185,8 @@ public class Util {
     }
 
 
-    public static String[] timeStringsFromNsSplitByDecimal(long nanoseconds, boolean enableMilliseconds) {
+    public static String[] timeStringsFromNsSplitByDecimal(long nanoseconds,
+                                                           boolean enableMilliseconds) {
         String[] array = new String[2];
 
         int hours = (int) ((nanoseconds / 1000000000L / 60 / 60) % 24);
@@ -180,23 +203,26 @@ public class Util {
         }
 
         if (enableMilliseconds) {
-            array[1] = String.format("%03d", (int) (((nanoseconds / 1000000.0) % 1000.0) + 0.5));
+            array[1] = String.format("%03d",
+                    (int) (((nanoseconds / 1000000.0) % 1000.0)));
         } else {
-            array[1] = String.format("%02d", (int) (((nanoseconds / 10000000.0) % 100.0) + 0.5));
+            array[1] = String.format("%02d",
+                    (int) ((nanoseconds / 10000000.0) % 100.0));
         }
 
         return array;
     }
 
     /**
-     * Gets a list of times (calculated with +2s) from the list of {@code Solve}s, excluding DNFs.
+     * Gets a list of times (calculated with +2s) from the list of {@code
+     * Solve}s, excluding DNFs.
      * If no times are found, an empty list is returned.
      *
      * @param list the list of solves to extract times from
      * @return the list of nanoseconds of times
      */
     public static List<Long> getListTimeTwoNoDnf(List<Solve> list) {
-        ArrayList<Long> timeTwo = new ArrayList<Long>();
+        ArrayList<Long> timeTwo = new ArrayList<>();
         for (Solve i : list) {
             if (!(i.getPenalty() == Solve.Penalty.DNF)) {
                 timeTwo.add(i.getTimeTwo());
@@ -208,21 +234,23 @@ public class Util {
     /**
      * Gets the best {@code Solve} out of the list (lowest time).
      * <p/>
-     * If the list contains no solves, null is returned. If the list contains only DNFs, the last
+     * If the list contains no solves, null is returned. If the list contains
+     * only DNFs, the last
      * DNF solve is returned.
      *
      * @param list the list of solves, not empty
      * @return the solve with the lowest time
      */
     public static Solve getBestSolveOfList(List<Solve> list) {
-        List<Solve> solveList = new ArrayList<Solve>(list);
+        List<Solve> solveList = new ArrayList<>(list);
         if (solveList.size() > 0) {
             Collections.reverse(solveList);
             List<Long> times = getListTimeTwoNoDnf(solveList);
             if (times.size() > 0) {
                 long bestTimeTwo = Collections.min(times);
                 for (Solve i : solveList) {
-                    if (!(i.getPenalty() == Solve.Penalty.DNF) && i.getTimeTwo() == bestTimeTwo) {
+                    if (!(i.getPenalty() == Solve.Penalty.DNF) && i
+                            .getTimeTwo() == bestTimeTwo) {
                         return i;
                     }
                 }
@@ -243,7 +271,7 @@ public class Util {
      * @return the solve with the highest time
      */
     public static Solve getWorstSolveOfList(List<Solve> list) {
-        List<Solve> solveList = new ArrayList<Solve>(list);
+        List<Solve> solveList = new ArrayList<>(list);
         if (solveList.size() > 0) {
             Collections.reverse(solveList);
             for (Solve i : solveList) {
@@ -271,7 +299,8 @@ public class Util {
      * @return the converted sequence of moves in SiGN notation
      */
     public static String wcaToSignNotation(String wca, String puzzleTypeName) {
-        if (Character.isDigit(PuzzleType.valueOf(puzzleTypeName).scramblerSpec.charAt(0))) {
+        if (Character.isDigit(PuzzleType.valueOf(puzzleTypeName)
+                .scramblerSpec.charAt(0))) {
             String[] moves = wca.split(" ");
             for (int i = 0; i < moves.length; i++) {
                 if (moves[i].contains("w")) {
@@ -297,13 +326,15 @@ public class Util {
      * @return the converted sequence of moves in WCA notation
      */
     public static String signToWcaNotation(String sign, String puzzleTypeName) {
-        if (Character.isDigit(PuzzleType.valueOf(puzzleTypeName).scramblerSpec.charAt(0))) {
+        if (Character.isDigit(PuzzleType.valueOf(puzzleTypeName)
+                .scramblerSpec.charAt(0))) {
             String[] moves = sign.split(" ");
             for (int i = 0; i < moves.length; i++) {
                 if (!moves[i].equals(moves[i].toUpperCase())) {
                     char[] possibleMoves = "udfrlb".toCharArray();
                     for (char move : possibleMoves) {
-                        moves[i] = moves[i].replace(String.valueOf(move), Character.toUpperCase(move) + "w");
+                        moves[i] = moves[i].replace(String.valueOf(move),
+                                Character.toUpperCase(move) + "w");
                     }
                 }
             }
@@ -319,8 +350,10 @@ public class Util {
     }
 
     /**
-     * Gets the average of a list of solves, excluding the best and worst solves (5%).
-     * Returns {@link Long#MAX_VALUE} for DNF and {@link Session#GET_AVERAGE_INVALID_NOT_ENOUGH} if the list size is less than 3.
+     * Gets the average of a list of solves, excluding the best and worst
+     * solves (5%).
+     * Returns {@link Long#MAX_VALUE} for DNF and {@link
+     * Session#GET_AVERAGE_INVALID_NOT_ENOUGH} if the list size is less than 3.
      *
      * @param list the list of solves
      * @return the average of the solves

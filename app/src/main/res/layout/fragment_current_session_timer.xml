@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.CurrentSessionActivity">
+    tools:context=".ui.CurrentSessionTimerFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -41,7 +41,7 @@
         android:id="@id/fragment_current_session_timer_stats_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@id/fragment_current_session_timer_bottom_hlistview"
+        android:layout_above="@id/fragment_current_session_timer_timebar_recycler"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:background="@color/bg_color"
@@ -58,7 +58,7 @@
         android:id="@id/fragment_current_session_timer_stats_solves_number_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@id/fragment_current_session_timer_bottom_hlistview"
+        android:layout_above="@id/fragment_current_session_timer_timebar_recycler"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:background="@color/bg_color"
@@ -70,17 +70,6 @@
         android:text="@string/solves"
         android:textSize="16sp" />
 
-
-    <it.sephiroth.android.library.widget.HListView
-        android:id="@id/fragment_current_session_timer_bottom_hlistview"
-        android:layout_width="match_parent"
-        android:layout_height="45dp"
-        android:layout_alignParentBottom="true"
-        android:background="@color/light_gray"
-        android:listSelector="@drawable/background_button_bar"
-        android:overScrollMode="always" />
-
-
     <TextView
         android:id="@id/fragment_current_session_timer_scramble_textview"
         android:layout_width="match_parent"
@@ -91,43 +80,54 @@
         android:text="@string/scrambling"
         android:textSize="18sp" />
 
+    <LinearLayout
+        android:id="@id/fragment_current_session_timer_penalty_linearlayout"
+        style="?android:buttonBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/button_bar_height"
+        android:layout_alignParentBottom="true"
+        android:background="?colorPrimary"
+        android:elevation="1dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@id/fragment_current_session_timer_penalty_dnf_button"
+            style="?android:buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/item_background_dark"
+            android:text="DNF"
+            tools:ignore="HardcodedText" />
+
+        <Button
+            android:id="@id/fragment_current_session_timer_penalty_plustwo_button"
+            style="?android:buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/item_background_dark"
+            android:text="+2"
+            tools:ignore="HardcodedText" />
+    </LinearLayout>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@id/fragment_current_session_timer_timebar_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/button_bar_height"
+        android:layout_alignParentBottom="true"
+        android:background="?colorPrimary"
+        android:elevation="2dp"
+        android:overScrollMode="always"
+        android:theme="@style/EdgeEffectThemeOverlayDark" />
 
     <ImageView
         android:id="@id/fragment_current_session_timer_scramble_imageview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="8dp"
-        android:contentDescription="@string/scrambleimage"
+        android:contentDescription="@string/scramble_image"
         android:visibility="gone" />
-
-    <LinearLayout
-        android:id="@id/fragment_current_session_timer_penalty_linearlayout"
-        android:layout_width="match_parent"
-        android:layout_height="45dp"
-        android:layout_above="@id/fragment_current_session_timer_bottom_hlistview"
-        android:orientation="horizontal"
-        android:visibility="gone">
-
-        <Button
-            android:id="@id/fragment_current_session_timer_penalty_dnf_button"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@drawable/background_button_bar"
-            android:text="DNF"
-            android:textSize="18sp"
-            tools:ignore="ButtonStyle,HardcodedText" />
-
-        <Button
-            android:id="@id/fragment_current_session_timer_penalty_plustwo_button"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@drawable/background_button_bar"
-            android:text="+2"
-            android:textSize="18sp"
-            tools:ignore="ButtonStyle,HardcodedText" />
-    </LinearLayout>
 
 
 </RelativeLayout>

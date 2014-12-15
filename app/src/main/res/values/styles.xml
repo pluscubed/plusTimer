@@ -1,49 +1,47 @@
+<!--suppress AndroidDomInspection -->
 <resources>
 
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="@android:style/Theme.Holo.Light.DarkActionBar">
-        <item name="hlv_listViewStyle">@style/HListView</item>
-
-        <item name="android:actionBarStyle">@style/ActionBar</item>
-
+    <style name="Theme.PlusTimer" parent="Theme.PlusTimer.Base">
         <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+    <style name="Theme.PlusTimer.Base" parent="@style/Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorAccent">@color/accent</item>
+
+        <item name="android:textColor">?android:textColorPrimary</item>
+
         <item name="android:windowBackground">@color/bg_color</item>
-        <item name="android:colorBackground">@color/bg_color</item>
 
-        <item name="android:actionBarDivider">@null</item>
+        <item name="actionModeBackground">?colorPrimary</item>
 
-        <item name="android:actionOverflowButtonStyle">@style/ActionButton.Overflow</item>
+        <item name="android:buttonBarButtonStyle">@style/ButtonBarButtonStyle
+        </item>
 
-        <item name="android:dropDownListViewStyle">@style/DropDownListView</item>
-
-        <item name="android:actionBarWidgetTheme">@style/Theme.ActionBar.Widget</item>
+        <item name="windowActionModeOverlay">true</item>
     </style>
 
-    <style name="Theme.ActionBar.Widget" parent="@android:style/Theme.Holo">
-        <item name="android:dropDownListViewStyle">@style/DropDownListView</item>
+    <style name="Theme.PlusTimer.WithNavDrawer" parent="Theme.PlusTimer" />
+
+    <style name="ButtonBarButtonStyle">
+        <item name="android:minWidth">64dp</item>
+        <item name="android:maxLines">2</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:background">?android:selectableItemBackground</item>
+        <item name="android:fontFamily">@string/font_fontFamily_medium</item>
+        <item name="android:textStyle">@integer/font_textStyle_medium</item>
+        <item name="android:textColor">?colorAccent</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textSize">14sp</item>
     </style>
 
-    <style name="ActionBar" parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
-        <item name="android:background">@drawable/ab_background</item>
+    <style name="Widget.Spinner.DropDown.ActionBar" parent="Widget.AppCompat.Spinner.DropDown.ActionBar">
+        <item name="android:popupBackground">
+            @drawable/abc_popup_dark_background_mtrl_mult
+        </item>
     </style>
 
-    <style name="DropDownListView" parent="@android:style/Widget.ListView.DropDown">
-        <item name="android:divider">@android:color/transparent</item>
-        <item name="android:dividerHeight">0dp</item>
-        <item name="android:listSelector">?android:selectableItemBackground</item>
-    </style>
-
-    <style name="ActionButton.Overflow" parent="@android:style/Widget.Holo.ActionButton.Overflow">
-        <item name="android:src">@drawable/ic_action_overflow</item>
-    </style>
-
-    <style name="HListView">
-        <item name="hlv_transcriptMode">normal</item>
-        <item name="hlv_stackFromRight">false</item>
-        <item name="hlv_measureWithChild">0</item>
-        <item name="hlv_dividerWidth">0dip</item>
-        <item name="hlv_headerDividersEnabled">false</item>
-        <item name="hlv_footerDividersEnabled">false</item>
-    </style>
+    <style name="EdgeEffectThemeOverlayDark" parent="ThemeOverlay.AppCompat.Dark" />
 
 </resources>

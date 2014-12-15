@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="horizontal">
@@ -13,20 +14,18 @@
             android:id="@android:id/text1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingEnd="10dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:paddingStart="10dp"
+            android:gravity="center_vertical|start"
+            android:paddingLeft="16dp"
+            android:paddingStart="16dp"
             android:textSize="16sp" />
 
         <TextView
             android:id="@android:id/text2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingEnd="10dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:paddingStart="10dp"
+            android:gravity="center_vertical|start"
+            android:paddingLeft="16dp"
+            android:paddingStart="16dp"
             android:textSize="12sp" />
     </LinearLayout>
 
@@ -34,7 +33,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:padding="8dp"
-        android:src="@drawable/spinner_triangle_white" />
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:src="@drawable/spinner_triangle"
+        tools:ignore="ContentDescription" />
 
 </LinearLayout>

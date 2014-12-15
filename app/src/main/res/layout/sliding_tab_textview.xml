@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 
+<!--suppress AndroidDomInspection -->
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@android:id/text1"
     android:layout_width="wrap_content"
     android:layout_height="48dp"
-    android:background="?android:attr/selectableItemBackground"
-    android:fontFamily="sans-serif"
+    android:background="@drawable/item_background_dark"
+    android:fontFamily="@string/font_fontFamily_medium"
     android:gravity="center"
     android:paddingEnd="16dp"
     android:paddingLeft="16dp"
@@ -14,4 +15,4 @@
     android:textAllCaps="true"
     android:textColor="@color/sliding_tab_text_color"
     android:textSize="12sp"
-    android:textStyle="bold" />
+    android:textStyle="@integer/font_textStyle_medium" />

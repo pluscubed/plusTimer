@@ -1,6 +1,5 @@
 package com.pluscubed.plustimer.ui;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.ActivityNotFoundException;
@@ -8,7 +7,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.NavUtils;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,24 +18,36 @@ import android.widget.TextView;
 
 import com.pluscubed.plustimer.BuildConfig;
 import com.pluscubed.plustimer.R;
+import com.pluscubed.plustimer.model.PuzzleType;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 /**
  * About Page
  */
-public class AboutActivity extends Activity {
+public class AboutActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        setContentView(R.layout.activity_with_toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
+        setSupportActionBar(toolbar);
+
         FragmentManager fm = getFragmentManager();
-        Fragment f = fm.findFragmentById(android.R.id.content);
+        Fragment f = fm.findFragmentById(R.id
+                .activity_with_toolbar_content_framelayout);
         if (f == null) {
             fm.beginTransaction()
-                    .replace(android.R.id.content, new AboutFragment())
+                    .replace(R.id.activity_with_toolbar_content_framelayout,
+                            new AboutFragment())
                     .commit();
         }
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle(R.string.about);
     }
 
@@ -44,7 +56,7 @@ public class AboutActivity extends Activity {
         switch (item.getItemId()) {
             // Respond to the action bar's Up/Home button
             case android.R.id.home:
-                NavUtils.navigateUpFromSameTask(this);
+                finish();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -56,49 +68,102 @@ public class AboutActivity extends Activity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            View view = inflater.inflate(R.layout.fragment_about, container, false);
-            Button licenses = (Button) view.findViewById(R.id.fragment_about_licenses_button);
+            View view = inflater.inflate(R.layout.fragment_about, container,
+                    false);
+            Button licenses = (Button) view.findViewById(R.id
+                    .fragment_about_licenses_button);
             licenses.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(getActivity(), LicensesActivity.class);
+                    Intent intent = new Intent(getActivity(),
+                            LicensesActivity.class);
                     startActivity(intent);
                 }
             });
-            TextView appName = (TextView) view.findViewById(R.id.fragment_about_appname_textview);
-            appName.setText(getString(R.string.app_name) + "\n v" + BuildConfig.VERSION_NAME);
+            TextView appName = (TextView) view.findViewById(R.id
+                    .fragment_about_appname_textview);
+            appName.setText(getString(R.string.app_name) + "\n v" +
+                    BuildConfig.VERSION_NAME);
 
-            Button github = (Button) view.findViewById(R.id.fragment_about_github_button);
+            Button github = (Button) view.findViewById(R.id
+                    .fragment_about_github_button);
             github.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Uri uriUrl = Uri.parse("https://github.com/plusCubed/plusTimer");
+                    Uri uriUrl = Uri.parse("https://github" +
+                            ".com/plusCubed/plusTimer");
                     startActivity(new Intent(Intent.ACTION_VIEW, uriUrl));
                 }
             });
 
-            Button email = (Button) view.findViewById(R.id.fragment_about_email_button);
+            Button email = (Button) view.findViewById(R.id
+                    .fragment_about_email_button);
             email.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(
-                            "mailto", "plusCubed@gmail.com", null));
+                    Intent intent = new Intent(Intent.ACTION_SENDTO,
+                            Uri.fromParts(
+                                    "mailto", "plusCubed@gmail.com", null));
                     startActivity(
-                            Intent.createChooser(intent, "Send email to the developer using..."));
+                            Intent.createChooser(intent,
+                                    "Send email to the developer using..."));
                 }
             });
 
-            Button rate = (Button) view.findViewById(R.id.fragment_about_rate_button);
+            Button rate = (Button) view.findViewById(R.id
+                    .fragment_about_rate_button);
             rate.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     try {
-                        Uri uri = Uri.parse("market://details?id=com.pluscubed.plustimer");
+                        Uri uri = Uri.parse("market://details?id=com" +
+                                ".pluscubed.plustimer");
                         startActivity(new Intent(Intent.ACTION_VIEW, uri));
                     } catch (ActivityNotFoundException e) {
                         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(
-                                "http://play.google.com/store/apps/details?id=com.pluscubed.plustimer")));
+                                "http://play.google" +
+                                        ".com/store/apps/details?id=com" +
+                                        ".pluscubed.plustimer")));
                     }
+                }
+            });
+
+            //TODO: Remove once History bug fixed
+            Button bug = (Button) view.findViewById(R.id.fragment_about_email_history_button);
+            bug.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    BufferedReader r = null;
+                    StringBuilder total = new StringBuilder();
+                    for (PuzzleType p : PuzzleType.values()) {
+                        try {
+                            total.append("\n\n\n").append(p.name());
+                            InputStream in = getActivity().openFileInput(p.name() + ".json");
+                            r = new BufferedReader(new InputStreamReader(in));
+                            String line;
+                            while ((line = r.readLine()) != null) {
+                                total.append(line);
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        } finally {
+                            if (r != null) {
+                                try {
+                                    r.close();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    }
+                    Intent intent = new Intent(Intent.ACTION_SENDTO,
+                            Uri.fromParts(
+                                    "mailto", "plusCubed@gmail.com", null));
+                    intent.putExtra(Intent.EXTRA_TEXT, total.toString());
+                    startActivity(
+                            Intent.createChooser(intent,
+                                    "Send email using..."));
+
                 }
             });
 

@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v13.app.FragmentPagerAdapter;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,15 +27,20 @@ import io.fabric.sdk.android.Fabric;
 /**
  * Current Session Activity
  */
-public class CurrentSessionActivity extends BaseActivity implements SolveDialogFragment.OnDialogDismissedListener, CreateDialogCallback, CurrentSessionTimerFragment.MenuItemsEnableCallback {
+public class CurrentSessionActivity extends DrawerActivity implements
+        CreateDialogCallback,
+        CurrentSessionTimerFragment.ScrambleImageActionEnableCallback {
 
     public static final String DIALOG_SOLVE_TAG = "SOLVE_DIALOG";
 
-    private static final String STATE_MENU_ITEMS_ENABLE_BOOLEAN = "menu_items_enable_boolean";
+    private static final String STATE_MENU_ITEMS_ENABLE_BOOLEAN =
+            "menu_items_enable_boolean";
 
-    private boolean mMenuItemsEnable;
+    private boolean mScrambleImageActionEnable;
 
-    private int mSelectedPosition;
+    private int mSelectedPage;
+
+    private boolean mInvalidateActionBarOnDrawerClosed;
 
     public static String makeFragmentName(int viewId, int index) {
         return "android:switcher:" + viewId + ":" + index;
@@ -45,27 +51,11 @@ public class CurrentSessionActivity extends BaseActivity implements SolveDialogF
         return NAVDRAWER_ITEM_CURRENT_SESSION;
     }
 
-    @Override
-    public void onDialogDismissed() {
-        if (getCurrentSessionTimerFragment() != null) {
-            getCurrentSessionTimerFragment().onSessionSolvesChanged();
-        }
-        if (getSolveListFragment() != null) {
-            getSolveListFragment().onSessionSolvesChanged();
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        //update puzzle spinner in case settings were changed
-        invalidateOptionsMenu();
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setContentView(R.layout.activity_current_session);
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_current_session);
 
         PuzzleType.initialize(this);
 
@@ -74,21 +64,30 @@ public class CurrentSessionActivity extends BaseActivity implements SolveDialogF
         }
 
         if (savedInstanceState != null) {
-            mMenuItemsEnable = savedInstanceState.getBoolean(STATE_MENU_ITEMS_ENABLE_BOOLEAN);
+            mScrambleImageActionEnable = savedInstanceState.getBoolean
+                    (STATE_MENU_ITEMS_ENABLE_BOOLEAN);
         }
 
         //Set up ViewPager with CurrentSessionAdapter
-        ViewPager viewPager = (ViewPager) findViewById(R.id.activity_current_session_viewpager);
-        viewPager.setAdapter(new CurrentSessionPagerAdapter(getFragmentManager(),
-                getResources().getStringArray(R.array.current_s_page_titles)));
+        ViewPager viewPager = (ViewPager) findViewById(R.id
+                .activity_current_session_viewpager);
+        viewPager.setAdapter(new CurrentSessionPagerAdapter
+                (getFragmentManager(),
+                        getResources().getStringArray(R.array
+                                .current_session_page_titles)));
 
         //Set up SlidingTabLayout
-        SlidingTabLayout slidingTabLayout = (SlidingTabLayout) findViewById(R.id.activity_current_session_slidingtablayout);
-        slidingTabLayout.setSelectedIndicatorColors(Color.parseColor("white"));
+        SlidingTabLayout slidingTabLayout = (SlidingTabLayout) findViewById(R
+                .id.activity_current_session_slidingtablayout);
+        int[] attrs = {R.attr.colorAccent};
+        slidingTabLayout.setSelectedIndicatorColors(obtainStyledAttributes
+                (attrs).getColor(0, Color.BLACK));
         slidingTabLayout.setDistributeEvenly(true);
-        slidingTabLayout.setCustomTabView(R.layout.sliding_tab_textview, android.R.id.text1);
+        slidingTabLayout.setCustomTabView(R.layout.sliding_tab_textview,
+                android.R.id.text1);
         slidingTabLayout.setViewPager(viewPager);
-        slidingTabLayout.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+        slidingTabLayout.setOnPageChangeListener(new ViewPager
+                .OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset,
                                        int positionOffsetPixels) {
@@ -96,44 +95,80 @@ public class CurrentSessionActivity extends BaseActivity implements SolveDialogF
 
             @Override
             public void onPageSelected(int position) {
-                invalidateOptionsMenu();
-                mSelectedPosition = position;
+                mSelectedPage = position;
             }
 
             @Override
             public void onPageScrollStateChanged(int state) {
-                if (state == ViewPager.SCROLL_STATE_DRAGGING
-                        || state == ViewPager.SCROLL_STATE_SETTLING) {
-                    getCurrentSessionTimerFragment().onSessionSolvesChanged();
+                if (state == ViewPager.SCROLL_STATE_DRAGGING || state ==
+                        ViewPager.SCROLL_STATE_SETTLING) {
                     getCurrentSessionTimerFragment().stopHoldTimer();
-                    getSolveListFragment().onSessionSolvesChanged();
                     getSolveListFragment().finishActionMode();
                 }
             }
         });
         viewPager.setCurrentItem(0);
+
+        getSupportActionBar().setElevation(0);
+
+        overridePendingTransition(0, 0);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // TODO: Only update Spinner, not invalidate whole action bar
+        // When puzzle types are enabled/disabled, update Spinner
+        queueInvalidateOptionsMenu();
     }
 
     private CurrentSessionTimerFragment getCurrentSessionTimerFragment() {
         return (CurrentSessionTimerFragment) getFragmentManager()
-                .findFragmentByTag(makeFragmentName(R.id.activity_current_session_viewpager, 0));
+                .findFragmentByTag(makeFragmentName(R.id
+                        .activity_current_session_viewpager, 0));
     }
 
     private SolveListFragment getSolveListFragment() {
         return (SolveListFragment) getFragmentManager()
-                .findFragmentByTag(makeFragmentName(R.id.activity_current_session_viewpager, 1));
+                .findFragmentByTag(makeFragmentName(R.id
+                        .activity_current_session_viewpager, 1));
+    }
+
+    public void queueInvalidateOptionsMenu() {
+        if (!isNavDrawerOpen()) {
+            invalidateOptionsMenu();
+        } else {
+            // Workaround for weird bug where calling invalidateOptionsMenu()
+            // while nav drawer is open doesn't call onCreateOptionsMenu()
+            mInvalidateActionBarOnDrawerClosed = true;
+        }
     }
 
     @Override
     public void enableMenuItems(boolean enable) {
-        mMenuItemsEnable = enable;
-        invalidateOptionsMenu();
+        mScrambleImageActionEnable = enable;
+        queueInvalidateOptionsMenu();
+    }
+
+    @Override
+    protected void onNavDrawerClosed() {
+        if (mInvalidateActionBarOnDrawerClosed) {
+            invalidateOptionsMenu();
+            mInvalidateActionBarOnDrawerClosed = false;
+        }
+    }
+
+    @Override
+    protected void onNavDrawerSlide(float offset) {
+        getSolveListFragment().finishActionMode();
+        getCurrentSessionTimerFragment().stopHoldTimer();
     }
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean(STATE_MENU_ITEMS_ENABLE_BOOLEAN, mMenuItemsEnable);
+        outState.putBoolean(STATE_MENU_ITEMS_ENABLE_BOOLEAN,
+                mScrambleImageActionEnable);
     }
 
     @Override
@@ -143,16 +178,25 @@ public class CurrentSessionActivity extends BaseActivity implements SolveDialogF
         }
         getMenuInflater().inflate(R.menu.menu_current_session, menu);
 
-        Spinner menuPuzzleSpinner = (Spinner) menu.findItem(R.id.menu_activity_current_session_puzzletype_spinner).getActionView();
-        ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter = new SpinnerPuzzleTypeAdapter(getLayoutInflater(), this);
+        Spinner menuPuzzleSpinner = (Spinner) MenuItemCompat.getActionView
+                (menu.findItem(R.id
+                        .menu_activity_current_session_puzzletype_spinner));
+        ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter = new
+                SpinnerPuzzleTypeAdapter(getLayoutInflater(),
+                getSupportActionBar().getThemedContext());
         menuPuzzleSpinner.setAdapter(puzzleTypeSpinnerAdapter);
-        menuPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition(PuzzleType.getCurrent()), true);
-        menuPuzzleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        menuPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition
+                (PuzzleType.getCurrent()), true);
+        menuPuzzleSpinner.setOnItemSelectedListener(new AdapterView
+                .OnItemSelectedListener() {
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                PuzzleType.setCurrent((PuzzleType) parent.getItemAtPosition(position), CurrentSessionActivity.this);
-                ((CurrentSessionTimerFragment) getFragmentManager().findFragmentByTag(makeFragmentName(R.id.activity_current_session_viewpager, 0))).onSessionChanged();
-                ((SolveListFragment) getFragmentManager().findFragmentByTag(makeFragmentName(R.id.activity_current_session_viewpager, 1))).onSessionChanged();
+            public void onItemSelected(AdapterView<?> parent, View view,
+                                       int position, long id) {
+                PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
+                        .unregisterAllObservers();
+                PuzzleType.setCurrent((PuzzleType) parent.getItemAtPosition
+                        (position), CurrentSessionActivity.this);
+
             }
 
             @Override
@@ -160,68 +204,42 @@ public class CurrentSessionActivity extends BaseActivity implements SolveDialogF
             }
         });
 
+        MenuItem displayScrambleImage = menu.findItem(
+                R.id.menu_activity_current_session_scramble_image_menuitem);
+        MenuItem share = menu.findItem(R.id.menu_solvelist_share_menuitem);
+        MenuItem addSolve = menu.findItem(R.id.menu_solvelist_add_menuitem);
+
+        if (displayScrambleImage != null) {
+            displayScrambleImage.setEnabled(mScrambleImageActionEnable);
+            displayScrambleImage.getIcon()
+                    .setAlpha(mScrambleImageActionEnable ? 255 : 96);
+        }
+
+        if (share != null && displayScrambleImage != null && addSolve != null) {
+            if (mSelectedPage == 0) {
+                share.setVisible(false);
+                displayScrambleImage.setVisible(true);
+                addSolve.setVisible(false);
+            } else {
+                displayScrambleImage.setVisible(false);
+                share.setVisible(true);
+                /*TODO: Set visible to true once dialog editing is fully
+                implemented*/
+                addSolve.setVisible(false);
+            }
+        }
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem menuDisplayScramble = menu
-                .findItem(R.id.menu_activity_current_session_scramble_image_menuitem);
-        if (menuDisplayScramble != null) {
-            menuDisplayScramble.setEnabled(mMenuItemsEnable);
-            menuDisplayScramble.getIcon().setAlpha(mMenuItemsEnable ? 255 : 96);
-        }
-        if (menu.findItem(R.id.menu_solvelist_share_menuitem) != null
-                && menu.findItem(R.id.menu_activity_current_session_scramble_image_menuitem) != null
-                && menu.findItem(R.id.menu_solvelist_add_menuitem) != null) {
-            if (mSelectedPosition == 0) {
-                menu.findItem(R.id.menu_solvelist_share_menuitem).setVisible(false);
-                menu.findItem(R.id.menu_activity_current_session_scramble_image_menuitem)
-                        .setVisible(true);
-                menu.findItem(R.id.menu_solvelist_add_menuitem).setVisible(false);
-            } else {
-                menu.findItem(R.id.menu_activity_current_session_scramble_image_menuitem)
-                        .setVisible(false);
-                menu.findItem(R.id.menu_solvelist_share_menuitem).setVisible(true);
-                //TODO: Set visible to true once dialog editing is fully implemented
-                menu.findItem(R.id.menu_solvelist_add_menuitem).setVisible(false);
-            }
-        }
-
-        if (menu.findItem(R.id.menu_activity_current_session_puzzletype_spinner) != null) {
-            menu.findItem(R.id.menu_activity_current_session_puzzletype_spinner).setVisible(true);
-        }
-
-        return super.onPrepareOptionsMenu(menu);
-    }
-
-
-    @Override
-    protected ActionBarWrappedDrawerToggle getWrappedDrawerToggle() {
-        return new ActionBarWrappedDrawerToggle() {
-            @Override
-            public void onDrawerSlide(View drawerView, float slideOffset) {
-                super.onDrawerSlide(drawerView, slideOffset);
-                getSolveListFragment().finishActionMode();
-                getCurrentSessionTimerFragment().stopHoldTimer();
-            }
-        };
-    }
-
-    @Override
-    protected int[] getNavDrawerHideActionBarItemIds() {
-        return new int[]{R.id.menu_activity_current_session_scramble_image_menuitem,
-                R.id.menu_solvelist_share_menuitem,
-                R.id.menu_activity_current_session_puzzletype_spinner};
-    }
-
-
-    @Override
-    public void createSolveDialog(String displayName, int sessionIndex, int solveIndex) {
+    public void createSolveDialog(String displayName, int sessionIndex,
+                                  int solveIndex) {
         DialogFragment dialog = (DialogFragment) getFragmentManager()
                 .findFragmentByTag(DIALOG_SOLVE_TAG);
         if (dialog == null) {
-            SolveDialogFragment d = SolveDialogFragment.newInstance(PuzzleType.getCurrent().name(), PuzzleType.CURRENT_SESSION, solveIndex);
+            SolveDialogFragment d = SolveDialogFragment.newInstance
+                    (PuzzleType.getCurrent().name(),
+                            PuzzleType.CURRENT_SESSION, solveIndex);
             d.show(getFragmentManager(), DIALOG_SOLVE_TAG);
         }
     }
@@ -230,7 +248,8 @@ public class CurrentSessionActivity extends BaseActivity implements SolveDialogF
 
         private final String[] mPageTitles;
 
-        public CurrentSessionPagerAdapter(FragmentManager fm, String[] pageTitles) {
+        public CurrentSessionPagerAdapter(FragmentManager fm,
+                                          String[] pageTitles) {
             super(fm);
             mPageTitles = pageTitles;
         }
@@ -241,7 +260,9 @@ public class CurrentSessionActivity extends BaseActivity implements SolveDialogF
                 case 0:
                     return new CurrentSessionTimerFragment();
                 case 1:
-                    return SolveListFragment.newInstance(true, PuzzleType.getCurrent().name(), PuzzleType.CURRENT_SESSION);
+                    return SolveListFragment.newInstance(true,
+                            PuzzleType.getCurrent().name(),
+                            PuzzleType.CURRENT_SESSION);
             }
             return null;
         }

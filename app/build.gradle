@@ -23,30 +23,37 @@ preBuild.dependsOn('syncTask')
 
 android {
     compileSdkVersion 21
-    buildToolsVersion '21.0.2'
+    buildToolsVersion '21.1.2'
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 21
-        versionCode 12
-        versionName '0.1.6'
+        versionCode 13
+        versionName '0.2.0-Beta1'
     }
-    signingConfigs {
-        release {
-            storeFile file(RELEASE_STORE_FILE)
-            storePassword RELEASE_STORE_PASSWORD
-            keyAlias RELEASE_KEY_ALIAS_PLUSTIMER
-            keyPassword RELEASE_KEY_PASSWORD_PLUSTIMER
+
+    if (project.hasProperty("RELEASE_STORE_FILE")) {
+        signingConfigs {
+            release {
+                storeFile file(RELEASE_STORE_FILE)
+                storePassword RELEASE_STORE_PASSWORD
+                keyAlias RELEASE_KEY_ALIAS_PLUSTIMER
+                keyPassword RELEASE_KEY_PASSWORD_PLUSTIMER
+            }
         }
     }
+
     buildTypes {
         release {
-            runProguard true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
-            signingConfig signingConfigs.release
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if (project.hasProperty("RELEASE_STORE_FILE")) {
+                signingConfig signingConfigs.release
+            }
         }
         debug {
-            runProguard false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             applicationIdSuffix '.debug'
             versionNameSuffix '-DEBUG'
             buildConfigField "boolean", "USE_CRASHLYTICS", "false"
@@ -70,15 +77,18 @@ android {
 }
 
 dependencies {
-    compile project(':libraries:hlistviewlibrary')
     compile 'com.jjoe64:graphview:3.+'
+    compile 'com.android.support:appcompat-v7:21.+'
     compile 'com.android.support:support-v13:21.+'
+    compile 'com.android.support:recyclerview-v7:21.+'
     compile 'com.github.cubing:tnoodle-android:0.+@aar'
     compile 'com.caverock:androidsvg:1.2.1'
     compile 'com.android.support:support-annotations:21.+'
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.google.code.gson:gson:2.+'
-    compile('com.crashlytics.sdk.android:crashlytics:2.0.0@aar') {
+    compile 'com.afollestad:material-dialogs:0.+'
+    compile 'com.rengwuxian.materialedittext:library:1.+'
+    compile('com.crashlytics.sdk.android:crashlytics:2.+@aar') {
         transitive = true;
     }
 }
