@@ -271,7 +271,7 @@ public class HistorySessionListFragment extends ListFragment {
                             lineColor = Color.YELLOW;
                     }
                     bestAverageGraphViewSeries.add(new GraphViewSeries(
-                            String.format(getString(R.string.best_ao),
+                            String.format(getString(R.string.bao),
                                     bestAverageMatrix.keyAt(i)),
                             new GraphViewSeries.GraphViewSeriesStyle(lineColor,
                                     Util.convertDpToPx(getActivity(), 2)),
