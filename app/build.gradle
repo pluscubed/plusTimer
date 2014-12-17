@@ -1,6 +1,6 @@
 buildscript {
     repositories {
-        maven { url 'https://maven.fabric.io/repo' }
+        maven { url 'https://maven.fabric.io/public' }
     }
 
     dependencies {
@@ -11,7 +11,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 
 repositories {
-    maven { url 'https://maven.fabric.io/repo' }
+    maven { url 'https://maven.fabric.io/public' }
 }
 
 task syncTask(type: Sync) {
