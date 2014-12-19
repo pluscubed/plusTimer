@@ -5,6 +5,6 @@
     android:layout_height="1dp"
     android:layout_marginBottom="8dp"
     android:layout_marginTop="8dp"
-    android:background="#0c000000"
+    android:background="?dividerHorizontal"
     android:clickable="false"
     android:gravity="center_vertical" />

@@ -1,6 +1,6 @@
 package com.pluscubed.plustimer.model;
 
-import com.pluscubed.plustimer.Util;
+import com.pluscubed.plustimer.utils.Util;
 
 /**
  * solve times data object

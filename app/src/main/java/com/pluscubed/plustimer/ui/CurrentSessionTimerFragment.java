@@ -32,10 +32,10 @@ import android.widget.TextView;
 import com.caverock.androidsvg.SVG;
 import com.caverock.androidsvg.SVGParseException;
 import com.pluscubed.plustimer.R;
-import com.pluscubed.plustimer.Util;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
+import com.pluscubed.plustimer.utils.Util;
 
 import java.util.Arrays;
 import java.util.Collections;

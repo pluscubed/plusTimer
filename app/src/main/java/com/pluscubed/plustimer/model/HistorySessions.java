@@ -2,7 +2,7 @@ package com.pluscubed.plustimer.model;
 
 import android.content.Context;
 
-import com.pluscubed.plustimer.Util;
+import com.pluscubed.plustimer.utils.Util;
 
 import java.util.ArrayList;
 import java.util.List;

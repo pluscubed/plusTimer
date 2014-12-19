@@ -2,16 +2,29 @@
 <resources>
 
     <style name="Theme.PlusTimer" parent="Theme.PlusTimer.Base">
-        <item name="android:alertDialogTheme">
-            @style/Theme.PlusTimer.AlertDialog
-        </item>
+        <item name="android:alertDialogTheme">@style/Theme.PlusTimer.AlertDialog</item>
+    </style>
+
+    <style name="Theme.PlusTimer.Dark" parent="Theme.PlusTimer.Dark.Base">
+        <item name="android:alertDialogTheme">@style/Theme.PlusTimer.Dark.AlertDialog</item>
     </style>
 
     <style name="Theme.PlusTimer.WithNavDrawer" parent="Theme.PlusTimer">
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 
+    <style name="Theme.PlusTimer.Dark.WithNavDrawer" parent="Theme.PlusTimer.Dark">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
+
     <style name="Theme.PlusTimer.AlertDialog" parent="@android:style/Theme.Material.Light.Dialog.Alert">
+        <item name="android:colorPrimary">@color/primary</item>
+        <item name="android:colorPrimaryDark">@color/primary_dark</item>
+        <item name="android:colorAccent">@color/accent</item>
+    </style>
+
+    <style name="Theme.PlusTimer.Dark.AlertDialog" parent="@android:style/Theme.Material.Dialog.Alert">
         <item name="android:colorPrimary">@color/primary</item>
         <item name="android:colorPrimaryDark">@color/primary_dark</item>
         <item name="android:colorAccent">@color/accent</item>

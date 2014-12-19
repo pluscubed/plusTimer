@@ -30,10 +30,10 @@ import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.GraphViewSeries;
 import com.jjoe64.graphview.LineGraphView;
 import com.pluscubed.plustimer.R;
-import com.pluscubed.plustimer.Util;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
+import com.pluscubed.plustimer.utils.Util;
 
 import java.io.IOException;
 import java.util.ArrayList;

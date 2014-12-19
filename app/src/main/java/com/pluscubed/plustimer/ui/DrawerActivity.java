@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.View;
@@ -23,7 +22,7 @@ import com.pluscubed.plustimer.R;
 /**
  * Base Activity with the Navigation Drawer
  */
-public abstract class DrawerActivity extends ActionBarActivity {
+public abstract class DrawerActivity extends ThemableActivity {
 
     protected static final int NAVDRAWER_ITEM_CURRENT_SESSION = 0;
     protected static final int NAVDRAWER_ITEM_HISTORY = 1;
@@ -88,6 +87,11 @@ public abstract class DrawerActivity extends ActionBarActivity {
     }
 
     protected void onNavDrawerClosed() {
+    }
+
+    @Override
+    protected boolean hasNavDrawer() {
+        return true;
     }
 
     protected Toolbar getActionBarToolbar() {

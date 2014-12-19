@@ -41,25 +41,7 @@
 
     <!-- The navigation drawer (width is placeholder, dynamically adjusted to total width-56dp)-->
 
-    <ScrollView
-        android:id="@id/activity_drawer_drawer_scrollview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        android:background="?colorPrimaryDark"
-        android:fillViewport="true"
-        android:fitsSystemWindows="true">
-
-        <LinearLayout
-            android:id="@id/activity_drawer_drawer_linearlayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:color/white"
-            android:orientation="vertical"
-            android:paddingBottom="8dp"
-            android:paddingTop="8dp" />
-
-    </ScrollView>
+    <include layout="@layout/drawer" />
 
 
 </android.support.v4.widget.DrawerLayout>

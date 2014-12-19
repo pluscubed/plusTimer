@@ -5,6 +5,14 @@
         <item name="android:windowContentOverlay">@null</item>
     </style>
 
+    <style name="Theme.PlusTimer.Dark" parent="Theme.PlusTimer.Dark.Base">
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+    <style name="Theme.PlusTimer.WithNavDrawer" parent="Theme.PlusTimer" />
+
+    <style name="Theme.PlusTimer.Dark.WithNavDrawer" parent="Theme.PlusTimer.Dark" />
+
     <style name="Theme.PlusTimer.Base" parent="@style/Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryDark">@color/primary_dark</item>
@@ -12,7 +20,7 @@
 
         <item name="android:textColor">?android:textColorPrimary</item>
 
-        <item name="android:windowBackground">@color/bg_color</item>
+        <item name="android:windowBackground">@color/background_material_light</item>
 
         <item name="actionModeBackground">?colorPrimary</item>
 
@@ -22,7 +30,22 @@
         <item name="windowActionModeOverlay">true</item>
     </style>
 
-    <style name="Theme.PlusTimer.WithNavDrawer" parent="Theme.PlusTimer" />
+    <style name="Theme.PlusTimer.Dark.Base" parent="@style/Theme.AppCompat.NoActionBar">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorAccent">@color/accent</item>
+
+        <item name="android:textColor">?android:textColorPrimary</item>
+
+        <item name="android:windowBackground">@color/background_material_dark</item>
+
+        <item name="actionModeBackground">?colorPrimary</item>
+
+        <item name="android:buttonBarButtonStyle">@style/ButtonBarButtonStyle
+        </item>
+
+        <item name="windowActionModeOverlay">true</item>
+    </style>
 
     <style name="ButtonBarButtonStyle">
         <item name="android:minWidth">64dp</item>
