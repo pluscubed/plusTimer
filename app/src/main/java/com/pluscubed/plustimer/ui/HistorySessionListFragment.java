@@ -3,12 +3,14 @@ package com.pluscubed.plustimer.ui;
 import android.app.ListFragment;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
@@ -25,17 +27,23 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.crashlytics.android.Crashlytics;
 import com.jjoe64.graphview.CustomLabelFormatter;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.GraphViewSeries;
 import com.jjoe64.graphview.LineGraphView;
+import com.pluscubed.plustimer.BuildConfig;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
 import com.pluscubed.plustimer.utils.Util;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -270,12 +278,61 @@ public class HistorySessionListFragment extends ListFragment {
                         case 1000:
                             lineColor = Color.YELLOW;
                     }
-                    bestAverageGraphViewSeries.add(new GraphViewSeries(
-                            String.format(getString(R.string.bao),
-                                    bestAverageMatrix.keyAt(i)),
-                            new GraphViewSeries.GraphViewSeriesStyle(lineColor,
-                                    Util.convertDpToPx(getActivity(), 2)),
-                            bestTimesDataArray));
+                    try {
+                        GraphViewSeries averageSeries = new GraphViewSeries(
+                                String.format(getString(R.string.bao),bestAverageMatrix.keyAt(i)),
+                                new GraphViewSeries.GraphViewSeriesStyle(lineColor,Util.convertDpToPx(getActivity(), 2)),
+                                bestTimesDataArray);
+                        bestAverageGraphViewSeries.add(averageSeries);
+                    } catch (final IllegalArgumentException e) {
+                        //TODO: Remove once History bug fixed
+                        if (BuildConfig.USE_CRASHLYTICS) Crashlytics.logException(e);
+                        new MaterialDialog.Builder(getActivity())
+                                .content("Error: " + e.toString())
+                                .positiveText("Send error report to developer")
+                                .negativeText("Ignore")
+                                .callback(new MaterialDialog.Callback() {
+                                    @Override
+                                    public void onNegative(MaterialDialog materialDialog) {
+
+                                    }
+
+                                    @Override
+                                    public void onPositive(MaterialDialog materialDialog) {
+                                        BufferedReader r = null;
+                                        StringBuilder total = new StringBuilder("Bug Report: ").append(Log.getStackTraceString(e));
+                                        for (PuzzleType p : PuzzleType.values()) {
+                                            try {
+                                                total.append("\n\n\n").append(p.name());
+                                                InputStream in = getActivity().openFileInput(p.name() + ".json");
+                                                r = new BufferedReader(new InputStreamReader(in));
+                                                String line;
+                                                while ((line = r.readLine()) != null) {
+                                                    total.append(line);
+                                                }
+                                            } catch (IOException e) {
+                                                e.printStackTrace();
+                                            } finally {
+                                                if (r != null) {
+                                                    try {
+                                                        r.close();
+                                                    } catch (IOException e) {
+                                                        e.printStackTrace();
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        Intent intent = new Intent(Intent.ACTION_SENDTO,
+                                                Uri.fromParts(
+                                                        "mailto", "plusCubed@gmail.com", null));
+                                        intent.putExtra(Intent.EXTRA_TEXT, total.toString());
+                                        intent.putExtra(Intent.EXTRA_SUBJECT, "plusTimer Bug Report");
+                                        startActivity(Intent.createChooser(intent, "Send email using..."));
+                                    }
+                                }).show();
+                        mGraph.setVisibility(View.GONE);
+                        return;
+                    }
                 }
             }
 
@@ -298,11 +355,61 @@ public class HistorySessionListFragment extends ListFragment {
                         sessionTimestamps.get(bestSolvesTimes.keyAt(i)),
                         bestSolvesTimes.valueAt(i));
             }
-            GraphViewSeries bestTimesSeries = new GraphViewSeries(getString(R
-                    .string.best_times),
-                    new GraphViewSeries.GraphViewSeriesStyle(Color.BLUE,
-                            Util.convertDpToPx(getActivity(), 2)),
-                    bestTimesDataArray);
+
+            GraphViewSeries bestTimesSeries=null;
+            try {
+                 bestTimesSeries= new GraphViewSeries(getString(R.string.best_times),
+                        new GraphViewSeries.GraphViewSeriesStyle(Color.BLUE,Util.convertDpToPx(getActivity(), 2)),
+                        bestTimesDataArray);
+            }catch (final IllegalArgumentException e) {
+                //TODO: Remove once History bug fixed
+                if (BuildConfig.USE_CRASHLYTICS) Crashlytics.logException(e);
+                new MaterialDialog.Builder(getActivity())
+                        .content("Error: " + e.toString())
+                        .positiveText("Send error report to developer")
+                        .negativeText("Ignore")
+                        .callback(new MaterialDialog.Callback() {
+                            @Override
+                            public void onNegative(MaterialDialog materialDialog) {
+
+                            }
+
+                            @Override
+                            public void onPositive(MaterialDialog materialDialog) {
+                                BufferedReader r = null;
+                                StringBuilder total = new StringBuilder("Bug Report: ").append(Log.getStackTraceString(e));
+                                for (PuzzleType p : PuzzleType.values()) {
+                                    try {
+                                        total.append("\n\n\n").append(p.name());
+                                        InputStream in = getActivity().openFileInput(p.name() + ".json");
+                                        r = new BufferedReader(new InputStreamReader(in));
+                                        String line;
+                                        while ((line = r.readLine()) != null) {
+                                            total.append(line);
+                                        }
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    } finally {
+                                        if (r != null) {
+                                            try {
+                                                r.close();
+                                            } catch (IOException e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    }
+                                }
+                                Intent intent = new Intent(Intent.ACTION_SENDTO,
+                                        Uri.fromParts(
+                                                "mailto", "plusCubed@gmail.com", null));
+                                intent.putExtra(Intent.EXTRA_TEXT, total.toString());
+                                intent.putExtra(Intent.EXTRA_SUBJECT, "plusTimer Bug Report");
+                                startActivity(Intent.createChooser(intent, "Send email using..."));
+                            }
+                        }).show();
+                mGraph.setVisibility(View.GONE);
+                return;
+            }
 
             boolean averageMoreThanOne = false;
             for (int i = 0; i < bestAverageMatrix.size(); i++) {
