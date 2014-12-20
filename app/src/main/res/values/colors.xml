@@ -5,7 +5,9 @@
     <item name="activated" type="color">#4c000000</item>
     <item name="accent" type="color">#4d73ff</item>
 
-    <color name="selector_dark">#20ffffff</color>
-    <color name="selector_light">#20000000</color>
+    <color name="selector_dark" type="color">#20ffffff</color>
+    <color name="selector_light" type="color">#20000000</color>
 
+    <color name="list_divider_dark" type="color">#0cffffff</color>
+    <color name="list_divider_light" type="color">#0c000000</color>
 </resources>
