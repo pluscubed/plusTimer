@@ -1,6 +1,6 @@
 buildscript {
     repositories {
-        maven { url 'https://maven.fabric.io/repo' }
+        maven { url 'https://maven.fabric.io/public' }
     }
 
     dependencies {
@@ -11,7 +11,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 
 repositories {
-    maven { url 'https://maven.fabric.io/repo' }
+    maven { url 'https://maven.fabric.io/public' }
 }
 
 task syncTask(type: Sync) {
@@ -27,8 +27,8 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 21
-        versionCode 14
-        versionName '0.2.0-Beta2'
+        versionCode 15
+        versionName '0.2.0-Beta3'
     }
 
     if (project.hasProperty("RELEASE_STORE_FILE")) {
