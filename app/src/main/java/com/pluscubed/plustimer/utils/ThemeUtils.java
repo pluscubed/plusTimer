@@ -26,7 +26,6 @@ public class ThemeUtils {
     }
 
     public static boolean isTrueBlack(Context context) {
-        if (!isDarkMode(context)) return false;
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         return prefs.getString(SettingsActivity.PREF_THEME_LIST, "0").equals("2");
     }
@@ -48,19 +47,17 @@ public class ThemeUtils {
 
     public int getCurrent(boolean hasNavDrawer) {
         if (hasNavDrawer) {
-            /*if (trueBlack) {
-                return R.style.Theme_CabinetTrueBlack_WithNavDrawer;
-            } else*/
-            if (darkMode) {
+            if (trueBlack) {
+                return R.style.Theme_PlusTimer_Black_WithNavDrawer;
+            } else if (darkMode) {
                 return R.style.Theme_PlusTimer_Dark_WithNavDrawer;
             } else {
                 return R.style.Theme_PlusTimer_WithNavDrawer;
             }
         } else {
-            /*if (trueBlack) {
-                return R.style.Theme_CabinetTrueBlack;
-            } else*/
-            if (darkMode) {
+            if (trueBlack) {
+                return R.style.Theme_PlusTimer_Black;
+            } else if (darkMode) {
                 return R.style.Theme_PlusTimer_Dark;
             } else {
                 return R.style.Theme_PlusTimer;
