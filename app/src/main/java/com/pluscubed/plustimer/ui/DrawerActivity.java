@@ -18,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.pluscubed.plustimer.R;
+import com.pluscubed.plustimer.utils.ThemeUtils;
 
 /**
  * Base Activity with the Navigation Drawer
@@ -112,8 +113,9 @@ public abstract class DrawerActivity extends ThemableActivity {
                 .activity_drawer_drawerlayout);
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, Gravity.START);
         Resources resources = getResources();
-        mDrawerLayout.setStatusBarBackgroundColor(resources.getColor(R
-                .color.primary_dark));
+        if (!ThemeUtils.isTrueBlack(this)) {
+            mDrawerLayout.setStatusBarBackgroundColor(resources.getColor(R.color.primary_dark));
+        }
         mDrawerLayout.setDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
             public void onDrawerSlide(View drawerView, float slideOffset) {
