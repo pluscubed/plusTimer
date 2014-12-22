@@ -177,7 +177,7 @@ public abstract class DrawerActivity extends ThemableActivity {
             final int itemId = NAVDRAWER_ITEMS[i];
             if (itemId == NAVDRAWER_ITEM_SEPARATOR) {
                 mDrawerListLinearLayout.addView(getLayoutInflater().inflate(R
-                                .layout.list_item_drawer_separator,
+                                .layout.list_item_separator,
                         mDrawerListLinearLayout, false));
             } else {
                 TextView v = (TextView) getLayoutInflater().inflate(R.layout
