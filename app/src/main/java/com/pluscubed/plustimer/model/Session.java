@@ -225,7 +225,7 @@ public class Session {
                            boolean milliseconds, boolean sign) {
         StringBuilder s = new StringBuilder();
         if (displaySolves) {
-            s.append(puzzleTypeName).append("\n\n");
+            s.append(PuzzleType.valueOf(puzzleTypeName).getUiName(context)).append("\n\n");
         }
         s.append(context.getString(R.string.number_solves)).append
                 (getNumberOfSolves());
