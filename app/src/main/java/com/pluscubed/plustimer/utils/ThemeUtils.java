@@ -14,6 +14,7 @@ public class ThemeUtils {
     private Context mContext;
     private boolean darkMode;
     private boolean trueBlack;
+
     public ThemeUtils(Activity context) {
         mContext = context;
         isChanged(); // invalidate stored booleans

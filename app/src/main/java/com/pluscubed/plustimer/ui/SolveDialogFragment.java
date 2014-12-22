@@ -143,8 +143,10 @@ public class SolveDialogFragment extends DialogFragment {
                 TextView textView = (TextView) convertView.findViewById
                         (android.R.id.text1);
                 textView.setText(getItem(position));
-                ImageView triangle = (ImageView) convertView.findViewById(R.id.spinner_item_imageview);
-                triangle.setColorFilter(Color.BLACK);
+                if (!ThemeUtils.isDarkMode(getActivity()) && !ThemeUtils.isTrueBlack(getActivity())) {
+                    ImageView triangle = (ImageView) convertView.findViewById(R.id.spinner_item_imageview);
+                    triangle.setColorFilter(Color.BLACK);
+                }
                 return convertView;
             }
 
@@ -152,9 +154,14 @@ public class SolveDialogFragment extends DialogFragment {
             public View getDropDownView(int position, View convertView,
                                         ViewGroup parent) {
                 View v = super.getDropDownView(position, convertView, parent);
+                int textColor;
+                if (ThemeUtils.isDarkMode(getActivity()) || ThemeUtils.isTrueBlack(getActivity())) {
+                    textColor = R.color.list_dropdown_color_dark;
+                } else {
+                    textColor = R.color.list_dropdown_color_light;
+                }
                 ((TextView) v.findViewById(android.R.id.text1)).setTextColor
-                        (getResources().getColorStateList(R.color
-                                .list_dropdown_color_light));
+                        (getResources().getColorStateList(textColor));
                 return v;
             }
         };

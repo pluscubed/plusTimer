@@ -280,8 +280,8 @@ public class HistorySessionListFragment extends ListFragment {
                     }
                     try {
                         GraphViewSeries averageSeries = new GraphViewSeries(
-                                String.format(getString(R.string.bao),bestAverageMatrix.keyAt(i)),
-                                new GraphViewSeries.GraphViewSeriesStyle(lineColor,Util.convertDpToPx(getActivity(), 2)),
+                                String.format(getString(R.string.bao), bestAverageMatrix.keyAt(i)),
+                                new GraphViewSeries.GraphViewSeriesStyle(lineColor, Util.convertDpToPx(getActivity(), 2)),
                                 bestTimesDataArray);
                         bestAverageGraphViewSeries.add(averageSeries);
                     } catch (final IllegalArgumentException e) {
@@ -356,12 +356,12 @@ public class HistorySessionListFragment extends ListFragment {
                         bestSolvesTimes.valueAt(i));
             }
 
-            GraphViewSeries bestTimesSeries=null;
+            GraphViewSeries bestTimesSeries = null;
             try {
-                 bestTimesSeries= new GraphViewSeries(getString(R.string.best_times),
-                        new GraphViewSeries.GraphViewSeriesStyle(Color.BLUE,Util.convertDpToPx(getActivity(), 2)),
+                bestTimesSeries = new GraphViewSeries(getString(R.string.best_times),
+                        new GraphViewSeries.GraphViewSeriesStyle(Color.BLUE, Util.convertDpToPx(getActivity(), 2)),
                         bestTimesDataArray);
-            }catch (final IllegalArgumentException e) {
+            } catch (final IllegalArgumentException e) {
                 //TODO: Remove once History bug fixed
                 if (BuildConfig.USE_CRASHLYTICS) Crashlytics.logException(e);
                 new MaterialDialog.Builder(getActivity())

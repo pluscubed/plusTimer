@@ -29,7 +29,7 @@
         <item name="android:colorPrimaryDark">@color/primary_dark</item>
         <item name="android:colorAccent">@color/accent</item>
     </style>
-    
+
     <style name="EdgeEffectThemeOverlayDark" parent="ThemeOverlay.AppCompat.Dark">
         <item name="android:colorEdgeEffect">@color/selector_dark</item>
     </style>
