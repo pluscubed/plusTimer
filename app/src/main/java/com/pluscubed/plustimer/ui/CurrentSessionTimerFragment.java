@@ -859,7 +859,7 @@ public class CurrentSessionTimerFragment extends Fragment {
                         try {
                             CreateDialogCallback callback =
                                     (CreateDialogCallback) getActivity();
-                            callback.createSolveDialog(null, 0, getPosition());
+                            callback.createSolveDisplayDialog(null, 0, getPosition());
                         } catch (ClassCastException e) {
                             throw new ClassCastException(getActivity()
                                     .toString() + " must implement " +

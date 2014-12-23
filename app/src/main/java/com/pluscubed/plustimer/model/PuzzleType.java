@@ -59,6 +59,7 @@ public enum PuzzleType {
     static {
         mObservers = new ArrayList<>();
     }
+
     public final String scramblerSpec;
     public final boolean official;
     private final String currentSessionFileName;

@@ -5,6 +5,8 @@ package com.pluscubed.plustimer.ui;
  */
 public interface CreateDialogCallback {
 
-    void createSolveDialog(String displayName, int sessionIndex,
-                           int solveIndex);
+    void createSolveDisplayDialog(String displayName, int sessionIndex,
+                                  int solveIndex);
+
+    void createSolveAddDialog(String displayName, int sessionIndex);
 }

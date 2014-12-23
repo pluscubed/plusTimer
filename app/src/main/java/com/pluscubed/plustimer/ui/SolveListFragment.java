@@ -169,6 +169,15 @@ public class SolveListFragment extends Fragment {
                         (mSessionIndex, getActivity());
                 getActivity().finish();
                 return true;
+            case R.id.menu_solvelist_add_menuitem:
+                try {
+                    CreateDialogCallback callback = (CreateDialogCallback) getActivity();
+                    callback.createSolveAddDialog(mPuzzleTypeName,
+                            mSessionIndex);
+                } catch (ClassCastException e) {
+                    throw new ClassCastException(getActivity().toString()
+                            + " must implement CreateDialogCallback");
+                }
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -185,15 +194,6 @@ public class SolveListFragment extends Fragment {
     public void finishActionMode() {
         if (mActionMode != null) {
             mActionMode.finish();
-        }
-    }
-
-    @Override
-    public void onPrepareOptionsMenu(Menu menu) {
-        super.onPrepareOptionsMenu(menu);
-        //TODO: Delete once dialog editing is fully implemented
-        if (menu.findItem(R.id.menu_solvelist_add_menuitem) != null) {
-            menu.findItem(R.id.menu_solvelist_add_menuitem).setVisible(false);
         }
     }
 
@@ -287,7 +287,7 @@ public class SolveListFragment extends Fragment {
                 try {
                     CreateDialogCallback callback = (CreateDialogCallback)
                             getActivity();
-                    callback.createSolveDialog(mPuzzleTypeName,
+                    callback.createSolveDisplayDialog(mPuzzleTypeName,
                             mSessionIndex, mSession.getPosition((Solve)
                                     mListView.getItemAtPosition(position)));
                 } catch (ClassCastException e) {
