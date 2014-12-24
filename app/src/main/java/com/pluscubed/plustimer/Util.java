@@ -23,6 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -55,23 +56,33 @@ public class Util {
     public static void saveSessionListToFile(Context context,
                                              String fileName,
                                              List<Session> sessionList) {
-        Writer writer = null;
-        try {
-            OutputStream out = context.openFileOutput(fileName,
-                    Context.MODE_PRIVATE);
-            writer = new OutputStreamWriter(out);
-            gson.toJson(sessionList, SESSION_LIST_TYPE, writer);
-        } catch (FileNotFoundException e) {
-            //File not found: create new file
-        } finally {
-            if (writer != null) {
-                try {
-                    writer.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
+        if (sessionList.size() >= 1) {
+            Writer writer = null;
+            try {
+                OutputStream out = context.openFileOutput(fileName,
+                        Context.MODE_PRIVATE);
+                writer = new OutputStreamWriter(out);
+                gson.toJson(sessionList, SESSION_LIST_TYPE, writer);
+            } catch (FileNotFoundException e) {
+                //File not found: create new file
+            } finally {
+                if (writer != null) {
+                    try {
+                        writer.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
+    }
+
+    /**
+     * Get list and save new list
+     */
+    public static void updateData(Context context, String fileName) {
+        List<Session> historySessions = getSessionListFromFile(context, fileName);
+        saveSessionListToFile(context, fileName, historySessions);
     }
 
     /**
@@ -80,8 +91,7 @@ public class Util {
     public static void updateData(Context context, String fileName, Gson oldGson) {
         Gson current = gson;
         gson = oldGson;
-        List<Session> historySessions = getSessionListFromFile(context, fileName);
-        if (historySessions.size() >= 1) saveSessionListToFile(context, fileName, historySessions);
+        updateData(context, fileName);
         gson = current;
     }
 
@@ -95,8 +105,20 @@ public class Util {
         try {
             InputStream in = context.openFileInput(fileName);
             reader = new BufferedReader(new InputStreamReader(in));
-            List<Session> fileSessions = gson.fromJson(reader,
-                    SESSION_LIST_TYPE);
+            List<Session> fileSessions = gson.fromJson(reader, SESSION_LIST_TYPE);
+            //Sort in chronological order
+            Collections.sort(fileSessions, new Comparator<Session>() {
+                @Override
+                public int compare(Session lhs, Session rhs) {
+                    if (lhs.getTimestamp() > rhs.getTimestamp()) {
+                        return 1;
+                    } else if (lhs.getTimestamp() < rhs.getTimestamp()) {
+                        return -1;
+                    } else {
+                        return 0;
+                    }
+                }
+            });
             if (fileSessions != null) {
                 return fileSessions;
             }

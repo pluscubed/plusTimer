@@ -59,6 +59,7 @@ public enum PuzzleType {
     static {
         mObservers = new ArrayList<>();
     }
+
     public final String scramblerSpec;
     public final boolean official;
     private final String currentSessionFileName;
@@ -149,6 +150,11 @@ public enum PuzzleType {
 
             //AFTER UPDATING APP////////////
             int savedVersionCode = defaultSharedPreferences.getInt(Util.PREF_VERSION_CODE, 10);
+
+            if (savedVersionCode <= 15) {
+                Util.updateData(context, historyFileName);
+            }
+
             if (savedVersionCode <= 13) {
                 //Version <=13: ScrambleAndSvg json structure changes
                 Gson gson = new GsonBuilder()
