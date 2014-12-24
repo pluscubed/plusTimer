@@ -10,11 +10,12 @@
         android:title="@string/share"
         app:showAsAction="ifRoom" />
 
-    <item
+    <!--TODO: Enable adding after fixing History issue-->
+    <!--<item
         android:id="@id/menu_solvelist_add_menuitem"
         android:icon="@drawable/ic_add_white"
         android:title="@string/manual_add_solve"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="ifRoom" />-->
 
 
     <item
