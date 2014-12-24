@@ -216,8 +216,9 @@ public class Session {
     }
 
     public void deleteSolve(Solve i) {
-        notifySolveDeleted(mSolves.indexOf(i));
+        int position = mSolves.indexOf(i);
         mSolves.remove(i);
+        notifySolveDeleted(position);
     }
 
     public String toString(Context context, String puzzleTypeName,

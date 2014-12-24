@@ -107,14 +107,14 @@ public enum PuzzleType {
     }
 
     public static void setCurrent(PuzzleType type, Context context) {
-        if (type != sCurrentPuzzleType) {
-            sCurrentPuzzleType = type;
-            notifyPuzzleTypeChanged();
-        }
         SharedPreferences defaultSharedPreferences = PreferenceManager
                 .getDefaultSharedPreferences(context);
         defaultSharedPreferences.edit().putString(PREF_CURRENT_PUZZLETYPE,
                 sCurrentPuzzleType.name()).apply();
+        if (type != sCurrentPuzzleType) {
+            sCurrentPuzzleType = type;
+            notifyPuzzleTypeChanged();
+        }
     }
 
     public static List<PuzzleType> valuesExcludeDisabled() {
