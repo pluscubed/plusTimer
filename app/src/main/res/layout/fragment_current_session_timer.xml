@@ -127,6 +127,7 @@
         android:layout_height="match_parent"
         android:layout_margin="8dp"
         android:contentDescription="@string/scramble_image"
+        android:elevation="4dp"
         android:visibility="gone" />
 
 
