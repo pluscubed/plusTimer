@@ -1,3 +1,4 @@
 <resources>
     <dimen name="navigation_drawer_margin">64dp</dimen>
+    <dimen name="navigation_drawer_limit">400dp</dimen>
 </resources>

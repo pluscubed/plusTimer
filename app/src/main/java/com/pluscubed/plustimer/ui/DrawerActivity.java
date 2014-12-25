@@ -142,12 +142,13 @@ public abstract class DrawerActivity extends ThemableActivity {
         mDrawerScrollView = (ScrollView) findViewById(R.id
                 .activity_drawer_drawer_scrollview);
         int actionBarSize = resources.getDimensionPixelSize(R.dimen
-                .abc_action_bar_default_height_material);
+                .navigation_drawer_margin);
         DisplayMetrics displayMetrics = resources.getDisplayMetrics();
-        int portraitWidth =
-                displayMetrics.widthPixels < displayMetrics.heightPixels ?
-                        displayMetrics.widthPixels : displayMetrics.heightPixels;
-        int navDrawerWidth = portraitWidth - actionBarSize;
+        int navDrawerWidthLimit = resources.getDimensionPixelSize(R.dimen.navigation_drawer_limit);
+        int navDrawerWidth = displayMetrics.widthPixels - actionBarSize;
+        if (navDrawerWidth > navDrawerWidthLimit) {
+            navDrawerWidth = navDrawerWidthLimit;
+        }
         mDrawerScrollView.setLayoutParams(new DrawerLayout.LayoutParams(
                         navDrawerWidth,
                         ViewGroup.LayoutParams.MATCH_PARENT,
