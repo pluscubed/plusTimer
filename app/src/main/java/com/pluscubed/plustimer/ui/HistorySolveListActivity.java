@@ -5,7 +5,6 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,7 +16,7 @@ import com.pluscubed.plustimer.model.PuzzleType;
  * History SolveList (started onListItemClick HistorySessionListFragment)
  * activity
  */
-public class HistorySolveListActivity extends ActionBarActivity
+public class HistorySolveListActivity extends ThemableActivity
         implements CreateDialogCallback {
 
     public static final String EXTRA_HISTORY_SESSION_POSITION = "com" +

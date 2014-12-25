@@ -8,7 +8,7 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.pluscubed.plustimer.R;
-import com.pluscubed.plustimer.Util;
+import com.pluscubed.plustimer.utils.Util;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;

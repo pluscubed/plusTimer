@@ -5,6 +5,7 @@ import android.animation.ObjectAnimator;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PictureDrawable;
@@ -32,10 +33,10 @@ import android.widget.TextView;
 import com.caverock.androidsvg.SVG;
 import com.caverock.androidsvg.SVGParseException;
 import com.pluscubed.plustimer.R;
-import com.pluscubed.plustimer.Util;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
+import com.pluscubed.plustimer.utils.Util;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -464,8 +465,15 @@ public class CurrentSessionTimerFragment extends Fragment {
         mInspectionStartTimestamp = 0;
         mTimingStartTimestamp = 0;
         mInspecting = false;
-        setTextColor(getResources().getColor(R.color
-                .primary_text_default_material_light));
+        setTextColorPrimary();
+    }
+
+    private void setTextColorPrimary() {
+        int[] textColorAttr = new int[]{android.R.attr.textColor};
+        TypedArray a = getActivity().obtainStyledAttributes(new TypedValue().data, textColorAttr);
+        int color = a.getColor(0, -1);
+        a.recycle();
+        setTextColor(color);
     }
 
     public void setTextColor(int color) {
@@ -728,8 +736,7 @@ public class CurrentSessionTimerFragment extends Fragment {
         mHoldTiming = false;
         mHoldTimerStartTimestamp = 0;
         mUiHandler.removeCallbacks(mHoldTimerRunnable);
-        setTextColor(getResources().getColor(R.color
-                .primary_text_default_material_light));
+        setTextColorPrimary();
     }
 
     /**

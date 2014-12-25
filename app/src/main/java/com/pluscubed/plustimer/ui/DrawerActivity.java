@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
@@ -20,11 +19,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.pluscubed.plustimer.R;
+import com.pluscubed.plustimer.utils.ThemeUtils;
 
 /**
  * Base Activity with the Navigation Drawer
  */
-public abstract class DrawerActivity extends ActionBarActivity {
+public abstract class DrawerActivity extends ThemableActivity {
 
     protected static final int NAVDRAWER_ITEM_CURRENT_SESSION = 0;
     protected static final int NAVDRAWER_ITEM_HISTORY = 1;
@@ -91,6 +91,11 @@ public abstract class DrawerActivity extends ActionBarActivity {
     protected void onNavDrawerClosed() {
     }
 
+    @Override
+    protected boolean hasNavDrawer() {
+        return true;
+    }
+
     protected Toolbar getActionBarToolbar() {
         if (mActionBarToolbar == null) {
             mActionBarToolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
@@ -109,8 +114,9 @@ public abstract class DrawerActivity extends ActionBarActivity {
                 .activity_drawer_drawerlayout);
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, Gravity.START);
         Resources resources = getResources();
-        mDrawerLayout.setStatusBarBackgroundColor(resources.getColor(R
-                .color.primary_dark));
+        if (!ThemeUtils.isTrueBlack(this)) {
+            mDrawerLayout.setStatusBarBackgroundColor(resources.getColor(R.color.primary_dark));
+        }
         mDrawerLayout.setDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
             public void onDrawerSlide(View drawerView, float slideOffset) {
@@ -172,7 +178,7 @@ public abstract class DrawerActivity extends ActionBarActivity {
             final int itemId = NAVDRAWER_ITEMS[i];
             if (itemId == NAVDRAWER_ITEM_SEPARATOR) {
                 mDrawerListLinearLayout.addView(getLayoutInflater().inflate(R
-                                .layout.list_item_drawer_separator,
+                                .layout.list_item_separator,
                         mDrawerListLinearLayout, false));
             } else {
                 TextView v = (TextView) getLayoutInflater().inflate(R.layout

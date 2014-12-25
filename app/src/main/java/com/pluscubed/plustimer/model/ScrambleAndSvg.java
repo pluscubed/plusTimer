@@ -1,6 +1,6 @@
 package com.pluscubed.plustimer.model;
 
-import com.pluscubed.plustimer.Util;
+import com.pluscubed.plustimer.utils.Util;
 
 /**
  * Scramble and Svg
