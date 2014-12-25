@@ -10,6 +10,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -136,13 +137,11 @@ public abstract class DrawerActivity extends ActionBarActivity {
                 .activity_drawer_drawer_scrollview);
         int actionBarSize = resources.getDimensionPixelSize(R.dimen
                 .abc_action_bar_default_height_material);
-        int navDrawerWidth = resources.getDisplayMetrics().widthPixels -
-                actionBarSize;
-        int limit = 5 * resources.getDimensionPixelSize(R.dimen
-                .navigation_drawer_margin);
-        if (navDrawerWidth > limit) {
-            navDrawerWidth = limit;
-        }
+        DisplayMetrics displayMetrics = resources.getDisplayMetrics();
+        int portraitWidth =
+                displayMetrics.widthPixels < displayMetrics.heightPixels ?
+                        displayMetrics.widthPixels : displayMetrics.heightPixels;
+        int navDrawerWidth = portraitWidth - actionBarSize;
         mDrawerScrollView.setLayoutParams(new DrawerLayout.LayoutParams(
                         navDrawerWidth,
                         ViewGroup.LayoutParams.MATCH_PARENT,
