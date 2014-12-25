@@ -28,14 +28,26 @@ public class HistorySolveListActivity extends ThemableActivity
             "HISTORY_MODIFY_DIALOG";
 
     @Override
-    public void createSolveDialog(String puzzleTypeName, int sessionIndex,
-                                  int solveIndex) {
+    public void createSolveDisplayDialog(String puzzleTypeName, int sessionIndex,
+                                         int solveIndex) {
         DialogFragment dialog = (DialogFragment) getFragmentManager()
                 .findFragmentByTag(HISTORY_DIALOG_SOLVE_TAG);
         if (dialog == null) {
-            SolveDialogFragment d = SolveDialogFragment.newInstance
+            SolveDialogFragment d = SolveDialogFragment.newInstanceDisplay
                     (PuzzleType.valueOf(puzzleTypeName).toString(),
                             sessionIndex, solveIndex);
+            d.show(getFragmentManager(), HISTORY_DIALOG_SOLVE_TAG);
+        }
+    }
+
+    @Override
+    public void createSolveAddDialog(String displayName, int sessionIndex) {
+        DialogFragment dialog = (DialogFragment) getFragmentManager()
+                .findFragmentByTag(HISTORY_DIALOG_SOLVE_TAG);
+        if (dialog == null) {
+            SolveDialogFragment d = SolveDialogFragment.newInstanceAdd
+                    (PuzzleType.valueOf(displayName).toString(),
+                            sessionIndex);
             d.show(getFragmentManager(), HISTORY_DIALOG_SOLVE_TAG);
         }
     }
