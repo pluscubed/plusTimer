@@ -4,7 +4,6 @@ package com.pluscubed.plustimer.ui;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.os.Bundle;
-import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.MultiSelectListPreference;
@@ -85,22 +84,6 @@ public class SettingsActivity extends ThemableActivity {
         public void onCreate(Bundle paramBundle) {
             super.onCreate(paramBundle);
             addPreferencesFromResource(R.xml.preferences);
-
-            CheckBoxPreference inspection = (CheckBoxPreference) findPreference(
-                    PREF_INSPECTION_CHECKBOX);
-            inspection.setOnPreferenceChangeListener(new Preference
-                    .OnPreferenceChangeListener() {
-                @Override
-                public boolean onPreferenceChange(Preference preference,
-                                                  Object newValue) {
-                    if (newValue.toString().equals("true")) {
-                        CheckBoxPreference hold = (CheckBoxPreference)
-                                findPreference(PREF_HOLDTOSTART_CHECKBOX);
-                        hold.setChecked(true);
-                    }
-                    return true;
-                }
-            });
 
             EditTextPreference size = (EditTextPreference) findPreference(
                     PREF_TIME_TEXT_SIZE_EDITTEXT);

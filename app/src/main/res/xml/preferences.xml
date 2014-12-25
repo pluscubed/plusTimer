@@ -26,13 +26,11 @@
     <PreferenceCategory android:title="@string/pref_timer_category_title">
         <CheckBoxPreference
             android:defaultValue="true"
-            android:disableDependentsState="true"
             android:key="pref_inspection_checkbox"
             android:summary="@string/pref_inspection_summary"
             android:title="@string/pref_inspection_title" />
         <CheckBoxPreference
             android:defaultValue="true"
-            android:dependency="pref_inspection_checkbox"
             android:key="pref_holdtostart_checkbox"
             android:summary="@string/pref_holdtostart_summary"
             android:title="@string/pref_holdtostart_title" />

@@ -624,13 +624,13 @@ public class CurrentSessionTimerFragment extends Fragment {
                             mRetainedFragment.postSetScrambleViewsToCurrent();
                             return false;
                         }
-                        if ((mInspecting) || (!mInspectionEnabled &&
-                                !scrambling &&
-                                mHoldToStartEnabled)) {
-                            //If hold to start is on or if inspection was
-                            // started,
-                            // start the hold timer
+                        if (mHoldToStartEnabled &&
+                                ((!mInspectionEnabled && !scrambling) || mInspecting)) {
+                            //If hold to start is on and/or inspection is on, start the hold timer
                             startHoldTimer();
+                            return true;
+                        } else if (mInspecting) {
+                            //If inspecting and hold to start is off, start regular timer
                             return true;
                         }
                         return !scrambling;
@@ -641,20 +641,18 @@ public class CurrentSessionTimerFragment extends Fragment {
                             //If inspection is on and we're not inspecting
                             startInspection();
                         } else if (mHoldToStartEnabled) {
-                            //Inspecting is on or hold to start is on
-                            if (mHoldTiming && (System.nanoTime() -
-                                    mHoldTimerStartTimestamp >=
+                            //Hold to start is on (may be inspecting)
+                            if (mHoldTiming &&
+                                    (System.nanoTime() - mHoldTimerStartTimestamp >=
                                     HOLD_TIME)) {
                                 stopInspection();
                                 stopHoldTimer();
                                 //User held long enough for timer to turn
-                                // green and lifted: start
-                                // timing
+                                // green and lifted: start timing
                                 startTiming();
                                 if (!mInspectionEnabled) {
-                                    //If hold timer was started not in
-                                    // inspection,
-                                    // generate next scramble
+                                    //If hold timer was started but not in
+                                    // inspection, generate next scramble
                                     mRetainedFragment.generateNextScramble();
                                 }
                             } else {
@@ -663,8 +661,10 @@ public class CurrentSessionTimerFragment extends Fragment {
                                 stopHoldTimer();
                             }
                         } else {
-                            //If inspection and hold to start are both off,
-                            // just start timing
+                            //Hold to start is off, just start timing
+                            if (mInspecting) {
+                                stopInspection();
+                            }
                             startTiming();
                             mRetainedFragment.generateNextScramble();
                         }
