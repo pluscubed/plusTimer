@@ -110,7 +110,7 @@ public enum PuzzleType {
         SharedPreferences defaultSharedPreferences = PreferenceManager
                 .getDefaultSharedPreferences(context);
         defaultSharedPreferences.edit().putString(PREF_CURRENT_PUZZLETYPE,
-                sCurrentPuzzleType.name()).apply();
+                type.name()).apply();
         if (type != sCurrentPuzzleType) {
             sCurrentPuzzleType = type;
             notifyPuzzleTypeChanged();
