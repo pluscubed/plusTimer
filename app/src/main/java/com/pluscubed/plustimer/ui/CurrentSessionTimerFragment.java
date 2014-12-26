@@ -115,6 +115,7 @@ public class CurrentSessionTimerFragment extends Fragment {
     private boolean mKeepScreenOn;
     private boolean mSignEnabled;
     private CurrentSessionTimerRetainedFragment mRetainedFragment;
+
     private TextView mTimerText;
     private TextView mTimerText2;
     private TextView mScrambleText;
@@ -122,9 +123,10 @@ public class CurrentSessionTimerFragment extends Fragment {
     private ImageView mScrambleImage;
     private TextView mStatsSolvesText;
     private TextView mStatsText;
-    private LinearLayout mPenaltyBarLinearLayout;
-    private Button mPenaltyDnfButton;
-    private Button mPenaltyPlusTwoButton;
+    private LinearLayout mLastBarLinearLayout;
+    private Button mLastDnfButton;
+    private Button mLastPlusTwoButton;
+
     private Handler mUiHandler;
     private boolean mHoldTiming;
     private long mHoldTimerStartTimestamp;
@@ -214,7 +216,8 @@ public class CurrentSessionTimerFragment extends Fragment {
         }
     };
     private LinearLayoutManager mTimeBarLayoutManager;
-    private AnimatorSet mPenaltyBarAnimationSet;
+    private AnimatorSet mLastBarAnimationSet;
+    private Button mLastDeleteButton;
 
     //Generate string with specified current averages and mean of current
     // session
@@ -542,14 +545,16 @@ public class CurrentSessionTimerFragment extends Fragment {
         mStatsSolvesText = (TextView) v.findViewById(R.id
                 .fragment_current_session_timer_stats_solves_number_textview);
 
-        mPenaltyBarLinearLayout = (LinearLayout) v.findViewById(R.id
-                .fragment_current_session_timer_penalty_linearlayout);
-        mPenaltyDnfButton = (Button) v.findViewById(R.id
-                .fragment_current_session_timer_penalty_dnf_button);
-        mPenaltyPlusTwoButton = (Button) v.findViewById(R.id
-                .fragment_current_session_timer_penalty_plustwo_button);
+        mLastBarLinearLayout = (LinearLayout) v.findViewById(R.id
+                .fragment_current_session_timer_last_linearlayout);
+        mLastDnfButton = (Button) v.findViewById(R.id
+                .fragment_current_session_timer_last_dnf_button);
+        mLastPlusTwoButton = (Button) v.findViewById(R.id
+                .fragment_current_session_timer_last_plustwo_button);
+        mLastDeleteButton = (Button) v.findViewById(R.id
+                .fragment_current_session_timer_last_delete_button);
 
-        mPenaltyDnfButton.setOnClickListener(new View.OnClickListener() {
+        mLastDnfButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 PuzzleType.getCurrent().getSession(PuzzleType
@@ -558,12 +563,20 @@ public class CurrentSessionTimerFragment extends Fragment {
             }
         });
 
-        mPenaltyPlusTwoButton.setOnClickListener(new View.OnClickListener() {
+        mLastPlusTwoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 PuzzleType.getCurrent().getSession(PuzzleType
                         .CURRENT_SESSION).getLastSolve().setPenalty(Solve
                         .Penalty.PLUSTWO);
+            }
+        });
+
+        mLastDeleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Session session = PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION);
+                session.deleteSolve(session.getLastSolve());
             }
         });
 
@@ -595,21 +608,21 @@ public class CurrentSessionTimerFragment extends Fragment {
                             // scramble/scramble image and time
                             PuzzleType.getCurrent().getSession(PuzzleType
                                     .CURRENT_SESSION).addSolve(s);
-                            if (mPenaltyBarAnimationSet == null) {
-                                ObjectAnimator enter = ObjectAnimator.ofFloat(mPenaltyBarLinearLayout, View.TRANSLATION_Y, 0f, -mPenaltyBarLinearLayout.getHeight());
-                                ObjectAnimator exit = ObjectAnimator.ofFloat(mPenaltyBarLinearLayout, View.TRANSLATION_Y, -mPenaltyBarLinearLayout.getHeight(), 0f);
-                                enter.setDuration(75);
-                                exit.setDuration(75);
+                            if (mLastBarAnimationSet == null) {
+                                ObjectAnimator enter = ObjectAnimator.ofFloat(mLastBarLinearLayout, View.TRANSLATION_Y, 0f, -mLastBarLinearLayout.getHeight());
+                                ObjectAnimator exit = ObjectAnimator.ofFloat(mLastBarLinearLayout, View.TRANSLATION_Y, -mLastBarLinearLayout.getHeight(), 0f);
+                                enter.setDuration(125);
+                                exit.setDuration(125);
                                 exit.setStartDelay(1500);
                                 enter.setInterpolator(new AccelerateInterpolator());
                                 exit.setInterpolator(new DecelerateInterpolator());
-                                mPenaltyBarAnimationSet = new AnimatorSet();
-                                mPenaltyBarAnimationSet.playSequentially(enter, exit);
+                                mLastBarAnimationSet = new AnimatorSet();
+                                mLastBarAnimationSet.playSequentially(enter, exit);
                             }
-                            if (mPenaltyBarAnimationSet.isStarted()) {
-                                mPenaltyBarAnimationSet.cancel();
+                            if (mLastBarAnimationSet.isStarted()) {
+                                mLastBarAnimationSet.cancel();
                             }
-                            mPenaltyBarAnimationSet.start();
+                            mLastBarAnimationSet.start();
 
                             resetTimer();
 

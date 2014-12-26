@@ -12,9 +12,10 @@
     <item name="fragment_current_session_timer_scramble_imageview" type="id" />
 
     <item name="fragment_current_session_timer_timeSecondary_textview" type="id" />
-    <item name="fragment_current_session_timer_penalty_plustwo_button" type="id" />
-    <item name="fragment_current_session_timer_penalty_dnf_button" type="id" />
-    <item name="fragment_current_session_timer_penalty_linearlayout" type="id" />
+    <item name="fragment_current_session_timer_last_plustwo_button" type="id" />
+    <item name="fragment_current_session_timer_last_dnf_button" type="id" />
+    <item name="fragment_current_session_timer_last_linearlayout" type="id" />
+    <item name="fragment_current_session_timer_last_delete_button" type="id" />
 
     <!--SolveDialog-->
     <item name="dialog_solve_timestamp_textview" type="id" />

@@ -81,7 +81,7 @@
         android:textSize="18sp" />
 
     <LinearLayout
-        android:id="@id/fragment_current_session_timer_penalty_linearlayout"
+        android:id="@id/fragment_current_session_timer_last_linearlayout"
         style="?android:buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="@dimen/button_bar_height"
@@ -91,7 +91,16 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@id/fragment_current_session_timer_penalty_dnf_button"
+            android:id="@id/fragment_current_session_timer_last_delete_button"
+            style="?android:buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/item_background_dark"
+            android:text="@string/delete" />
+
+        <Button
+            android:id="@id/fragment_current_session_timer_last_dnf_button"
             style="?android:buttonBarButtonStyle"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -101,7 +110,7 @@
             tools:ignore="HardcodedText" />
 
         <Button
-            android:id="@id/fragment_current_session_timer_penalty_plustwo_button"
+            android:id="@id/fragment_current_session_timer_last_plustwo_button"
             style="?android:buttonBarButtonStyle"
             android:layout_width="0dp"
             android:layout_height="match_parent"
