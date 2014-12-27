@@ -64,30 +64,37 @@ public class CurrentSessionTimerFragment extends Fragment {
         @Override
         public void onSolveAdded() {
             onSessionSolvesChanged();
+            SolveRecyclerAdapter adapter = (SolveRecyclerAdapter) mTimeBarRecycler.getAdapter();
+            adapter.updateSolvesList(-1, ObservedMode.ADD);
         }
 
         @Override
         public void onSolveChanged(int index) {
             onSessionSolvesChanged();
+            SolveRecyclerAdapter adapter = (SolveRecyclerAdapter) mTimeBarRecycler.getAdapter();
+            adapter.updateSolvesList(index, ObservedMode.SINGLE_CHANGE);
         }
 
         @Override
         public void onSolveRemoved(int index) {
             onSessionSolvesChanged();
+            SolveRecyclerAdapter adapter = (SolveRecyclerAdapter) mTimeBarRecycler.getAdapter();
+            adapter.updateSolvesList(index, ObservedMode.REMOVE);
         }
 
         @Override
         public void onReset() {
             onSessionSolvesChanged();
+            SolveRecyclerAdapter adapter = (SolveRecyclerAdapter) mTimeBarRecycler.getAdapter();
+            adapter.updateSolvesList(-1, ObservedMode.RESET);
         }
     };
-
     private final PuzzleType.Observer puzzleTypeObserver = new PuzzleType
             .Observer() {
         @Override
         public void onPuzzleTypeChanged() {
             //Update quick stats and hlistview
-            onSessionSolvesChanged();
+            onSessionSolvesUpdated();
 
             //Set timer text to ready, scramble text to scrambling
             mScrambleText.setText(R.string.scrambling);
@@ -105,7 +112,6 @@ public class CurrentSessionTimerFragment extends Fragment {
                     .registerObserver(sessionObserver);
         }
     };
-
     private boolean mHoldToStartEnabled;
     private boolean mInspectionEnabled;
     private boolean mTwoRowTimeEnabled;
@@ -115,7 +121,6 @@ public class CurrentSessionTimerFragment extends Fragment {
     private boolean mKeepScreenOn;
     private boolean mSignEnabled;
     private CurrentSessionTimerRetainedFragment mRetainedFragment;
-
     private TextView mTimerText;
     private TextView mTimerText2;
     private TextView mScrambleText;
@@ -126,7 +131,6 @@ public class CurrentSessionTimerFragment extends Fragment {
     private LinearLayout mLastBarLinearLayout;
     private Button mLastDnfButton;
     private Button mLastPlusTwoButton;
-
     private Handler mUiHandler;
     private boolean mHoldTiming;
     private long mHoldTimerStartTimestamp;
@@ -269,7 +273,6 @@ public class CurrentSessionTimerFragment extends Fragment {
         }
     }
 
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -305,7 +308,6 @@ public class CurrentSessionTimerFragment extends Fragment {
             mRetainedFragment.postSetScrambleViewsToCurrent();
         }
     }
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -361,21 +363,23 @@ public class CurrentSessionTimerFragment extends Fragment {
         PuzzleType.unregisterObserver(puzzleTypeObserver);
     }
 
-    public void onSessionSolvesChanged() {
+    public void onSessionSolvesUpdated() {
+        onSessionSolvesChanged();
+
+        //Update RecyclerView
+        SolveRecyclerAdapter adapter = (SolveRecyclerAdapter) mTimeBarRecycler.getAdapter();
+        adapter.updateSolvesList(-1, ObservedMode.UPDATE_ALL);
+    }
+
+    private void onSessionSolvesChanged() {
         //Update stats
         mStatsSolvesText.setText(getString(R.string.solves) + PuzzleType
                 .getCurrent().getSession(PuzzleType.CURRENT_SESSION)
                 .getNumberOfSolves());
         mStatsText.setText(buildStatsWithAveragesOf(getActivity(), 5, 12, 100));
 
-        //Update RecyclerView
-        SolveRecyclerAdapter adapter = (SolveRecyclerAdapter)
-                mTimeBarRecycler.getAdapter();
-        adapter.updateSolvesList();
-
         if (!mTiming && !mInspecting) setTimerTextToLastSolveTime();
     }
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -442,7 +446,6 @@ public class CurrentSessionTimerFragment extends Fragment {
             }
         }
     }
-
 
     public void showScrambleImage(boolean enable) {
         if (enable) {
@@ -657,7 +660,7 @@ public class CurrentSessionTimerFragment extends Fragment {
                             //Hold to start is on (may be inspecting)
                             if (mHoldTiming &&
                                     (System.nanoTime() - mHoldTimerStartTimestamp >=
-                                    HOLD_TIME)) {
+                                            HOLD_TIME)) {
                                 stopInspection();
                                 stopHoldTimer();
                                 //User held long enough for timer to turn
@@ -733,7 +736,7 @@ public class CurrentSessionTimerFragment extends Fragment {
             }
         });
 
-        onSessionSolvesChanged();
+        onSessionSolvesUpdated();
 
         return v;
     }
@@ -804,6 +807,10 @@ public class CurrentSessionTimerFragment extends Fragment {
         return mUiHandler;
     }
 
+    public enum ObservedMode {
+        ADD, REMOVE, RESET, SINGLE_CHANGE, UPDATE_ALL
+    }
+
     public interface ScrambleImageActionEnableCallback {
 
         void enableMenuItems(boolean enable);
@@ -818,7 +825,7 @@ public class CurrentSessionTimerFragment extends Fragment {
 
         public SolveRecyclerAdapter() {
             mBestAndWorstSolves = new Solve[2];
-            updateSolvesList();
+            updateSolvesList(-1, ObservedMode.UPDATE_ALL);
         }
 
         @Override
@@ -845,25 +852,35 @@ public class CurrentSessionTimerFragment extends Fragment {
             return mSolves.size();
         }
 
-        public void updateSolvesList() {
-            boolean scroll;
-            try {
-                scroll = mTimeBarLayoutManager
-                        .findLastCompletelyVisibleItemPosition() == mSolves
-                        .size() - 1;
-            } catch (NullPointerException e) {
-                //Not ready -> First start or rotation
-                scroll = true;
-            }
-
+        private void updateSolvesList(int position, ObservedMode mode) {
+            int oldSize = 0;
+            if (mSolves != null) oldSize = mSolves.size();
             mSolves = PuzzleType.getCurrent().getSession(PuzzleType
                     .CURRENT_SESSION).getSolves();
             mBestAndWorstSolves[0] = Util.getBestSolveOfList(mSolves);
             mBestAndWorstSolves[1] = Util.getWorstSolveOfList(mSolves);
-            notifyDataSetChanged();
 
-            if (scroll) {
-                mTimeBarLayoutManager.scrollToPosition(mSolves.size() - 1);
+            switch (mode) {
+                case UPDATE_ALL:
+                    notifyDataSetChanged();
+                    if (mSolves.size() >= 1)
+                        mTimeBarRecycler.smoothScrollToPosition(mSolves.size() - 1);
+                    break;
+                case ADD:
+                    //TODO: Smooth scroll so empty space for insertion opens up
+                    notifyItemInserted(mSolves.size() - 1);
+                    if (mSolves.size() >= 1)
+                        mTimeBarRecycler.smoothScrollToPosition(mSolves.size() - 1);
+                    break;
+                case REMOVE:
+                    notifyItemRemoved(position);
+                    break;
+                case SINGLE_CHANGE:
+                    notifyItemChanged(position);
+                    break;
+                case RESET:
+                    notifyItemRangeRemoved(0, oldSize);
+                    break;
             }
         }
 
