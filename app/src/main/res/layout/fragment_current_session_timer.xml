@@ -87,7 +87,7 @@
         android:layout_height="@dimen/button_bar_height"
         android:layout_alignParentBottom="true"
         android:background="?colorPrimary"
-        android:elevation="1dp"
+        android:elevation="2dp"
         android:orientation="horizontal">
 
         <Button
@@ -129,6 +129,28 @@
         android:elevation="2dp"
         android:overScrollMode="always"
         android:theme="@style/EdgeEffectThemeOverlayDark" />
+
+    <FrameLayout
+        android:id="@id/fragment_current_session_timer_dynamic_status_frame"
+        style="?android:buttonBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/button_bar_height"
+        android:layout_alignParentBottom="true"
+        android:background="?colorPrimary"
+        android:elevation="2dp"
+        android:orientation="horizontal"
+        android:translationY="@dimen/button_bar_height">
+
+        <TextView
+            android:id="@id/fragment_current_session_timer_dynamic_status_text"
+            style="?android:buttonBarButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/item_background_dark"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:textColor="@color/primary_text_default_material_dark" />
+    </FrameLayout>
 
     <ImageView
         android:id="@id/fragment_current_session_timer_scramble_imageview"

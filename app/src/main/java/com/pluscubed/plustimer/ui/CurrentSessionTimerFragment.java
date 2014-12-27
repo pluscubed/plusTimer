@@ -26,6 +26,7 @@ import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -222,6 +223,9 @@ public class CurrentSessionTimerFragment extends Fragment {
     private LinearLayoutManager mTimeBarLayoutManager;
     private AnimatorSet mLastBarAnimationSet;
     private Button mLastDeleteButton;
+    private FrameLayout mDynamicStatusBarFrame;
+    private TextView mDynamicStatusBarText;
+    private AnimatorSet mDynamicStatusBarAnimatorSet;
 
     //Generate string with specified current averages and mean of current
     // session
@@ -592,6 +596,9 @@ public class CurrentSessionTimerFragment extends Fragment {
         mTimeBarRecycler.setHasFixedSize(true);
         mTimeBarRecycler.setAdapter(new SolveRecyclerAdapter());
 
+        mDynamicStatusBarFrame = (FrameLayout) v.findViewById(R.id.fragment_current_session_timer_dynamic_status_frame);
+        mDynamicStatusBarText = (TextView) v.findViewById(R.id.fragment_current_session_timer_dynamic_status_text);
+
         //When the root view is touched...
         v.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -614,21 +621,8 @@ public class CurrentSessionTimerFragment extends Fragment {
                             // scramble/scramble image and time
                             PuzzleType.getCurrent().getSession(PuzzleType
                                     .CURRENT_SESSION).addSolve(s);
-                            if (mLastBarAnimationSet == null) {
-                                ObjectAnimator enter = ObjectAnimator.ofFloat(mLastBarLinearLayout, View.TRANSLATION_Y, 0f, -mLastBarLinearLayout.getHeight());
-                                ObjectAnimator exit = ObjectAnimator.ofFloat(mLastBarLinearLayout, View.TRANSLATION_Y, -mLastBarLinearLayout.getHeight(), 0f);
-                                enter.setDuration(125);
-                                exit.setDuration(125);
-                                exit.setStartDelay(1500);
-                                enter.setInterpolator(new AccelerateInterpolator());
-                                exit.setInterpolator(new DecelerateInterpolator());
-                                mLastBarAnimationSet = new AnimatorSet();
-                                mLastBarAnimationSet.playSequentially(enter, exit);
-                            }
-                            if (mLastBarAnimationSet.isStarted()) {
-                                mLastBarAnimationSet.cancel();
-                            }
-                            mLastBarAnimationSet.start();
+                            playLastBarAnimation();
+                            playDynamicStatusBarExitAnimation();
 
                             resetTimer();
 
@@ -744,19 +738,64 @@ public class CurrentSessionTimerFragment extends Fragment {
         return v;
     }
 
-    public void playLastBarExitAnimation() {
+    private void playLastBarAnimation() {
+        if (mLastBarAnimationSet == null) {
+            ObjectAnimator enter = ObjectAnimator.ofFloat(mLastBarLinearLayout, View.TRANSLATION_Y, 0f, -mLastBarLinearLayout.getHeight());
+            ObjectAnimator exit = ObjectAnimator.ofFloat(mLastBarLinearLayout, View.TRANSLATION_Y, -mLastBarLinearLayout.getHeight(), 0f);
+            enter.setDuration(125);
+            exit.setDuration(125);
+            exit.setStartDelay(1500);
+            enter.setInterpolator(new DecelerateInterpolator());
+            exit.setInterpolator(new AccelerateInterpolator());
+            mLastBarAnimationSet = new AnimatorSet();
+            mLastBarAnimationSet.playSequentially(enter, exit);
+        }
         if (mLastBarAnimationSet.isStarted()) {
             mLastBarAnimationSet.cancel();
         }
-        ObjectAnimator exit = ObjectAnimator.ofFloat(mLastBarLinearLayout, View.TRANSLATION_Y, -mLastBarLinearLayout.getHeight(), 0f);
+        mLastBarAnimationSet.start();
+    }
+
+    public void playDynamicStatusBarEnterAnimation() {
+        if (mDynamicStatusBarAnimatorSet != null && mDynamicStatusBarAnimatorSet.isStarted()) {
+            mDynamicStatusBarAnimatorSet.cancel();
+        }
+        ObjectAnimator enter = ObjectAnimator.ofFloat(mDynamicStatusBarFrame, View.TRANSLATION_Y, mDynamicStatusBarFrame.getHeight(), 0f);
+        enter.setDuration(125);
+        enter.setInterpolator(new DecelerateInterpolator());
+        mDynamicStatusBarAnimatorSet = new AnimatorSet();
+        mDynamicStatusBarAnimatorSet.play(enter);
+        mDynamicStatusBarAnimatorSet.start();
+    }
+
+    public void playDynamicStatusBarExitAnimation() {
+        if (mDynamicStatusBarAnimatorSet != null && mDynamicStatusBarAnimatorSet.isStarted()) {
+            mDynamicStatusBarAnimatorSet.cancel();
+        }
+        ObjectAnimator exit = ObjectAnimator.ofFloat(mDynamicStatusBarFrame, View.TRANSLATION_Y, 0f, mDynamicStatusBarFrame.getHeight());
         exit.setDuration(125);
-        exit.setInterpolator(new DecelerateInterpolator());
-        AnimatorSet set = new AnimatorSet();
-        set.play(exit);
-        set.start();
+        exit.setInterpolator(new AccelerateInterpolator());
+        mDynamicStatusBarAnimatorSet = new AnimatorSet();
+        mDynamicStatusBarAnimatorSet.play(exit);
+        mDynamicStatusBarAnimatorSet.start();
+    }
+
+    public void playLastBarExitAnimation() {
+        if (mLastBarAnimationSet != null && mLastBarAnimationSet.isStarted()) {
+            mLastBarAnimationSet.cancel();
+        }
+        if (mLastBarLinearLayout.getTranslationY() == -mLastBarLinearLayout.getHeight()) {
+            ObjectAnimator exit = ObjectAnimator.ofFloat(mLastBarLinearLayout, View.TRANSLATION_Y, -mLastBarLinearLayout.getHeight(), 0f);
+            exit.setDuration(125);
+            exit.setInterpolator(new AccelerateInterpolator());
+            AnimatorSet set = new AnimatorSet();
+            set.play(exit);
+            set.start();
+        }
     }
 
     public void startHoldTimer() {
+        playLastBarExitAnimation();
         mHoldTiming = true;
         mHoldTimerStartTimestamp = System.nanoTime();
         setTextColor(Color.RED);
@@ -774,6 +813,9 @@ public class CurrentSessionTimerFragment extends Fragment {
      * Start inspection; Start Generating Next Scramble
      */
     public void startInspection() {
+        playLastBarExitAnimation();
+        mDynamicStatusBarText.setText(R.string.inspecting);
+        playDynamicStatusBarEnterAnimation();
         mInspectionStartTimestamp = System.nanoTime();
         mInspecting = true;
         mUiHandler.post(mInspectionRunnable);
@@ -792,12 +834,14 @@ public class CurrentSessionTimerFragment extends Fragment {
      * Start timing; does not start generating next scramble
      */
     public void startTiming() {
+        playLastBarExitAnimation();
         mTimingStartTimestamp = System.nanoTime();
         mInspecting = false;
         mTiming = true;
         mUiHandler.post(mTimerRunnable);
         enableMenuItems(false);
         showScrambleImage(false);
+        mDynamicStatusBarText.setText(R.string.timing);
     }
 
     /**
@@ -884,8 +928,14 @@ public class CurrentSessionTimerFragment extends Fragment {
                 case ADD:
                     //TODO: Smooth scroll so empty space for insertion opens up
                     notifyItemInserted(mSolves.size() - 1);
-                    if (mSolves.size() >= 1)
-                        mTimeBarRecycler.smoothScrollToPosition(mSolves.size() - 1);
+                    mTimeBarRecycler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            //Run after status bar goes down
+                            if (mSolves.size() >= 1)
+                                mTimeBarRecycler.smoothScrollToPosition(mSolves.size() - 1);
+                        }
+                    }, 200);
                     break;
                 case REMOVE:
                     notifyItemRemoved(position);

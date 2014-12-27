@@ -30,10 +30,11 @@
     <string name="reset_warning_message">You\'ll lose all solves recorded in this session!</string>
 
     <!--Timer-->
+    <string name="inspecting">Inspecting…</string>
     <string name="scrambling">Scrambling…</string>
     <string name="scramble_image">Scramble Image</string>
     <string name="session_no_solves">Session is empty!\nGo do some solves!</string>
-    <string name="timing">Timing</string>
+    <string name="timing">Timing…</string>
 
     <!--Stats-->
     <string name="solves">"Solves: "</string>
