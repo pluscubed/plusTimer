@@ -563,6 +563,7 @@ public class CurrentSessionTimerFragment extends Fragment {
                 PuzzleType.getCurrent().getSession(PuzzleType
                         .CURRENT_SESSION).getLastSolve().setPenalty(Solve
                         .Penalty.DNF);
+                playLastBarExitAnimation();
             }
         });
 
@@ -572,6 +573,7 @@ public class CurrentSessionTimerFragment extends Fragment {
                 PuzzleType.getCurrent().getSession(PuzzleType
                         .CURRENT_SESSION).getLastSolve().setPenalty(Solve
                         .Penalty.PLUSTWO);
+                playLastBarExitAnimation();
             }
         });
 
@@ -580,6 +582,7 @@ public class CurrentSessionTimerFragment extends Fragment {
             public void onClick(View v) {
                 Session session = PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION);
                 session.deleteSolve(session.getLastSolve());
+                playLastBarExitAnimation();
             }
         });
 
@@ -739,6 +742,18 @@ public class CurrentSessionTimerFragment extends Fragment {
         onSessionSolvesUpdated();
 
         return v;
+    }
+
+    public void playLastBarExitAnimation() {
+        if (mLastBarAnimationSet.isStarted()) {
+            mLastBarAnimationSet.cancel();
+        }
+        ObjectAnimator exit = ObjectAnimator.ofFloat(mLastBarLinearLayout, View.TRANSLATION_Y, -mLastBarLinearLayout.getHeight(), 0f);
+        exit.setDuration(125);
+        exit.setInterpolator(new DecelerateInterpolator());
+        AnimatorSet set = new AnimatorSet();
+        set.play(exit);
+        set.start();
     }
 
     public void startHoldTimer() {
