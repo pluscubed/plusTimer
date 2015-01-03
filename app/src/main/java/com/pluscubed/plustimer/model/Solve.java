@@ -3,7 +3,7 @@ package com.pluscubed.plustimer.model;
 import com.pluscubed.plustimer.utils.Util;
 
 /**
- * solve times data object
+ * Solve data object
  */
 public class Solve {
 
