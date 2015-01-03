@@ -235,8 +235,6 @@ public class CurrentSessionTimerFragment extends Fragment {
             }
         }
     };
-    private long mBldInspectionTime;
-    private long mBldSolvingTime;
 
     //Generate string with specified current averages and mean of current
     // session
@@ -487,6 +485,7 @@ public class CurrentSessionTimerFragment extends Fragment {
         mTimingStartTimestamp = 0;
         mInspecting = false;
         setTextColorPrimary();
+        playDynamicStatusBarExitAnimation();
     }
 
     private void setTextColorPrimary() {
@@ -796,12 +795,14 @@ public class CurrentSessionTimerFragment extends Fragment {
         if (mDynamicStatusBarAnimatorSet != null && mDynamicStatusBarAnimatorSet.isStarted()) {
             mDynamicStatusBarAnimatorSet.cancel();
         }
-        ObjectAnimator exit = ObjectAnimator.ofFloat(mDynamicStatusBarFrame, View.TRANSLATION_Y, 0f, mDynamicStatusBarFrame.getHeight());
-        exit.setDuration(125);
-        exit.setInterpolator(new AccelerateInterpolator());
-        mDynamicStatusBarAnimatorSet = new AnimatorSet();
-        mDynamicStatusBarAnimatorSet.play(exit);
-        mDynamicStatusBarAnimatorSet.start();
+        if (mDynamicStatusBarFrame.getTranslationY() == 0f) {
+            ObjectAnimator exit = ObjectAnimator.ofFloat(mDynamicStatusBarFrame, View.TRANSLATION_Y, 0f, mDynamicStatusBarFrame.getHeight());
+            exit.setDuration(125);
+            exit.setInterpolator(new AccelerateInterpolator());
+            mDynamicStatusBarAnimatorSet = new AnimatorSet();
+            mDynamicStatusBarAnimatorSet.play(exit);
+            mDynamicStatusBarAnimatorSet.start();
+        }
     }
 
     public void playLastBarExitAnimation() {
