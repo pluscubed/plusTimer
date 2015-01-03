@@ -30,7 +30,6 @@
 
     <LinearLayout
         android:id="@id/fragment_solvelist_submit_reset_linearlayout"
-        style="?android:buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="@dimen/button_bar_height"
         android:background="?colorPrimary"

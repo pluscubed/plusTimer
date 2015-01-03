@@ -82,7 +82,6 @@
 
     <LinearLayout
         android:id="@id/fragment_current_session_timer_last_linearlayout"
-        style="?android:buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="@dimen/button_bar_height"
         android:layout_alignParentBottom="true"
@@ -132,7 +131,6 @@
 
     <FrameLayout
         android:id="@id/fragment_current_session_timer_dynamic_status_frame"
-        style="?android:buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="@dimen/button_bar_height"
         android:layout_alignParentBottom="true"
