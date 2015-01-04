@@ -3,14 +3,17 @@
 
     <style name="Theme.PlusTimer" parent="Base.Theme.PlusTimer">
         <item name="android:windowContentOverlay">@null</item>
+        <item name="toolbarShadow">@drawable/toolbar_shadow</item>
     </style>
 
     <style name="Theme.PlusTimer.Dark" parent="Base.Theme.PlusTimer.Dark">
         <item name="android:windowContentOverlay">@null</item>
+        <item name="toolbarShadow">@drawable/toolbar_shadow</item>
     </style>
 
     <style name="Theme.PlusTimer.Black" parent="Base.Theme.PlusTimer.Black">
         <item name="android:windowContentOverlay">@null</item>
+        <item name="toolbarShadow">@drawable/toolbar_shadow</item>
     </style>
 
     <style name="Theme.PlusTimer.WithNavDrawer" parent="Theme.PlusTimer" />

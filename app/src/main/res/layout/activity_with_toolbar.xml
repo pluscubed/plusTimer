@@ -9,6 +9,13 @@
     <FrameLayout
         android:id="@id/activity_with_toolbar_content_framelayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:background="?toolbarShadow"
+            android:elevation="1dp" />
+    </FrameLayout>
 
 </LinearLayout>

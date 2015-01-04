@@ -2,4 +2,5 @@
 <resources>
     <attr name="listDividerColor" format="color" />
     <attr name="activatedBackground" format="reference" />
+    <attr name="toolbarShadow" format="reference" />
 </resources>
