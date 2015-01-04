@@ -8,11 +8,13 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -230,8 +232,6 @@ public class SolveDialogFragment extends DialogFragment {
         if (!mAddMode) {
             mTimeEdit.setText(Util.timeStringSecondsFromNs(mSolve.getRawTime(),
                     mMillisecondsEnabled));
-        } else {
-            //TODO: Bring up keyboard
         }
         mTimeEdit.addTextChangedListener(new TextWatcher() {
             @Override
@@ -293,7 +293,7 @@ public class SolveDialogFragment extends DialogFragment {
 
         //Return
         MaterialDialog.Builder builder = new MaterialDialog.Builder(getActivity());
-        builder.customView(v)
+        builder.customView(v, true)
                 .title(timeString)
                 .theme(ThemeUtils.getDialogTheme(getActivity()))
                 .autoDismiss(false)
@@ -331,6 +331,15 @@ public class SolveDialogFragment extends DialogFragment {
         }
 
         return builder.build();
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        if (mAddMode) {
+            getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        }
+        return super.onCreateView(inflater, container, savedInstanceState);
     }
 
     private void onNeutral() {
