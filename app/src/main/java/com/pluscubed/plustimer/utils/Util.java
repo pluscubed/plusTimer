@@ -1,10 +1,13 @@
 package com.pluscubed.plustimer.utils;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
@@ -48,6 +51,36 @@ public class Util {
     public static int convertDpToPx(Context context, float dp) {
         return (int) (dp * context.getResources().getDisplayMetrics().density
                 + 0.5f);
+    }
+
+    public static void sendHistoryDataEmail(Context context) {
+        BufferedReader r = null;
+        StringBuilder total = new StringBuilder();
+        for (PuzzleType p : PuzzleType.values()) {
+            try {
+                total.append("\n\n\n").append(p.name()).append("\n");
+                InputStream in = context.openFileInput(p.name() + ".json");
+                r = new BufferedReader(new InputStreamReader(in));
+                String line;
+                while ((line = r.readLine()) != null) {
+                    total.append(line);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (r != null) {
+                    try {
+                        r.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        Intent intent = new Intent(Intent.ACTION_SENDTO,
+                Uri.fromParts("mailto", "plusCubed@gmail.com", null));
+        intent.putExtra(Intent.EXTRA_TEXT, total.toString());
+        context.startActivity(Intent.createChooser(intent, context.getString(R.string.send_email)));
     }
 
     /**
