@@ -26,7 +26,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -139,19 +138,6 @@ public class Util {
             InputStream in = context.openFileInput(fileName);
             reader = new BufferedReader(new InputStreamReader(in));
             List<Session> fileSessions = gson.fromJson(reader, SESSION_LIST_TYPE);
-            //Sort in chronological order
-            Collections.sort(fileSessions, new Comparator<Session>() {
-                @Override
-                public int compare(Session lhs, Session rhs) {
-                    if (lhs.getTimestamp() > rhs.getTimestamp()) {
-                        return 1;
-                    } else if (lhs.getTimestamp() < rhs.getTimestamp()) {
-                        return -1;
-                    } else {
-                        return 0;
-                    }
-                }
-            });
             if (fileSessions != null) {
                 return fileSessions;
             }

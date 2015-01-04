@@ -5,6 +5,8 @@ import android.content.Context;
 import com.pluscubed.plustimer.utils.Util;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -76,5 +78,20 @@ public class HistorySessions {
      */
     public void init(Context context) {
         mHistorySessionsList = Util.getSessionListFromFile(context, mFilename);
+    }
+
+    public void sort() {
+        Collections.sort(mHistorySessionsList, new Comparator<Session>() {
+            @Override
+            public int compare(Session lhs, Session rhs) {
+                if (lhs.getTimestamp() > rhs.getTimestamp()) {
+                    return 1;
+                } else if (lhs.getTimestamp() < rhs.getTimestamp()) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            }
+        });
     }
 }

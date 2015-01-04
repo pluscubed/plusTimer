@@ -187,6 +187,7 @@ public class HistorySessionListFragment extends ListFragment {
     }
 
     public void updateStats() {
+        PuzzleType.valueOf(mPuzzleTypeName).getHistorySessions().sort();
         List<Session> historySessions = PuzzleType.valueOf(mPuzzleTypeName)
                 .getHistorySessions().getList();
         if (historySessions.size() > 0) {
