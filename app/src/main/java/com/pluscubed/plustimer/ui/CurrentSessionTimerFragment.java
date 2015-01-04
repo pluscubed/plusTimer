@@ -760,9 +760,12 @@ public class CurrentSessionTimerFragment extends Fragment {
     }
 
     private void playLastBarAnimation() {
+        if (mLastBarAnimationSet != null && mLastBarAnimationSet.isStarted()) {
+            mLastBarAnimationSet.cancel();
+        }
         if (mLastBarAnimationSet == null) {
-            ObjectAnimator enter = ObjectAnimator.ofFloat(mLastBarLinearLayout, View.TRANSLATION_Y, 0f, -mLastBarLinearLayout.getHeight());
-            ObjectAnimator exit = ObjectAnimator.ofFloat(mLastBarLinearLayout, View.TRANSLATION_Y, -mLastBarLinearLayout.getHeight(), 0f);
+            ObjectAnimator enter = ObjectAnimator.ofFloat(mLastBarLinearLayout, View.TRANSLATION_Y, -mLastBarLinearLayout.getHeight());
+            ObjectAnimator exit = ObjectAnimator.ofFloat(mLastBarLinearLayout, View.TRANSLATION_Y, 0f);
             enter.setDuration(125);
             exit.setDuration(125);
             exit.setStartDelay(1500);
@@ -771,9 +774,6 @@ public class CurrentSessionTimerFragment extends Fragment {
             mLastBarAnimationSet = new AnimatorSet();
             mLastBarAnimationSet.playSequentially(enter, exit);
         }
-        if (mLastBarAnimationSet.isStarted()) {
-            mLastBarAnimationSet.cancel();
-        }
         mLastBarAnimationSet.start();
     }
 
@@ -781,42 +781,37 @@ public class CurrentSessionTimerFragment extends Fragment {
         if (mDynamicStatusBarAnimatorSet != null && mDynamicStatusBarAnimatorSet.isStarted()) {
             mDynamicStatusBarAnimatorSet.cancel();
         }
-        if (mDynamicStatusBarFrame.getTranslationY() == mDynamicStatusBarFrame.getHeight()) {
-            ObjectAnimator enter = ObjectAnimator.ofFloat(mDynamicStatusBarFrame, View.TRANSLATION_Y, mDynamicStatusBarFrame.getHeight(), 0f);
-            enter.setDuration(125);
-            enter.setInterpolator(new DecelerateInterpolator());
-            mDynamicStatusBarAnimatorSet = new AnimatorSet();
-            mDynamicStatusBarAnimatorSet.play(enter);
-            mDynamicStatusBarAnimatorSet.start();
-        }
+        ObjectAnimator enter = ObjectAnimator.ofFloat(mDynamicStatusBarFrame, View.TRANSLATION_Y, 0f);
+        enter.setDuration(125);
+        enter.setInterpolator(new DecelerateInterpolator());
+        mDynamicStatusBarAnimatorSet = new AnimatorSet();
+        mDynamicStatusBarAnimatorSet.play(enter);
+        mDynamicStatusBarAnimatorSet.start();
     }
 
     public void playDynamicStatusBarExitAnimation() {
         if (mDynamicStatusBarAnimatorSet != null && mDynamicStatusBarAnimatorSet.isStarted()) {
             mDynamicStatusBarAnimatorSet.cancel();
         }
-        if (mDynamicStatusBarFrame.getTranslationY() == 0f) {
-            ObjectAnimator exit = ObjectAnimator.ofFloat(mDynamicStatusBarFrame, View.TRANSLATION_Y, 0f, mDynamicStatusBarFrame.getHeight());
-            exit.setDuration(125);
-            exit.setInterpolator(new AccelerateInterpolator());
-            mDynamicStatusBarAnimatorSet = new AnimatorSet();
-            mDynamicStatusBarAnimatorSet.play(exit);
-            mDynamicStatusBarAnimatorSet.start();
-        }
+        ObjectAnimator exit = ObjectAnimator.ofFloat(mDynamicStatusBarFrame, View.TRANSLATION_Y, mDynamicStatusBarFrame.getHeight());
+        exit.setDuration(125);
+        exit.setInterpolator(new AccelerateInterpolator());
+        mDynamicStatusBarAnimatorSet = new AnimatorSet();
+        mDynamicStatusBarAnimatorSet.play(exit);
+        mDynamicStatusBarAnimatorSet.start();
+
     }
 
     public void playLastBarExitAnimation() {
         if (mLastBarAnimationSet != null && mLastBarAnimationSet.isStarted()) {
             mLastBarAnimationSet.cancel();
         }
-        if (mLastBarLinearLayout.getTranslationY() == -mLastBarLinearLayout.getHeight()) {
-            ObjectAnimator exit = ObjectAnimator.ofFloat(mLastBarLinearLayout, View.TRANSLATION_Y, -mLastBarLinearLayout.getHeight(), 0f);
-            exit.setDuration(125);
-            exit.setInterpolator(new AccelerateInterpolator());
-            AnimatorSet set = new AnimatorSet();
-            set.play(exit);
-            set.start();
-        }
+        ObjectAnimator exit = ObjectAnimator.ofFloat(mLastBarLinearLayout, View.TRANSLATION_Y, 0f);
+        exit.setDuration(125);
+        exit.setInterpolator(new AccelerateInterpolator());
+        AnimatorSet set = new AnimatorSet();
+        set.play(exit);
+        set.start();
     }
 
     public void startHoldTimer() {
