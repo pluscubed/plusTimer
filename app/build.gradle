@@ -65,7 +65,7 @@ android {
             buildConfigField "boolean", "USE_CRASHLYTICS", "true"
         }
         noCrashlytics {
-            versionName = android.defaultConfig.versionName + "-NOCRASHLYTICS"
+            versionName = android.defaultConfig.versionName + "-NoPermissions"
             buildConfigField "boolean", "USE_CRASHLYTICS", "false"
             ext.enableCrashlytics = false
         }
