@@ -299,7 +299,7 @@ public class SolveDialogFragment extends DialogFragment {
                 .autoDismiss(false)
                 .positiveText(android.R.string.ok)
                 .negativeText(android.R.string.cancel)
-                .callback(new MaterialDialog.Callback() {
+                .callback(new MaterialDialog.ButtonCallback() {
                     @Override
                     public void onNegative(MaterialDialog materialDialog) {
                         SolveDialogFragment.this.onNegative();
@@ -312,7 +312,7 @@ public class SolveDialogFragment extends DialogFragment {
                 });
         if (!mAddMode) {
             builder.neutralText(R.string.delete)
-                    .callback(new MaterialDialog.FullCallback() {
+                    .callback(new MaterialDialog.ButtonCallback() {
                         @Override
                         public void onPositive(MaterialDialog materialDialog) {
                             SolveDialogFragment.this.onPositive();
