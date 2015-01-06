@@ -27,8 +27,8 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 21
-        versionCode 15
-        versionName '0.2.0-Beta3'
+        versionCode 16
+        versionName '0.2.0-Beta4'
     }
 
     if (project.hasProperty("RELEASE_STORE_FILE")) {
@@ -46,7 +46,7 @@ android {
         release {
             minifyEnabled true
             shrinkResources true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             if (project.hasProperty("RELEASE_STORE_FILE")) {
                 signingConfig signingConfigs.release
             }
@@ -65,7 +65,7 @@ android {
             buildConfigField "boolean", "USE_CRASHLYTICS", "true"
         }
         noCrashlytics {
-            versionName = android.defaultConfig.versionName + "-NOCRASHLYTICS"
+            versionName = android.defaultConfig.versionName + "-NoPermissions"
             buildConfigField "boolean", "USE_CRASHLYTICS", "false"
             ext.enableCrashlytics = false
         }

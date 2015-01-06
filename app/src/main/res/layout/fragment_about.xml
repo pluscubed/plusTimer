@@ -70,12 +70,11 @@
             android:layout_marginTop="4dp"
             android:text="@string/open_source_licenses" />
 
-        <!--TODO: Remove after History bug fixed-->
         <Button
-            android:id="@+id/fragment_about_email_history_button"
+            android:id="@id/fragment_about_email_history_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Email Developer History Data\nfor Debugging Purposes" />
+            android:text="@string/email_developer_history_data" />
 
     </LinearLayout>
 </ScrollView>

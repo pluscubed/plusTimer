@@ -223,23 +223,32 @@ public class CurrentSessionActivity extends DrawerActivity implements
             } else {
                 displayScrambleImage.setVisible(false);
                 share.setVisible(true);
-                /*TODO: Set visible to true once dialog editing is fully
-                implemented*/
-                addSolve.setVisible(false);
+                addSolve.setVisible(true);
             }
         }
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
-    public void createSolveDialog(String displayName, int sessionIndex,
-                                  int solveIndex) {
+    public void createSolveDisplayDialog(String displayName, int sessionIndex,
+                                         int solveIndex) {
         DialogFragment dialog = (DialogFragment) getFragmentManager()
                 .findFragmentByTag(DIALOG_SOLVE_TAG);
         if (dialog == null) {
-            SolveDialogFragment d = SolveDialogFragment.newInstance
+            SolveDialogFragment d = SolveDialogFragment.newInstanceDisplay
                     (PuzzleType.getCurrent().name(),
                             PuzzleType.CURRENT_SESSION, solveIndex);
+            d.show(getFragmentManager(), DIALOG_SOLVE_TAG);
+        }
+    }
+
+    @Override
+    public void createSolveAddDialog(String displayName, int sessionIndex) {
+        DialogFragment dialog = (DialogFragment) getFragmentManager()
+                .findFragmentByTag(DIALOG_SOLVE_TAG);
+        if (dialog == null) {
+            SolveDialogFragment d = SolveDialogFragment.newInstanceAdd
+                    (PuzzleType.getCurrent().name(), PuzzleType.CURRENT_SESSION);
             d.show(getFragmentManager(), DIALOG_SOLVE_TAG);
         }
     }

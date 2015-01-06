@@ -23,26 +23,13 @@
             android:name="com.pluscubed.plustimer.ui.HistorySessionListActivity"
             android:theme="@style/Theme.PlusTimer.WithNavDrawer" />
 
-        <activity
-            android:name="com.pluscubed.plustimer.ui.HistorySolveListActivity"
-            android:parentActivityName="com.pluscubed.plustimer.ui.HistorySessionListActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.pluscubed.plustimer.ui.HistorySessionListActivity" />
-        </activity>
+        <activity android:name="com.pluscubed.plustimer.ui.HistorySolveListActivity" />
 
         <activity android:name="com.pluscubed.plustimer.ui.SettingsActivity" />
         <activity
             android:name="com.pluscubed.plustimer.ui.AboutActivity"
             android:launchMode="singleTop" />
-        <activity
-            android:name="com.pluscubed.plustimer.ui.LicensesActivity"
-            android:parentActivityName="com.pluscubed.plustimer.ui.AboutActivity">
-            <!-- Parent activity meta-data to support 4.0 and lower -->
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.pluscubed.plustimer.ui.AboutActivity" />
-        </activity>
+        <activity android:name="com.pluscubed.plustimer.ui.LicensesActivity" />
     </application>
 
 </manifest>

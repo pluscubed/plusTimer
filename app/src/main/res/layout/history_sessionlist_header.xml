@@ -14,12 +14,8 @@
         android:id="@id/history_sessionlist_header_stats_textview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="16dp" />
+        android:paddingBottom="8dp" />
 
-    <View
-        android:layout_width="fill_parent"
-        android:layout_height="1dp"
-        android:layout_marginBottom="8dp"
-        android:background="#0c000000" />
+    <include layout="@layout/list_item_separator" />
 
 </LinearLayout>

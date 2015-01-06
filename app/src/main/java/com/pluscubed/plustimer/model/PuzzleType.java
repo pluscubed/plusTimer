@@ -12,8 +12,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.pluscubed.plustimer.BuildConfig;
 import com.pluscubed.plustimer.R;
-import com.pluscubed.plustimer.Util;
 import com.pluscubed.plustimer.ui.SettingsActivity;
+import com.pluscubed.plustimer.utils.Util;
 
 import net.gnehzr.tnoodle.scrambles.Puzzle;
 import net.gnehzr.tnoodle.scrambles.PuzzlePlugins;
@@ -59,6 +59,7 @@ public enum PuzzleType {
     static {
         mObservers = new ArrayList<>();
     }
+
     public final String scramblerSpec;
     public final boolean official;
     private final String currentSessionFileName;
@@ -106,14 +107,14 @@ public enum PuzzleType {
     }
 
     public static void setCurrent(PuzzleType type, Context context) {
+        SharedPreferences defaultSharedPreferences = PreferenceManager
+                .getDefaultSharedPreferences(context);
+        defaultSharedPreferences.edit().putString(PREF_CURRENT_PUZZLETYPE,
+                type.name()).apply();
         if (type != sCurrentPuzzleType) {
             sCurrentPuzzleType = type;
             notifyPuzzleTypeChanged();
         }
-        SharedPreferences defaultSharedPreferences = PreferenceManager
-                .getDefaultSharedPreferences(context);
-        defaultSharedPreferences.edit().putString(PREF_CURRENT_PUZZLETYPE,
-                sCurrentPuzzleType.name()).apply();
     }
 
     public static List<PuzzleType> valuesExcludeDisabled() {
@@ -149,6 +150,11 @@ public enum PuzzleType {
 
             //AFTER UPDATING APP////////////
             int savedVersionCode = defaultSharedPreferences.getInt(Util.PREF_VERSION_CODE, 10);
+
+            if (savedVersionCode <= 15) {
+                Util.updateData(context, historyFileName);
+            }
+
             if (savedVersionCode <= 13) {
                 //Version <=13: ScrambleAndSvg json structure changes
                 Gson gson = new GsonBuilder()

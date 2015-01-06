@@ -8,7 +8,7 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.pluscubed.plustimer.R;
-import com.pluscubed.plustimer.Util;
+import com.pluscubed.plustimer.utils.Util;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -216,8 +216,9 @@ public class Session {
     }
 
     public void deleteSolve(Solve i) {
-        notifySolveDeleted(mSolves.indexOf(i));
+        int position = mSolves.indexOf(i);
         mSolves.remove(i);
+        notifySolveDeleted(position);
     }
 
     public String toString(Context context, String puzzleTypeName,
@@ -225,7 +226,7 @@ public class Session {
                            boolean milliseconds, boolean sign) {
         StringBuilder s = new StringBuilder();
         if (displaySolves) {
-            s.append(puzzleTypeName).append("\n\n");
+            s.append(PuzzleType.valueOf(puzzleTypeName).getUiName(context)).append("\n\n");
         }
         s.append(context.getString(R.string.number_solves)).append
                 (getNumberOfSolves());

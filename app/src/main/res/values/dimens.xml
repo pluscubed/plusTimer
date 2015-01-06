@@ -1,4 +1,5 @@
 <resources>
     <dimen name="navigation_drawer_margin">56dp</dimen>
+    <dimen name="navigation_drawer_limit">320dp</dimen>
     <dimen name="button_bar_height">48dp</dimen>
 </resources>

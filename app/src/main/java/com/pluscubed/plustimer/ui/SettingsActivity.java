@@ -4,13 +4,11 @@ package com.pluscubed.plustimer.ui;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.os.Bundle;
-import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -26,7 +24,7 @@ import java.util.Set;
 /**
  * Settings Activity and Fragment
  */
-public class SettingsActivity extends ActionBarActivity {
+public class SettingsActivity extends ThemableActivity {
 
     public static final String PREF_INSPECTION_CHECKBOX =
             "pref_inspection_checkbox";
@@ -46,6 +44,8 @@ public class SettingsActivity extends ActionBarActivity {
             "pref_sign_checkbox";
     public static final String PREF_PUZZLETYPES_MULTISELECTLIST =
             "pref_puzzletypes_multiselectlist";
+    public static final String PREF_THEME_LIST =
+            "pref_theme_list";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,22 +85,6 @@ public class SettingsActivity extends ActionBarActivity {
             super.onCreate(paramBundle);
             addPreferencesFromResource(R.xml.preferences);
 
-            CheckBoxPreference inspection = (CheckBoxPreference) findPreference(
-                    PREF_INSPECTION_CHECKBOX);
-            inspection.setOnPreferenceChangeListener(new Preference
-                    .OnPreferenceChangeListener() {
-                @Override
-                public boolean onPreferenceChange(Preference preference,
-                                                  Object newValue) {
-                    if (newValue.toString().equals("true")) {
-                        CheckBoxPreference hold = (CheckBoxPreference)
-                                findPreference(PREF_HOLDTOSTART_CHECKBOX);
-                        hold.setChecked(true);
-                    }
-                    return true;
-                }
-            });
-
             EditTextPreference size = (EditTextPreference) findPreference(
                     PREF_TIME_TEXT_SIZE_EDITTEXT);
             size.setOnPreferenceChangeListener(new Preference
@@ -118,18 +102,16 @@ public class SettingsActivity extends ActionBarActivity {
             ListPreference updateOccurrence = (ListPreference) findPreference
                     (PREF_UPDATE_TIME_LIST);
             updateOccurrence.setEntryValues(new String[]{"0", "1", "2"});
-            updateOccurrence.setOnPreferenceChangeListener(new Preference
-                    .OnPreferenceChangeListener() {
+
+            ListPreference theme = (ListPreference) findPreference(PREF_THEME_LIST);
+            theme.setEntryValues(new String[]{"0", "1", "2"});
+            theme.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
-                public boolean onPreferenceChange(Preference preference,
-                                                  Object newValue) {
-                    ListPreference updateTime = (ListPreference) preference;
-                    updateTime.setSummary(updateTime.getEntries()[Integer
-                            .parseInt(newValue.toString())]);
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    getActivity().recreate();
                     return true;
                 }
             });
-            updateOccurrence.setSummary(updateOccurrence.getEntry());
 
 
             MultiSelectListPreference puzzleTypeMultiList =

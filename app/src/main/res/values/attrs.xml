@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="listDividerColor" format="color" />
+    <attr name="activatedBackground" format="reference" />
+    <attr name="toolbarShadow" format="reference" />
+</resources>
