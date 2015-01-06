@@ -87,4 +87,13 @@
     <string name="manual_add_solve">Solve hinzufügen</string>
     <string name="share">teilen</string>
     <string name="share_dialog_title">Zeiten teilen über&#8230;</string>
+    <string name="inspecting">de:[Inspecting…]</string>
+    <string name="pref_theme_title">de:[Theme]</string>
+    <string-array name="pref_theme_list_entries">
+        <item>de:[Light]</item>
+        <item>de:[Dark]</item>
+        <item>de:[Black]</item>
+    </string-array>
+    <string name="send_email">de:[Send email to the developer using...]</string>
+    <string name="email_developer_history_data">de:[Email History Data to Developer]</string>
 </resources>

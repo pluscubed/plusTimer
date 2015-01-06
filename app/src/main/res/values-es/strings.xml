@@ -87,4 +87,13 @@
     <string name="manual_add_solve">Agregar Tiempo</string>
     <string name="share">Compartir</string>
     <string name="share_dialog_title">Compartir tiempos via&#8230;</string>
+    <string name="inspecting">es:[Inspecting…]</string>
+    <string name="pref_theme_title">es:[Theme]</string>
+    <string-array name="pref_theme_list_entries">
+        <item>es:[Light]</item>
+        <item>es:[Dark]</item>
+        <item>es:[Black]</item>
+    </string-array>
+    <string name="send_email">es:[Send email to the developer using...]</string>
+    <string name="email_developer_history_data">es:[Email History Data to Developer]</string>
 </resources>
