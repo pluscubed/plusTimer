@@ -108,6 +108,9 @@ public class SolveListFragment extends Fragment {
     public void onResume() {
         super.onResume();
         initSharedPrefs();
+
+        //When Settings change
+        onSessionSolvesChanged();
     }
 
     private void initSharedPrefs() {
