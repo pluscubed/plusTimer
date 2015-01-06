@@ -21,6 +21,7 @@
     <string name="session_reset">Se ha reiniciado la sesión.</string>
     <string name="reset_warning">¿Reiniciar sesión?</string>
     <string name="reset_warning_message">¡Perderás todos los tiempos guardados en esta sesión!</string>
+    <string name="inspecting">Inspeccionando&#8230;</string>
     <string name="scrambling">Mezclando&#8230;</string>
     <string name="scramble_image">Imagen del Scramble</string>
     <string name="session_no_solves">¡La sesión está vacía!\n¡Ve a hacer algunos tiempos!</string>
@@ -70,6 +71,12 @@
     <string name="pref_sign_title">Usar Notación SiGN</string>
     <string name="puzzle_types_setup">Mostrar/Ocultar Tipos de puzzle</string>
     <string name="no_disable_all_puzzletypes">¡No puedes ocultar todos los tipos de puzzle!</string>
+    <string name="pref_theme_title">Estilo</string>
+    <string-array name="pref_theme_list_entries">
+        <item>Claro</item>
+        <item>Oscuro</item>
+        <item>Negro</item>
+    </string-array>
     <string name="current_session">Sesión Actual</string>
     <string name="history">Historial</string>
     <string name="current">Actual</string>
@@ -86,14 +93,7 @@
     <string name="rate">Puntuar en la Play Store</string>
     <string name="manual_add_solve">Agregar Tiempo</string>
     <string name="share">Compartir</string>
-    <string name="share_dialog_title">Compartir tiempos via&#8230;</string>
-    <string name="inspecting">es:[Inspecting…]</string>
-    <string name="pref_theme_title">es:[Theme]</string>
-    <string-array name="pref_theme_list_entries">
-        <item>es:[Light]</item>
-        <item>es:[Dark]</item>
-        <item>es:[Black]</item>
-    </string-array>
-    <string name="send_email">es:[Send email to the developer using...]</string>
-    <string name="email_developer_history_data">es:[Email History Data to Developer]</string>
+    <string name="share_dialog_title">Compartir tiempos vía&#8230;</string>
+    <string name="send_email">Enviar email al desarrollador usando&#8230;</string>
+    <string name="email_developer_history_data">Enviar Datos del Historial al Desarrollador</string>
 </resources>
