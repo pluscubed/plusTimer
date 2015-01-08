@@ -27,8 +27,8 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 21
-        versionCode 16
-        versionName '0.2.0-Beta4'
+        versionCode 17
+        versionName '0.2.0-Beta5'
     }
 
     if (project.hasProperty("RELEASE_STORE_FILE")) {
