@@ -151,8 +151,20 @@ public enum PuzzleType {
             //AFTER UPDATING APP////////////
             int savedVersionCode = defaultSharedPreferences.getInt(Util.PREF_VERSION_CODE, 10);
 
-            if (savedVersionCode <= 15) {
-                Util.updateData(context, historyFileName);
+            if (savedVersionCode <= 10) {
+                //Version <=10: Set up history sessions with old
+                // name first
+                if (!scramblerSpec.equals("333") || name().equals("THREE")) {
+                    mHistorySessions.setFilename(scramblerSpec + ".json");
+                    mHistorySessions.init(context);
+                    mHistorySessions.setFilename(historyFileName);
+                    if (mHistorySessions.getList().size() > 0) {
+                        mHistorySessions.save(context);
+                    }
+                    File oldFile = new File(context.getFilesDir(),
+                            scramblerSpec + ".json");
+                    oldFile.delete();
+                }
             }
 
             if (savedVersionCode <= 13) {
@@ -186,21 +198,6 @@ public enum PuzzleType {
                 Util.updateData(context, currentSessionFileName, gson);
             }
 
-            if (savedVersionCode <= 10) {
-                //Version <=10: Set up history sessions with old
-                // name first
-                if (!scramblerSpec.equals("333") || name().equals("THREE")) {
-                    mHistorySessions.setFilename(scramblerSpec + ".json");
-                    mHistorySessions.init(context);
-                    mHistorySessions.setFilename(historyFileName);
-                    if (mHistorySessions.getList().size() > 0) {
-                        mHistorySessions.save(context);
-                    }
-                    File oldFile = new File(context.getFilesDir(),
-                            scramblerSpec + ".json");
-                    oldFile.delete();
-                }
-            }
             ////////////////////////////
 
             mHistorySessions.init(context);

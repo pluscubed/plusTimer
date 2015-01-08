@@ -65,28 +65,28 @@ public class CurrentSessionTimerFragment extends Fragment {
     private final Session.Observer sessionObserver = new Session.Observer() {
         @Override
         public void onSolveAdded() {
-            onSessionSolvesChanged();
+            updateStatsAndTimer();
             SolveRecyclerAdapter adapter = (SolveRecyclerAdapter) mTimeBarRecycler.getAdapter();
             adapter.updateSolvesList(-1, ObservedMode.ADD);
         }
 
         @Override
         public void onSolveChanged(int index) {
-            onSessionSolvesChanged();
+            updateStatsAndTimer();
             SolveRecyclerAdapter adapter = (SolveRecyclerAdapter) mTimeBarRecycler.getAdapter();
             adapter.updateSolvesList(index, ObservedMode.SINGLE_CHANGE);
         }
 
         @Override
         public void onSolveRemoved(int index) {
-            onSessionSolvesChanged();
+            updateStatsAndTimer();
             SolveRecyclerAdapter adapter = (SolveRecyclerAdapter) mTimeBarRecycler.getAdapter();
             adapter.updateSolvesList(index, ObservedMode.REMOVE);
         }
 
         @Override
         public void onReset() {
-            onSessionSolvesChanged();
+            updateStatsAndTimer();
             SolveRecyclerAdapter adapter = (SolveRecyclerAdapter) mTimeBarRecycler.getAdapter();
             adapter.updateSolvesList(-1, ObservedMode.RESET);
         }
@@ -195,7 +195,7 @@ public class CurrentSessionTimerFragment extends Fragment {
         @Override
         public void onPuzzleTypeChanged() {
             //Update quick stats and hlistview
-            onSessionSolvesUpdated();
+            onSessionSolvesChanged();
 
             //Set timer text to ready, scramble text to scrambling
             mScrambleText.setText(R.string.scrambling);
@@ -376,15 +376,15 @@ public class CurrentSessionTimerFragment extends Fragment {
         PuzzleType.unregisterObserver(puzzleTypeObserver);
     }
 
-    public void onSessionSolvesUpdated() {
-        onSessionSolvesChanged();
+    public void onSessionSolvesChanged() {
+        updateStatsAndTimer();
 
         //Update RecyclerView
         SolveRecyclerAdapter adapter = (SolveRecyclerAdapter) mTimeBarRecycler.getAdapter();
         adapter.updateSolvesList(-1, ObservedMode.UPDATE_ALL);
     }
 
-    private void onSessionSolvesChanged() {
+    private void updateStatsAndTimer() {
         //Update stats
         mStatsSolvesText.setText(getString(R.string.solves) + PuzzleType
                 .getCurrent().getSession(PuzzleType.CURRENT_SESSION)
@@ -418,6 +418,8 @@ public class CurrentSessionTimerFragment extends Fragment {
                     .FLAG_KEEP_SCREEN_ON);
         }
 
+        //When Settings change
+        onSessionSolvesChanged();
     }
 
     public void initSharedPrefs() {
@@ -754,7 +756,7 @@ public class CurrentSessionTimerFragment extends Fragment {
 
         mBldMode = PuzzleType.getCurrent().name().contains("BLD");
 
-        onSessionSolvesUpdated();
+        onSessionSolvesChanged();
 
         return v;
     }
