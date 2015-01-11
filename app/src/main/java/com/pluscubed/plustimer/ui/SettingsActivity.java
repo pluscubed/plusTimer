@@ -92,6 +92,10 @@ public class SettingsActivity extends ThemableActivity {
                 @Override
                 public boolean onPreferenceChange(Preference preference,
                                                   Object newValue) {
+                    if (Integer.valueOf(newValue.toString()) > 500) {
+                        Toast.makeText(getActivity(), getString(R.string.text_size_warning), Toast.LENGTH_SHORT).show();
+                        return false;
+                    }
                     EditTextPreference size = (EditTextPreference) preference;
                     size.setSummary(newValue.toString());
                     return true;
