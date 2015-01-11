@@ -116,5 +116,6 @@
     </string-array>
     <string name="send_email">發郵件給開發者</string>
     <string name="email_developer_history_data">發歷史記錄信息給開發者</string>
+    <string name="text_size_warning">不能設高於50字體大小！</string>
 
 </resources>
