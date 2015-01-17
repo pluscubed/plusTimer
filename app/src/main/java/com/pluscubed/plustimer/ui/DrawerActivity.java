@@ -65,14 +65,12 @@ public abstract class DrawerActivity extends ThemableActivity {
     private Toolbar mActionBarToolbar;
 
     public static boolean isWelcomeDone(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences
-                (context);
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         return sp.getBoolean(PREF_WELCOME_DONE, false);
     }
 
     public static void markWelcomeDone(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences
-                (context);
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         sp.edit().putBoolean(PREF_WELCOME_DONE, true).apply();
     }
 
@@ -167,7 +165,7 @@ public abstract class DrawerActivity extends ThemableActivity {
             }
         });
 
-        setTitle(NAVDRAWER_ACTIONBAR_TITLE_RES_ID[getSelfNavDrawerItem()]);
+        resetTitle();
 
         if (!isWelcomeDone(this)) {
             markWelcomeDone(this);
@@ -195,6 +193,10 @@ public abstract class DrawerActivity extends ThemableActivity {
             }
 
         }
+    }
+
+    protected void resetTitle() {
+        setTitle(NAVDRAWER_ACTIONBAR_TITLE_RES_ID[getSelfNavDrawerItem()]);
     }
 
     @Override

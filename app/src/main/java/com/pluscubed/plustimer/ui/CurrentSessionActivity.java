@@ -4,14 +4,17 @@ import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
@@ -29,7 +32,7 @@ import io.fabric.sdk.android.Fabric;
  */
 public class CurrentSessionActivity extends DrawerActivity implements
         CreateDialogCallback,
-        CurrentSessionTimerFragment.ScrambleImageActionEnableCallback {
+        CurrentSessionTimerFragment.ActivityCallback {
 
     public static final String DIALOG_SOLVE_TAG = "SOLVE_DIALOG";
 
@@ -44,6 +47,11 @@ public class CurrentSessionActivity extends DrawerActivity implements
 
     public static String makeFragmentName(int viewId, int index) {
         return "android:switcher:" + viewId + ":" + index;
+    }
+
+    @Override
+    public Toolbar getActionBarToolbar() {
+        return super.getActionBarToolbar();
     }
 
     @Override
@@ -226,6 +234,24 @@ public class CurrentSessionActivity extends DrawerActivity implements
                 addSolve.setVisible(true);
             }
         }
+
+        ViewTreeObserver vto = findViewById(android.R.id.content).getViewTreeObserver();
+        vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                if (getActionBarToolbar().isTitleTruncated()) {
+                    setTitle("");
+                } else {
+                    resetTitle();
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    findViewById(android.R.id.content).getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                } else {
+                    findViewById(android.R.id.content).getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                }
+            }
+        });
+
         return super.onCreateOptionsMenu(menu);
     }
 
