@@ -12,7 +12,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -115,6 +114,16 @@ public abstract class DrawerActivity extends ThemableActivity {
         if (!ThemeUtils.isTrueBlack(this)) {
             mDrawerLayout.setStatusBarBackgroundColor(resources.getColor(R.color.primary_dark));
         }
+
+        mActionBarToolbar.setNavigationIcon(R.drawable.ic_drawer);
+        mActionBarToolbar.setNavigationOnClickListener(new View
+                .OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mDrawerLayout.openDrawer(Gravity.START);
+            }
+        });
+
         mDrawerLayout.setDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
             public void onDrawerSlide(View drawerView, float slideOffset) {
@@ -147,11 +156,9 @@ public abstract class DrawerActivity extends ThemableActivity {
         if (navDrawerWidth > navDrawerWidthLimit) {
             navDrawerWidth = navDrawerWidthLimit;
         }
-        mDrawerScrollView.setLayoutParams(new DrawerLayout.LayoutParams(
-                        navDrawerWidth,
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        Gravity.START)
-        );
+        DrawerLayout.LayoutParams params = (DrawerLayout.LayoutParams) mDrawerScrollView.getLayoutParams();
+        params.width = navDrawerWidth;
+        mDrawerScrollView.setLayoutParams(params);
 
         mDrawerListLinearLayout = (LinearLayout) findViewById(R.id
                 .activity_drawer_drawer_linearlayout);
