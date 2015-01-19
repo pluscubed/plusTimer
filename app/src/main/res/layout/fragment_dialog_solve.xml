@@ -15,7 +15,6 @@
 
     <com.rengwuxian.materialedittext.MaterialEditText
         android:id="@id/dialog_solve_time_edittext"
-        android:layout_width="0dp"
         android:layout_gravity="fill_horizontal"
         android:layout_marginLeft="8dp"
         android:layout_marginStart="8dp"
@@ -35,7 +34,6 @@
 
     <TextView
         android:id="@id/dialog_solve_timestamp_textview"
-        android:layout_width="0dp"
         android:layout_gravity="fill_horizontal"
         android:layout_marginBottom="4dp"
         android:layout_marginLeft="8dp"
@@ -52,7 +50,6 @@
 
     <com.rengwuxian.materialedittext.MaterialEditText
         android:id="@id/dialog_solve_scramble_edittext"
-        android:layout_width="0dp"
         android:layout_gravity="fill_horizontal"
         android:layout_marginLeft="8dp"
         android:layout_marginStart="8dp"
