@@ -92,6 +92,13 @@ public class CurrentSessionTimerFragment extends Fragment {
             adapter.updateSolvesList(-1, ObservedMode.RESET);
         }
     };
+    private final Runnable mHoldTimerRunnable = new Runnable() {
+        @Override
+        public void run() {
+            setTextColor(Color.GREEN);
+            setTimerTextToPrefSize();
+        }
+    };
     private boolean mHoldToStartEnabled;
     private boolean mInspectionEnabled;
     private boolean mTwoRowTimeEnabled;
@@ -117,17 +124,6 @@ public class CurrentSessionTimerFragment extends Fragment {
     private Handler mUiHandler;
     private boolean mHoldTiming;
     private long mHoldTimerStartTimestamp;
-    private final Runnable mHoldTimerRunnable = new Runnable() {
-        @Override
-        public void run() {
-            if (550000000L <= System.nanoTime() - mHoldTimerStartTimestamp) {
-                setTextColor(Color.GREEN);
-            } else {
-                mUiHandler.postDelayed(this, REFRESH_RATE);
-            }
-            setTimerTextToPrefSize();
-        }
-    };
     private boolean mInspecting;
     private long mInspectionStartTimestamp;
     private long mInspectionStopTimestamp;
@@ -811,7 +807,7 @@ public class CurrentSessionTimerFragment extends Fragment {
         mHoldTiming = true;
         mHoldTimerStartTimestamp = System.nanoTime();
         setTextColor(Color.RED);
-        mUiHandler.postDelayed(mHoldTimerRunnable, 450);
+        mUiHandler.postDelayed(mHoldTimerRunnable, 550);
     }
 
     public void stopHoldTimer() {
