@@ -4,7 +4,6 @@ import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v13.app.FragmentPagerAdapter;
@@ -14,7 +13,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
@@ -234,24 +232,6 @@ public class CurrentSessionActivity extends DrawerActivity implements
                 addSolve.setVisible(true);
             }
         }
-
-        ViewTreeObserver vto = findViewById(android.R.id.content).getViewTreeObserver();
-        vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @SuppressWarnings("deprecation")
-            @Override
-            public void onGlobalLayout() {
-                if (getActionBarToolbar().isTitleTruncated()) {
-                    setTitle("");
-                } else {
-                    resetTitle();
-                }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    findViewById(android.R.id.content).getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                } else {
-                    findViewById(android.R.id.content).getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                }
-            }
-        });
 
         return super.onCreateOptionsMenu(menu);
     }

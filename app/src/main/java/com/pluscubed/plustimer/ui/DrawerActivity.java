@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -11,7 +12,9 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
+import android.view.Menu;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -204,6 +207,21 @@ public abstract class DrawerActivity extends ThemableActivity {
 
     protected void resetTitle() {
         setTitle(NAVDRAWER_ACTIONBAR_TITLE_RES_ID[getSelfNavDrawerItem()]);
+        ViewTreeObserver vto = findViewById(android.R.id.content).getViewTreeObserver();
+        vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @SuppressWarnings("deprecation")
+            @Override
+            public void onGlobalLayout() {
+                if (getActionBarToolbar().isTitleTruncated()) {
+                    setTitle(null);
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    findViewById(android.R.id.content).getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                } else {
+                    findViewById(android.R.id.content).getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                }
+            }
+        });
     }
 
     @Override
@@ -225,6 +243,12 @@ public abstract class DrawerActivity extends ThemableActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mHandler = new Handler();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        resetTitle();
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
