@@ -15,7 +15,7 @@
             android:layout_height="100dp"
             android:layout_margin="16dp"
             android:contentDescription="@string/icon"
-            android:src="@drawable/ic_launcher" />
+            android:src="@mipmap/ic_launcher" />
 
         <TextView
             android:id="@id/fragment_about_appname_textview"
