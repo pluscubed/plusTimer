@@ -21,6 +21,7 @@
     <string name="session_reset">Session wurde zurückgesetzt.</string>
     <string name="reset_warning">Sitzung zurücksetzen?</string>
     <string name="reset_warning_message">Du wirst alle Solves dieser Sitzung verlieren!</string>
+    <string name="inspecting">Inspecte&#8230;</string>
     <string name="scrambling">scramble Puzzle&#8230;</string>
     <string name="scramble_image">Scramble-Bild</string>
     <string name="session_no_solves">Session ist leer!\nLos, mach ein paar Solves!</string>
@@ -70,6 +71,12 @@
     <string name="pref_sign_title">SiGN-Notation verwenden</string>
     <string name="puzzle_types_setup">Puzzle-Typen aktivieren/deaktivieren</string>
     <string name="no_disable_all_puzzletypes">Du kannst nicht alle Puzzle-Typen deaktivieren!</string>
+    <string name="pref_theme_title">Aussehen</string>
+    <string-array name="pref_theme_list_entries">
+        <item>Hell</item>
+        <item>Dunkel</item>
+        <item>Schwarz</item>
+    </string-array>
     <string name="current_session">Aktuelle Session</string>
     <string name="history">Verlauf</string>
     <string name="current">Aktuell</string>
@@ -87,14 +94,7 @@
     <string name="manual_add_solve">Solve hinzufügen</string>
     <string name="share">teilen</string>
     <string name="share_dialog_title">Zeiten teilen über&#8230;</string>
-    <string name="inspecting">de:[Inspecting…]</string>
-    <string name="pref_theme_title">de:[Theme]</string>
-    <string-array name="pref_theme_list_entries">
-        <item>de:[Light]</item>
-        <item>de:[Dark]</item>
-        <item>de:[Black]</item>
-    </string-array>
-    <string name="send_email">de:[Send email to the developer using...]</string>
-    <string name="email_developer_history_data">de:[Email History Data to Developer]</string>
-    <string name="text_size_warning">de:[You can\'t set a text size larger than 500!]</string>
+    <string name="send_email">Mail an Entwickler senden via&#8230;</string>
+    <string name="email_developer_history_data">Verlaufsdaten per Mail an Entwickler senden</string>
+    <string name="text_size_warning">You can\'t set a text size larger than 500!</string>
 </resources>

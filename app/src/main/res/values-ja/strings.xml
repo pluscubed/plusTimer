@@ -21,7 +21,8 @@
     <string name="session_reset">セッションをリセットしました</string>
     <string name="reset_warning">セッションをリセットしますか？</string>
     <string name="reset_warning_message">セッションのすべての記録が削除されます。よろしいですか？</string>
-    <string name="scrambling">スクランブル中...</string>
+    <string name="inspecting">Inspecting&#8230;</string>
+    <string name="scrambling">スクランブル中&#8230;</string>
     <string name="scramble_image">スクランブル画像</string>
     <string name="session_no_solves">セッションがありません！\nタイム測定をしましょう！</string>
     <string name="timing">測定中</string>
@@ -70,6 +71,12 @@
     <string name="pref_sign_title">SiGN表記を使用する</string>
     <string name="puzzle_types_setup">パズル種類の表示/非表示</string>
     <string name="no_disable_all_puzzletypes">すべてのパズルを非表示にすることはできません！</string>
+    <string name="pref_theme_title">Theme</string>
+    <string-array name="pref_theme_list_entries">
+        <item>Light</item>
+        <item>Dark</item>
+        <item>Black</item>
+    </string-array>
     <string name="current_session">タイム測定</string>
     <string name="history">記録履歴</string>
     <string name="current">タイム測定</string>
@@ -87,14 +94,7 @@
     <string name="manual_add_solve">ソルブを追加する</string>
     <string name="share">共有する</string>
     <string name="share_dialog_title">共有方法</string>
-    <string name="inspecting">ja:[Inspecting…]</string>
-    <string name="pref_theme_title">ja:[Theme]</string>
-    <string-array name="pref_theme_list_entries">
-        <item>ja:[Light]</item>
-        <item>ja:[Dark]</item>
-        <item>ja:[Black]</item>
-    </string-array>
-    <string name="send_email">ja:[Send email to the developer using...]</string>
-    <string name="email_developer_history_data">ja:[Email History Data to Developer]</string>
-    <string name="text_size_warning">ja:[You can\'t set a text size larger than 500!]</string>
+    <string name="send_email">Send email to the developer using&#8230;</string>
+    <string name="email_developer_history_data">Email History Data to Developer</string>
+    <string name="text_size_warning">You can\'t set a text size larger than 500!</string>
 </resources>

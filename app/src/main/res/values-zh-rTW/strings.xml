@@ -25,11 +25,12 @@
     <string name="reset_warning">重置本組?</string>
     <string name="reset_warning_message">當前組內所有成績將被刪除!</string>
 
+    <string name="inspecting">觀察</string>
     <string name="scrambling">打亂公式生成中…</string>
     <string name="scramble_image">打亂圖</string>
     <string name="session_no_solves">本組目前無成績!</string>
-    <string name="timing">還原</string>
 
+    <string name="timing">還原</string>
     <string name="solves">"總數: "</string>
     <string name="cao">"當前%1$d次去尾"</string>
     <string name="lao">"當前%1$d次去尾"</string>
@@ -41,8 +42,8 @@
     <string name="average">"總去尾: "</string>
     <string name="pb">PB</string>
     <string name="ao">%1$d次去尾</string>
-    <string name="best_times">單次最快</string>
 
+    <string name="best_times">單次最快</string>
     <string name="delete">刪除</string>
     <string name="penalty">懲罰:</string>
     <string-array name="penalty_array">
@@ -53,25 +54,26 @@
     <string name="time">時間（秒）:</string>
     <string name="scramble_colon">打亂:</string>
     <string name="timestamp">時間戳:</string>
-    <string name="invalid_scramble">非正確打亂！</string>
 
+    <string name="invalid_scramble">非正確打亂！</string>
     <string name="puzzletype_no_solves">該魔方無記錄!\n完成一些還原後，在 成績列表 頁面按 保存至記錄。</string>
     <string name="pref_inspection_title">WCA觀察</string>
+
     <string name="pref_inspection_summary">15秒觀察魔方</string>
-
     <string name="pref_holdtostart_title">長按開始</string>
+
     <string name="pref_holdtostart_summary">開始前按住0.55秒 (類似SpeedStacks計時器)</string>
-
     <string name="pref_keepscreenon_summary">防止屏幕自動休眠</string>
+
     <string name="pref_keepscreenon_title">屏幕常亮</string>
-
     <string name="pref_two_row_time_summary">時:分:秒在上，毫秒在下</string>
+
     <string name="pref_two_row_time_title">兩行顯示</string>
-
     <string name="pref_time_text_size_title">字體大小</string>
-    <string name="time_text_edittext_dialog_title">計時器字體大小 (默認100):</string>
 
+    <string name="time_text_edittext_dialog_title">計時器字體大小 (默認100):</string>
     <string name="pref_update_time_title">計時器更新</string>
+
     <string-array name="pref_update_time_list_entries">
         <item>實時</item>
         <item>到秒</item>
@@ -83,37 +85,35 @@
     <string name="pref_milliseconds_title">顯示到毫秒(0.001)</string>
 
     <string name="pref_sign_title">使用SiGN</string>
-
     <string name="puzzle_types_setup">啟用、禁用魔方類型</string>
+
     <string name="no_disable_all_puzzletypes">不能禁用所有魔方類型！</string>
-
-    <string name="current_session">當前組</string>
-    <string name="history">歷史記錄</string>
-    <string name="current">當前組</string>
-    <string name="help">幫助</string>
-    <string name="about">關於</string>
-
-    <string-array name="current_session_page_titles">
-        <item>計時</item>
-        <item>成績列表</item>
-    </string-array>
-
-    <string name="icon">圖標</string>
-    <string name="open_source_licenses">開源代碼許可</string>
-    <string name="github">GitHub</string>
-    <string name="email">發送反饋</string>
-    <string name="share">分享成績</string>
-
-    <string name="share_dialog_title">分享成績至…</string>
-    <string name="rate">在Play Store上評價</string>
-    <string name="manual_add_solve">手動加成績</string>
-    <string name="inspecting">觀察</string>
     <string name="pref_theme_title">顏色主題</string>
     <string-array name="pref_theme_list_entries">
         <item>淺灰背景</item>
         <item>深灰背景</item>
         <item>黑背景</item>
     </string-array>
+    <string name="current_session">當前組</string>
+    <string name="history">歷史記錄</string>
+
+    <string name="current">當前組</string>
+
+    <string name="help">幫助</string>
+    <string name="about">關於</string>
+    <string-array name="current_session_page_titles">
+        <item>計時</item>
+        <item>成績列表</item>
+    </string-array>
+    <string name="icon">圖標</string>
+    <string name="share">分享成績</string>
+
+    <string name="share_dialog_title">分享成績至…</string>
+    <string name="rate">在Play Store上評價</string>
+    <string name="manual_add_solve">手動加成績</string>
+    <string name="email">發送反饋</string>
+    <string name="open_source_licenses">開源代碼許可</string>
+    <string name="github">GitHub</string>
     <string name="send_email">發郵件給開發者</string>
     <string name="email_developer_history_data">發歷史記錄信息給開發者</string>
     <string name="text_size_warning">不能設高於50字體大小！</string>

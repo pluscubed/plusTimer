@@ -96,5 +96,5 @@
     <string name="share_dialog_title">Compartir tiempos vía&#8230;</string>
     <string name="send_email">Enviar email al desarrollador usando&#8230;</string>
     <string name="email_developer_history_data">Enviar Datos del Historial al Desarrollador</string>
-    <string name="text_size_warning">es:[You can\'t set a text size larger than 500!]</string>
+    <string name="text_size_warning">You can\'t set a text size larger than 500!</string>
 </resources>
