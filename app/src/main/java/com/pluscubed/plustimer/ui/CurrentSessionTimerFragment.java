@@ -24,7 +24,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
@@ -646,7 +645,6 @@ public class CurrentSessionTimerFragment extends Fragment {
                                     .CURRENT_SESSION).addSolve(s);
                             playLastBarEnterAnimation();
                             playDynamicStatusBarExitAnimation();
-                            playScrambleEnterAnimation();
 
                             resetTimer();
 
@@ -808,41 +806,7 @@ public class CurrentSessionTimerFragment extends Fragment {
         lastBarAnimationSet.start();
     }
 
-    public void playScrambleExitAnimation() {
-        ObjectAnimator exit = ObjectAnimator.ofFloat(mScrambleText, View.TRANSLATION_Y, -mScrambleText.getHeight() - Util.convertDpToPx(getActivity(), 48));
-        exit.setDuration(300);
-        exit.setInterpolator(new AccelerateInterpolator());
-        AnimatorSet scrambleAnimatorSet = new AnimatorSet();
-        scrambleAnimatorSet.play(exit);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            ObjectAnimator elevate = ObjectAnimator.ofFloat(mScrambleText, View.TRANSLATION_Z, Util.convertDpToPx(getActivity(), 2));
-            elevate.setDuration(100);
-            elevate.setInterpolator(new AccelerateDecelerateInterpolator());
-            scrambleAnimatorSet.play(elevate).before(exit);
-        }
-        scrambleAnimatorSet.start();
-    }
-
-    public void playScrambleEnterAnimation() {
-        ObjectAnimator enter = ObjectAnimator.ofFloat(mScrambleText, View.TRANSLATION_Y, 0);
-        enter.setDuration(300);
-        enter.setInterpolator(new DecelerateInterpolator());
-        AnimatorSet scrambleAnimatorSet = new AnimatorSet();
-        scrambleAnimatorSet.play(enter);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            ObjectAnimator lower = ObjectAnimator.ofFloat(mScrambleText, View.TRANSLATION_Z, Util.convertDpToPx(getActivity(), 0));
-            lower.setDuration(100);
-            lower.setInterpolator(new AccelerateDecelerateInterpolator());
-            scrambleAnimatorSet.play(lower).after(enter);
-        }
-        scrambleAnimatorSet.start();
-    }
-
-    public void playToolbarExitAnimation() {
-    }
-
     public void startHoldTimer() {
-        playScrambleExitAnimation();
         playLastBarExitAnimation();
         mHoldTiming = true;
         mHoldTimerStartTimestamp = System.nanoTime();
@@ -861,7 +825,6 @@ public class CurrentSessionTimerFragment extends Fragment {
      * Start inspection; Start Generating Next Scramble
      */
     public void startInspection() {
-        playScrambleExitAnimation();
         playLastBarExitAnimation();
         mDynamicStatusBarText.setText(R.string.inspecting);
         playDynamicStatusBarEnterAnimation();
@@ -887,7 +850,6 @@ public class CurrentSessionTimerFragment extends Fragment {
      * Start timing; does not start generating next scramble
      */
     public void startTiming() {
-        playScrambleExitAnimation();
         playLastBarExitAnimation();
         playDynamicStatusBarEnterAnimation();
         mTimingStartTimestamp = System.nanoTime();
@@ -926,6 +888,7 @@ public class CurrentSessionTimerFragment extends Fragment {
 
     public interface ActivityCallback {
         Toolbar getActionBarToolbar();
+
         void enableMenuItems(boolean enable);
     }
 

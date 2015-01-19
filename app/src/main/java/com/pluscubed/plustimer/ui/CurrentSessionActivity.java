@@ -237,6 +237,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
 
         ViewTreeObserver vto = findViewById(android.R.id.content).getViewTreeObserver();
         vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @SuppressWarnings("deprecation")
             @Override
             public void onGlobalLayout() {
                 if (getActionBarToolbar().isTitleTruncated()) {
