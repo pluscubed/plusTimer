@@ -2,52 +2,43 @@ package com.pluscubed.plustimer.utils;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 
 import com.afollestad.materialdialogs.Theme;
 import com.pluscubed.plustimer.R;
-import com.pluscubed.plustimer.ui.SettingsActivity;
 
 public class ThemeUtils {
 
     private Context mContext;
     private boolean darkMode;
-    private boolean trueBlack;
+    private boolean blackMode;
 
     public ThemeUtils(Activity context) {
         mContext = context;
         isChanged(); // invalidate stored booleans
     }
 
-    public static boolean isDarkMode(Context context) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        return prefs.getString(SettingsActivity.PREF_THEME_LIST, "0").equals("1");
-    }
-
-    public static boolean isTrueBlack(Context context) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        return prefs.getString(SettingsActivity.PREF_THEME_LIST, "0").equals("2");
-    }
-
     public static Theme getDialogTheme(Context context) {
-        if (isDarkMode(context) || isTrueBlack(context)) return Theme.DARK;
-        else return Theme.LIGHT;
+        if (PrefUtils.getTheme(context) == PrefUtils.Theme.DARK
+                || PrefUtils.getTheme(context) == PrefUtils.Theme.BLACK) {
+            return Theme.DARK;
+        } else {
+            return Theme.LIGHT;
+        }
     }
 
     public boolean isChanged() {
-        boolean darkTheme = isDarkMode(mContext);
-        boolean blackTheme = isTrueBlack(mContext);
+        boolean darkTheme = PrefUtils.getTheme(mContext) == PrefUtils.Theme.DARK;
+        boolean blackTheme = PrefUtils.getTheme(mContext) == PrefUtils.Theme.BLACK;
 
-        boolean changed = darkMode != darkTheme || trueBlack != blackTheme;
+        boolean changed = darkMode != darkTheme || blackMode != blackTheme;
         darkMode = darkTheme;
-        trueBlack = blackTheme;
+        blackMode = blackTheme;
         return changed;
     }
 
     public int getCurrent(boolean hasNavDrawer) {
         if (hasNavDrawer) {
-            if (trueBlack) {
+            if (blackMode) {
                 return R.style.Theme_PlusTimer_Black_WithNavDrawer;
             } else if (darkMode) {
                 return R.style.Theme_PlusTimer_Dark_WithNavDrawer;
@@ -55,7 +46,7 @@ public class ThemeUtils {
                 return R.style.Theme_PlusTimer_WithNavDrawer;
             }
         } else {
-            if (trueBlack) {
+            if (blackMode) {
                 return R.style.Theme_PlusTimer_Black;
             } else if (darkMode) {
                 return R.style.Theme_PlusTimer_Dark;

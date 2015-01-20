@@ -4,25 +4,25 @@
     <MultiSelectListPreference
         android:key="pref_puzzletypes_multiselectlist"
         android:title="@string/puzzle_types_setup" />
+
     <CheckBoxPreference
         android:defaultValue="true"
         android:key="pref_milliseconds_checkbox"
         android:title="@string/pref_milliseconds_title" />
-    <CheckBoxPreference
-        android:defaultValue="false"
-        android:key="pref_sign_checkbox"
-        android:title="@string/pref_sign_title" />
+
     <ListPreference
         android:defaultValue="0"
         android:entries="@array/pref_theme_list_entries"
         android:key="pref_theme_list"
         android:summary="%s"
         android:title="@string/pref_theme_title" />
+
     <CheckBoxPreference
         android:defaultValue="true"
         android:key="pref_keepscreenon_checkbox"
         android:summary="@string/pref_keepscreenon_summary"
         android:title="@string/pref_keepscreenon_title" />
+
     <PreferenceCategory android:title="@string/pref_timer_category_title">
         <CheckBoxPreference
             android:defaultValue="true"
@@ -44,7 +44,6 @@
             android:dialogTitle="@string/time_text_edittext_dialog_title"
             android:inputType="number"
             android:key="pref_time_display_size_edittext"
-            android:summary="%s"
             android:title="@string/pref_time_text_size_title" />
         <ListPreference
             android:defaultValue="0"
@@ -53,4 +52,16 @@
             android:summary="%s"
             android:title="@string/pref_update_time_title" />
     </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/scrambles">
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="pref_sign_checkbox"
+            android:title="@string/pref_sign_title" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="pref_monospace_scrambles_checkbox"
+            android:title="@string/pref_monospace_scrambles_title" />
+    </PreferenceCategory>
+
 </PreferenceScreen>

@@ -1,6 +1,6 @@
 package com.pluscubed.plustimer.model;
 
-import com.pluscubed.plustimer.utils.Util;
+import com.pluscubed.plustimer.utils.Utils;
 
 /**
  * Scramble and Svg
@@ -17,7 +17,7 @@ public class ScrambleAndSvg {
     }
 
     public String getUiScramble(boolean sign, String puzzleTypeName) {
-        return sign ? Util.wcaToSignNotation(mScramble,
+        return sign ? Utils.wcaToSignNotation(mScramble,
                 puzzleTypeName) : mScramble;
     }
 
@@ -26,7 +26,7 @@ public class ScrambleAndSvg {
     }
 
     public void setScramble(String scramble, String puzzleTypeName) {
-        mScramble = Util.signToWcaNotation(scramble, puzzleTypeName);
+        mScramble = Utils.signToWcaNotation(scramble, puzzleTypeName);
     }
 
     public String getSvg() {

@@ -32,9 +32,7 @@ import java.util.List;
 /**
  * Utilities class
  */
-public class Util {
-
-    public static final String PREF_VERSION_CODE = "pref_version_code";
+public class Utils {
 
     static {
         gson = new GsonBuilder()

@@ -1,8 +1,6 @@
 package com.pluscubed.plustimer.model;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -10,10 +8,9 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
-import com.pluscubed.plustimer.BuildConfig;
 import com.pluscubed.plustimer.R;
-import com.pluscubed.plustimer.ui.SettingsActivity;
-import com.pluscubed.plustimer.utils.Util;
+import com.pluscubed.plustimer.utils.PrefUtils;
+import com.pluscubed.plustimer.utils.Utils;
 
 import net.gnehzr.tnoodle.scrambles.Puzzle;
 import net.gnehzr.tnoodle.scrambles.PuzzlePlugins;
@@ -24,7 +21,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -51,7 +47,6 @@ public enum PuzzleType {
     TWO("222");
 
     public static final int CURRENT_SESSION = -1;
-    public static final String PREF_CURRENT_PUZZLETYPE = "current_puzzletype";
     private static final int NOT_SPECIAL_STRING = -1;
     private static PuzzleType sCurrentPuzzleType;
     private static List<Observer> mObservers;
@@ -107,10 +102,7 @@ public enum PuzzleType {
     }
 
     public static void setCurrent(PuzzleType type, Context context) {
-        SharedPreferences defaultSharedPreferences = PreferenceManager
-                .getDefaultSharedPreferences(context);
-        defaultSharedPreferences.edit().putString(PREF_CURRENT_PUZZLETYPE,
-                type.name()).apply();
+        PrefUtils.saveCurrentPuzzleType(context, type.name());
         if (type != sCurrentPuzzleType) {
             sCurrentPuzzleType = type;
             notifyPuzzleTypeChanged();
@@ -129,14 +121,11 @@ public enum PuzzleType {
 
     public synchronized static void initialize(Context context) {
         if (sCurrentPuzzleType == null)
-            sCurrentPuzzleType = valueOf(PreferenceManager
-                    .getDefaultSharedPreferences(context).getString
-                            (PREF_CURRENT_PUZZLETYPE, THREE.name()));
+            sCurrentPuzzleType = PrefUtils.getCurrentPuzzleType(context);
         for (PuzzleType puzzleType : values()) {
             puzzleType.init(context);
         }
-        PreferenceManager.getDefaultSharedPreferences(context).edit().putInt
-                (Util.PREF_VERSION_CODE, BuildConfig.VERSION_CODE).apply();
+        PrefUtils.saveVersionCode(context);
     }
 
     public HistorySessions getHistorySessions() {
@@ -145,11 +134,9 @@ public enum PuzzleType {
 
     private synchronized void init(Context context) {
         if (!mInitialized) {
-            SharedPreferences defaultSharedPreferences = PreferenceManager
-                    .getDefaultSharedPreferences(context);
 
             //AFTER UPDATING APP////////////
-            int savedVersionCode = defaultSharedPreferences.getInt(Util.PREF_VERSION_CODE, 10);
+            int savedVersionCode = PrefUtils.getVersionCode(context);
 
             if (savedVersionCode <= 10) {
                 //Version <=10: Set up history sessions with old
@@ -194,19 +181,17 @@ public enum PuzzleType {
                             }
                         })
                         .create();
-                Util.updateData(context, historyFileName, gson);
-                Util.updateData(context, currentSessionFileName, gson);
+                Utils.updateData(context, historyFileName, gson);
+                Utils.updateData(context, currentSessionFileName, gson);
             }
 
             ////////////////////////////
 
             mHistorySessions.init(context);
-            Set<String> selected = defaultSharedPreferences.getStringSet
-                    (SettingsActivity.PREF_PUZZLETYPES_MULTISELECTLIST,
-                            new HashSet<String>());
-            mEnabled = selected.size() == 0 || selected.contains(name());
-            List<Session> currentSessions = Util.getSessionListFromFile
-                    (context, currentSessionFileName);
+            Set<String> selected = PrefUtils.getSelectedPuzzleTypeNames(context);
+            mEnabled = (selected.size() == 0 || selected.contains(name()));
+            List<Session> currentSessions =
+                    Utils.getSessionListFromFile(context, currentSessionFileName);
             if (currentSessions.size() > 0) {
                 mCurrentSession = currentSessions.get(0);
             } else {
@@ -219,7 +204,7 @@ public enum PuzzleType {
     public void saveCurrentSession(Context context) {
         ArrayList<Session> session = new ArrayList<>();
         session.add(mCurrentSession);
-        Util.saveSessionListToFile(context, currentSessionFileName, session);
+        Utils.saveSessionListToFile(context, currentSessionFileName, session);
     }
 
     public void submitCurrentSession(Context context) {

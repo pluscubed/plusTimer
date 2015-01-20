@@ -5,7 +5,6 @@ import android.app.Fragment;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -25,7 +24,8 @@ import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
-import com.pluscubed.plustimer.utils.Util;
+import com.pluscubed.plustimer.utils.PrefUtils;
+import com.pluscubed.plustimer.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -114,12 +114,8 @@ public class SolveListFragment extends Fragment {
     }
 
     private void initSharedPrefs() {
-        mMillisecondsEnabled = PreferenceManager.getDefaultSharedPreferences
-                (getActivity())
-                .getBoolean(SettingsActivity.PREF_MILLISECONDS_CHECKBOX, true);
-        mSignEnabled = PreferenceManager.getDefaultSharedPreferences
-                (getActivity())
-                .getBoolean(SettingsActivity.PREF_SIGN_CHECKBOX, true);
+        mMillisecondsEnabled = PrefUtils.isDisplayMillisecondsEnabled(getActivity());
+        mSignEnabled = PrefUtils.isSignEnabled(getActivity());
     }
 
     @Override
@@ -445,13 +441,11 @@ public class SolveListFragment extends Fragment {
             Collections.reverse(solves);
             addAll(solves);
             mBestAndWorstSolves = new ArrayList<>();
-            mBestAndWorstSolves.add(Util.getBestSolveOfList(mSession
+            mBestAndWorstSolves.add(Utils.getBestSolveOfList(mSession
                     .getSolves()));
-            mBestAndWorstSolves.add(Util.getWorstSolveOfList(mSession
+            mBestAndWorstSolves.add(Utils.getWorstSolveOfList(mSession
                     .getSolves()));
-            mSignEnabled = PreferenceManager.getDefaultSharedPreferences
-                    (getActivity()).getBoolean(SettingsActivity
-                    .PREF_SIGN_CHECKBOX, true);
+            mSignEnabled = PrefUtils.isSignEnabled(getActivity());
             notifyDataSetChanged();
         }
 

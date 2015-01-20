@@ -1,13 +1,10 @@
 package com.pluscubed.plustimer.ui;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
@@ -21,7 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.pluscubed.plustimer.R;
-import com.pluscubed.plustimer.utils.ThemeUtils;
+import com.pluscubed.plustimer.utils.PrefUtils;
 
 /**
  * Base Activity with the Navigation Drawer
@@ -43,7 +40,6 @@ public abstract class DrawerActivity extends ThemableActivity {
             NAVDRAWER_ITEM_HELP,
             NAVDRAWER_ITEM_ABOUT
     };
-    private static final String PREF_WELCOME_DONE = "welcome_done";
     private static final int NAVDRAWER_LAUNCH_DELAY = 250;
     private static final int MAIN_CONTENT_FADEOUT_DURATION = 150;
     private static final int MAIN_CONTENT_FADEIN_DURATION = 250;
@@ -65,16 +61,6 @@ public abstract class DrawerActivity extends ThemableActivity {
 
     private Handler mHandler;
     private Toolbar mActionBarToolbar;
-
-    public static boolean isWelcomeDone(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREF_WELCOME_DONE, false);
-    }
-
-    public static void markWelcomeDone(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putBoolean(PREF_WELCOME_DONE, true).apply();
-    }
 
     /**
      * Returns the navigation drawer item that corresponds to this Activity.
@@ -114,7 +100,7 @@ public abstract class DrawerActivity extends ThemableActivity {
                 .activity_drawer_drawerlayout);
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, Gravity.START);
         Resources resources = getResources();
-        if (!ThemeUtils.isTrueBlack(this)) {
+        if (PrefUtils.getTheme(this) != PrefUtils.Theme.BLACK) {
             mDrawerLayout.setStatusBarBackgroundColor(resources.getColor(R.color.primary_dark));
         }
 
@@ -177,8 +163,8 @@ public abstract class DrawerActivity extends ThemableActivity {
 
         resetTitle();
 
-        if (!isWelcomeDone(this)) {
-            markWelcomeDone(this);
+        if (!PrefUtils.isWelcomeDone(this)) {
+            PrefUtils.markWelcomeDone(this);
             mDrawerLayout.openDrawer(Gravity.START);
         }
 

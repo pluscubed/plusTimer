@@ -8,7 +8,7 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.pluscubed.plustimer.R;
-import com.pluscubed.plustimer.utils.Util;
+import com.pluscubed.plustimer.utils.Utils;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -127,12 +127,12 @@ public class Session {
                 solves.add(x);
             }
 
-            long result = Util.getAverageOf(solves);
+            long result = Utils.getAverageOf(solves);
 
             if (result == Long.MAX_VALUE) {
                 return "DNF";
             } else {
-                return Util.timeStringFromNs(result, millisecondsEnabled);
+                return Utils.timeStringFromNs(result, millisecondsEnabled);
             }
         }
         return "";
@@ -155,7 +155,7 @@ public class Session {
         if (bestAverage == Long.MAX_VALUE) {
             return "DNF";
         }
-        return Util.timeStringFromNs(bestAverage, millisecondsEnabled);
+        return Utils.timeStringFromNs(bestAverage, millisecondsEnabled);
     }
 
     /**
@@ -176,7 +176,7 @@ public class Session {
             for (int i = 0; mSolves.size() - (number + i) >= 0; i++) {
                 //Sublist the [number] of solves, offset by i from the most
                 // recent. Gets the average.
-                long average = Util.getAverageOf(mSolves.subList(mSolves.size
+                long average = Utils.getAverageOf(mSolves.subList(mSolves.size
                         () - (number + i), mSolves.size() - i));
                 //If the average is less than the current best (or on the
                 // first loop), set the best average to the average
@@ -198,11 +198,11 @@ public class Session {
                 return "DNF";
             }
         }
-        return Util.timeStringFromNs(sum / mSolves.size(), milliseconds);
+        return Utils.timeStringFromNs(sum / mSolves.size(), milliseconds);
     }
 
     public String getTimestampString(Context context) {
-        return Util.timeDateStringFromTimestamp(context,
+        return Utils.timeDateStringFromTimestamp(context,
                 getLastSolve().getTimestamp());
     }
 
@@ -235,17 +235,17 @@ public class Session {
                     (getStringMean(milliseconds));
             if (getNumberOfSolves() > 1) {
                 s.append("\n").append(context.getString(R.string.best))
-                        .append(Util.getBestSolveOfList(mSolves)
+                        .append(Utils.getBestSolveOfList(mSolves)
                                 .getTimeString(milliseconds));
                 s.append("\n").append(context.getString(R.string.worst))
-                        .append(Util.getWorstSolveOfList(mSolves)
+                        .append(Utils.getWorstSolveOfList(mSolves)
                                 .getTimeString(milliseconds));
 
                 if (getNumberOfSolves() > 2) {
-                    long average = Util.getAverageOf(mSolves);
+                    long average = Utils.getAverageOf(mSolves);
                     if (average != Long.MAX_VALUE) {
                         s.append("\n").append(context.getString(R.string
-                                .average)).append(Util.timeStringFromNs
+                                .average)).append(Utils.timeStringFromNs
                                 (average, milliseconds));
                     } else {
                         s.append("\n").append(context.getString(R.string
@@ -280,8 +280,8 @@ public class Session {
                 s.append("\n\n");
                 int c = 1;
                 for (Solve i : mSolves) {
-                    Solve best = Util.getBestSolveOfList(mSolves);
-                    Solve worst = Util.getWorstSolveOfList(mSolves);
+                    Solve best = Utils.getBestSolveOfList(mSolves);
+                    Solve worst = Utils.getWorstSolveOfList(mSolves);
                     s.append(c).append(". ");
                     if (i == best || i == worst) {
                         s.append("(").append(i.getDescriptiveTimeString
@@ -289,7 +289,7 @@ public class Session {
                     } else {
                         s.append(i.getDescriptiveTimeString(milliseconds));
                     }
-                    s.append("\n").append("     ").append(Util
+                    s.append("\n").append("     ").append(Utils
                             .timeDateStringFromTimestamp(context,
                                     i.getTimestamp()))
                             .append("\n").append("     ").append(i

@@ -4,9 +4,9 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.Fragment;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PictureDrawable;
 import android.os.Build;
@@ -39,7 +39,8 @@ import com.pluscubed.plustimer.model.BldSolve;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
-import com.pluscubed.plustimer.utils.Util;
+import com.pluscubed.plustimer.utils.PrefUtils;
+import com.pluscubed.plustimer.utils.Utils;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -102,12 +103,17 @@ public class CurrentSessionTimerFragment extends Fragment {
     private boolean mHoldToStartEnabled;
     private boolean mInspectionEnabled;
     private boolean mTwoRowTimeEnabled;
-    private int mUpdateTimePref;
+    private PrefUtils.TimerUpdate mUpdateTimePref;
     private boolean mMillisecondsEnabled;
+    private boolean mMonospaceScrambleFontEnabled;
     private int mPrefSize;
     private boolean mKeepScreenOn;
     private boolean mSignEnabled;
+
+
     private CurrentSessionTimerRetainedFragment mRetainedFragment;
+
+
     private TextView mTimerText;
     private TextView mTimerText2;
     private TextView mScrambleText;
@@ -121,7 +127,11 @@ public class CurrentSessionTimerFragment extends Fragment {
     private Button mLastDeleteButton;
     private FrameLayout mDynamicStatusBarFrame;
     private TextView mDynamicStatusBarText;
+
+
     private Handler mUiHandler;
+
+
     private boolean mHoldTiming;
     private long mHoldTimerStartTimestamp;
     private boolean mInspecting;
@@ -135,7 +145,7 @@ public class CurrentSessionTimerFragment extends Fragment {
     private final Runnable mInspectionRunnable = new Runnable() {
         @Override
         public void run() {
-            String[] array = Util.timeStringsFromNsSplitByDecimal
+            String[] array = Utils.timeStringsFromNsSplitByDecimal
                     (16000000000L - (System.nanoTime() -
                             mInspectionStartTimestamp), mMillisecondsEnabled);
             array[1] = "";
@@ -183,7 +193,6 @@ public class CurrentSessionTimerFragment extends Fragment {
             mUiHandler.postDelayed(this, REFRESH_RATE);
         }
     };
-    private LinearLayoutManager mTimeBarLayoutManager;
     private boolean mBldMode;
     private final PuzzleType.Observer puzzleTypeObserver = new PuzzleType
             .Observer() {
@@ -212,13 +221,13 @@ public class CurrentSessionTimerFragment extends Fragment {
     private final Runnable mTimerRunnable = new Runnable() {
         @Override
         public void run() {
-            if (mUpdateTimePref != 2) {
+            if (mUpdateTimePref != PrefUtils.TimerUpdate.OFF) {
                 if (!mBldMode) {
-                    setTimerText(Util.timeStringsFromNsSplitByDecimal(
+                    setTimerText(Utils.timeStringsFromNsSplitByDecimal(
                             System.nanoTime() - mTimingStartTimestamp,
                             mMillisecondsEnabled));
                 } else {
-                    setTimerText(Util.timeStringsFromNsSplitByDecimal(
+                    setTimerText(Utils.timeStringsFromNsSplitByDecimal(
                             System.nanoTime() - mInspectionStartTimestamp,
                             mMillisecondsEnabled));
                 }
@@ -267,7 +276,7 @@ public class CurrentSessionTimerFragment extends Fragment {
         if (mTwoRowTimeEnabled) {
             mTimerText.setText(array[0]);
             mTimerText2.setText(array[1]);
-            if (array[1].equals("") || (mTiming && mUpdateTimePref != 0)) {
+            if (array[1].equals("") || (mTiming && mUpdateTimePref != PrefUtils.TimerUpdate.ON)) {
                 mTimerText2.setVisibility(View.GONE);
             } else {
                 mTimerText2.setVisibility(View.VISIBLE);
@@ -275,7 +284,7 @@ public class CurrentSessionTimerFragment extends Fragment {
         } else {
             mTimerText2.setVisibility(View.GONE);
             mTimerText.setText(array[0]);
-            if (!array[1].equals("") && !(mTiming && (mUpdateTimePref != 0))) {
+            if (!array[1].equals("") && !(mTiming && (mUpdateTimePref != PrefUtils.TimerUpdate.ON))) {
                 mTimerText.append("." + array[1]);
             }
         }
@@ -413,32 +422,28 @@ public class CurrentSessionTimerFragment extends Fragment {
                     .FLAG_KEEP_SCREEN_ON);
         }
 
+        if (mMonospaceScrambleFontEnabled) {
+            mScrambleText.setTypeface(Typeface.MONOSPACE);
+        } else {
+            mScrambleText.setTypeface(Typeface.DEFAULT);
+        }
+
         //When Settings change
         onSessionSolvesChanged();
     }
 
     public void initSharedPrefs() {
-        SharedPreferences defaultSharedPreferences = PreferenceManager
-                .getDefaultSharedPreferences(getActivity());
-        mInspectionEnabled = defaultSharedPreferences
-                .getBoolean(SettingsActivity.PREF_INSPECTION_CHECKBOX, true);
-        mHoldToStartEnabled = defaultSharedPreferences
-                .getBoolean(SettingsActivity.PREF_HOLDTOSTART_CHECKBOX, true);
-        mTwoRowTimeEnabled = getResources().getConfiguration().orientation == 1
-                && defaultSharedPreferences
-                .getBoolean(SettingsActivity.PREF_TWO_ROW_TIME_CHECKBOX, true);
-        mUpdateTimePref = Integer.parseInt(
-                defaultSharedPreferences.getString(SettingsActivity
-                        .PREF_UPDATE_TIME_LIST, "0"));
-        mMillisecondsEnabled = defaultSharedPreferences
-                .getBoolean(SettingsActivity.PREF_MILLISECONDS_CHECKBOX, true);
-        mPrefSize = Integer.parseInt(defaultSharedPreferences
-                .getString(SettingsActivity.PREF_TIME_TEXT_SIZE_EDITTEXT,
-                        "100"));
-        mKeepScreenOn = defaultSharedPreferences.getBoolean(SettingsActivity
-                .PREF_KEEPSCREENON_CHECKBOX, true);
-        mSignEnabled = defaultSharedPreferences.getBoolean(SettingsActivity
-                .PREF_SIGN_CHECKBOX, true);
+        mInspectionEnabled = PrefUtils.isInspectionEnabled(getActivity());
+        mHoldToStartEnabled = PrefUtils.isHoldToStartEnabled(getActivity());
+        mTwoRowTimeEnabled =
+                getResources().getConfiguration().orientation == 1
+                        && PrefUtils.isTwoRowTimeEnabled(getActivity());
+        mUpdateTimePref = PrefUtils.getTimerUpdateMode(getActivity());
+        mMillisecondsEnabled = PrefUtils.isDisplayMillisecondsEnabled(getActivity());
+        mPrefSize = PrefUtils.getTimerTextSize(getActivity());
+        mKeepScreenOn = PrefUtils.isKeepScreenOnEnabled(getActivity());
+        mSignEnabled = PrefUtils.isSignEnabled(getActivity());
+        mMonospaceScrambleFontEnabled = PrefUtils.isMonospaceScrambleFontEnabled(getActivity());
     }
 
     public void setTimerTextToPrefSize() {
@@ -602,9 +607,9 @@ public class CurrentSessionTimerFragment extends Fragment {
             }
         });
 
-        mTimeBarLayoutManager = new LinearLayoutManager(getActivity(),
+        LinearLayoutManager timeBarLayoutManager = new LinearLayoutManager(getActivity(),
                 LinearLayoutManager.HORIZONTAL, false);
-        mTimeBarRecycler.setLayoutManager(mTimeBarLayoutManager);
+        mTimeBarRecycler.setLayoutManager(timeBarLayoutManager);
         mTimeBarRecycler.setHasFixedSize(true);
         mTimeBarRecycler.setAdapter(new SolveRecyclerAdapter());
 
@@ -929,8 +934,8 @@ public class CurrentSessionTimerFragment extends Fragment {
             if (mSolves != null) oldSize = mSolves.size();
             mSolves = PuzzleType.getCurrent().getSession(PuzzleType
                     .CURRENT_SESSION).getSolves();
-            mBestAndWorstSolves[0] = Util.getBestSolveOfList(mSolves);
-            mBestAndWorstSolves[1] = Util.getWorstSolveOfList(mSolves);
+            mBestAndWorstSolves[0] = Utils.getBestSolveOfList(mSolves);
+            mBestAndWorstSolves[1] = Utils.getWorstSolveOfList(mSolves);
 
             switch (mode) {
                 case UPDATE_ALL:
