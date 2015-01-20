@@ -55,8 +55,6 @@ public class CurrentSessionTimerFragment extends Fragment {
     public static final String TAG = "CURRENT_SESSION_TIMER_FRAGMENT";
     public static final long HOLD_TIME = 550000000L;
     public static final int REFRESH_RATE = 15;
-    private static final String CURRENT_SESSION_TIMER_RETAINED_TAG
-            = "CURRENT_SESSION_TIMER_RETAINED";
     private static final String STATE_IMAGE_DISPLAYED =
             "scramble_image_displayed_boolean";
     private static final String STATE_START_TIME = "start_time_long";
@@ -335,17 +333,6 @@ public class CurrentSessionTimerFragment extends Fragment {
         PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
                 .registerObserver(sessionObserver);
 
-        mRetainedFragment = (CurrentSessionTimerRetainedFragment)
-                getFragmentManager().findFragmentByTag
-                        (CURRENT_SESSION_TIMER_RETAINED_TAG);
-        // If the Fragment is null, create and add it
-        if (mRetainedFragment == null) {
-            mRetainedFragment = new CurrentSessionTimerRetainedFragment();
-            getFragmentManager().beginTransaction().add(mRetainedFragment,
-                    CURRENT_SESSION_TIMER_RETAINED_TAG).commit();
-        }
-        mRetainedFragment.setTargetFragment(this, 0);
-
         //Set up UIHandler
         mUiHandler = new Handler(Looper.getMainLooper());
 
@@ -615,6 +602,9 @@ public class CurrentSessionTimerFragment extends Fragment {
 
         mDynamicStatusBarFrame = (FrameLayout) v.findViewById(R.id.fragment_current_session_timer_dynamic_status_frame);
         mDynamicStatusBarText = (TextView) v.findViewById(R.id.fragment_current_session_timer_dynamic_status_text);
+
+        mRetainedFragment = getActivityCallback().getTimerRetainedFragment();
+        mRetainedFragment.setTargetFragment(this, 0);
 
         //When the root view is touched...
         v.setOnTouchListener(new View.OnTouchListener() {
@@ -889,6 +879,8 @@ public class CurrentSessionTimerFragment extends Fragment {
 
     public interface ActivityCallback {
         Toolbar getActionBarToolbar();
+
+        CurrentSessionTimerRetainedFragment getTimerRetainedFragment();
 
         void enableMenuItems(boolean enable);
     }

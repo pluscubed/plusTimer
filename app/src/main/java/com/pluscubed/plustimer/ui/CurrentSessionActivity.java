@@ -37,6 +37,9 @@ public class CurrentSessionActivity extends DrawerActivity implements
     private static final String STATE_MENU_ITEMS_ENABLE_BOOLEAN =
             "menu_items_enable_boolean";
 
+    private static final String CURRENT_SESSION_TIMER_RETAINED_TAG
+            = "CURRENT_SESSION_TIMER_RETAINED";
+
     private boolean mScrambleImageActionEnable;
 
     private int mSelectedPage;
@@ -50,6 +53,12 @@ public class CurrentSessionActivity extends DrawerActivity implements
     @Override
     public Toolbar getActionBarToolbar() {
         return super.getActionBarToolbar();
+    }
+
+    @Override
+    public CurrentSessionTimerRetainedFragment getTimerRetainedFragment() {
+        return (CurrentSessionTimerRetainedFragment)
+                getFragmentManager().findFragmentByTag(CURRENT_SESSION_TIMER_RETAINED_TAG);
     }
 
     @Override
@@ -72,6 +81,15 @@ public class CurrentSessionActivity extends DrawerActivity implements
         if (savedInstanceState != null) {
             mScrambleImageActionEnable = savedInstanceState.getBoolean
                     (STATE_MENU_ITEMS_ENABLE_BOOLEAN);
+        }
+
+        Fragment retainedFragment =
+                getFragmentManager().findFragmentByTag(CURRENT_SESSION_TIMER_RETAINED_TAG);
+        // If the Fragment is null, create and add it
+        if (retainedFragment == null) {
+            retainedFragment = new CurrentSessionTimerRetainedFragment();
+            getFragmentManager().beginTransaction().add(retainedFragment,
+                    CURRENT_SESSION_TIMER_RETAINED_TAG).commit();
         }
 
         //Set up ViewPager with CurrentSessionAdapter
