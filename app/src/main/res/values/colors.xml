@@ -10,4 +10,7 @@
 
     <color name="list_divider_dark" type="color">#0cffffff</color>
     <color name="list_divider_light" type="color">#0c000000</color>
+
+    <color name="hint_light" type="color">#40000000</color>
+    <color name="hint_dark" type="color">#40ffffff</color>
 </resources>
