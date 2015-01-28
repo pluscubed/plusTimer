@@ -30,8 +30,8 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 21
-        versionCode 18
-        versionName '0.2.0'
+        versionCode 19
+        versionName '0.2.1'
     }
 
     if (project.hasProperty("RELEASE_STORE_FILE")) {
@@ -69,8 +69,8 @@ android {
         normal {
             buildConfigField "boolean", "USE_CRASHLYTICS", "true"
         }
-        noCrashlytics {
-            versionName = android.defaultConfig.versionName + "_NoPermissions"
+        noPermissions {
+            versionName = android.defaultConfig.versionName + "-NoPermissions"
             buildConfigField "boolean", "USE_CRASHLYTICS", "false"
             ext.enableCrashlytics = false
         }
