@@ -1,6 +1,7 @@
 package com.pluscubed.plustimer.ui;
 
 import android.app.ListFragment;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -438,10 +439,16 @@ public class HistorySessionListFragment extends ListFragment {
         Spinner menuPuzzleSpinner = (Spinner) MenuItemCompat.getActionView
                 (menu.findItem(R.id
                         .menu_activity_history_sessionlist_puzzletype_spinner));
-        ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter = new
-                SpinnerPuzzleTypeAdapter(getActivity().getLayoutInflater(),
-                ((ActionBarActivity) getActivity()).getSupportActionBar()
-                        .getThemedContext());
+        Context themedContext = ((ActionBarActivity) getActivity()).getSupportActionBar()
+                .getThemedContext();
+        if (themedContext == null) {
+            themedContext = getActivity();
+        }
+        ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter =
+                new SpinnerPuzzleTypeAdapter(
+                        getActivity().getLayoutInflater(),
+                        themedContext
+                );
         menuPuzzleSpinner.setAdapter(puzzleTypeSpinnerAdapter);
         menuPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition
                 (PuzzleType.valueOf(mPuzzleTypeName)), true);
