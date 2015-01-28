@@ -1,79 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:columnCount="2"
-    android:rowCount="4">
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:text="@string/time"
-        android:textColor="?android:attr/textColorAlertDialogListItem"
-        android:textSize="12sp" />
+    android:orientation="vertical">
 
     <com.rengwuxian.materialedittext.MaterialEditText
         android:id="@id/dialog_solve_time_edittext"
-        android:layout_width="0dp"
-        android:layout_gravity="fill_horizontal"
-        android:layout_marginLeft="8dp"
-        android:layout_marginStart="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
         android:imeOptions="actionDone"
         android:inputType="numberDecimal|textNoSuggestions"
-        android:textColor="?android:attr/textColorAlertDialogListItem"
         android:textSize="16sp"
+        app:floatingLabel="highlight"
+        app:floatingLabelAlwaysShown="true"
+        app:floatingLabelText="@string/time"
         app:primaryColor="@color/accent" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_marginBottom="4dp"
-        android:layout_marginTop="8dp"
-        android:text="@string/timestamp"
-        android:textColor="?android:attr/textColorAlertDialogListItem"
-        android:textSize="12sp" />
-
-    <TextView
+    <com.rengwuxian.materialedittext.MaterialEditText
         android:id="@id/dialog_solve_timestamp_textview"
-        android:layout_width="0dp"
-        android:layout_gravity="fill_horizontal"
-        android:layout_marginBottom="4dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:textColor="?android:attr/textColorAlertDialogListItem"
-        android:textSize="16sp" />
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:focusable="false"
+        android:textSize="16sp"
+        app:floatingLabel="highlight"
+        app:floatingLabelAlwaysShown="true"
+        app:floatingLabelText="@string/timestamp"
+        app:hideUnderline="true"
+        app:primaryColor="@color/accent" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:text="@string/scramble_colon"
-        android:textColor="?android:attr/textColorAlertDialogListItem"
-        android:textSize="12sp" />
 
     <com.rengwuxian.materialedittext.MaterialEditText
         android:id="@id/dialog_solve_scramble_edittext"
-        android:layout_width="0dp"
-        android:layout_gravity="fill_horizontal"
-        android:layout_marginLeft="8dp"
-        android:layout_marginStart="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
         android:imeOptions="actionDone"
         android:inputType="textMultiLine|textNoSuggestions"
-        android:textColor="?android:attr/textColorAlertDialogListItem"
         android:textSize="16sp"
+        app:floatingLabel="highlight"
+        app:floatingLabelAlwaysShown="true"
+        app:floatingLabelText="@string/scramble_colon"
         app:primaryColor="@color/accent" />
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_gravity="center_vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:text="@string/penalty"
-        android:textColor="?android:attr/textColorAlertDialogListItem"
+        android:textColor="?hintColor"
         android:textSize="12sp" />
 
     <Spinner
         android:id="@id/dialog_solve_modify_penalty_spinner"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_gravity="center_vertical|fill_horizontal"
         android:background="?android:selectableItemBackground"
-        android:textSize="16sp"
-        android:translationX="-8dp" />
-</GridLayout>
+        android:dropDownHorizontalOffset="32dp"
+        android:translationX="-16dp" />
+</LinearLayout>

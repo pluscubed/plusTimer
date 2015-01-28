@@ -3,10 +3,8 @@ package com.pluscubed.plustimer.ui;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.Editable;
@@ -27,8 +25,9 @@ import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.ScrambleAndSvg;
 import com.pluscubed.plustimer.model.Solve;
+import com.pluscubed.plustimer.utils.PrefUtils;
 import com.pluscubed.plustimer.utils.ThemeUtils;
-import com.pluscubed.plustimer.utils.Util;
+import com.pluscubed.plustimer.utils.Utils;
 import com.rengwuxian.materialedittext.MaterialEditText;
 
 import net.gnehzr.tnoodle.scrambles.InvalidScrambleException;
@@ -117,12 +116,8 @@ public class SolveDialogFragment extends DialogFragment {
             mSolveCopy = new Solve(new ScrambleAndSvg("", ""), 0);
         }
 
-        SharedPreferences defaultSharedPreferences = PreferenceManager
-                .getDefaultSharedPreferences(getActivity());
-        mMillisecondsEnabled = defaultSharedPreferences.getBoolean
-                (SettingsActivity.PREF_MILLISECONDS_CHECKBOX, true);
-        boolean signEnabled = defaultSharedPreferences.getBoolean
-                (SettingsActivity.PREF_SIGN_CHECKBOX, true);
+        mMillisecondsEnabled = PrefUtils.isDisplayMillisecondsEnabled(getActivity());
+        boolean signEnabled = PrefUtils.isSignEnabled(getActivity());
 
         String timeString = "0";
         String scramble = "";
@@ -156,7 +151,7 @@ public class SolveDialogFragment extends DialogFragment {
         //TIMESTAMP TEXTVIEW SETUP
         TextView timestampTextView = (TextView) v.findViewById(R.id
                 .dialog_solve_timestamp_textview);
-        timestampTextView.setText(Util.timeDateStringFromTimestamp
+        timestampTextView.setText(Utils.timeDateStringFromTimestamp
                 (getActivity().getApplicationContext(), timestamp));
 
         //PENALTY SPINNER SETUP
@@ -175,7 +170,8 @@ public class SolveDialogFragment extends DialogFragment {
                 TextView textView = (TextView) convertView.findViewById
                         (android.R.id.text1);
                 textView.setText(getItem(position));
-                if (!ThemeUtils.isDarkMode(getActivity()) && !ThemeUtils.isTrueBlack(getActivity())) {
+                if (PrefUtils.getTheme(getActivity()) != PrefUtils.Theme.DARK
+                        && PrefUtils.getTheme(getActivity()) != PrefUtils.Theme.BLACK) {
                     ImageView triangle = (ImageView) convertView.findViewById(R.id.spinner_item_imageview);
                     triangle.setColorFilter(Color.BLACK);
                 }
@@ -187,7 +183,8 @@ public class SolveDialogFragment extends DialogFragment {
                                         ViewGroup parent) {
                 View v = super.getDropDownView(position, convertView, parent);
                 int textColor;
-                if (ThemeUtils.isDarkMode(getActivity()) || ThemeUtils.isTrueBlack(getActivity())) {
+                if (PrefUtils.getTheme(getActivity()) == PrefUtils.Theme.DARK
+                        || PrefUtils.getTheme(getActivity()) == PrefUtils.Theme.BLACK) {
                     textColor = R.color.list_dropdown_color_dark;
                 } else {
                     textColor = R.color.list_dropdown_color_light;
@@ -230,7 +227,7 @@ public class SolveDialogFragment extends DialogFragment {
         mTimeEdit = (EditText) v.findViewById(R.id
                 .dialog_solve_time_edittext);
         if (!mAddMode) {
-            mTimeEdit.setText(Util.timeStringSecondsFromNs(mSolve.getRawTime(),
+            mTimeEdit.setText(Utils.timeStringSecondsFromNs(mSolve.getRawTime(),
                     mMillisecondsEnabled));
         }
         mTimeEdit.addTextChangedListener(new TextWatcher() {
@@ -258,7 +255,7 @@ public class SolveDialogFragment extends DialogFragment {
                             updateTitle();
                             break;
                         } else {
-                            getDialog().setTitle(Util.timeStringFromNs(0,
+                            getDialog().setTitle(Utils.timeStringFromNs(0,
                                     mMillisecondsEnabled));
                             mSolveCopy.setRawTime(0);
                             break;
@@ -360,7 +357,7 @@ public class SolveDialogFragment extends DialogFragment {
             if (mTimeEdit.getText().toString().equals("")) {
                 mTimeEdit.setText("0");
             }
-            String scrambleText = Util.signToWcaNotation
+            String scrambleText = Utils.signToWcaNotation
                     (mScrambleEdit.getText().toString(),
                             mPuzzleTypeName);
             if (!scrambleText.equals(mSolveCopy.getScrambleAndSvg()

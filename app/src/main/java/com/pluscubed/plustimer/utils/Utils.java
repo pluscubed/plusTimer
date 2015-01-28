@@ -3,7 +3,10 @@ package com.pluscubed.plustimer.utils;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.util.Log;
 
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.crashlytics.android.Crashlytics;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -32,9 +35,7 @@ import java.util.List;
 /**
  * Utilities class
  */
-public class Util {
-
-    public static final String PREF_VERSION_CODE = "pref_version_code";
+public class Utils {
 
     static {
         gson = new GsonBuilder()
@@ -106,6 +107,26 @@ public class Util {
                     }
                 }
             }
+        }
+    }
+
+    public static boolean assertSolveExists(Context c, int solveIndex, int sessionIndex) {
+        try {
+            PuzzleType.getCurrent().getSession(sessionIndex).getSolveByPosition(solveIndex);
+            return true;
+        } catch (IndexOutOfBoundsException e) {
+            new MaterialDialog.Builder(c)
+                    .content("Error: Solve #" + solveIndex + " doesn't exist")
+                    .positiveText("Dismiss")
+                    .show();
+            Crashlytics.log(Log.ERROR,
+                    "Solve #" + solveIndex + " nonexistent",
+                    PuzzleType.getCurrent()
+                            .getSession(sessionIndex)
+                            .toString(c, PuzzleType.getCurrent().name(), true, true, true, false)
+            );
+            Crashlytics.logException(e);
+            return false;
         }
     }
 

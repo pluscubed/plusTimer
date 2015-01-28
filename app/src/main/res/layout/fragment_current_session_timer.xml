@@ -76,7 +76,7 @@
         android:layout_height="wrap_content"
         android:background="?android:windowBackground"
         android:gravity="center_horizontal"
-        android:padding="6dp"
+        android:padding="8dp"
         android:text="@string/scrambling"
         android:textSize="18sp" />
 

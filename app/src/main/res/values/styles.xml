@@ -39,8 +39,8 @@
         <item name="windowActionModeOverlay">true</item>
 
         <item name="listDividerColor">@color/list_divider_light</item>
-
         <item name="activatedBackground">@drawable/activated_background_light</item>
+        <item name="hintColor">@color/hint_light</item>
     </style>
 
     <style name="Base.Theme.PlusTimer.Dark" parent="@style/Theme.AppCompat.NoActionBar">
@@ -60,8 +60,8 @@
         <item name="windowActionModeOverlay">true</item>
 
         <item name="listDividerColor">@color/list_divider_dark</item>
-
         <item name="activatedBackground">@drawable/activated_background_dark</item>
+        <item name="hintColor">@color/hint_dark</item>
     </style>
 
     <style name="Base.Theme.PlusTimer.Black" parent="@style/Theme.AppCompat.NoActionBar">
@@ -81,8 +81,8 @@
         <item name="windowActionModeOverlay">true</item>
 
         <item name="listDividerColor">@color/list_divider_dark</item>
-
         <item name="activatedBackground">@drawable/activated_background_dark</item>
+        <item name="hintColor">@color/hint_dark</item>
     </style>
 
     <style name="ButtonBarButtonStyle">

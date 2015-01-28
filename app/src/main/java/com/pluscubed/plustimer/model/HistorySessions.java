@@ -2,7 +2,7 @@ package com.pluscubed.plustimer.model;
 
 import android.content.Context;
 
-import com.pluscubed.plustimer.utils.Util;
+import com.pluscubed.plustimer.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,7 +36,7 @@ public class HistorySessions {
      */
     public void deleteSession(int index, Context context) {
         mHistorySessionsList.remove(index);
-        Util.saveSessionListToFile(context, mFilename, mHistorySessionsList);
+        Utils.saveSessionListToFile(context, mFilename, mHistorySessionsList);
     }
 
     /**
@@ -44,7 +44,7 @@ public class HistorySessions {
      */
     public void deleteSession(Session session, Context context) {
         mHistorySessionsList.remove(session);
-        Util.saveSessionListToFile(context, mFilename, mHistorySessionsList);
+        Utils.saveSessionListToFile(context, mFilename, mHistorySessionsList);
     }
 
     /**
@@ -52,14 +52,14 @@ public class HistorySessions {
      */
     public void addSession(Session session, Context context) {
         mHistorySessionsList.add(new Session(session));
-        Util.saveSessionListToFile(context, mFilename, mHistorySessionsList);
+        Utils.saveSessionListToFile(context, mFilename, mHistorySessionsList);
     }
 
     /**
      * Save the list to a file.
      */
     public void save(Context context) {
-        Util.saveSessionListToFile(context, mFilename, mHistorySessionsList);
+        Utils.saveSessionListToFile(context, mFilename, mHistorySessionsList);
     }
 
     /**
@@ -77,7 +77,7 @@ public class HistorySessions {
      * list.
      */
     public void init(Context context) {
-        mHistorySessionsList = Util.getSessionListFromFile(context, mFilename);
+        mHistorySessionsList = Utils.getSessionListFromFile(context, mFilename);
     }
 
     public void sort() {

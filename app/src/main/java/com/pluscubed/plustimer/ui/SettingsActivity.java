@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
+import com.pluscubed.plustimer.utils.PrefUtils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -25,27 +26,6 @@ import java.util.Set;
  * Settings Activity and Fragment
  */
 public class SettingsActivity extends ThemableActivity {
-
-    public static final String PREF_INSPECTION_CHECKBOX =
-            "pref_inspection_checkbox";
-    public static final String PREF_HOLDTOSTART_CHECKBOX =
-            "pref_holdtostart_checkbox";
-    public static final String PREF_KEEPSCREENON_CHECKBOX =
-            "pref_keepscreenon_checkbox";
-    public static final String PREF_TWO_ROW_TIME_CHECKBOX =
-            "pref_two_row_time_checkbox";
-    public static final String PREF_TIME_TEXT_SIZE_EDITTEXT =
-            "pref_time_display_size_edittext";
-    public static final String PREF_UPDATE_TIME_LIST =
-            "pref_update_time_list";
-    public static final String PREF_MILLISECONDS_CHECKBOX =
-            "pref_milliseconds_checkbox";
-    public static final String PREF_SIGN_CHECKBOX =
-            "pref_sign_checkbox";
-    public static final String PREF_PUZZLETYPES_MULTISELECTLIST =
-            "pref_puzzletypes_multiselectlist";
-    public static final String PREF_THEME_LIST =
-            "pref_theme_list";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,15 +65,16 @@ public class SettingsActivity extends ThemableActivity {
             super.onCreate(paramBundle);
             addPreferencesFromResource(R.xml.preferences);
 
-            EditTextPreference size = (EditTextPreference) findPreference(
-                    PREF_TIME_TEXT_SIZE_EDITTEXT);
+            EditTextPreference size = (EditTextPreference)
+                    findPreference(PrefUtils.PREF_TIME_TEXT_SIZE_EDITTEXT);
             size.setOnPreferenceChangeListener(new Preference
                     .OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference,
                                                   Object newValue) {
                     if (Integer.valueOf(newValue.toString()) > 500) {
-                        Toast.makeText(getActivity(), getString(R.string.text_size_warning), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(), getString(R.string.text_size_warning), Toast.LENGTH_SHORT)
+                                .show();
                         return false;
                     }
                     EditTextPreference size = (EditTextPreference) preference;
@@ -103,11 +84,11 @@ public class SettingsActivity extends ThemableActivity {
             });
             size.setSummary(size.getText());
 
-            ListPreference updateOccurrence = (ListPreference) findPreference
-                    (PREF_UPDATE_TIME_LIST);
+            ListPreference updateOccurrence = (ListPreference)
+                    findPreference(PrefUtils.PREF_UPDATE_TIME_LIST);
             updateOccurrence.setEntryValues(new String[]{"0", "1", "2"});
 
-            ListPreference theme = (ListPreference) findPreference(PREF_THEME_LIST);
+            ListPreference theme = (ListPreference) findPreference(PrefUtils.PREF_THEME_LIST);
             theme.setEntryValues(new String[]{"0", "1", "2"});
             theme.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
@@ -119,8 +100,7 @@ public class SettingsActivity extends ThemableActivity {
 
 
             MultiSelectListPreference puzzleTypeMultiList =
-                    (MultiSelectListPreference) findPreference
-                            (PREF_PUZZLETYPES_MULTISELECTLIST);
+                    (MultiSelectListPreference) findPreference(PrefUtils.PREF_PUZZLETYPES_MULTISELECTLIST);
 
             if (puzzleTypeMultiList.getValues().size() == 0) {
                 Set<String> all = new HashSet<>();

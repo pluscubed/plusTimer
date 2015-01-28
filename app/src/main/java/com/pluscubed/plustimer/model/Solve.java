@@ -1,6 +1,6 @@
 package com.pluscubed.plustimer.model;
 
-import com.pluscubed.plustimer.utils.Util;
+import com.pluscubed.plustimer.utils.Utils;
 
 /**
  * Solve data object
@@ -59,11 +59,11 @@ public class Solve {
             case DNF:
                 return "DNF";
             case PLUSTWO:
-                return Util.timeStringFromNs(mRawTime + 2000000000L,
+                return Utils.timeStringFromNs(mRawTime + 2000000000L,
                         milliseconds) + "+";
             case NONE:
             default:
-                return Util.timeStringFromNs(mRawTime, milliseconds);
+                return Utils.timeStringFromNs(mRawTime, milliseconds);
         }
     }
 
@@ -73,7 +73,7 @@ public class Solve {
                 return new String[]{"DNF", ""};
             case PLUSTWO:
                 long nanoseconds = mRawTime + 2000000000L;
-                String[] timeStringsSplitByDecimal = Util
+                String[] timeStringsSplitByDecimal = Utils
                         .timeStringsFromNsSplitByDecimal(nanoseconds,
                                 milliseconds);
                 timeStringsSplitByDecimal[1] = timeStringsSplitByDecimal[1] +
@@ -81,7 +81,7 @@ public class Solve {
                 return timeStringsSplitByDecimal;
             case NONE:
             default:
-                return Util.timeStringsFromNsSplitByDecimal(mRawTime,
+                return Utils.timeStringsFromNsSplitByDecimal(mRawTime,
                         milliseconds);
         }
     }
@@ -90,7 +90,7 @@ public class Solve {
         switch (mPenalty) {
             case DNF:
                 if (mRawTime != 0) {
-                    return "DNF (" + Util.timeStringFromNs(mRawTime,
+                    return "DNF (" + Utils.timeStringFromNs(mRawTime,
                             milliseconds) + ")";
                 }
             default:

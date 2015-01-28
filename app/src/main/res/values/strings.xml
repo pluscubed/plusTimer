@@ -132,5 +132,7 @@
     <string name="send_email">Send email to the developer using…</string>
     <string name="email_developer_history_data">Email History Data to Developer</string>
     <string name="text_size_warning">You can\'t set a text size larger than 500!</string>
+    <string name="scrambles">Scrambles</string>
+    <string name="pref_monospace_scrambles_title">Monospace scramble font</string>
 
 </resources>
