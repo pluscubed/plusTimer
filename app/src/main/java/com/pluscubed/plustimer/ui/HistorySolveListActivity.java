@@ -10,6 +10,7 @@ import android.view.MenuItem;
 
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
+import com.pluscubed.plustimer.utils.Utils;
 
 /**
  * History SolveList (started onListItemClick HistorySessionListFragment)
@@ -31,6 +32,9 @@ public class HistorySolveListActivity extends ThemableActivity
                                          int solveIndex) {
         DialogFragment dialog = (DialogFragment) getFragmentManager()
                 .findFragmentByTag(HISTORY_DIALOG_SOLVE_TAG);
+        if (!Utils.assertSolveExists(this, solveIndex, sessionIndex)) {
+            return;
+        }
         if (dialog == null) {
             SolveDialogFragment d = SolveDialogFragment.newInstanceDisplay
                     (PuzzleType.valueOf(puzzleTypeName).toString(),

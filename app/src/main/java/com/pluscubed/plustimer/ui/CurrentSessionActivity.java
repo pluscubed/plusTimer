@@ -22,6 +22,7 @@ import com.pluscubed.plustimer.BuildConfig;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.ui.widget.SlidingTabLayout;
+import com.pluscubed.plustimer.utils.Utils;
 
 import io.fabric.sdk.android.Fabric;
 
@@ -259,6 +260,9 @@ public class CurrentSessionActivity extends DrawerActivity implements
                                          int solveIndex) {
         DialogFragment dialog = (DialogFragment) getFragmentManager()
                 .findFragmentByTag(DIALOG_SOLVE_TAG);
+        if (!Utils.assertSolveExists(this, solveIndex, PuzzleType.CURRENT_SESSION)) {
+            return;
+        }
         if (dialog == null) {
             SolveDialogFragment d = SolveDialogFragment.newInstanceDisplay
                     (PuzzleType.getCurrent().name(),
