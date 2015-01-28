@@ -776,6 +776,9 @@ public class CurrentSessionTimerFragment extends Fragment {
     }
 
     private void playLastBarEnterAnimation() {
+        mLastDeleteButton.setEnabled(true);
+        mLastDnfButton.setEnabled(true);
+        mLastPlusTwoButton.setEnabled(true);
         ObjectAnimator enter = ObjectAnimator.ofFloat(mLastBarLinearLayout, View.TRANSLATION_Y, -mLastBarLinearLayout.getHeight());
         ObjectAnimator exit = ObjectAnimator.ofFloat(mLastBarLinearLayout, View.TRANSLATION_Y, 0f);
         enter.setDuration(125);
@@ -789,6 +792,9 @@ public class CurrentSessionTimerFragment extends Fragment {
     }
 
     public void playLastBarExitAnimation() {
+        mLastDeleteButton.setEnabled(false);
+        mLastDnfButton.setEnabled(false);
+        mLastPlusTwoButton.setEnabled(false);
         ObjectAnimator exit = ObjectAnimator.ofFloat(mLastBarLinearLayout, View.TRANSLATION_Y, 0f);
         exit.setDuration(125);
         exit.setInterpolator(new AccelerateInterpolator());
