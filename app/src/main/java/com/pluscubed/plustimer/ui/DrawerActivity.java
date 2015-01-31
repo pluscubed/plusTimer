@@ -152,15 +152,6 @@ public abstract class DrawerActivity extends ThemableActivity {
         mDrawerListLinearLayout = (LinearLayout) findViewById(R.id
                 .activity_drawer_drawer_linearlayout);
 
-        mActionBarToolbar.setNavigationIcon(R.drawable.ic_drawer);
-        mActionBarToolbar.setNavigationOnClickListener(new View
-                .OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mDrawerLayout.openDrawer(Gravity.START);
-            }
-        });
-
         resetTitle();
 
         if (!PrefUtils.isWelcomeDone(this)) {
