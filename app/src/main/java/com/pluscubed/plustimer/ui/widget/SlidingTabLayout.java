@@ -220,6 +220,14 @@ public class SlidingTabLayout extends HorizontalScrollView {
         mContentDescriptions.put(i, desc);
     }
 
+    public void setClickEnabled(boolean enabled) {
+        int childCount = mTabStrip.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View v = mTabStrip.getChildAt(i);
+            v.setEnabled(enabled);
+        }
+    }
+
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();

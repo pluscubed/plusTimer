@@ -1,5 +1,8 @@
 package com.pluscubed.plustimer.ui;
 
+import android.animation.Animator;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -13,14 +16,18 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 
 import com.crashlytics.android.Crashlytics;
 import com.pluscubed.plustimer.BuildConfig;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
+import com.pluscubed.plustimer.ui.widget.LockingViewPager;
 import com.pluscubed.plustimer.ui.widget.SlidingTabLayout;
 import com.pluscubed.plustimer.utils.Utils;
 
@@ -46,14 +53,98 @@ public class CurrentSessionActivity extends DrawerActivity implements
     private int mSelectedPage;
 
     private boolean mInvalidateActionBarOnDrawerClosed;
+    private SlidingTabLayout mSlidingTabLayout;
+    private LockingViewPager mViewPager;
 
     public static String makeFragmentName(int viewId, int index) {
         return "android:switcher:" + viewId + ":" + index;
     }
 
-    @Override
     public Toolbar getActionBarToolbar() {
         return super.getActionBarToolbar();
+    }
+
+    public void playToolbarExitAnimation() {
+        final LinearLayout toolbar = (LinearLayout) findViewById(R.id.activity_current_session_headerbar);
+        ObjectAnimator exit = ObjectAnimator.ofFloat(toolbar, View.Y,
+                -toolbar.getHeight());
+        exit.setDuration(300);
+        exit.setInterpolator(new AccelerateInterpolator());
+        AnimatorSet scrambleAnimatorSet = new AnimatorSet();
+        scrambleAnimatorSet.play(exit);
+        scrambleAnimatorSet.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (toolbar.getY() == -toolbar.getHeight()) {
+                    toolbar.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+        scrambleAnimatorSet.start();
+    }
+
+    public void playToolbarEnterAnimation() {
+        final LinearLayout toolbar = (LinearLayout) findViewById(R.id.activity_current_session_headerbar);
+        ObjectAnimator exit = ObjectAnimator.ofFloat(toolbar, View.Y, 0f);
+        exit.setDuration(300);
+        exit.setInterpolator(new DecelerateInterpolator());
+        AnimatorSet scrambleAnimatorSet = new AnimatorSet();
+        scrambleAnimatorSet.play(exit);
+        toolbar.setVisibility(View.VISIBLE);
+        scrambleAnimatorSet.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                findViewById(R.id.activity_current_session_toolbarshadow).setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+        scrambleAnimatorSet.start();
+    }
+
+    @Override
+    public void playEnterAnimations() {
+        playToolbarEnterAnimation();
+        mSlidingTabLayout.setClickEnabled(true);
+        mViewPager.setPagingEnabled(true);
+        lockDrawer(false);
+    }
+
+    @Override
+    public void playHideAnimations() {
+        playToolbarExitAnimation();
+        findViewById(R.id.activity_current_session_toolbarshadow).setVisibility(View.GONE);
+        mSlidingTabLayout.setClickEnabled(false);
+        mViewPager.setPagingEnabled(false);
+        lockDrawer(true);
     }
 
     @Override
@@ -94,24 +185,24 @@ public class CurrentSessionActivity extends DrawerActivity implements
         }
 
         //Set up ViewPager with CurrentSessionAdapter
-        ViewPager viewPager = (ViewPager) findViewById(R.id
+        mViewPager = (LockingViewPager) findViewById(R.id
                 .activity_current_session_viewpager);
-        viewPager.setAdapter(new CurrentSessionPagerAdapter
+        mViewPager.setAdapter(new CurrentSessionPagerAdapter
                 (getFragmentManager(),
                         getResources().getStringArray(R.array
                                 .current_session_page_titles)));
 
         //Set up SlidingTabLayout
-        SlidingTabLayout slidingTabLayout = (SlidingTabLayout) findViewById(R
+        mSlidingTabLayout = (SlidingTabLayout) findViewById(R
                 .id.activity_current_session_slidingtablayout);
         int[] attrs = {R.attr.colorAccent};
-        slidingTabLayout.setSelectedIndicatorColors(obtainStyledAttributes
+        mSlidingTabLayout.setSelectedIndicatorColors(obtainStyledAttributes
                 (attrs).getColor(0, Color.BLACK));
-        slidingTabLayout.setDistributeEvenly(true);
-        slidingTabLayout.setCustomTabView(R.layout.sliding_tab_textview,
+        mSlidingTabLayout.setDistributeEvenly(true);
+        mSlidingTabLayout.setCustomTabView(R.layout.sliding_tab_textview,
                 android.R.id.text1);
-        slidingTabLayout.setViewPager(viewPager);
-        slidingTabLayout.setOnPageChangeListener(new ViewPager
+        mSlidingTabLayout.setViewPager(mViewPager);
+        mSlidingTabLayout.setOnPageChangeListener(new ViewPager
                 .OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset,
@@ -132,7 +223,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
                 }
             }
         });
-        viewPager.setCurrentItem(0);
+        mViewPager.setCurrentItem(0);
 
         getSupportActionBar().setElevation(0);
 

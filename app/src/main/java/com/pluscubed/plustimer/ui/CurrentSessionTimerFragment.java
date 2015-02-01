@@ -1,5 +1,6 @@
 package com.pluscubed.plustimer.ui;
 
+import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.Fragment;
@@ -16,7 +17,6 @@ import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -141,6 +141,8 @@ public class CurrentSessionTimerFragment extends Fragment {
                     stopHoldTimer();
                     stopInspection();
 
+                    playEnterAnimations();
+
                     Solve s = new Solve(mRetainedFragment
                             .getCurrentScrambleAndSvg(), 0);
                     s.setPenalty(Solve.Penalty.DNF);
@@ -242,6 +244,7 @@ public class CurrentSessionTimerFragment extends Fragment {
     private boolean mScrambleImageDisplay;
     private boolean mLateStartPenalty;
     private boolean mBldMode;
+    private AnimatorSet mLastBarAnimationSet;
 
     //Generate string with specified current averages and mean of current
     // session
@@ -303,7 +306,10 @@ public class CurrentSessionTimerFragment extends Fragment {
             } catch (SVGParseException e) {
                 e.printStackTrace();
             }
-            Drawable drawable = new PictureDrawable(svg.renderToPicture());
+            Drawable drawable = null;
+            if (svg != null) {
+                drawable = new PictureDrawable(svg.renderToPicture());
+            }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
                 mScrambleImage.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
             }
@@ -705,6 +711,7 @@ public class CurrentSessionTimerFragment extends Fragment {
                     .CURRENT_SESSION).addSolve(s);
             playLastBarEnterAnimation();
             playDynamicStatusBarExitAnimation();
+            playEnterAnimations();
 
             resetTimer();
 
@@ -728,6 +735,9 @@ public class CurrentSessionTimerFragment extends Fragment {
             //If hold to start is on, start the hold timer
             //If inspection is enabled, only start hold timer when inspecting
             //Go to section 2
+            if (!mInspecting) {
+                playExitAnimations();
+            }
             startHoldTimer();
             return true;
         } else if (mInspecting) {
@@ -753,6 +763,7 @@ public class CurrentSessionTimerFragment extends Fragment {
             //Section 1
             //If inspection is on (or BLD) and not inspecting
             startInspection();
+            playExitAnimations();
         } else if (!mBldMode && mHoldToStartEnabled) {
             //Section 2
             //Hold to start is on (may be inspecting)
@@ -779,6 +790,8 @@ public class CurrentSessionTimerFragment extends Fragment {
             //Hold to start is off, start timing
             if (mInspecting) {
                 stopInspection();
+            } else {
+                playExitAnimations();
             }
             startTiming();
             if (!mBldMode) {
@@ -794,6 +807,29 @@ public class CurrentSessionTimerFragment extends Fragment {
         enter.setInterpolator(new DecelerateInterpolator());
         AnimatorSet dynamicStatusBarAnimatorSet = new AnimatorSet();
         dynamicStatusBarAnimatorSet.play(enter);
+        dynamicStatusBarAnimatorSet.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                for (int i = 0; i < mTimeBarRecycler.getChildCount(); i++) {
+                    mTimeBarRecycler.getChildAt(i).setEnabled(false);
+                }
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
         dynamicStatusBarAnimatorSet.start();
     }
 
@@ -803,11 +839,50 @@ public class CurrentSessionTimerFragment extends Fragment {
         exit.setInterpolator(new AccelerateInterpolator());
         AnimatorSet dynamicStatusBarAnimatorSet = new AnimatorSet();
         dynamicStatusBarAnimatorSet.play(exit);
-        dynamicStatusBarAnimatorSet.start();
+        dynamicStatusBarAnimatorSet.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                for (int i = 0; i < mTimeBarRecycler.getChildCount(); i++) {
+                    mTimeBarRecycler.getChildAt(i).setEnabled(true);
+                }
+            }
 
+            @Override
+            public void onAnimationEnd(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+        dynamicStatusBarAnimatorSet.start();
+    }
+
+    private void playExitAnimations() {
+        Utils.lockOrientation(getActivity());
+        playScrambleExitAnimation();
+        playStatsExitAnimation();
+        getActivityCallback().playHideAnimations();
+    }
+
+    private void playEnterAnimations() {
+        Utils.unlockOrientation(getActivity());
+        playScrambleEnterAnimation();
+        playStatsEnterAnimation();
+        getActivityCallback().playEnterAnimations();
     }
 
     private void playLastBarEnterAnimation() {
+        if (mLastBarAnimationSet != null) {
+            mLastBarAnimationSet.cancel();
+        }
         mLastDeleteButton.setEnabled(true);
         mLastDnfButton.setEnabled(true);
         mLastPlusTwoButton.setEnabled(true);
@@ -818,9 +893,9 @@ public class CurrentSessionTimerFragment extends Fragment {
         exit.setStartDelay(1500);
         enter.setInterpolator(new DecelerateInterpolator());
         exit.setInterpolator(new AccelerateInterpolator());
-        AnimatorSet lastBarAnimationSet = new AnimatorSet();
-        lastBarAnimationSet.playSequentially(enter, exit);
-        lastBarAnimationSet.start();
+        mLastBarAnimationSet = new AnimatorSet();
+        mLastBarAnimationSet.playSequentially(enter, exit);
+        mLastBarAnimationSet.start();
     }
 
     public void playLastBarExitAnimation() {
@@ -833,6 +908,48 @@ public class CurrentSessionTimerFragment extends Fragment {
         AnimatorSet lastBarAnimationSet = new AnimatorSet();
         lastBarAnimationSet.play(exit);
         lastBarAnimationSet.start();
+    }
+
+    public void playScrambleExitAnimation() {
+        ObjectAnimator exit = ObjectAnimator.ofFloat(mScrambleText, View.ALPHA, 0f);
+        exit.setDuration(300);
+        ObjectAnimator exit2 = ObjectAnimator.ofFloat(mScrambleText, View.TRANSLATION_Y, -Utils.convertDpToPx(getActivity(), 24));
+        exit2.setDuration(300);
+        exit2.setInterpolator(new AccelerateInterpolator());
+        AnimatorSet scrambleAnimatorSet = new AnimatorSet();
+        scrambleAnimatorSet.play(exit).with(exit2);
+        scrambleAnimatorSet.start();
+    }
+
+    public void playScrambleEnterAnimation() {
+        ObjectAnimator enter = ObjectAnimator.ofFloat(mScrambleText, View.ALPHA, 1f);
+        enter.setDuration(300);
+        ObjectAnimator enter2 = ObjectAnimator.ofFloat(mScrambleText, View.TRANSLATION_Y, 0f);
+        enter2.setDuration(300);
+        enter2.setInterpolator(new DecelerateInterpolator());
+        AnimatorSet scrambleAnimatorSet = new AnimatorSet();
+        scrambleAnimatorSet.play(enter).with(enter2);
+        scrambleAnimatorSet.start();
+    }
+
+    public void playStatsExitAnimation() {
+        ObjectAnimator exit = ObjectAnimator.ofFloat(mStatsText, View.ALPHA, 0f);
+        exit.setDuration(300);
+        ObjectAnimator exit3 = ObjectAnimator.ofFloat(mStatsSolvesText, View.ALPHA, 0f);
+        exit3.setDuration(300);
+        AnimatorSet scrambleAnimatorSet = new AnimatorSet();
+        scrambleAnimatorSet.play(exit).with(exit3);
+        scrambleAnimatorSet.start();
+    }
+
+    public void playStatsEnterAnimation() {
+        ObjectAnimator enter = ObjectAnimator.ofFloat(mStatsText, View.ALPHA, 1f);
+        enter.setDuration(300);
+        ObjectAnimator enter3 = ObjectAnimator.ofFloat(mStatsSolvesText, View.ALPHA, 1f);
+        enter3.setDuration(300);
+        AnimatorSet scrambleAnimatorSet = new AnimatorSet();
+        scrambleAnimatorSet.play(enter).with(enter3);
+        scrambleAnimatorSet.start();
     }
 
     public void startHoldTimer() {
@@ -855,8 +972,8 @@ public class CurrentSessionTimerFragment extends Fragment {
      */
     public void startInspection() {
         playLastBarExitAnimation();
-        mDynamicStatusBarText.setText(R.string.inspecting);
         playDynamicStatusBarEnterAnimation();
+        mDynamicStatusBarText.setText(R.string.inspecting);
         mInspectionStartTimestamp = System.nanoTime();
         mInspecting = true;
         if (mBldMode) {
@@ -918,7 +1035,9 @@ public class CurrentSessionTimerFragment extends Fragment {
     }
 
     public interface ActivityCallback {
-        Toolbar getActionBarToolbar();
+        void playEnterAnimations();
+
+        void playHideAnimations();
 
         CurrentSessionTimerRetainedFragment getTimerRetainedFragment();
 
