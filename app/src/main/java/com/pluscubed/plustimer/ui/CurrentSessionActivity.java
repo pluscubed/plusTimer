@@ -64,8 +64,10 @@ public class CurrentSessionActivity extends DrawerActivity implements
         return super.getActionBarToolbar();
     }
 
+    @Override
     public void playToolbarExitAnimation() {
         final LinearLayout toolbar = (LinearLayout) findViewById(R.id.activity_current_session_headerbar);
+        findViewById(R.id.activity_current_session_toolbarshadow).setVisibility(View.GONE);
         ObjectAnimator exit = ObjectAnimator.ofFloat(toolbar, View.Y,
                 -toolbar.getHeight());
         exit.setDuration(300);
@@ -98,6 +100,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
         scrambleAnimatorSet.start();
     }
 
+    @Override
     public void playToolbarEnterAnimation() {
         final LinearLayout toolbar = (LinearLayout) findViewById(R.id.activity_current_session_headerbar);
         ObjectAnimator exit = ObjectAnimator.ofFloat(toolbar, View.Y, 0f);
@@ -131,20 +134,10 @@ public class CurrentSessionActivity extends DrawerActivity implements
     }
 
     @Override
-    public void playEnterAnimations() {
-        playToolbarEnterAnimation();
-        mSlidingTabLayout.setClickEnabled(true);
-        mViewPager.setPagingEnabled(true);
-        lockDrawer(false);
-    }
-
-    @Override
-    public void playHideAnimations() {
-        playToolbarExitAnimation();
-        findViewById(R.id.activity_current_session_toolbarshadow).setVisibility(View.GONE);
-        mSlidingTabLayout.setClickEnabled(false);
-        mViewPager.setPagingEnabled(false);
-        lockDrawer(true);
+    public void lockDrawerAndViewPager(boolean lock) {
+        mSlidingTabLayout.setClickEnabled(!lock);
+        mViewPager.setPagingEnabled(!lock);
+        lockDrawer(lock);
     }
 
     @Override
@@ -219,6 +212,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
                 if (state == ViewPager.SCROLL_STATE_DRAGGING || state ==
                         ViewPager.SCROLL_STATE_SETTLING) {
                     getCurrentSessionTimerFragment().stopHoldTimer();
+                    getCurrentSessionTimerFragment().playEnterAnimations();
                     getSolveListFragment().finishActionMode();
                 }
             }
@@ -278,6 +272,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
     protected void onNavDrawerSlide(float offset) {
         getSolveListFragment().finishActionMode();
         getCurrentSessionTimerFragment().stopHoldTimer();
+        getCurrentSessionTimerFragment().playEnterAnimations();
     }
 
     @Override
