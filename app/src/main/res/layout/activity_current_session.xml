@@ -16,6 +16,7 @@
         android:orientation="vertical">
 
         <LinearLayout
+            android:id="@id/activity_current_session_headerbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="?colorPrimary"
@@ -32,16 +33,18 @@
 
 
         <FrameLayout
+            android:id="@id/activity_current_session_framelayout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1">
 
-            <android.support.v4.view.ViewPager
+            <com.pluscubed.plustimer.ui.widget.LockingViewPager
                 android:id="@id/activity_current_session_viewpager"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
 
             <View
+                android:id="@id/activity_current_session_toolbarshadow"
                 android:layout_width="match_parent"
                 android:layout_height="5dp"
                 android:background="?toolbarShadow"/>

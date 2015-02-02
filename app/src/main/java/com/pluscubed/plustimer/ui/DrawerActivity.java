@@ -201,6 +201,14 @@ public abstract class DrawerActivity extends ThemableActivity {
         });
     }
 
+    protected void lockDrawer(boolean lock) {
+        if (lock) {
+            mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        } else {
+            mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+        }
+    }
+
     @Override
     public void setContentView(int layoutResID) {
         super.setContentView(layoutResID);
