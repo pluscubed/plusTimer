@@ -1,4 +1,4 @@
-![Icon](./app/src/main/res/mipmap-hdpi/ic_launcher.png) plusTimer
+![Icon](./app/src/main/res/drawable-hdpi/ic_launcher.png) plusTimer
 =========
 Open Source Android Cubing Timer with WCA TNoodle Scrambles
 
