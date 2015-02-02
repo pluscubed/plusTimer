@@ -750,8 +750,11 @@ public class CurrentSessionTimerFragment extends Fragment {
 
         //If inspection is on and haven't started yet: section 1
         //If hold to start and inspection are both off: section 3
-        setTextColor(Color.GREEN);
-        return !scrambling;
+        if (!scrambling) {
+            setTextColor(Color.GREEN);
+            return true;
+        }
+        return false;
     }
 
     private boolean onTimerBldTouchDown(boolean scrambling) {
