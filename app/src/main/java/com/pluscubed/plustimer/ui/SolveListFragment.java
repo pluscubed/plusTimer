@@ -20,8 +20,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.crashlytics.android.Crashlytics;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
+import com.pluscubed.plustimer.model.ScrambleAndSvg;
 import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
 import com.pluscubed.plustimer.utils.PrefUtils;
@@ -429,8 +432,20 @@ public class SolveListFragment extends Fragment {
                 time.setText(s.getDescriptiveTimeString(mMillisecondsEnabled));
             }
 
-            desc.setText(s.getScrambleAndSvg().getUiScramble(mSignEnabled,
-                    mPuzzleTypeName));
+            ScrambleAndSvg scrambleAndSvg = s.getScrambleAndSvg();
+            String uiScramble = "";
+            try {
+                uiScramble = scrambleAndSvg.getUiScramble(mSignEnabled,
+                        mPuzzleTypeName);
+            } catch (NullPointerException e) {
+                new MaterialDialog.Builder(getActivity())
+                        .content("Error: Solve #" + position + " UI scramble doesn't exist")
+                        .positiveText("Dismiss")
+                        .show();
+                Crashlytics.logException(e);
+            }
+
+            desc.setText(uiScramble);
 
             return convertView;
         }
