@@ -421,8 +421,12 @@ public class CurrentSessionTimerFragment extends Fragment {
         mLastDnfButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                PuzzleType.getCurrent().getSession(PuzzleType
-                        .CURRENT_SESSION).getLastSolve().setPenalty(Solve
+                Session currentSession = PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION);
+                if (ErrorUtils.solveNonexistent(getActivity(), PuzzleType.getCurrent().name(),
+                        currentSession.getNumberOfSolves() - 1, PuzzleType.CURRENT_SESSION)) {
+                    return;
+                }
+                currentSession.getLastSolve().setPenalty(Solve
                         .Penalty.DNF);
                 playLastBarExitAnimation();
             }
@@ -431,8 +435,12 @@ public class CurrentSessionTimerFragment extends Fragment {
         mLastPlusTwoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                PuzzleType.getCurrent().getSession(PuzzleType
-                        .CURRENT_SESSION).getLastSolve().setPenalty(Solve
+                Session currentSession = PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION);
+                if (ErrorUtils.solveNonexistent(getActivity(), PuzzleType.getCurrent().name(),
+                        currentSession.getNumberOfSolves() - 1, PuzzleType.CURRENT_SESSION)) {
+                    return;
+                }
+                currentSession.getLastSolve().setPenalty(Solve
                         .Penalty.PLUSTWO);
                 playLastBarExitAnimation();
             }
@@ -441,8 +449,12 @@ public class CurrentSessionTimerFragment extends Fragment {
         mLastDeleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Session session = PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION);
-                session.deleteSolve(session.getLastSolve());
+                Session currentSession = PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION);
+                if (ErrorUtils.solveNonexistent(getActivity(), PuzzleType.getCurrent().name(),
+                        currentSession.getNumberOfSolves() - 1, PuzzleType.CURRENT_SESSION)) {
+                    return;
+                }
+                currentSession.deleteSolve(currentSession.getLastSolve());
                 playLastBarExitAnimation();
             }
         });
