@@ -28,10 +28,11 @@ android {
     compileSdkVersion 21
     buildToolsVersion '21.1.2'
     defaultConfig {
+        applicationId "com.pluscubed.plustimer"
         minSdkVersion 14
         targetSdkVersion 21
-        versionCode 19
-        versionName '0.2.1'
+        versionCode 20
+        versionName '0.2.2'
     }
 
     if (project.hasProperty("RELEASE_STORE_FILE")) {
