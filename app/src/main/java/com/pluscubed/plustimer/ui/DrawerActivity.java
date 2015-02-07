@@ -25,13 +25,13 @@ import com.pluscubed.plustimer.utils.PrefUtils;
  */
 public abstract class DrawerActivity extends ThemableActivity {
 
-    protected static final int NAVDRAWER_ITEM_CURRENT_SESSION = 0;
-    protected static final int NAVDRAWER_ITEM_HISTORY = 1;
-    protected static final int NAVDRAWER_ITEM_SETTINGS = -3;
-    protected static final int NAVDRAWER_ITEM_HELP = -4;
-    protected static final int NAVDRAWER_ITEM_ABOUT = -5;
-    protected static final int NAVDRAWER_ITEM_INVALID = -1;
-    protected static final int NAVDRAWER_ITEM_SEPARATOR = -2;
+    static final int NAVDRAWER_ITEM_CURRENT_SESSION = 0;
+    static final int NAVDRAWER_ITEM_HISTORY = 1;
+    private static final int NAVDRAWER_ITEM_SETTINGS = -3;
+    private static final int NAVDRAWER_ITEM_HELP = -4;
+    private static final int NAVDRAWER_ITEM_ABOUT = -5;
+    private static final int NAVDRAWER_ITEM_INVALID = -1;
+    private static final int NAVDRAWER_ITEM_SEPARATOR = -2;
     private static final int[] NAVDRAWER_ITEMS = new int[]{
             NAVDRAWER_ITEM_CURRENT_SESSION,
             NAVDRAWER_ITEM_HISTORY,
@@ -56,8 +56,6 @@ public abstract class DrawerActivity extends ThemableActivity {
             R.string.history
     };
     private DrawerLayout mDrawerLayout;
-    private ScrollView mDrawerScrollView;
-    private LinearLayout mDrawerListLinearLayout;
 
     private Handler mHandler;
     private Toolbar mActionBarToolbar;
@@ -67,14 +65,14 @@ public abstract class DrawerActivity extends ThemableActivity {
      * Subclasses of BaseActivity override this to indicate what nav drawer item
      * corresponds to them.
      */
-    protected int getSelfNavDrawerItem() {
+    int getSelfNavDrawerItem() {
         return NAVDRAWER_ITEM_INVALID;
     }
 
-    protected void onNavDrawerSlide(float offset) {
+    void onNavDrawerSlide(float offset) {
     }
 
-    protected void onNavDrawerClosed() {
+    void onNavDrawerClosed() {
     }
 
     @Override
@@ -82,7 +80,7 @@ public abstract class DrawerActivity extends ThemableActivity {
         return true;
     }
 
-    protected Toolbar getActionBarToolbar() {
+    Toolbar getActionBarToolbar() {
         if (mActionBarToolbar == null) {
             mActionBarToolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
             if (mActionBarToolbar != null) {
@@ -135,7 +133,7 @@ public abstract class DrawerActivity extends ThemableActivity {
             }
         });
 
-        mDrawerScrollView = (ScrollView) findViewById(R.id
+        ScrollView mDrawerScrollView = (ScrollView) findViewById(R.id
                 .activity_drawer_drawer_scrollview);
         int actionBarSize = resources.getDimensionPixelSize(R.dimen
                 .navigation_drawer_margin);
@@ -149,7 +147,7 @@ public abstract class DrawerActivity extends ThemableActivity {
         params.width = navDrawerWidth;
         mDrawerScrollView.setLayoutParams(params);
 
-        mDrawerListLinearLayout = (LinearLayout) findViewById(R.id
+        LinearLayout mDrawerListLinearLayout = (LinearLayout) findViewById(R.id
                 .activity_drawer_drawer_linearlayout);
 
         resetTitle();
@@ -182,7 +180,7 @@ public abstract class DrawerActivity extends ThemableActivity {
         }
     }
 
-    protected void resetTitle() {
+    void resetTitle() {
         setTitle(NAVDRAWER_ACTIONBAR_TITLE_RES_ID[getSelfNavDrawerItem()]);
         ViewTreeObserver vto = findViewById(android.R.id.content).getViewTreeObserver();
         vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -201,7 +199,7 @@ public abstract class DrawerActivity extends ThemableActivity {
         });
     }
 
-    protected void lockDrawer(boolean lock) {
+    void lockDrawer(boolean lock) {
         if (lock) {
             mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         } else {
@@ -259,7 +257,7 @@ public abstract class DrawerActivity extends ThemableActivity {
                 goToNavDrawerItem(itemId);
             }
         }, NAVDRAWER_LAUNCH_DELAY);
-        if (!isSpecialItem(itemId)) {
+        if (isSpecialItem(itemId)) {
             View mainContent = findViewById(R.id
                     .activity_drawer_content_linearlayout);
             if (mainContent != null) {
@@ -276,12 +274,12 @@ public abstract class DrawerActivity extends ThemableActivity {
                 NAVDRAWER_ITEM_HELP || itemId == NAVDRAWER_ITEM_ABOUT;
     }
 
-    protected boolean isNavDrawerOpen() {
+    boolean isNavDrawerOpen() {
         return mDrawerLayout != null && mDrawerLayout.isDrawerOpen(Gravity
                 .START);
     }
 
-    protected void closeNavDrawer() {
+    void closeNavDrawer() {
         if (mDrawerLayout != null) {
             mDrawerLayout.closeDrawer(Gravity.START);
         }
@@ -310,6 +308,6 @@ public abstract class DrawerActivity extends ThemableActivity {
 
         startActivity(i);
         //If it is not a special item, finish this activity
-        if (!isSpecialItem(itemId)) finish();
+        if (isSpecialItem(itemId)) finish();
     }
 }

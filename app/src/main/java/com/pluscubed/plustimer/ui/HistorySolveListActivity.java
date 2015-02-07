@@ -24,7 +24,7 @@ public class HistorySolveListActivity extends ThemableActivity
     public static final String EXTRA_HISTORY_PUZZLETYPE_DISPLAYNAME = "com" +
             ".pluscubed.plustimer.history_puzzletype_displayname";
 
-    public static final String HISTORY_DIALOG_SOLVE_TAG =
+    private static final String HISTORY_DIALOG_SOLVE_TAG =
             "HISTORY_MODIFY_DIALOG";
 
     @Override
@@ -32,7 +32,7 @@ public class HistorySolveListActivity extends ThemableActivity
                                          int solveIndex) {
         DialogFragment dialog = (DialogFragment) getFragmentManager()
                 .findFragmentByTag(HISTORY_DIALOG_SOLVE_TAG);
-        if (!Utils.assertSolveExists(this, solveIndex, sessionIndex)) {
+        if (Utils.assertSolveExists(this, solveIndex, sessionIndex)) {
             return;
         }
         if (dialog == null) {

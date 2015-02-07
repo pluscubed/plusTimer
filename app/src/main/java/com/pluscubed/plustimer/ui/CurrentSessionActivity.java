@@ -40,7 +40,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
         CreateDialogCallback,
         CurrentSessionTimerFragment.ActivityCallback {
 
-    public static final String DIALOG_SOLVE_TAG = "SOLVE_DIALOG";
+    private static final String DIALOG_SOLVE_TAG = "SOLVE_DIALOG";
 
     private static final String STATE_MENU_ITEMS_ENABLE_BOOLEAN =
             "menu_items_enable_boolean";
@@ -56,7 +56,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
     private SlidingTabLayout mSlidingTabLayout;
     private LockingViewPager mViewPager;
 
-    public static String makeFragmentName(int viewId, int index) {
+    private static String makeFragmentName(int viewId, int index) {
         return "android:switcher:" + viewId + ":" + index;
     }
 
@@ -244,7 +244,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
                         .activity_current_session_viewpager, 1));
     }
 
-    public void queueInvalidateOptionsMenu() {
+    void queueInvalidateOptionsMenu() {
         if (!isNavDrawerOpen()) {
             invalidateOptionsMenu();
         } else {
@@ -346,7 +346,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
                                          int solveIndex) {
         DialogFragment dialog = (DialogFragment) getFragmentManager()
                 .findFragmentByTag(DIALOG_SOLVE_TAG);
-        if (!Utils.assertSolveExists(this, solveIndex, PuzzleType.CURRENT_SESSION)) {
+        if (Utils.assertSolveExists(this, solveIndex, PuzzleType.CURRENT_SESSION)) {
             return;
         }
         if (dialog == null) {

@@ -121,12 +121,6 @@ public class SolveListFragment extends Fragment {
         mSignEnabled = PrefUtils.isSignEnabled(getActivity());
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-    }
-
-
     private void share() {
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
@@ -186,7 +180,7 @@ public class SolveListFragment extends Fragment {
     }
 
 
-    public void updateStats() {
+    void updateStats() {
         mQuickStats.setText(
                 mSession.toString(getActivity(), getPuzzleType().toString(),
                         mCurrentToggle, false, mMillisecondsEnabled,
@@ -357,7 +351,7 @@ public class SolveListFragment extends Fragment {
         PuzzleType.unregisterObserver(puzzleTypeObserver);
     }
 
-    public void enableResetSubmitButtons(boolean enable) {
+    void enableResetSubmitButtons(boolean enable) {
         mResetSubmitLinearLayout.setVisibility(enable ? View.VISIBLE : View
                 .GONE);
     }
@@ -369,7 +363,7 @@ public class SolveListFragment extends Fragment {
         if (mCurrentToggle) getPuzzleType().saveCurrentSession(getActivity());
     }
 
-    public void onSessionSolvesChanged() {
+    void onSessionSolvesChanged() {
         mSession = getPuzzleType().getSession(mSessionIndex);
         if (!mCurrentToggle && mSession.getNumberOfSolves() <= 0) {
             getPuzzleType().getHistorySessions().deleteSession(mSessionIndex,

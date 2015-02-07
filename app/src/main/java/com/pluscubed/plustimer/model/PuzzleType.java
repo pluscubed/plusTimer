@@ -265,7 +265,7 @@ public enum PuzzleType {
         mCurrentSession.reset();
     }
 
-    public boolean isEnabled() {
+    boolean isEnabled() {
         return mEnabled;
     }
 

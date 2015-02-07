@@ -36,7 +36,6 @@ import com.pluscubed.plustimer.model.Solve;
 import com.pluscubed.plustimer.utils.PrefUtils;
 import com.pluscubed.plustimer.utils.Utils;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -175,19 +174,15 @@ public class HistorySessionListFragment extends ListFragment {
         mGraph.setDataPointsRadius(Utils.convertDpToPx(getActivity(), 3));
         headerView.addView(mGraph, 1);
         getListView().addHeaderView(headerView, null, false);
-        try {
-            setListAdapter(new SessionListAdapter());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        setListAdapter(new SessionListAdapter());
     }
 
-    public void onSessionListChanged() {
+    void onSessionListChanged() {
         updateStats();
         ((SessionListAdapter) getListAdapter()).onSessionListChanged();
     }
 
-    public void updateStats() {
+    void updateStats() {
         PuzzleType.valueOf(mPuzzleTypeName).getHistorySessions().sort();
         List<Session> historySessions = PuzzleType.valueOf(mPuzzleTypeName)
                 .getHistorySessions().getList();
@@ -397,8 +392,8 @@ public class HistorySessionListFragment extends ListFragment {
      * @param sessions list of sessions
      * @return String with the best averages of [numbers]
      */
-    public String getBestAverageOfNumberOfSessions(int[] numbers,
-                                                   List<Session> sessions) {
+    String getBestAverageOfNumberOfSessions(int[] numbers,
+                                            List<Session> sessions) {
         StringBuilder builder = new StringBuilder();
         for (int number : numbers) {
             ArrayList<Long> bestAverages = new ArrayList<>();
@@ -504,7 +499,7 @@ public class HistorySessionListFragment extends ListFragment {
 
     public class SessionListAdapter extends ArrayAdapter<Session> {
 
-        SessionListAdapter() throws IOException {
+        SessionListAdapter() {
             super(getActivity(), 0, new ArrayList<Session>());
             onSessionListChanged();
         }

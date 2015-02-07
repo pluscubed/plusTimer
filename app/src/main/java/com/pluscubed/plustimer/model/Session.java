@@ -52,13 +52,13 @@ public class Session {
         notifyReset();
     }
 
-    public void notifySolveAdded() {
+    void notifySolveAdded() {
         for (Observer s : mObservers) {
             s.onSolveAdded();
         }
     }
 
-    public void notifySolveDeleted(int index) {
+    void notifySolveDeleted(int index) {
         for (Observer s : mObservers) {
             s.onSolveRemoved(index);
         }
@@ -70,7 +70,7 @@ public class Session {
         }
     }
 
-    public void notifyReset() {
+    void notifyReset() {
         for (Observer s : mObservers) {
             s.onReset();
         }
@@ -146,8 +146,8 @@ public class Session {
      * @param millisecondsEnabled whether to display milliseconds
      * @return the best average of some number of solves
      */
-    public String getStringBestAverageOf(int number,
-                                         boolean millisecondsEnabled) {
+    String getStringBestAverageOf(int number,
+                                  boolean millisecondsEnabled) {
         long bestAverage = getBestAverageOf(number);
         if (bestAverage == GET_AVERAGE_INVALID_NOT_ENOUGH) {
             return "";

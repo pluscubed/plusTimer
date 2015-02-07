@@ -168,7 +168,7 @@ public class Utils {
     /**
      * Get list and save new list
      */
-    public static void updateData(Context context, String fileName) {
+    private static void updateData(Context context, String fileName) {
         List<Session> historySessions = getSessionListFromFile(context, fileName);
         saveSessionListToFile(context, fileName, historySessions);
     }
@@ -328,7 +328,7 @@ public class Utils {
      * @param list the list of solves to extract times from
      * @return the list of nanoseconds of times
      */
-    public static List<Long> getListTimeTwoNoDnf(List<Solve> list) {
+    private static List<Long> getListTimeTwoNoDnf(List<Solve> list) {
         ArrayList<Long> timeTwo = new ArrayList<>();
         for (Solve i : list) {
             if (!(i.getPenalty() == Solve.Penalty.DNF)) {

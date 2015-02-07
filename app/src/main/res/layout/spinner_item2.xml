@@ -16,8 +16,8 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical|start"
             android:paddingLeft="16dp"
-            android:paddingStart="16dp"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            tools:ignore="RtlHardcoded,RtlSymmetry" />
 
         <TextView
             android:id="@android:id/text2"
@@ -25,8 +25,8 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical|start"
             android:paddingLeft="16dp"
-            android:paddingStart="16dp"
-            android:textSize="12sp" />
+            android:textSize="12sp"
+            tools:ignore="RtlHardcoded,RtlSymmetry" />
     </LinearLayout>
 
     <ImageView

@@ -1,6 +1,5 @@
 package com.pluscubed.plustimer.ui.widget;
 
-import android.R;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -33,14 +32,14 @@ class SlidingTabStrip extends LinearLayout {
         this(context, null);
     }
 
-    SlidingTabStrip(Context context, AttributeSet attrs) {
+    private SlidingTabStrip(Context context, AttributeSet attrs) {
         super(context, attrs);
         setWillNotDraw(false);
 
         final float density = getResources().getDisplayMetrics().density;
 
         TypedValue outValue = new TypedValue();
-        context.getTheme().resolveAttribute(R.attr.colorForeground, outValue,
+        context.getTheme().resolveAttribute(android.R.attr.colorForeground, outValue,
                 true);
         final int themeForegroundColor = outValue.data;
 

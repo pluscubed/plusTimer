@@ -47,7 +47,7 @@
                 android:id="@id/activity_current_session_toolbarshadow"
                 android:layout_width="match_parent"
                 android:layout_height="5dp"
-                android:background="?toolbarShadow"/>
+                android:background="?toolbarShadow" />
         </FrameLayout>
 
     </LinearLayout>

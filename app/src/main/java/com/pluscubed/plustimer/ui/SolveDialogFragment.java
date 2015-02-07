@@ -39,21 +39,21 @@ import java.math.BigDecimal;
  */
 public class SolveDialogFragment extends DialogFragment {
 
-    public static final String ARG_DIALOG_INIT_PUZZLETYPE_DISPLAY_NAME
+    private static final String ARG_DIALOG_INIT_PUZZLETYPE_DISPLAY_NAME
             = "com.pluscubed.plustimer.dialog.puzzleType";
 
-    public static final String ARG_DIALOG_INIT_SESSION_INDEX
+    private static final String ARG_DIALOG_INIT_SESSION_INDEX
             = "com.pluscubed.plustimer.dialog.sessionIndex";
 
-    public static final String ARG_DIALOG_INIT_SOLVE_INDEX
+    private static final String ARG_DIALOG_INIT_SOLVE_INDEX
             = "com.pluscubed.plustimer.dialog.solveIndex";
 
-    public static final String ARG_DIALOG_INIT_ADD_MODE
+    private static final String ARG_DIALOG_INIT_ADD_MODE
             = "com.pluscubed.plustimer.dialog.addMode";
 
-    public static final int DIALOG_PENALTY_NONE = 0;
-    public static final int DIALOG_PENALTY_PLUSTWO = 1;
-    public static final int DIALOG_PENALTY_DNF = 2;
+    private static final int DIALOG_PENALTY_NONE = 0;
+    private static final int DIALOG_PENALTY_PLUSTWO = 1;
+    private static final int DIALOG_PENALTY_DNF = 2;
 
     private String mPuzzleTypeName;
     private int mSessionIndex;
@@ -377,7 +377,7 @@ public class SolveDialogFragment extends DialogFragment {
             }
             dismiss();
         } catch (InvalidScrambleException e) {
-            mScrambleEdit.setError("Invalid scramble.");
+            mScrambleEdit.setError(getString(R.string.invalid_scramble));
         }
     }
 
@@ -385,7 +385,7 @@ public class SolveDialogFragment extends DialogFragment {
         mListener = listener;
     }
 
-    public void updateTitle() {
+    void updateTitle() {
         getDialog().setTitle(mSolveCopy.getDescriptiveTimeString
                 (mMillisecondsEnabled));
     }
