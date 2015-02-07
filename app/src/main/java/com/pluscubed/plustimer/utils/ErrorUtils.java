@@ -8,11 +8,13 @@ import android.view.WindowManager;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.crashlytics.android.Crashlytics;
+import com.pluscubed.plustimer.BuildConfig;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.ScrambleAndSvg;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -21,6 +23,12 @@ import java.io.InputStreamReader;
  * Error Utility Methods
  */
 public class ErrorUtils {
+
+    public static void logCrashlytics(Exception e) {
+        if (BuildConfig.USE_CRASHLYTICS) {
+            logCrashlytics(e);
+        }
+    }
 
     public static void showErrorDialog(final Context context, String userReadableMessage, Exception e,
                                        boolean sendFileData) {
@@ -49,7 +57,7 @@ public class ErrorUtils {
     }
 
     public static void showJsonSyntaxError(Context c, Exception e) {
-        Crashlytics.logException(e);
+        logCrashlytics(e);
         showErrorDialog(c, "History/current data can't be read from storage.", e, true);
     }
 
@@ -64,7 +72,7 @@ public class ErrorUtils {
             if (position == -1) {
                 positionString = "CurrentScrambleAndSvg";
             }
-            Crashlytics.logException(e);
+            logCrashlytics(e);
             showErrorDialog(c, "Solve #" + positionString + " UI scramble doesn't exist", e, false);
         }
         return uiScramble;
@@ -75,14 +83,16 @@ public class ErrorUtils {
             PuzzleType.valueOf(puzzleTypeName).getSession(sessionIndex).getSolveByPosition(solveIndex);
             return false;
         } catch (IndexOutOfBoundsException e) {
-            Crashlytics.log(Log.ERROR,
-                    "Solve #" + solveIndex + " nonexistent",
-                    PuzzleType.getCurrent()
-                            .getSession(sessionIndex)
-                            .toString(c, PuzzleType.getCurrent().name(), true, true, true, false)
-            );
+            if (BuildConfig.USE_CRASHLYTICS) {
+                Crashlytics.log(Log.ERROR,
+                        "Solve #" + solveIndex + " nonexistent",
+                        PuzzleType.getCurrent()
+                                .getSession(sessionIndex)
+                                .toString(c, PuzzleType.getCurrent().name(), true, true, true, false)
+                );
+            }
             showErrorDialog(c, "Solve #" + solveIndex + " doesn't exist", e, false);
-            Crashlytics.logException(e);
+            logCrashlytics(e);
             return true;
         }
     }
@@ -106,15 +116,16 @@ public class ErrorUtils {
                     while ((line = r.readLine()) != null) {
                         total.append(line);
                     }
+                } catch (FileNotFoundException e) {
+                    // File not found: ignore
                 } catch (IOException e) {
-                    Crashlytics.logException(e);
                     showErrorDialog(context, "", e, false);
                 } finally {
                     if (r != null) {
                         try {
                             r.close();
                         } catch (IOException e) {
-                            Crashlytics.logException(e);
+                            logCrashlytics(e);
                             showErrorDialog(context, "", e, false);
                         }
                     }
