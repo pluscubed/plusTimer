@@ -179,6 +179,10 @@ public class CurrentSessionTimerFragment extends Fragment {
         public void run() {
             setTextColor(Color.GREEN);
             setTimerTextToPrefSize();
+            if (!mInspecting) {
+                playExitAnimations();
+                getActivityCallback().lockDrawerAndViewPager(true);
+            }
         }
     };
     private final Runnable timerRunnable = new Runnable() {
@@ -751,9 +755,6 @@ public class CurrentSessionTimerFragment extends Fragment {
             //If hold to start is on, start the hold timer
             //If inspection is enabled, only start hold timer when inspecting
             //Go to section 2
-            if (!mInspecting) {
-                playExitAnimations();
-            }
             startHoldTimer();
             return true;
         } else if (mInspecting) {
@@ -806,9 +807,6 @@ public class CurrentSessionTimerFragment extends Fragment {
                 //User started hold timer but lifted before
                 // the timer is green: stop hold timer
                 stopHoldTimer();
-                if (!mInspecting) {
-                    playEnterAnimations();
-                }
             }
         } else {
             //Section 3
