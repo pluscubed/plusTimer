@@ -426,7 +426,7 @@ public class CurrentSessionTimerFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Session currentSession = PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION);
-                if (ErrorUtils.solveNonexistent(getActivity(), PuzzleType.getCurrent().name(),
+                if (ErrorUtils.isSolveNonexistent(getActivity(), PuzzleType.getCurrent().name(),
                         currentSession.getNumberOfSolves() - 1, PuzzleType.CURRENT_SESSION)) {
                     return;
                 }
@@ -440,7 +440,7 @@ public class CurrentSessionTimerFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Session currentSession = PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION);
-                if (ErrorUtils.solveNonexistent(getActivity(), PuzzleType.getCurrent().name(),
+                if (ErrorUtils.isSolveNonexistent(getActivity(), PuzzleType.getCurrent().name(),
                         currentSession.getNumberOfSolves() - 1, PuzzleType.CURRENT_SESSION)) {
                     return;
                 }
@@ -454,7 +454,7 @@ public class CurrentSessionTimerFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Session currentSession = PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION);
-                if (ErrorUtils.solveNonexistent(getActivity(), PuzzleType.getCurrent().name(),
+                if (ErrorUtils.isSolveNonexistent(getActivity(), PuzzleType.getCurrent().name(),
                         currentSession.getNumberOfSolves() - 1, PuzzleType.CURRENT_SESSION)) {
                     return;
                 }

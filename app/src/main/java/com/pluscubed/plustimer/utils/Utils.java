@@ -11,6 +11,7 @@ import android.view.WindowManager;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Session;
@@ -143,6 +144,8 @@ public class Utils {
             }
         } catch (FileNotFoundException e) {
             //File not found: create empty list
+        } catch (JsonSyntaxException e) {
+            ErrorUtils.showJsonSyntaxError(context, e);
         } finally {
             if (reader != null) {
                 try {

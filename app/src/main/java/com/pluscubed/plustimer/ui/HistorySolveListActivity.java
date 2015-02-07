@@ -33,6 +33,7 @@ public class HistorySolveListActivity extends ThemableActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_with_toolbar);
 
         PuzzleType.initialize(this);
         int position = getIntent().getIntExtra
@@ -40,7 +41,6 @@ public class HistorySolveListActivity extends ThemableActivity {
         String puzzleType = getIntent().getStringExtra
                 (EXTRA_HISTORY_PUZZLETYPE_DISPLAYNAME);
 
-        setContentView(R.layout.activity_with_toolbar);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
         setSupportActionBar(toolbar);
 
