@@ -25,6 +25,7 @@ import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.ScrambleAndSvg;
 import com.pluscubed.plustimer.model.Solve;
+import com.pluscubed.plustimer.utils.ErrorUtils;
 import com.pluscubed.plustimer.utils.PrefUtils;
 import com.pluscubed.plustimer.utils.ThemeUtils;
 import com.pluscubed.plustimer.utils.Utils;
@@ -328,7 +329,7 @@ public class SolveDialogFragment extends DialogFragment {
     }
 
     private void onNeutral() {
-        if (Utils.solveNonexistent(getActivity(), mPuzzleTypeName, 100, mSessionIndex)) {
+        if (ErrorUtils.solveNonexistent(getActivity(), mPuzzleTypeName, 100, mSessionIndex)) {
             return;
         }
         PuzzleType.valueOf(mPuzzleTypeName).getSession

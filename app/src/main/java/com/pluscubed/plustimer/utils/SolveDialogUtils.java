@@ -17,7 +17,7 @@ public class SolveDialogUtils {
                                          int sessionIndex, int solveIndex) {
         FragmentManager fragmentManager = activity.getFragmentManager();
         DialogFragment dialog = (DialogFragment) fragmentManager.findFragmentByTag(DIALOG_SOLVE_TAG);
-        if (Utils.solveNonexistent(activity, puzzleTypeName, solveIndex, sessionIndex)) {
+        if (ErrorUtils.solveNonexistent(activity, puzzleTypeName, solveIndex, sessionIndex)) {
             return;
         }
         if (dialog == null) {

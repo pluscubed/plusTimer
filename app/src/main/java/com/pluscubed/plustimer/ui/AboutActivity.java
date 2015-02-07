@@ -17,7 +17,7 @@ import android.widget.TextView;
 
 import com.pluscubed.plustimer.BuildConfig;
 import com.pluscubed.plustimer.R;
-import com.pluscubed.plustimer.utils.Utils;
+import com.pluscubed.plustimer.utils.ErrorUtils;
 
 /**
  * About Page
@@ -126,7 +126,7 @@ public class AboutActivity extends ThemableActivity {
             send.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Utils.sendHistoryDataEmail(getActivity());
+                    ErrorUtils.sendHistoryDataEmail(getActivity());
 
                 }
             });

@@ -37,8 +37,10 @@ import com.caverock.androidsvg.SVGParseException;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.BldSolve;
 import com.pluscubed.plustimer.model.PuzzleType;
+import com.pluscubed.plustimer.model.ScrambleAndSvg;
 import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
+import com.pluscubed.plustimer.utils.ErrorUtils;
 import com.pluscubed.plustimer.utils.PrefUtils;
 import com.pluscubed.plustimer.utils.SolveDialogUtils;
 import com.pluscubed.plustimer.utils.Utils;
@@ -299,11 +301,11 @@ public class CurrentSessionTimerFragment extends Fragment {
 
     //Set scramble text and scramble image to current ones
     public void setScrambleTextAndImageToCurrent() {
-        if (mRetainedFragment.getCurrentScrambleAndSvg() != null) {
+        ScrambleAndSvg currentScrambleAndSvg = mRetainedFragment.getCurrentScrambleAndSvg();
+        if (currentScrambleAndSvg != null) {
             SVG svg = null;
             try {
-                svg = SVG.getFromString(mRetainedFragment
-                        .getCurrentScrambleAndSvg().getSvg());
+                svg = SVG.getFromString(currentScrambleAndSvg.getSvg());
             } catch (SVGParseException e) {
                 e.printStackTrace();
             }
@@ -316,9 +318,8 @@ public class CurrentSessionTimerFragment extends Fragment {
             }
             mScrambleImage.setImageDrawable(drawable);
 
-            mScrambleText.setText(mRetainedFragment.getCurrentScrambleAndSvg
-                    ().getUiScramble(mSignEnabled, PuzzleType.getCurrent()
-                    .name()));
+            mScrambleText.setText(ErrorUtils.getUiScramble(getActivity(), -1, currentScrambleAndSvg, mSignEnabled,
+                    PuzzleType.getCurrent().name()));
         } else {
             mRetainedFragment.generateNextScramble();
             mRetainedFragment.postSetScrambleViewsToCurrent();

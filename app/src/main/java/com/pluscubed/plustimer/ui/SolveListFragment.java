@@ -20,13 +20,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.afollestad.materialdialogs.MaterialDialog;
-import com.crashlytics.android.Crashlytics;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.ScrambleAndSvg;
 import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
+import com.pluscubed.plustimer.utils.ErrorUtils;
 import com.pluscubed.plustimer.utils.PrefUtils;
 import com.pluscubed.plustimer.utils.SolveDialogUtils;
 import com.pluscubed.plustimer.utils.Utils;
@@ -414,17 +413,8 @@ public class SolveListFragment extends Fragment {
             }
 
             ScrambleAndSvg scrambleAndSvg = s.getScrambleAndSvg();
-            String uiScramble = "";
-            try {
-                uiScramble = scrambleAndSvg.getUiScramble(mSignEnabled,
-                        mPuzzleTypeName);
-            } catch (NullPointerException e) {
-                new MaterialDialog.Builder(getActivity())
-                        .content("Error: Solve #" + position + " UI scramble doesn't exist")
-                        .positiveText("Dismiss")
-                        .show();
-                Crashlytics.logException(e);
-            }
+            String uiScramble = ErrorUtils.getUiScramble(getActivity(), position, scrambleAndSvg,
+                    mSignEnabled, mPuzzleTypeName);
 
             desc.setText(uiScramble);
 
