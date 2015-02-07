@@ -126,7 +126,7 @@ public class AboutActivity extends ThemableActivity {
             send.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    ErrorUtils.sendHistoryDataEmail(getActivity());
+                    ErrorUtils.sendFileDataEmail(getActivity());
 
                 }
             });

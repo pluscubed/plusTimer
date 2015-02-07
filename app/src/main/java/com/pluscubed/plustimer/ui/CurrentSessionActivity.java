@@ -152,11 +152,11 @@ public class CurrentSessionActivity extends DrawerActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_current_session);
 
-        PuzzleType.initialize(this);
-
         if (BuildConfig.USE_CRASHLYTICS) {
             Fabric.with(this, new Crashlytics());
         }
+
+        PuzzleType.initialize(this);
 
         if (savedInstanceState != null) {
             mScrambleImageActionEnable = savedInstanceState.getBoolean

@@ -128,6 +128,14 @@ public enum PuzzleType {
         PrefUtils.saveVersionCode(context);
     }
 
+    public String getHistoryFileName() {
+        return historyFileName;
+    }
+
+    public String getCurrentSessionFileName() {
+        return currentSessionFileName;
+    }
+
     public HistorySessions getHistorySessions() {
         return mHistorySessions;
     }

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
+import android.view.WindowManager;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.crashlytics.android.Crashlytics;
@@ -21,6 +22,37 @@ import java.io.InputStreamReader;
  */
 public class ErrorUtils {
 
+    public static void showErrorDialog(final Context context, String userReadableMessage, Exception e,
+                                       boolean sendFileData) {
+        try {
+            MaterialDialog.Builder builder = new MaterialDialog.Builder(context)
+                    .title("Error")
+                    .positiveText("Dismiss");
+            if (sendFileData) {
+                builder.negativeText(R.string.email_developer_history_data)
+                        .callback(new MaterialDialog.ButtonCallback() {
+                            @Override
+                            public void onNegative(MaterialDialog dialog) {
+                                super.onNegative(dialog);
+                                sendFileDataEmail(context);
+                            }
+                        });
+            }
+            if (!userReadableMessage.equals("")) {
+                builder.content(userReadableMessage + "\n" + e.getMessage());
+            }
+            builder.show();
+        } catch (WindowManager.BadTokenException e2) {
+            e.printStackTrace();
+            e2.printStackTrace();
+        }
+    }
+
+    public static void showJsonSyntaxError(Context c, Exception e) {
+        Crashlytics.logException(e);
+        showErrorDialog(c, "History/current data can't be read from storage.", e, true);
+    }
+
     public static String getUiScramble(Context c, int position, ScrambleAndSvg scrambleAndSvg, boolean signEnabled,
                                        String puzzleTypeName) {
         String uiScramble = "";
@@ -32,55 +64,59 @@ public class ErrorUtils {
             if (position == -1) {
                 positionString = "CurrentScrambleAndSvg";
             }
-            new MaterialDialog.Builder(c)
-                    .content("Error: Solve #" + positionString + " UI scramble doesn't exist")
-                    .positiveText("Dismiss")
-                    .show();
             Crashlytics.logException(e);
+            showErrorDialog(c, "Solve #" + positionString + " UI scramble doesn't exist", e, false);
         }
         return uiScramble;
     }
 
-    public static boolean solveNonexistent(Context c, String puzzleTypeName, int solveIndex, int sessionIndex) {
+    public static boolean isSolveNonexistent(Context c, String puzzleTypeName, int solveIndex, int sessionIndex) {
         try {
             PuzzleType.valueOf(puzzleTypeName).getSession(sessionIndex).getSolveByPosition(solveIndex);
             return false;
         } catch (IndexOutOfBoundsException e) {
-            new MaterialDialog.Builder(c)
-                    .content("Error: Solve #" + solveIndex + " doesn't exist")
-                    .positiveText("Dismiss")
-                    .show();
             Crashlytics.log(Log.ERROR,
                     "Solve #" + solveIndex + " nonexistent",
                     PuzzleType.getCurrent()
                             .getSession(sessionIndex)
                             .toString(c, PuzzleType.getCurrent().name(), true, true, true, false)
             );
+            showErrorDialog(c, "Solve #" + solveIndex + " doesn't exist", e, false);
             Crashlytics.logException(e);
             return true;
         }
     }
 
-    public static void sendHistoryDataEmail(Context context) {
+    public static void sendFileDataEmail(Context context) {
         BufferedReader r = null;
         StringBuilder total = new StringBuilder();
         for (PuzzleType p : PuzzleType.values()) {
-            try {
-                total.append("\n\n\n").append(p.name()).append("\n");
-                InputStream in = context.openFileInput(p.name() + ".json");
-                r = new BufferedReader(new InputStreamReader(in));
-                String line;
-                while ((line = r.readLine()) != null) {
-                    total.append(line);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                if (r != null) {
-                    try {
-                        r.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+            for (int i = 0; i < 2; i++) {
+                try {
+                    String fileName;
+                    if (i == 0) {
+                        fileName = p.getHistoryFileName();
+                    } else {
+                        fileName = p.getCurrentSessionFileName();
+                    }
+                    total.append("\n\n\n").append(fileName).append("\n");
+                    InputStream in = context.openFileInput(fileName);
+                    r = new BufferedReader(new InputStreamReader(in));
+                    String line;
+                    while ((line = r.readLine()) != null) {
+                        total.append(line);
+                    }
+                } catch (IOException e) {
+                    Crashlytics.logException(e);
+                    showErrorDialog(context, "", e, false);
+                } finally {
+                    if (r != null) {
+                        try {
+                            r.close();
+                        } catch (IOException e) {
+                            Crashlytics.logException(e);
+                            showErrorDialog(context, "", e, false);
+                        }
                     }
                 }
             }
