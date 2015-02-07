@@ -145,10 +145,10 @@ public class Utils {
         }
     }
 
-    public static boolean assertSolveExists(Context c, int solveIndex, int sessionIndex) {
+    public static boolean solveNonexistent(Context c, String puzzleTypeName, int solveIndex, int sessionIndex) {
         try {
-            PuzzleType.getCurrent().getSession(sessionIndex).getSolveByPosition(solveIndex);
-            return true;
+            PuzzleType.valueOf(puzzleTypeName).getSession(sessionIndex).getSolveByPosition(solveIndex);
+            return false;
         } catch (IndexOutOfBoundsException e) {
             new MaterialDialog.Builder(c)
                     .content("Error: Solve #" + solveIndex + " doesn't exist")
@@ -161,7 +161,7 @@ public class Utils {
                             .toString(c, PuzzleType.getCurrent().name(), true, true, true, false)
             );
             Crashlytics.logException(e);
-            return false;
+            return true;
         }
     }
 

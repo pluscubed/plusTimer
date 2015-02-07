@@ -340,6 +340,9 @@ public class SolveDialogFragment extends DialogFragment {
     }
 
     private void onNeutral() {
+        if (Utils.solveNonexistent(getActivity(), mPuzzleTypeName, 100, mSessionIndex)) {
+            return;
+        }
         PuzzleType.valueOf(mPuzzleTypeName).getSession
                 (mSessionIndex).deleteSolve
                 (mSolveIndex);

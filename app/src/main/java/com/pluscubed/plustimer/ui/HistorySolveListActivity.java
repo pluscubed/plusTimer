@@ -32,7 +32,7 @@ public class HistorySolveListActivity extends ThemableActivity
                                          int solveIndex) {
         DialogFragment dialog = (DialogFragment) getFragmentManager()
                 .findFragmentByTag(HISTORY_DIALOG_SOLVE_TAG);
-        if (Utils.assertSolveExists(this, solveIndex, sessionIndex)) {
+        if (Utils.solveNonexistent(this, puzzleTypeName, solveIndex, sessionIndex)) {
             return;
         }
         if (dialog == null) {

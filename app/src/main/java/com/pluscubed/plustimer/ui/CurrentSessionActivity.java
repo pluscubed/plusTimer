@@ -346,7 +346,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
                                          int solveIndex) {
         DialogFragment dialog = (DialogFragment) getFragmentManager()
                 .findFragmentByTag(DIALOG_SOLVE_TAG);
-        if (Utils.assertSolveExists(this, solveIndex, PuzzleType.CURRENT_SESSION)) {
+        if (Utils.solveNonexistent(this, PuzzleType.getCurrent().name(), solveIndex, PuzzleType.CURRENT_SESSION)) {
             return;
         }
         if (dialog == null) {

@@ -257,7 +257,7 @@ public abstract class DrawerActivity extends ThemableActivity {
                 goToNavDrawerItem(itemId);
             }
         }, NAVDRAWER_LAUNCH_DELAY);
-        if (isSpecialItem(itemId)) {
+        if (isNormalItem(itemId)) {
             View mainContent = findViewById(R.id
                     .activity_drawer_content_linearlayout);
             if (mainContent != null) {
@@ -269,9 +269,9 @@ public abstract class DrawerActivity extends ThemableActivity {
         mDrawerLayout.closeDrawer(Gravity.START);
     }
 
-    private boolean isSpecialItem(int itemId) {
-        return itemId == NAVDRAWER_ITEM_SETTINGS || itemId ==
-                NAVDRAWER_ITEM_HELP || itemId == NAVDRAWER_ITEM_ABOUT;
+    private boolean isNormalItem(int itemId) {
+        return itemId != NAVDRAWER_ITEM_SETTINGS && itemId !=
+                NAVDRAWER_ITEM_HELP && itemId != NAVDRAWER_ITEM_ABOUT;
     }
 
     boolean isNavDrawerOpen() {
@@ -308,6 +308,6 @@ public abstract class DrawerActivity extends ThemableActivity {
 
         startActivity(i);
         //If it is not a special item, finish this activity
-        if (isSpecialItem(itemId)) finish();
+        if (isNormalItem(itemId)) finish();
     }
 }
