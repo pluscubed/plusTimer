@@ -3,7 +3,6 @@ package com.pluscubed.plustimer.ui;
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.graphics.Color;
@@ -29,7 +28,6 @@ import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.ui.widget.LockingViewPager;
 import com.pluscubed.plustimer.ui.widget.SlidingTabLayout;
-import com.pluscubed.plustimer.utils.Utils;
 
 import io.fabric.sdk.android.Fabric;
 
@@ -37,10 +35,7 @@ import io.fabric.sdk.android.Fabric;
  * Current Session Activity
  */
 public class CurrentSessionActivity extends DrawerActivity implements
-        CreateDialogCallback,
         CurrentSessionTimerFragment.ActivityCallback {
-
-    private static final String DIALOG_SOLVE_TAG = "SOLVE_DIALOG";
 
     private static final String STATE_MENU_ITEMS_ENABLE_BOOLEAN =
             "menu_items_enable_boolean";
@@ -339,33 +334,6 @@ public class CurrentSessionActivity extends DrawerActivity implements
         }
 
         return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public void createSolveDisplayDialog(String displayName, int sessionIndex,
-                                         int solveIndex) {
-        DialogFragment dialog = (DialogFragment) getFragmentManager()
-                .findFragmentByTag(DIALOG_SOLVE_TAG);
-        if (Utils.solveNonexistent(this, PuzzleType.getCurrent().name(), solveIndex, PuzzleType.CURRENT_SESSION)) {
-            return;
-        }
-        if (dialog == null) {
-            SolveDialogFragment d = SolveDialogFragment.newInstanceDisplay
-                    (PuzzleType.getCurrent().name(),
-                            PuzzleType.CURRENT_SESSION, solveIndex);
-            d.show(getFragmentManager(), DIALOG_SOLVE_TAG);
-        }
-    }
-
-    @Override
-    public void createSolveAddDialog(String displayName, int sessionIndex) {
-        DialogFragment dialog = (DialogFragment) getFragmentManager()
-                .findFragmentByTag(DIALOG_SOLVE_TAG);
-        if (dialog == null) {
-            SolveDialogFragment d = SolveDialogFragment.newInstanceAdd
-                    (PuzzleType.getCurrent().name(), PuzzleType.CURRENT_SESSION);
-            d.show(getFragmentManager(), DIALOG_SOLVE_TAG);
-        }
     }
 
     public class CurrentSessionPagerAdapter extends FragmentPagerAdapter {

@@ -1,6 +1,5 @@
 package com.pluscubed.plustimer.ui;
 
-import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.os.Bundle;
@@ -10,14 +9,12 @@ import android.view.MenuItem;
 
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
-import com.pluscubed.plustimer.utils.Utils;
 
 /**
  * History SolveList (started onListItemClick HistorySessionListFragment)
  * activity
  */
-public class HistorySolveListActivity extends ThemableActivity
-        implements CreateDialogCallback {
+public class HistorySolveListActivity extends ThemableActivity {
 
     public static final String EXTRA_HISTORY_SESSION_POSITION = "com" +
             ".pluscubed.plustimer.history_session_position";
@@ -26,39 +23,6 @@ public class HistorySolveListActivity extends ThemableActivity
 
     private static final String HISTORY_DIALOG_SOLVE_TAG =
             "HISTORY_MODIFY_DIALOG";
-
-    @Override
-    public void createSolveDisplayDialog(String puzzleTypeName, int sessionIndex,
-                                         int solveIndex) {
-        DialogFragment dialog = (DialogFragment) getFragmentManager()
-                .findFragmentByTag(HISTORY_DIALOG_SOLVE_TAG);
-        if (Utils.solveNonexistent(this, puzzleTypeName, solveIndex, sessionIndex)) {
-            return;
-        }
-        if (dialog == null) {
-            SolveDialogFragment d = SolveDialogFragment.newInstanceDisplay
-                    (PuzzleType.valueOf(puzzleTypeName).toString(),
-                            sessionIndex, solveIndex);
-            d.show(getFragmentManager(), HISTORY_DIALOG_SOLVE_TAG);
-        }
-    }
-
-    @Override
-    public void createSolveAddDialog(String displayName, int sessionIndex) {
-        DialogFragment dialog = (DialogFragment) getFragmentManager()
-                .findFragmentByTag(HISTORY_DIALOG_SOLVE_TAG);
-        if (dialog == null) {
-            SolveDialogFragment d = SolveDialogFragment.newInstanceAdd
-                    (PuzzleType.valueOf(displayName).toString(),
-                            sessionIndex);
-            d.show(getFragmentManager(), HISTORY_DIALOG_SOLVE_TAG);
-        }
-    }
-
-    private SolveListFragment getSolveListFragment() {
-        return (SolveListFragment) getFragmentManager().findFragmentById
-                (android.R.id.content);
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

@@ -28,6 +28,7 @@ import com.pluscubed.plustimer.model.ScrambleAndSvg;
 import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
 import com.pluscubed.plustimer.utils.PrefUtils;
+import com.pluscubed.plustimer.utils.SolveDialogUtils;
 import com.pluscubed.plustimer.utils.Utils;
 
 import java.util.ArrayList;
@@ -166,14 +167,8 @@ public class SolveListFragment extends Fragment {
                 getActivity().finish();
                 return true;
             case R.id.menu_solvelist_add_menuitem:
-                try {
-                    CreateDialogCallback callback = (CreateDialogCallback) getActivity();
-                    callback.createSolveAddDialog(mPuzzleTypeName,
-                            mSessionIndex);
-                } catch (ClassCastException e) {
-                    throw new ClassCastException(getActivity().toString()
-                            + " must implement CreateDialogCallback");
-                }
+                SolveDialogUtils.createSolveDialog(getActivity(), true, mPuzzleTypeName,
+                        mSessionIndex, 0);
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -280,16 +275,8 @@ public class SolveListFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
-                try {
-                    CreateDialogCallback callback = (CreateDialogCallback)
-                            getActivity();
-                    callback.createSolveDisplayDialog(mPuzzleTypeName,
-                            mSessionIndex, mSession.getPosition((Solve)
-                                    mListView.getItemAtPosition(position)));
-                } catch (ClassCastException e) {
-                    throw new ClassCastException(getActivity().toString()
-                            + " must implement CreateDialogCallback");
-                }
+                SolveDialogUtils.createSolveDialog(getActivity(), false, mPuzzleTypeName, mSessionIndex,
+                        mSession.getPosition((Solve) mListView.getItemAtPosition(position)));
             }
         });
 

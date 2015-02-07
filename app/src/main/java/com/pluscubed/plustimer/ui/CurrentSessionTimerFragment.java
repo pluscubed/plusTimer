@@ -40,6 +40,7 @@ import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
 import com.pluscubed.plustimer.utils.PrefUtils;
+import com.pluscubed.plustimer.utils.SolveDialogUtils;
 import com.pluscubed.plustimer.utils.Utils;
 
 import java.util.Arrays;
@@ -1143,15 +1144,8 @@ public class CurrentSessionTimerFragment extends Fragment {
                 textView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        try {
-                            CreateDialogCallback callback =
-                                    (CreateDialogCallback) getActivity();
-                            callback.createSolveDisplayDialog(null, 0, getPosition());
-                        } catch (ClassCastException e) {
-                            throw new ClassCastException(getActivity()
-                                    .toString() + " must implement " +
-                                    "CreateDialogCallback");
-                        }
+                        SolveDialogUtils.createSolveDialog(getActivity(), false, PuzzleType.getCurrent().name(),
+                                PuzzleType.CURRENT_SESSION, getPosition());
                     }
                 });
             }

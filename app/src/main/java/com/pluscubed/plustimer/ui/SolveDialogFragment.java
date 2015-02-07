@@ -68,26 +68,14 @@ public class SolveDialogFragment extends DialogFragment {
     private boolean mMillisecondsEnabled;
     private EditText mTimeEdit;
 
-    static SolveDialogFragment newInstanceAdd(String puzzleTypeName,
-                                              int sessionIndex) {
-        SolveDialogFragment d = new SolveDialogFragment();
-        Bundle args = new Bundle();
-        args.putInt(ARG_DIALOG_INIT_SESSION_INDEX, sessionIndex);
-        args.putInt(ARG_DIALOG_INIT_SOLVE_INDEX, -1);
-        args.putString(ARG_DIALOG_INIT_PUZZLETYPE_DISPLAY_NAME, puzzleTypeName);
-        args.putBoolean(ARG_DIALOG_INIT_ADD_MODE, true);
-        d.setArguments(args);
-        return d;
-    }
-
-    static SolveDialogFragment newInstanceDisplay(String puzzleTypeName,
+    public static SolveDialogFragment newInstance(boolean addMode, String puzzleTypeName,
                                                   int sessionIndex, int solveIndex) {
         SolveDialogFragment d = new SolveDialogFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_DIALOG_INIT_SESSION_INDEX, sessionIndex);
         args.putInt(ARG_DIALOG_INIT_SOLVE_INDEX, solveIndex);
         args.putString(ARG_DIALOG_INIT_PUZZLETYPE_DISPLAY_NAME, puzzleTypeName);
-        args.putBoolean(ARG_DIALOG_INIT_ADD_MODE, false);
+        args.putBoolean(ARG_DIALOG_INIT_ADD_MODE, addMode);
         d.setArguments(args);
         return d;
     }
