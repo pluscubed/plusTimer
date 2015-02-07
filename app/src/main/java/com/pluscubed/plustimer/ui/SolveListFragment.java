@@ -22,9 +22,12 @@ import android.widget.Toast;
 
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
+import com.pluscubed.plustimer.model.ScrambleAndSvg;
 import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
+import com.pluscubed.plustimer.utils.ErrorUtils;
 import com.pluscubed.plustimer.utils.PrefUtils;
+import com.pluscubed.plustimer.utils.SolveDialogUtils;
 import com.pluscubed.plustimer.utils.Utils;
 
 import java.util.ArrayList;
@@ -118,12 +121,6 @@ public class SolveListFragment extends Fragment {
         mSignEnabled = PrefUtils.isSignEnabled(getActivity());
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-    }
-
-
     private void share() {
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
@@ -169,21 +166,15 @@ public class SolveListFragment extends Fragment {
                 getActivity().finish();
                 return true;
             case R.id.menu_solvelist_add_menuitem:
-                try {
-                    CreateDialogCallback callback = (CreateDialogCallback) getActivity();
-                    callback.createSolveAddDialog(mPuzzleTypeName,
-                            mSessionIndex);
-                } catch (ClassCastException e) {
-                    throw new ClassCastException(getActivity().toString()
-                            + " must implement CreateDialogCallback");
-                }
+                SolveDialogUtils.createSolveDialog(getActivity(), true, mPuzzleTypeName,
+                        mSessionIndex, 0);
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
 
-    public void updateStats() {
+    void updateStats() {
         mQuickStats.setText(
                 mSession.toString(getActivity(), getPuzzleType().toString(),
                         mCurrentToggle, false, mMillisecondsEnabled,
@@ -283,16 +274,8 @@ public class SolveListFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
-                try {
-                    CreateDialogCallback callback = (CreateDialogCallback)
-                            getActivity();
-                    callback.createSolveDisplayDialog(mPuzzleTypeName,
-                            mSessionIndex, mSession.getPosition((Solve)
-                                    mListView.getItemAtPosition(position)));
-                } catch (ClassCastException e) {
-                    throw new ClassCastException(getActivity().toString()
-                            + " must implement CreateDialogCallback");
-                }
+                SolveDialogUtils.createSolveDialog(getActivity(), false, mPuzzleTypeName, mSessionIndex,
+                        mSession.getPosition((Solve) mListView.getItemAtPosition(position)));
             }
         });
 
@@ -354,7 +337,7 @@ public class SolveListFragment extends Fragment {
         PuzzleType.unregisterObserver(puzzleTypeObserver);
     }
 
-    public void enableResetSubmitButtons(boolean enable) {
+    void enableResetSubmitButtons(boolean enable) {
         mResetSubmitLinearLayout.setVisibility(enable ? View.VISIBLE : View
                 .GONE);
     }
@@ -366,7 +349,7 @@ public class SolveListFragment extends Fragment {
         if (mCurrentToggle) getPuzzleType().saveCurrentSession(getActivity());
     }
 
-    public void onSessionSolvesChanged() {
+    void onSessionSolvesChanged() {
         mSession = getPuzzleType().getSession(mSessionIndex);
         if (!mCurrentToggle && mSession.getNumberOfSolves() <= 0) {
             getPuzzleType().getHistorySessions().deleteSession(mSessionIndex,
@@ -429,8 +412,11 @@ public class SolveListFragment extends Fragment {
                 time.setText(s.getDescriptiveTimeString(mMillisecondsEnabled));
             }
 
-            desc.setText(s.getScrambleAndSvg().getUiScramble(mSignEnabled,
-                    mPuzzleTypeName));
+            ScrambleAndSvg scrambleAndSvg = s.getScrambleAndSvg();
+            String uiScramble = ErrorUtils.getUiScramble(getActivity(), position, scrambleAndSvg,
+                    mSignEnabled, mPuzzleTypeName);
+
+            desc.setText(uiScramble);
 
             return convertView;
         }

@@ -1,6 +1,8 @@
 package com.pluscubed.plustimer.ui;
 
-import android.app.DialogFragment;
+import android.animation.Animator;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.graphics.Color;
@@ -13,16 +15,19 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 
 import com.crashlytics.android.Crashlytics;
 import com.pluscubed.plustimer.BuildConfig;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
+import com.pluscubed.plustimer.ui.widget.LockingViewPager;
 import com.pluscubed.plustimer.ui.widget.SlidingTabLayout;
-import com.pluscubed.plustimer.utils.Utils;
 
 import io.fabric.sdk.android.Fabric;
 
@@ -30,10 +35,7 @@ import io.fabric.sdk.android.Fabric;
  * Current Session Activity
  */
 public class CurrentSessionActivity extends DrawerActivity implements
-        CreateDialogCallback,
         CurrentSessionTimerFragment.ActivityCallback {
-
-    public static final String DIALOG_SOLVE_TAG = "SOLVE_DIALOG";
 
     private static final String STATE_MENU_ITEMS_ENABLE_BOOLEAN =
             "menu_items_enable_boolean";
@@ -46,14 +48,91 @@ public class CurrentSessionActivity extends DrawerActivity implements
     private int mSelectedPage;
 
     private boolean mInvalidateActionBarOnDrawerClosed;
+    private SlidingTabLayout mSlidingTabLayout;
+    private LockingViewPager mViewPager;
 
-    public static String makeFragmentName(int viewId, int index) {
+    private static String makeFragmentName(int viewId, int index) {
         return "android:switcher:" + viewId + ":" + index;
     }
 
-    @Override
     public Toolbar getActionBarToolbar() {
         return super.getActionBarToolbar();
+    }
+
+    @Override
+    public void playToolbarExitAnimation() {
+        final LinearLayout toolbar = (LinearLayout) findViewById(R.id.activity_current_session_headerbar);
+        findViewById(R.id.activity_current_session_toolbarshadow).setVisibility(View.GONE);
+        ObjectAnimator exit = ObjectAnimator.ofFloat(toolbar, View.Y,
+                -toolbar.getHeight());
+        exit.setDuration(300);
+        exit.setInterpolator(new AccelerateInterpolator());
+        AnimatorSet scrambleAnimatorSet = new AnimatorSet();
+        scrambleAnimatorSet.play(exit);
+        scrambleAnimatorSet.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (toolbar.getY() == -toolbar.getHeight()) {
+                    toolbar.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+        scrambleAnimatorSet.start();
+    }
+
+    @Override
+    public void playToolbarEnterAnimation() {
+        final LinearLayout toolbar = (LinearLayout) findViewById(R.id.activity_current_session_headerbar);
+        ObjectAnimator exit = ObjectAnimator.ofFloat(toolbar, View.Y, 0f);
+        exit.setDuration(300);
+        exit.setInterpolator(new DecelerateInterpolator());
+        AnimatorSet scrambleAnimatorSet = new AnimatorSet();
+        scrambleAnimatorSet.play(exit);
+        toolbar.setVisibility(View.VISIBLE);
+        scrambleAnimatorSet.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                findViewById(R.id.activity_current_session_toolbarshadow).setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+        scrambleAnimatorSet.start();
+    }
+
+    @Override
+    public void lockDrawerAndViewPager(boolean lock) {
+        mSlidingTabLayout.setClickEnabled(!lock);
+        mViewPager.setPagingEnabled(!lock);
+        lockDrawer(lock);
     }
 
     @Override
@@ -73,11 +152,11 @@ public class CurrentSessionActivity extends DrawerActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_current_session);
 
-        PuzzleType.initialize(this);
-
         if (BuildConfig.USE_CRASHLYTICS) {
             Fabric.with(this, new Crashlytics());
         }
+
+        PuzzleType.initialize(this);
 
         if (savedInstanceState != null) {
             mScrambleImageActionEnable = savedInstanceState.getBoolean
@@ -94,24 +173,24 @@ public class CurrentSessionActivity extends DrawerActivity implements
         }
 
         //Set up ViewPager with CurrentSessionAdapter
-        ViewPager viewPager = (ViewPager) findViewById(R.id
+        mViewPager = (LockingViewPager) findViewById(R.id
                 .activity_current_session_viewpager);
-        viewPager.setAdapter(new CurrentSessionPagerAdapter
+        mViewPager.setAdapter(new CurrentSessionPagerAdapter
                 (getFragmentManager(),
                         getResources().getStringArray(R.array
                                 .current_session_page_titles)));
 
         //Set up SlidingTabLayout
-        SlidingTabLayout slidingTabLayout = (SlidingTabLayout) findViewById(R
+        mSlidingTabLayout = (SlidingTabLayout) findViewById(R
                 .id.activity_current_session_slidingtablayout);
         int[] attrs = {R.attr.colorAccent};
-        slidingTabLayout.setSelectedIndicatorColors(obtainStyledAttributes
+        mSlidingTabLayout.setSelectedIndicatorColors(obtainStyledAttributes
                 (attrs).getColor(0, Color.BLACK));
-        slidingTabLayout.setDistributeEvenly(true);
-        slidingTabLayout.setCustomTabView(R.layout.sliding_tab_textview,
+        mSlidingTabLayout.setDistributeEvenly(true);
+        mSlidingTabLayout.setCustomTabView(R.layout.sliding_tab_textview,
                 android.R.id.text1);
-        slidingTabLayout.setViewPager(viewPager);
-        slidingTabLayout.setOnPageChangeListener(new ViewPager
+        mSlidingTabLayout.setViewPager(mViewPager);
+        mSlidingTabLayout.setOnPageChangeListener(new ViewPager
                 .OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset,
@@ -128,11 +207,12 @@ public class CurrentSessionActivity extends DrawerActivity implements
                 if (state == ViewPager.SCROLL_STATE_DRAGGING || state ==
                         ViewPager.SCROLL_STATE_SETTLING) {
                     getCurrentSessionTimerFragment().stopHoldTimer();
+                    getCurrentSessionTimerFragment().playEnterAnimations();
                     getSolveListFragment().finishActionMode();
                 }
             }
         });
-        viewPager.setCurrentItem(0);
+        mViewPager.setCurrentItem(0);
 
         getSupportActionBar().setElevation(0);
 
@@ -159,7 +239,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
                         .activity_current_session_viewpager, 1));
     }
 
-    public void queueInvalidateOptionsMenu() {
+    void queueInvalidateOptionsMenu() {
         if (!isNavDrawerOpen()) {
             invalidateOptionsMenu();
         } else {
@@ -187,6 +267,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
     protected void onNavDrawerSlide(float offset) {
         getSolveListFragment().finishActionMode();
         getCurrentSessionTimerFragment().stopHoldTimer();
+        getCurrentSessionTimerFragment().playEnterAnimations();
     }
 
     @Override
@@ -253,33 +334,6 @@ public class CurrentSessionActivity extends DrawerActivity implements
         }
 
         return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public void createSolveDisplayDialog(String displayName, int sessionIndex,
-                                         int solveIndex) {
-        DialogFragment dialog = (DialogFragment) getFragmentManager()
-                .findFragmentByTag(DIALOG_SOLVE_TAG);
-        if (!Utils.assertSolveExists(this, solveIndex, PuzzleType.CURRENT_SESSION)) {
-            return;
-        }
-        if (dialog == null) {
-            SolveDialogFragment d = SolveDialogFragment.newInstanceDisplay
-                    (PuzzleType.getCurrent().name(),
-                            PuzzleType.CURRENT_SESSION, solveIndex);
-            d.show(getFragmentManager(), DIALOG_SOLVE_TAG);
-        }
-    }
-
-    @Override
-    public void createSolveAddDialog(String displayName, int sessionIndex) {
-        DialogFragment dialog = (DialogFragment) getFragmentManager()
-                .findFragmentByTag(DIALOG_SOLVE_TAG);
-        if (dialog == null) {
-            SolveDialogFragment d = SolveDialogFragment.newInstanceAdd
-                    (PuzzleType.getCurrent().name(), PuzzleType.CURRENT_SESSION);
-            d.show(getFragmentManager(), DIALOG_SOLVE_TAG);
-        }
     }
 
     public class CurrentSessionPagerAdapter extends FragmentPagerAdapter {

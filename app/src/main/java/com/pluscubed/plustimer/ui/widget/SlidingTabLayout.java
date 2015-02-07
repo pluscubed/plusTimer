@@ -146,7 +146,7 @@ public class SlidingTabLayout extends HorizontalScrollView {
      * tab view is not set via
      * {@link #setCustomTabView(int, int)}.
      */
-    protected TextView createDefaultTabView(Context context) {
+    TextView createDefaultTabView(Context context) {
         TextView textView = new TextView(context);
         textView.setGravity(Gravity.CENTER);
         textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, TAB_VIEW_TEXT_SIZE_SP);
@@ -218,6 +218,14 @@ public class SlidingTabLayout extends HorizontalScrollView {
 
     public void setContentDescription(int i, String desc) {
         mContentDescriptions.put(i, desc);
+    }
+
+    public void setClickEnabled(boolean enabled) {
+        int childCount = mTabStrip.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View v = mTabStrip.getChildAt(i);
+            v.setEnabled(enabled);
+        }
     }
 
     @Override

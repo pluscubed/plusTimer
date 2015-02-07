@@ -2,7 +2,6 @@
 <resources>
     <item name="primary_dark" type="color">#151515</item>
     <item name="primary" type="color">#212121</item>
-    <item name="activated" type="color">#4c000000</item>
     <item name="accent" type="color">#4d73ff</item>
 
     <color name="selector_dark" type="color">#20ffffff</color>

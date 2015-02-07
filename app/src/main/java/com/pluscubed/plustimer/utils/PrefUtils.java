@@ -11,31 +11,31 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class PrefUtils {
-    public static final String PREF_INSPECTION_CHECKBOX =
-            "pref_inspection_checkbox";
-    public static final String PREF_HOLDTOSTART_CHECKBOX =
-            "pref_holdtostart_checkbox";
-    public static final String PREF_KEEPSCREENON_CHECKBOX =
-            "pref_keepscreenon_checkbox";
-    public static final String PREF_TWO_ROW_TIME_CHECKBOX =
-            "pref_two_row_time_checkbox";
     public static final String PREF_TIME_TEXT_SIZE_EDITTEXT =
             "pref_time_display_size_edittext";
     public static final String PREF_UPDATE_TIME_LIST =
             "pref_update_time_list";
-    public static final String PREF_MILLISECONDS_CHECKBOX =
-            "pref_milliseconds_checkbox";
-    public static final String PREF_SIGN_CHECKBOX =
-            "pref_sign_checkbox";
     public static final String PREF_PUZZLETYPES_MULTISELECTLIST =
             "pref_puzzletypes_multiselectlist";
     public static final String PREF_THEME_LIST =
             "pref_theme_list";
-    public static final String PREF_MONOSPACE_SCRAMBLES_CHECKBOX =
+    private static final String PREF_INSPECTION_CHECKBOX =
+            "pref_inspection_checkbox";
+    private static final String PREF_HOLDTOSTART_CHECKBOX =
+            "pref_holdtostart_checkbox";
+    private static final String PREF_KEEPSCREENON_CHECKBOX =
+            "pref_keepscreenon_checkbox";
+    private static final String PREF_TWO_ROW_TIME_CHECKBOX =
+            "pref_two_row_time_checkbox";
+    private static final String PREF_MILLISECONDS_CHECKBOX =
+            "pref_milliseconds_checkbox";
+    private static final String PREF_SIGN_CHECKBOX =
+            "pref_sign_checkbox";
+    private static final String PREF_MONOSPACE_SCRAMBLES_CHECKBOX =
             "pref_monospace_scrambles_checkbox";
-    public static final String PREF_VERSION_CODE =
+    private static final String PREF_VERSION_CODE =
             "pref_version_code";
-    public static final String PREF_CURRENT_PUZZLETYPE =
+    private static final String PREF_CURRENT_PUZZLETYPE =
             "current_puzzletype";
     private static final String PREF_WELCOME_DONE =
             "welcome_done";

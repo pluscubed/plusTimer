@@ -1,16 +1,18 @@
 package com.pluscubed.plustimer.utils;
 
+import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
-import android.util.Log;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
+import android.os.Build;
+import android.view.Display;
+import android.view.Surface;
+import android.view.WindowManager;
 
-import com.afollestad.materialdialogs.MaterialDialog;
-import com.crashlytics.android.Crashlytics;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
-import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
@@ -53,34 +55,32 @@ public class Utils {
                 + 0.5f);
     }
 
-    public static void sendHistoryDataEmail(Context context) {
-        BufferedReader r = null;
-        StringBuilder total = new StringBuilder();
-        for (PuzzleType p : PuzzleType.values()) {
-            try {
-                total.append("\n\n\n").append(p.name()).append("\n");
-                InputStream in = context.openFileInput(p.name() + ".json");
-                r = new BufferedReader(new InputStreamReader(in));
-                String line;
-                while ((line = r.readLine()) != null) {
-                    total.append(line);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                if (r != null) {
-                    try {
-                        r.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
+    public static void lockOrientation(Activity activity) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
         }
-        Intent intent = new Intent(Intent.ACTION_SENDTO,
-                Uri.fromParts("mailto", "plusCubed@gmail.com", null));
-        intent.putExtra(Intent.EXTRA_TEXT, total.toString());
-        context.startActivity(Intent.createChooser(intent, context.getString(R.string.send_email)));
+        Display display = ((WindowManager) activity.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+        int rotation = display.getRotation();
+        int tempOrientation = activity.getResources().getConfiguration().orientation;
+        int orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+        switch (tempOrientation) {
+            case Configuration.ORIENTATION_LANDSCAPE:
+                if (rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_90)
+                    orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+                else
+                    orientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+                break;
+            case Configuration.ORIENTATION_PORTRAIT:
+                if (rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_270)
+                    orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+                else
+                    orientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
+        }
+        activity.setRequestedOrientation(orientation);
+    }
+
+    public static void unlockOrientation(Activity activity) {
+        activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
     }
 
     /**
@@ -110,30 +110,10 @@ public class Utils {
         }
     }
 
-    public static boolean assertSolveExists(Context c, int solveIndex, int sessionIndex) {
-        try {
-            PuzzleType.getCurrent().getSession(sessionIndex).getSolveByPosition(solveIndex);
-            return true;
-        } catch (IndexOutOfBoundsException e) {
-            new MaterialDialog.Builder(c)
-                    .content("Error: Solve #" + solveIndex + " doesn't exist")
-                    .positiveText("Dismiss")
-                    .show();
-            Crashlytics.log(Log.ERROR,
-                    "Solve #" + solveIndex + " nonexistent",
-                    PuzzleType.getCurrent()
-                            .getSession(sessionIndex)
-                            .toString(c, PuzzleType.getCurrent().name(), true, true, true, false)
-            );
-            Crashlytics.logException(e);
-            return false;
-        }
-    }
-
     /**
      * Get list and save new list
      */
-    public static void updateData(Context context, String fileName) {
+    private static void updateData(Context context, String fileName) {
         List<Session> historySessions = getSessionListFromFile(context, fileName);
         saveSessionListToFile(context, fileName, historySessions);
     }
@@ -164,6 +144,8 @@ public class Utils {
             }
         } catch (FileNotFoundException e) {
             //File not found: create empty list
+        } catch (JsonSyntaxException e) {
+            ErrorUtils.showJsonSyntaxError(context, e);
         } finally {
             if (reader != null) {
                 try {
@@ -293,7 +275,7 @@ public class Utils {
      * @param list the list of solves to extract times from
      * @return the list of nanoseconds of times
      */
-    public static List<Long> getListTimeTwoNoDnf(List<Solve> list) {
+    private static List<Long> getListTimeTwoNoDnf(List<Solve> list) {
         ArrayList<Long> timeTwo = new ArrayList<>();
         for (Solve i : list) {
             if (!(i.getPenalty() == Solve.Penalty.DNF)) {

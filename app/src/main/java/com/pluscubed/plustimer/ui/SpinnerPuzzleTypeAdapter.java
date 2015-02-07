@@ -14,11 +14,11 @@ import com.pluscubed.plustimer.model.PuzzleType;
 /**
  * An Adapter for a Spinner with values of the PuzzleTypes
  */
-public class SpinnerPuzzleTypeAdapter extends ArrayAdapter<PuzzleType> {
+class SpinnerPuzzleTypeAdapter extends ArrayAdapter<PuzzleType> {
 
-    LayoutInflater mLayoutInflater;
+    private LayoutInflater mLayoutInflater;
 
-    Context mContext;
+    private Context mContext;
 
     public SpinnerPuzzleTypeAdapter(LayoutInflater inflater, Context context) {
         super(context, 0, PuzzleType.valuesExcludeDisabled());

@@ -10,11 +10,11 @@ import android.view.KeyEvent;
 import com.pluscubed.plustimer.utils.ThemeUtils;
 
 
-public class ThemableActivity extends ActionBarActivity {
+public abstract class ThemableActivity extends ActionBarActivity {
 
     private ThemeUtils mThemeUtils;
 
-    protected boolean hasNavDrawer() {
+    boolean hasNavDrawer() {
         return false;
     }
 

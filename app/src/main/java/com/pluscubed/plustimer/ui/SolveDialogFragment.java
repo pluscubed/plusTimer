@@ -25,6 +25,7 @@ import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.ScrambleAndSvg;
 import com.pluscubed.plustimer.model.Solve;
+import com.pluscubed.plustimer.utils.ErrorUtils;
 import com.pluscubed.plustimer.utils.PrefUtils;
 import com.pluscubed.plustimer.utils.ThemeUtils;
 import com.pluscubed.plustimer.utils.Utils;
@@ -39,21 +40,21 @@ import java.math.BigDecimal;
  */
 public class SolveDialogFragment extends DialogFragment {
 
-    public static final String ARG_DIALOG_INIT_PUZZLETYPE_DISPLAY_NAME
+    private static final String ARG_DIALOG_INIT_PUZZLETYPE_DISPLAY_NAME
             = "com.pluscubed.plustimer.dialog.puzzleType";
 
-    public static final String ARG_DIALOG_INIT_SESSION_INDEX
+    private static final String ARG_DIALOG_INIT_SESSION_INDEX
             = "com.pluscubed.plustimer.dialog.sessionIndex";
 
-    public static final String ARG_DIALOG_INIT_SOLVE_INDEX
+    private static final String ARG_DIALOG_INIT_SOLVE_INDEX
             = "com.pluscubed.plustimer.dialog.solveIndex";
 
-    public static final String ARG_DIALOG_INIT_ADD_MODE
+    private static final String ARG_DIALOG_INIT_ADD_MODE
             = "com.pluscubed.plustimer.dialog.addMode";
 
-    public static final int DIALOG_PENALTY_NONE = 0;
-    public static final int DIALOG_PENALTY_PLUSTWO = 1;
-    public static final int DIALOG_PENALTY_DNF = 2;
+    private static final int DIALOG_PENALTY_NONE = 0;
+    private static final int DIALOG_PENALTY_PLUSTWO = 1;
+    private static final int DIALOG_PENALTY_DNF = 2;
 
     private String mPuzzleTypeName;
     private int mSessionIndex;
@@ -68,26 +69,14 @@ public class SolveDialogFragment extends DialogFragment {
     private boolean mMillisecondsEnabled;
     private EditText mTimeEdit;
 
-    static SolveDialogFragment newInstanceAdd(String puzzleTypeName,
-                                              int sessionIndex) {
-        SolveDialogFragment d = new SolveDialogFragment();
-        Bundle args = new Bundle();
-        args.putInt(ARG_DIALOG_INIT_SESSION_INDEX, sessionIndex);
-        args.putInt(ARG_DIALOG_INIT_SOLVE_INDEX, -1);
-        args.putString(ARG_DIALOG_INIT_PUZZLETYPE_DISPLAY_NAME, puzzleTypeName);
-        args.putBoolean(ARG_DIALOG_INIT_ADD_MODE, true);
-        d.setArguments(args);
-        return d;
-    }
-
-    static SolveDialogFragment newInstanceDisplay(String puzzleTypeName,
+    public static SolveDialogFragment newInstance(boolean addMode, String puzzleTypeName,
                                                   int sessionIndex, int solveIndex) {
         SolveDialogFragment d = new SolveDialogFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_DIALOG_INIT_SESSION_INDEX, sessionIndex);
         args.putInt(ARG_DIALOG_INIT_SOLVE_INDEX, solveIndex);
         args.putString(ARG_DIALOG_INIT_PUZZLETYPE_DISPLAY_NAME, puzzleTypeName);
-        args.putBoolean(ARG_DIALOG_INIT_ADD_MODE, false);
+        args.putBoolean(ARG_DIALOG_INIT_ADD_MODE, addMode);
         d.setArguments(args);
         return d;
     }
@@ -340,6 +329,9 @@ public class SolveDialogFragment extends DialogFragment {
     }
 
     private void onNeutral() {
+        if (ErrorUtils.isSolveNonexistent(getActivity(), mPuzzleTypeName, 100, mSessionIndex)) {
+            return;
+        }
         PuzzleType.valueOf(mPuzzleTypeName).getSession
                 (mSessionIndex).deleteSolve
                 (mSolveIndex);
@@ -377,7 +369,7 @@ public class SolveDialogFragment extends DialogFragment {
             }
             dismiss();
         } catch (InvalidScrambleException e) {
-            mScrambleEdit.setError("Invalid scramble.");
+            mScrambleEdit.setError(getString(R.string.invalid_scramble));
         }
     }
 
@@ -385,7 +377,7 @@ public class SolveDialogFragment extends DialogFragment {
         mListener = listener;
     }
 
-    public void updateTitle() {
+    void updateTitle() {
         getDialog().setTitle(mSolveCopy.getDescriptiveTimeString
                 (mMillisecondsEnabled));
     }
