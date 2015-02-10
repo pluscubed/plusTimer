@@ -78,7 +78,7 @@ public class ErrorUtils {
         return uiScramble;
     }
 
-    public static boolean isSolveNonexistent(Context c, String puzzleTypeName, int solveIndex, int sessionIndex) {
+    public static boolean isSolveNonexistent(Context c, String puzzleTypeName, int sessionIndex, int solveIndex) {
         try {
             PuzzleType.valueOf(puzzleTypeName).getSession(sessionIndex).getSolveByPosition(solveIndex);
             return false;
