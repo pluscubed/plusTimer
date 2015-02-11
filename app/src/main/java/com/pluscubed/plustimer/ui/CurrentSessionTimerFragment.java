@@ -837,8 +837,8 @@ public class CurrentSessionTimerFragment extends Fragment {
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                for (int i = 0; i < mTimeBarRecycler.getChildCount(); i++) {
-                    mTimeBarRecycler.getChildAt(i).setEnabled(false);
+                if (mDynamicStatusBarFrame.getY() == 0) {
+                    mTimeBarRecycler.setVisibility(View.GONE);
                 }
             }
 
@@ -864,9 +864,7 @@ public class CurrentSessionTimerFragment extends Fragment {
         dynamicStatusBarAnimatorSet.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
-                for (int i = 0; i < mTimeBarRecycler.getChildCount(); i++) {
-                    mTimeBarRecycler.getChildAt(i).setEnabled(true);
-                }
+                mTimeBarRecycler.setVisibility(View.VISIBLE);
             }
 
             @Override
@@ -915,6 +913,29 @@ public class CurrentSessionTimerFragment extends Fragment {
         exit.setStartDelay(1500);
         enter.setInterpolator(new DecelerateInterpolator());
         exit.setInterpolator(new AccelerateInterpolator());
+        mLastBarAnimationSet.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                mLastBarLinearLayout.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (mLastBarLinearLayout.getY() == 0f) {
+                    mLastBarLinearLayout.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
         mLastBarAnimationSet = new AnimatorSet();
         mLastBarAnimationSet.playSequentially(enter, exit);
         mLastBarAnimationSet.start();
@@ -928,6 +949,29 @@ public class CurrentSessionTimerFragment extends Fragment {
         exit.setDuration(125);
         exit.setInterpolator(new AccelerateInterpolator());
         AnimatorSet lastBarAnimationSet = new AnimatorSet();
+        lastBarAnimationSet.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (mLastBarLinearLayout.getY() == 0f) {
+                    mLastBarLinearLayout.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
         lastBarAnimationSet.play(exit);
         lastBarAnimationSet.start();
     }
