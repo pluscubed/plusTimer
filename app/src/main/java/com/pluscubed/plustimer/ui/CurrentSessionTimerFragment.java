@@ -837,7 +837,7 @@ public class CurrentSessionTimerFragment extends Fragment {
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                if (mDynamicStatusBarFrame.getY() == 0) {
+                if (mDynamicStatusBarFrame.getTranslationY() == 0) {
                     mTimeBarRecycler.setVisibility(View.GONE);
                 }
             }
@@ -922,7 +922,7 @@ public class CurrentSessionTimerFragment extends Fragment {
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                if (mLastBarLinearLayout.getY() == 0f) {
+                if (mLastBarLinearLayout.getTranslationY() == 0f) {
                     mLastBarLinearLayout.setVisibility(View.GONE);
                 }
             }
@@ -957,7 +957,7 @@ public class CurrentSessionTimerFragment extends Fragment {
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                if (mLastBarLinearLayout.getY() == 0f) {
+                if (mLastBarLinearLayout.getTranslationY() == 0f) {
                     mLastBarLinearLayout.setVisibility(View.GONE);
                 }
             }
