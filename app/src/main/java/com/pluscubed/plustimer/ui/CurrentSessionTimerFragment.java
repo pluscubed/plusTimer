@@ -913,6 +913,7 @@ public class CurrentSessionTimerFragment extends Fragment {
         exit.setStartDelay(1500);
         enter.setInterpolator(new DecelerateInterpolator());
         exit.setInterpolator(new AccelerateInterpolator());
+        mLastBarAnimationSet = new AnimatorSet();
         mLastBarAnimationSet.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
@@ -936,7 +937,6 @@ public class CurrentSessionTimerFragment extends Fragment {
 
             }
         });
-        mLastBarAnimationSet = new AnimatorSet();
         mLastBarAnimationSet.playSequentially(enter, exit);
         mLastBarAnimationSet.start();
     }
