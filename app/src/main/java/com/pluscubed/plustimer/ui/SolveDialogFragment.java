@@ -329,7 +329,7 @@ public class SolveDialogFragment extends DialogFragment {
     }
 
     private void onNeutral() {
-        if (ErrorUtils.isSolveNonexistent(getActivity(), mPuzzleTypeName, 100, mSessionIndex)) {
+        if (ErrorUtils.isSolveNonexistent(getActivity(), mPuzzleTypeName, mSessionIndex, mSolveIndex)) {
             return;
         }
         PuzzleType.valueOf(mPuzzleTypeName).getSession
