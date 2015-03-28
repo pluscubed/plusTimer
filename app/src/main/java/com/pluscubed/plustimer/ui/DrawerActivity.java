@@ -143,7 +143,8 @@ public abstract class DrawerActivity extends ThemableActivity {
         if (navDrawerWidth > navDrawerWidthLimit) {
             navDrawerWidth = navDrawerWidthLimit;
         }
-        DrawerLayout.LayoutParams params = (DrawerLayout.LayoutParams) mDrawerScrollView.getLayoutParams();
+        DrawerLayout.LayoutParams params = (DrawerLayout.LayoutParams) mDrawerScrollView
+                .getLayoutParams();
         params.width = navDrawerWidth;
         mDrawerScrollView.setLayoutParams(params);
 
@@ -191,9 +192,11 @@ public abstract class DrawerActivity extends ThemableActivity {
                     setTitle(null);
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    findViewById(android.R.id.content).getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    findViewById(android.R.id.content).getViewTreeObserver()
+                            .removeOnGlobalLayoutListener(this);
                 } else {
-                    findViewById(android.R.id.content).getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                    findViewById(android.R.id.content).getViewTreeObserver()
+                            .removeGlobalOnLayoutListener(this);
                 }
             }
         });

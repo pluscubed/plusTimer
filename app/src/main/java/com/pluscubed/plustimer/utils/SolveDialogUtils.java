@@ -15,7 +15,8 @@ public class SolveDialogUtils {
     public static void createSolveDialog(Activity activity, boolean addMode, String puzzleTypeName,
                                          int sessionIndex, int solveIndex) {
         FragmentManager fragmentManager = activity.getFragmentManager();
-        DialogFragment dialog = (DialogFragment) fragmentManager.findFragmentByTag(DIALOG_SOLVE_TAG);
+        DialogFragment dialog = (DialogFragment) fragmentManager.findFragmentByTag
+                (DIALOG_SOLVE_TAG);
         if (ErrorUtils.isSolveNonexistent(activity, puzzleTypeName, sessionIndex, solveIndex)) {
             return;
         }

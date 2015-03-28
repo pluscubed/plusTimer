@@ -39,6 +39,9 @@ import java.util.List;
  */
 public class Utils {
 
+    private static final Type SESSION_LIST_TYPE;
+    private static Gson gson;
+
     static {
         gson = new GsonBuilder()
                 .registerTypeAdapter(Session.class, new Session.Deserializer())
@@ -46,9 +49,6 @@ public class Utils {
         SESSION_LIST_TYPE = new TypeToken<List<Session>>() {
         }.getType();
     }
-
-    private static final Type SESSION_LIST_TYPE;
-    private static Gson gson;
 
     public static int convertDpToPx(Context context, float dp) {
         return (int) (dp * context.getResources().getDisplayMetrics().density
@@ -59,7 +59,8 @@ public class Utils {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
         }
-        Display display = ((WindowManager) activity.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+        Display display = ((WindowManager) activity.getSystemService(Context.WINDOW_SERVICE))
+                .getDefaultDisplay();
         int rotation = display.getRotation();
         int tempOrientation = activity.getResources().getConfiguration().orientation;
         int orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;

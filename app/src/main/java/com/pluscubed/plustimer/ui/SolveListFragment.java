@@ -50,7 +50,18 @@ public class SolveListFragment extends Fragment {
 
     private static final String ARG_CURRENT_BOOLEAN
             = "com.pluscubed.plustimer.solvelist.current_boolean";
-
+    private Session mSession;
+    private boolean mMillisecondsEnabled;
+    private boolean mSignEnabled;
+    private TextView mQuickStats;
+    private ListView mListView;
+    private TextView mEmptyView;
+    private SolveListAdapter mListAdapter;
+    private int mSessionIndex;
+    private String mPuzzleTypeName;
+    private boolean mCurrentToggle;
+    private ActionMode mActionMode;
+    private LinearLayout mResetSubmitLinearLayout;
     private final Session.Observer sessionObserver = new Session.Observer() {
         @Override
         public void onSolveAdded() {
@@ -72,7 +83,6 @@ public class SolveListFragment extends Fragment {
             onSessionSolvesChanged();
         }
     };
-
     private final PuzzleType.Observer puzzleTypeObserver = new PuzzleType
             .Observer() {
         @Override
@@ -81,19 +91,6 @@ public class SolveListFragment extends Fragment {
             mSession.registerObserver(sessionObserver);
         }
     };
-
-    private Session mSession;
-    private boolean mMillisecondsEnabled;
-    private boolean mSignEnabled;
-    private TextView mQuickStats;
-    private ListView mListView;
-    private TextView mEmptyView;
-    private SolveListAdapter mListAdapter;
-    private int mSessionIndex;
-    private String mPuzzleTypeName;
-    private boolean mCurrentToggle;
-    private ActionMode mActionMode;
-    private LinearLayout mResetSubmitLinearLayout;
 
     public static SolveListFragment newInstance(boolean current,
                                                 String puzzleTypeName,
@@ -274,7 +271,8 @@ public class SolveListFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
-                SolveDialogUtils.createSolveDialog(getActivity(), false, mPuzzleTypeName, mSessionIndex,
+                SolveDialogUtils.createSolveDialog(getActivity(), false, mPuzzleTypeName,
+                        mSessionIndex,
                         mSession.getPosition((Solve) mListView.getItemAtPosition(position)));
             }
         });

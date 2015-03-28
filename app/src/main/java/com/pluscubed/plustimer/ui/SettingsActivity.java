@@ -73,7 +73,8 @@ public class SettingsActivity extends ThemableActivity {
                 public boolean onPreferenceChange(Preference preference,
                                                   Object newValue) {
                     if (Integer.valueOf(newValue.toString()) > 500) {
-                        Toast.makeText(getActivity(), getString(R.string.text_size_warning), Toast.LENGTH_SHORT)
+                        Toast.makeText(getActivity(), getString(R.string.text_size_warning),
+                                Toast.LENGTH_SHORT)
                                 .show();
                         return false;
                     }
@@ -100,7 +101,8 @@ public class SettingsActivity extends ThemableActivity {
 
 
             MultiSelectListPreference puzzleTypeMultiList =
-                    (MultiSelectListPreference) findPreference(PrefUtils.PREF_PUZZLETYPES_MULTISELECTLIST);
+                    (MultiSelectListPreference) findPreference(PrefUtils
+                            .PREF_PUZZLETYPES_MULTISELECTLIST);
 
             if (puzzleTypeMultiList.getValues().size() == 0) {
                 Set<String> all = new HashSet<>();

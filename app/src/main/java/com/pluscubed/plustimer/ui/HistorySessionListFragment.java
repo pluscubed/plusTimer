@@ -269,7 +269,8 @@ public class HistorySessionListFragment extends ListFragment {
                     }
                     GraphViewSeries averageSeries = new GraphViewSeries(
                             String.format(getString(R.string.bao), bestAverageMatrix.keyAt(i)),
-                            new GraphViewSeries.GraphViewSeriesStyle(lineColor, Utils.convertDpToPx(getActivity(), 2)),
+                            new GraphViewSeries.GraphViewSeriesStyle(lineColor, Utils
+                                    .convertDpToPx(getActivity(), 2)),
                             bestTimesDataArray);
                     bestAverageGraphViewSeries.add(averageSeries);
                 }
@@ -296,7 +297,8 @@ public class HistorySessionListFragment extends ListFragment {
             }
 
             GraphViewSeries bestTimesSeries = new GraphViewSeries(getString(R.string.best_times),
-                    new GraphViewSeries.GraphViewSeriesStyle(Color.BLUE, Utils.convertDpToPx(getActivity(), 2)),
+                    new GraphViewSeries.GraphViewSeriesStyle(Color.BLUE, Utils.convertDpToPx
+                            (getActivity(), 2)),
                     bestTimesDataArray);
 
             boolean averageMoreThanOne = false;
