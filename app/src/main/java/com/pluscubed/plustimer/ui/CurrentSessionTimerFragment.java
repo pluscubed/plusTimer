@@ -658,6 +658,7 @@ public class CurrentSessionTimerFragment extends Fragment {
         getActivity().getWindow().clearFlags(WindowManager.LayoutParams
                 .FLAG_KEEP_SCREEN_ON);
         PuzzleType.getCurrent().saveCurrentSession(getActivity());
+        stopHoldTimer();
     }
 
     @Override

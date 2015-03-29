@@ -294,7 +294,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
         }
         getMenuInflater().inflate(R.menu.menu_current_session, menu);
 
-        Spinner menuPuzzleSpinner = (Spinner) MenuItemCompat.getActionView
+        final Spinner menuPuzzleSpinner = (Spinner) MenuItemCompat.getActionView
                 (menu.findItem(R.id
                         .menu_activity_current_session_puzzletype_spinner));
         ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter = new
@@ -308,11 +308,12 @@ public class CurrentSessionActivity extends DrawerActivity implements
             @Override
             public void onItemSelected(AdapterView<?> parent, View view,
                                        int position, long id) {
-                PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
-                        .unregisterAllObservers();
-                PuzzleType.setCurrent((PuzzleType) parent.getItemAtPosition
-                        (position), CurrentSessionActivity.this);
-
+                PuzzleType newPuzzleType = (PuzzleType) parent.getItemAtPosition(position);
+                if (newPuzzleType != PuzzleType.getCurrent()) {
+                    PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
+                            .unregisterAllObservers();
+                    PuzzleType.setCurrent(newPuzzleType, CurrentSessionActivity.this);
+                }
             }
 
             @Override

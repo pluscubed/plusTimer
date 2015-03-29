@@ -197,6 +197,7 @@ public class HistorySessionListFragment extends ListFragment {
             }
 
             //Add PB of all historySessions
+            //noinspection ConstantConditions
             s.append(getString(R.string.pb)).append(": ")
                     .append(Utils.getBestSolveOfList(bestSolvesOfSessionsArray)
                             .getTimeString(mMillisecondsEnabled));
