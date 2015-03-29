@@ -58,8 +58,8 @@
     <string name="pref_keepscreenon_title">Nevypínat display</string>
     <string name="pref_two_row_time_summary">Hodiny:minuty:sekundy nahoře, milisekundy dole</string>
     <string name="pref_two_row_time_title">Čas ve svou řádcích</string>
-    <string name="pref_time_text_size_title">Velikost textu</string>
-    <string name="time_text_edittext_dialog_title">Nastavit velikost písma (výchozí: 100)</string>
+    <string name="pref_text_size_title">Velikost textu</string>
+    <string name="pref_time_text_size_dialog_title">Nastavit velikost písma (výchozí: 100)</string>
     <string name="pref_update_time_title">Zobrazení času</string>
     <string-array name="pref_update_time_list_entries">
         <item>Zobrazit</item>
@@ -97,6 +97,6 @@
     <string name="send_email">Send email to the developer using&#8230;</string>
     <string name="email_developer_history_data">Email History Data to Developer</string>
     <string name="text_size_warning">You can\'t set a text size larger than 500!</string>
-    <string name="scrambles">Scrambles</string>
+    <string name="pref_scrambles_category_title">Scrambles</string>
     <string name="pref_monospace_scrambles_title">Monospace scramble font</string>
 </resources>

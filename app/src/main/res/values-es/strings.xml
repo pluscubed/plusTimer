@@ -58,8 +58,8 @@
     <string name="pref_keepscreenon_title">Mantener la pantalla encendida</string>
     <string name="pref_two_row_time_summary">>Horas:Minutos:Segundos arriba, milisegundos abajo</string>
     <string name="pref_two_row_time_title">Mostrar Tiempo en Dos Renglones</string>
-    <string name="pref_time_text_size_title">Tamaño del Texto del Cronómetro</string>
-    <string name="time_text_edittext_dialog_title">Configurar tamaño del cronómetro (predeterminado 100):</string>
+    <string name="pref_text_size_title">Tamaño del Texto del Cronómetro</string>
+    <string name="pref_time_text_size_dialog_title">Configurar tamaño del cronómetro (predeterminado 100):</string>
     <string name="pref_update_time_title">Actualización del cronómetro</string>
     <string-array name="pref_update_time_list_entries">
         <item>Encendido</item>
@@ -97,6 +97,6 @@
     <string name="send_email">Enviar email al desarrollador usando&#8230;</string>
     <string name="email_developer_history_data">Enviar Datos del Historial al Desarrollador</string>
     <string name="text_size_warning">You can\'t set a text size larger than 500!</string>
-    <string name="scrambles">Scrambles</string>
+    <string name="pref_scrambles_category_title">Scrambles</string>
     <string name="pref_monospace_scrambles_title">Monospace scramble font</string>
 </resources>

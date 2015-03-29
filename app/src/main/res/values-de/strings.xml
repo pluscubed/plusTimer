@@ -58,8 +58,8 @@
     <string name="pref_keepscreenon_title">Bildschirm nicht automatisch ausschalten</string>
     <string name="pref_two_row_time_summary">Stunden:Minuten:Sekunden oben, Millisekunden unten</string>
     <string name="pref_two_row_time_title">zweizeiliges Display</string>
-    <string name="pref_time_text_size_title">Textgröße</string>
-    <string name="time_text_edittext_dialog_title">Timer-Textgröße (Standard 100):</string>
+    <string name="pref_text_size_title">Textgröße</string>
+    <string name="pref_time_text_size_dialog_title">Timer-Textgröße (Standard 100):</string>
     <string name="pref_update_time_title">Textaktualisierung</string>
     <string-array name="pref_update_time_list_entries">
         <item>an</item>
@@ -97,6 +97,6 @@
     <string name="send_email">Mail an Entwickler senden via&#8230;</string>
     <string name="email_developer_history_data">Verlaufsdaten per Mail an Entwickler senden</string>
     <string name="text_size_warning">You can\'t set a text size larger than 500!</string>
-    <string name="scrambles">Scrambles</string>
+    <string name="pref_scrambles_category_title">Scrambles</string>
     <string name="pref_monospace_scrambles_title">Monospace scramble font</string>
 </resources>

@@ -69,9 +69,9 @@
     <string name="pref_two_row_time_summary">時:分:秒在上，毫秒在下</string>
 
     <string name="pref_two_row_time_title">兩行顯示</string>
-    <string name="pref_time_text_size_title">字體大小</string>
+    <string name="pref_text_size_title">字體大小</string>
 
-    <string name="time_text_edittext_dialog_title">計時器字體大小 (默認100):</string>
+    <string name="pref_time_text_size_dialog_title">計時器字體大小 (默認100):</string>
     <string name="pref_update_time_title">計時器更新</string>
 
     <string-array name="pref_update_time_list_entries">
@@ -117,7 +117,7 @@
     <string name="send_email">發郵件給開發者</string>
     <string name="email_developer_history_data">發歷史記錄信息給開發者</string>
     <string name="text_size_warning">不能設高於50字體大小！</string>
-    <string name="scrambles">打亂公式</string>
+    <string name="pref_scrambles_category_title">打亂公式</string>
     <string name="pref_monospace_scrambles_title">等寬字體</string>
 
 </resources>

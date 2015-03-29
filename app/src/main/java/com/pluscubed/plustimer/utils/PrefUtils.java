@@ -11,6 +11,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class PrefUtils {
+    public static final String PREF_SCRAMBLE_TEXT_SIZE_EDITTEXT =
+            "pref_scramble_display_size_edittext";
     public static final String PREF_TIME_TEXT_SIZE_EDITTEXT =
             "pref_time_display_size_edittext";
     public static final String PREF_UPDATE_TIME_LIST =
@@ -94,6 +96,11 @@ public class PrefUtils {
     public static int getTimerTextSize(final Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         return Integer.parseInt(sp.getString(PREF_TIME_TEXT_SIZE_EDITTEXT, "100"));
+    }
+
+    public static int getScrambleTextSize(final Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        return Integer.parseInt(sp.getString(PREF_SCRAMBLE_TEXT_SIZE_EDITTEXT, "18"));
     }
 
     public static void saveVersionCode(final Context context) {

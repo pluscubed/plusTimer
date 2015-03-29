@@ -77,7 +77,8 @@ public class CurrentSessionTimerFragment extends Fragment {
     private PrefUtils.TimerUpdate mUpdateTimePref;
     private boolean mMillisecondsEnabled;
     private boolean mMonospaceScrambleFontEnabled;
-    private int mPrefSize;
+    private int mTimerTextSize;
+    private int mScrambleTextSize;
     private boolean mKeepScreenOn;
     private boolean mSignEnabled;
     //Retained Fragment
@@ -645,6 +646,8 @@ public class CurrentSessionTimerFragment extends Fragment {
             mScrambleText.setTypeface(Typeface.DEFAULT);
         }
 
+        mScrambleText.setTextSize(mScrambleTextSize);
+
         //When Settings change
         onSessionSolvesChanged();
     }
@@ -688,7 +691,8 @@ public class CurrentSessionTimerFragment extends Fragment {
                         && PrefUtils.isTwoRowTimeEnabled(getActivity());
         mUpdateTimePref = PrefUtils.getTimerUpdateMode(getActivity());
         mMillisecondsEnabled = PrefUtils.isDisplayMillisecondsEnabled(getActivity());
-        mPrefSize = PrefUtils.getTimerTextSize(getActivity());
+        mTimerTextSize = PrefUtils.getTimerTextSize(getActivity());
+        mScrambleTextSize = PrefUtils.getScrambleTextSize(getActivity());
         mKeepScreenOn = PrefUtils.isKeepScreenOnEnabled(getActivity());
         mSignEnabled = PrefUtils.isSignEnabled(getActivity());
         mMonospaceScrambleFontEnabled = PrefUtils.isMonospaceScrambleFontEnabled(getActivity());
@@ -699,13 +703,13 @@ public class CurrentSessionTimerFragment extends Fragment {
             if (mTimerText != null && mTimerText2 != null) {
                 if (mTwoRowTimeEnabled) {
                     mTimerText.setTextSize(TypedValue.COMPLEX_UNIT_SP,
-                            mPrefSize);
+                            mTimerTextSize);
                 } else {
                     mTimerText.setTextSize(TypedValue.COMPLEX_UNIT_SP,
-                            mPrefSize * 0.7F);
+                            mTimerTextSize * 0.7F);
                 }
                 mTimerText2.setTextSize(TypedValue.COMPLEX_UNIT_SP,
-                        mPrefSize / 2);
+                        mTimerTextSize / 2);
             }
         }
     }
