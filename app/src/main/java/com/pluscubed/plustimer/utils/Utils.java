@@ -290,8 +290,7 @@ public class Utils {
      * Gets the best {@code Solve} out of the list (lowest time).
      * <p/>
      * If the list contains no solves, null is returned. If the list contains
-     * only DNFs, the last
-     * DNF solve is returned.
+     * only DNFs, the last DNF solve is returned.
      *
      * @param list the list of solves, not empty
      * @return the solve with the lowest time

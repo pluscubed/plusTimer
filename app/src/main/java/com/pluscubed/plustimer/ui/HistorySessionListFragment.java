@@ -152,11 +152,7 @@ public class HistorySessionListFragment extends ListFragment {
         layoutParams.setMargins(0, 0, 0, Utils.convertDpToPx(getActivity(), 20));
         mGraph.setLayoutParams(layoutParams);
         mGraph.setShowLegend(true);
-        mGraph.getGraphViewStyle().setLegendWidth(Utils.convertDpToPx
-                (getActivity(), 85));
-        mGraph.getGraphViewStyle().setLegendMarginBottom(Utils.convertDpToPx
-                (getActivity(), 12));
-        mGraph.setLegendAlign(GraphView.LegendAlign.BOTTOM);
+        mGraph.setLegendAlign(GraphView.LegendAlign.TOP);
         mGraph.setCustomLabelFormatter(new CustomLabelFormatter() {
             @Override
             public String formatLabel(double value, boolean isValueX) {
@@ -282,11 +278,12 @@ public class HistorySessionListFragment extends ListFragment {
             SparseArray<Long> bestSolvesTimes = new SparseArray<>();
             for (int i = 0; i < historySessions.size(); i++) {
                 Session session = historySessions.get(i);
+                //noinspection ConstantConditions
                 if (Utils.getBestSolveOfList(session.getSolves()).getPenalty()
                         != Solve.Penalty.DNF) {
+                    //noinspection ConstantConditions
                     bestSolvesTimes
-                            .put(i, Utils.getBestSolveOfList(session.getSolves
-                                    ()).getTimeTwo());
+                            .put(i, Utils.getBestSolveOfList(session.getSolves()).getTimeTwo());
                 }
             }
             GraphView.GraphViewData[] bestTimesDataArray
@@ -316,6 +313,27 @@ public class HistorySessionListFragment extends ListFragment {
                         bestAverageGraphViewSeries) {
                     mGraph.addSeries(averageSeries);
                 }
+
+                //CALCULATE LONGEST SERIES NAME WIDTH TO SET IN LEGEND
+                String bestTimesSeriesName = getString(R.string.best_times);
+                String longestAverageSeriesName = String.format(getString(R.string.bao),
+                        bestAverageMatrix.keyAt(bestAverageMatrix.size() - 1));
+
+                TextView textView = new TextView(getActivity());
+                textView.setText(bestTimesSeriesName);
+                textView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+                int longestSeriesNameWidth = textView.getMeasuredWidth();
+                textView = new TextView(getActivity());
+                textView.setText(longestAverageSeriesName);
+                textView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+                if (textView.getMeasuredWidth() > longestSeriesNameWidth) {
+                    longestSeriesNameWidth = textView.getMeasuredWidth();
+                }
+
+                mGraph.getGraphViewStyle()
+                        .setLegendWidth(longestSeriesNameWidth);
+
+                //---
 
                 ArrayList<Long> allPointsValue = new ArrayList<>();
                 for (int i = 0; i < bestAverageMatrix.size(); i++) {
