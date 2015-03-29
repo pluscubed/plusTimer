@@ -185,8 +185,7 @@ public class CurrentSessionTimerFragment extends Fragment {
 
                     playEnterAnimations();
 
-                    Solve s = new Solve(mRetainedFragment
-                            .getCurrentScrambleAndSvg(), 0);
+                    Solve s = new Solve(mRetainedFragment.getCurrentScrambleAndSvg(), 0);
                     s.setPenalty(Solve.Penalty.DNF);
 
                     //Add the solve to the current session with the current
@@ -804,8 +803,7 @@ public class CurrentSessionTimerFragment extends Fragment {
         if (mTiming) {
             Solve s;
             if (!mBldMode) {
-                s = new Solve(mRetainedFragment
-                        .getCurrentScrambleAndSvg(),
+                s = new Solve(mRetainedFragment.getCurrentScrambleAndSvg(),
                         System.nanoTime() - mTimingStartTimestamp);
             } else {
                 s = new BldSolve(mRetainedFragment.getCurrentScrambleAndSvg(),

@@ -33,6 +33,7 @@ import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
+import com.pluscubed.plustimer.utils.ErrorUtils;
 import com.pluscubed.plustimer.utils.PrefUtils;
 import com.pluscubed.plustimer.utils.Utils;
 
@@ -455,33 +456,39 @@ public class HistorySessionListFragment extends ListFragment {
         Spinner menuPuzzleSpinner = (Spinner) MenuItemCompat.getActionView
                 (menu.findItem(R.id
                         .menu_activity_history_sessionlist_puzzletype_spinner));
-        Context themedContext = ((ActionBarActivity) getActivity()).getSupportActionBar()
-                .getThemedContext();
-        if (themedContext == null) {
-            themedContext = getActivity();
-        }
-        ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter =
-                new SpinnerPuzzleTypeAdapter(
-                        getActivity().getLayoutInflater(),
-                        themedContext
-                );
-        menuPuzzleSpinner.setAdapter(puzzleTypeSpinnerAdapter);
-        menuPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition
-                (PuzzleType.valueOf(mPuzzleTypeName)), true);
-        menuPuzzleSpinner.setOnItemSelectedListener(new AdapterView
-                .OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view,
-                                       int position, long id) {
-                mPuzzleTypeName = (parent.getItemAtPosition(position))
-                        .toString();
-                onSessionListChanged();
+        ActionBarActivity activity = (ActionBarActivity) getActivity();
+        if (activity != null) {
+            Context themedContext;
+            if (activity.getSupportActionBar() != null) {
+                themedContext = activity.getSupportActionBar().getThemedContext();
+            } else {
+                themedContext = activity;
             }
+            ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter =
+                    new SpinnerPuzzleTypeAdapter(
+                            getActivity().getLayoutInflater(),
+                            themedContext
+                    );
+            menuPuzzleSpinner.setAdapter(puzzleTypeSpinnerAdapter);
+            menuPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition
+                    (PuzzleType.valueOf(mPuzzleTypeName)), true);
+            menuPuzzleSpinner.setOnItemSelectedListener(new AdapterView
+                    .OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view,
+                                           int position, long id) {
+                    mPuzzleTypeName = (parent.getItemAtPosition(position))
+                            .toString();
+                    onSessionListChanged();
+                }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+                }
+            });
+        } else {
+            ErrorUtils.logCrashlytics(new Exception("HistorySessionListFragment onCreateOptionsMenu(): activity is null"));
+        }
     }
 
     @Override

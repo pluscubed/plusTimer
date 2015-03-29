@@ -157,8 +157,16 @@ public class SolveListFragment extends Fragment {
                 share();
                 return true;
             case R.id.menu_history_solvelist_delete_menuitem:
-                getPuzzleType().getHistorySessions().deleteSession
-                        (mSessionIndex, getActivity());
+                if (getPuzzleType().getHistorySessions().getList().size() >= mSessionIndex) {
+                    getPuzzleType().getHistorySessions().deleteSession(mSessionIndex, getActivity());
+                } else {
+                    NullPointerException e = new NullPointerException(
+                            "SolveListFragment onOptionsItemSelected: " +
+                                    "delete failed for history session #"
+                                    + mSessionIndex + ", is null");
+                    ErrorUtils.showErrorDialog(getActivity(), "Error: ", e, true);
+                    ErrorUtils.logCrashlytics(e);
+                }
                 getActivity().finish();
                 return true;
             case R.id.menu_solvelist_add_menuitem:

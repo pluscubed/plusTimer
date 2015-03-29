@@ -70,12 +70,10 @@ public class CurrentSessionTimerRetainedFragment extends Fragment {
 
     //Generate scramble image and text
     private ScrambleAndSvg generateScramble() {
-        String scramble = PuzzleType.getCurrent().getPuzzle()
-                .generateScramble();
         ScrambleAndSvg scrambleAndSvg = null;
         try {
-            String svg = PuzzleType.getCurrent().getPuzzle().drawScramble
-                    (scramble, null).toString();
+            String scramble = PuzzleType.getCurrent().getPuzzle().generateScramble();
+            String svg = PuzzleType.getCurrent().getPuzzle().drawScramble(scramble, null).toString();
             scrambleAndSvg = new ScrambleAndSvg(scramble, svg);
         } catch (InvalidScrambleException e) {
             e.printStackTrace();

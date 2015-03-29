@@ -62,7 +62,6 @@ public class SolveDialogFragment extends DialogFragment {
 
     private boolean mAddMode;
 
-    private OnDialogDismissedListener mListener;
     private MaterialEditText mScrambleEdit;
     private Solve mSolve;
     private Solve mSolveCopy;
@@ -339,12 +338,10 @@ public class SolveDialogFragment extends DialogFragment {
         PuzzleType.valueOf(mPuzzleTypeName).getSession
                 (mSessionIndex).deleteSolve
                 (mSolveIndex);
-        if (mListener != null) mListener.onDialogDismissed();
         dismiss();
     }
 
     private void onNegative() {
-        if (mListener != null) mListener.onDialogDismissed();
         dismiss();
     }
 
@@ -364,8 +361,6 @@ public class SolveDialogFragment extends DialogFragment {
             }
             mSolveCopy.getScrambleAndSvg().setScramble(scrambleText,
                     mPuzzleTypeName);
-            if (mListener != null)
-                mListener.onDialogDismissed();
             if (!mAddMode) {
                 mSolve.copy(mSolveCopy);
             } else {
@@ -377,16 +372,10 @@ public class SolveDialogFragment extends DialogFragment {
         }
     }
 
-    public void addListener(OnDialogDismissedListener listener) {
-        mListener = listener;
-    }
-
     void updateTitle() {
-        getDialog().setTitle(mSolveCopy.getDescriptiveTimeString
-                (mMillisecondsEnabled));
+        if (getDialog() != null) {
+            getDialog().setTitle(mSolveCopy.getDescriptiveTimeString(mMillisecondsEnabled));
+        }
     }
 
-    public interface OnDialogDismissedListener {
-        public void onDialogDismissed();
-    }
 }

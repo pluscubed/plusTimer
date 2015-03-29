@@ -67,8 +67,7 @@ public class ErrorUtils {
                                        String puzzleTypeName) {
         String uiScramble = "";
         try {
-            uiScramble = scrambleAndSvg.getUiScramble(signEnabled,
-                    puzzleTypeName);
+            uiScramble = scrambleAndSvg.getUiScramble(signEnabled, puzzleTypeName);
         } catch (NullPointerException e) {
             String positionString = String.valueOf(position);
             if (position == -1) {
@@ -83,8 +82,7 @@ public class ErrorUtils {
     public static boolean isSolveNonexistent(Context c, String puzzleTypeName, int sessionIndex,
                                              int solveIndex) {
         try {
-            PuzzleType.valueOf(puzzleTypeName).getSession(sessionIndex).getSolveByPosition
-                    (solveIndex);
+            PuzzleType.valueOf(puzzleTypeName).getSession(sessionIndex).getSolveByPosition(solveIndex);
             return false;
         } catch (IndexOutOfBoundsException e) {
             if (BuildConfig.USE_CRASHLYTICS) {
@@ -124,6 +122,7 @@ public class ErrorUtils {
                 } catch (FileNotFoundException e) {
                     // File not found: ignore
                 } catch (IOException e) {
+                    logCrashlytics(e);
                     showErrorDialog(context, "", e, false);
                 } finally {
                     if (r != null) {
