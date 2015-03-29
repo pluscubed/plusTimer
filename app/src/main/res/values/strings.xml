@@ -28,6 +28,7 @@
     <string name="session_reset">Session has been reset.</string>
     <string name="reset_warning">Reset session?</string>
     <string name="reset_warning_message">You\'ll lose all solves recorded in this session!</string>
+    <string name="submit_warning_message">Submit session?</string>
 
     <!--Timer-->
     <string name="inspecting">Inspecting…</string>

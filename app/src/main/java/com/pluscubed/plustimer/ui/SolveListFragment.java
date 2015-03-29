@@ -1,8 +1,6 @@
 package com.pluscubed.plustimer.ui;
 
-import android.app.AlertDialog;
 import android.app.Fragment;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.ActionMode;
@@ -20,6 +18,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.ScrambleAndSvg;
@@ -201,35 +200,22 @@ public class SolveListFragment extends Fragment {
             reset.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder
-                            (getActivity());
-                    builder.setMessage(getString(R.string
-                            .reset_warning_message))
-                            .setIcon(R.drawable.ic_action_warning)
-                            .setTitle(getString(R.string.reset_warning))
-                            .setPositiveButton(android.R.string.ok,
-                                    new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface
-                                                                    dialog,
-                                                            int id) {
-                                            getPuzzleType()
-                                                    .resetCurrentSession();
-                                            Toast.makeText(getActivity()
-                                                            .getApplicationContext(),
-                                                    getResources().getText(R
-                                                            .string
-                                                            .session_reset),
-                                                    Toast.LENGTH_SHORT).show();
-                                        }
-                                    })
-                            .setNegativeButton(android.R.string.cancel,
-                                    new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface
-                                                                    dialog,
-                                                            int id) {
-                                        }
-                                    });
-                    builder.create().show();
+                    MaterialDialog.Builder builder = new MaterialDialog.Builder(getActivity());
+                    builder.content(getString(R.string.reset_warning_message))
+                            .title(getString(R.string.reset_warning))
+                            .positiveText(R.string.reset)
+                            .negativeText(android.R.string.cancel)
+                            .callback(new MaterialDialog.ButtonCallback() {
+                                @Override
+                                public void onPositive(MaterialDialog dialog) {
+                                    super.onPositive(dialog);
+                                    getPuzzleType().resetCurrentSession();
+                                    Toast.makeText(getActivity().getApplicationContext(),
+                                            getResources().getText(R.string.session_reset),
+                                            Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                    builder.show();
                 }
             });
             Button submit = (Button) v.findViewById(R.id
@@ -237,20 +223,31 @@ public class SolveListFragment extends Fragment {
             submit.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (mSession.getNumberOfSolves() == 0) {
-                        Toast.makeText(getActivity().getApplicationContext(),
-                                getResources().getText(R.string
-                                        .session_no_solves),
-                                Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+                    MaterialDialog.Builder builder = new MaterialDialog.Builder(getActivity());
+                    builder.content(getString(R.string.submit_warning_message))
+                            .positiveText(R.string.submit)
+                            .negativeText(android.R.string.cancel)
+                            .callback(new MaterialDialog.ButtonCallback() {
+                                @Override
+                                public void onPositive(MaterialDialog dialog) {
+                                    super.onPositive(dialog);
+                                    if (mSession.getNumberOfSolves() == 0) {
+                                        Toast.makeText(getActivity().getApplicationContext(),
+                                                getResources().getText(R.string.session_no_solves),
+                                                Toast.LENGTH_SHORT
+                                        ).show();
+                                        return;
+                                    }
 
-                    Toast.makeText(getActivity().getApplicationContext(),
-                            getResources().getText(R.string
-                                    .session_submitted), Toast.LENGTH_SHORT)
-                            .show();
+                                    Toast.makeText(getActivity().getApplicationContext(),
+                                            getResources().getText(R.string.session_submitted),
+                                            Toast.LENGTH_SHORT
+                                    ).show();
 
-                    getPuzzleType().submitCurrentSession(getActivity());
+                                    getPuzzleType().submitCurrentSession(getActivity());
+                                }
+                            });
+                    builder.show();
                 }
             });
 
