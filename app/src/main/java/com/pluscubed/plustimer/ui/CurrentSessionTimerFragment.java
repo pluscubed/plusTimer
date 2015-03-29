@@ -52,7 +52,9 @@ import com.pluscubed.plustimer.utils.Utils;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * TimerFragment
@@ -1231,15 +1233,22 @@ public class CurrentSessionTimerFragment extends Fragment {
         private void updateSolvesList(int position, Update mode) {
             int oldSize = 0;
             if (mSolves != null) oldSize = mSolves.size();
+
+            Set<Solve> changed = new HashSet<>();
+            changed.addAll(Arrays.asList(mBestAndWorstSolves));
+
             mSolves = PuzzleType.getCurrent().getSession(PuzzleType
                     .CURRENT_SESSION).getSolves();
-            for (Solve s : mBestAndWorstSolves) {
-                notifyItemChanged(mSolves.indexOf(s));
-            }
             mBestAndWorstSolves[0] = Utils.getBestSolveOfList(mSolves);
             mBestAndWorstSolves[1] = Utils.getWorstSolveOfList(mSolves);
-            for (Solve s : mBestAndWorstSolves) {
-                notifyItemChanged(mSolves.indexOf(s));
+
+            if (mode != Update.DATA_RESET && mode != Update.REMOVE_ALL) {
+                changed.addAll(Arrays.asList(mBestAndWorstSolves));
+                for (Solve s : changed) {
+                    if (mSolves.contains(s)) {
+                        notifyItemChanged(mSolves.indexOf(s));
+                    }
+                }
             }
 
             switch (mode) {
