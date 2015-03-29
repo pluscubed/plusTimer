@@ -4,7 +4,7 @@
     <string name="ready">Ready</string>
     <string name="settings">設定</string>
     <string name="puzzle_selection">パズル選択</string>
-    <string name="unofficial">高速版、非公式</string>
+    <string name="unofficial">高速版，非公式</string>
     <string name="oh">OH</string>
     <string name="bld">BLD</string>
     <string name="feet">Feet</string>
@@ -21,11 +21,12 @@
     <string name="session_reset">セッションをリセットしました</string>
     <string name="reset_warning">セッションをリセットしますか？</string>
     <string name="reset_warning_message">セッションのすべての記録が削除されます。よろしいですか？</string>
-    <string name="inspecting">Inspecting&#8230;</string>
+    <string name="submit_warning_message">Submit session?</string>
+    <string name="inspecting">インスペクション中&#8230;</string>
     <string name="scrambling">スクランブル中&#8230;</string>
     <string name="scramble_image">スクランブル画像</string>
     <string name="session_no_solves">セッションがありません！\nタイム測定をしましょう！</string>
-    <string name="timing">測定中</string>
+    <string name="timing">測定中&#8230;</string>
     <string name="solves">"Solves: "</string>
     <string name="cao">Current Ao%1$d</string>
     <string name="lao">Last Ao%1$d</string>
@@ -60,6 +61,8 @@
     <string name="pref_two_row_time_title">タイムの2行表示</string>
     <string name="pref_text_size_title">文字のサイズ</string>
     <string name="pref_time_text_size_dialog_title">タイマー表示文字サイズ（既定は100）</string>
+    <string name="text_size_warning">500より大きなサイズは設定できません。</string>
+    <string name="pref_scramble_text_size_dialog_title">Set scramble text size (default 18):</string>
     <string name="pref_update_time_title">タイム表示</string>
     <string-array name="pref_update_time_list_entries">
         <item>表示する</item>
@@ -67,16 +70,20 @@
         <item>表示しない</item>
     </string-array>
     <string name="pref_timer_category_title">タイマー</string>
+    <string name="pref_scrambles_category_title">スクランブル</string>
     <string name="pref_milliseconds_title">ミリ秒（0.001）まで表示する</string>
     <string name="pref_sign_title">SiGN表記を使用する</string>
     <string name="puzzle_types_setup">パズル種類の表示/非表示</string>
     <string name="no_disable_all_puzzletypes">すべてのパズルを非表示にすることはできません！</string>
-    <string name="pref_theme_title">Theme</string>
+    <string name="pref_theme_title">テーマ</string>
     <string-array name="pref_theme_list_entries">
         <item>Light</item>
         <item>Dark</item>
         <item>Black</item>
     </string-array>
+    <string name="pref_monospace_scrambles_title">等幅フォントを使用する</string>
+    <string name="pref_lock_swiping_title">Prevent swiping between Timer and Session Details</string>
+    <string name="pref_lock_swiping_summary">This means you can switch between them only by pressing the actual tabs at the top.</string>
     <string name="current_session">タイム測定</string>
     <string name="history">記録履歴</string>
     <string name="current">タイム測定</string>
@@ -94,9 +101,6 @@
     <string name="manual_add_solve">ソルブを追加する</string>
     <string name="share">共有する</string>
     <string name="share_dialog_title">共有方法</string>
-    <string name="send_email">Send email to the developer using&#8230;</string>
-    <string name="email_developer_history_data">Email History Data to Developer</string>
-    <string name="text_size_warning">You can\'t set a text size larger than 500!</string>
-    <string name="pref_scrambles_category_title">Scrambles</string>
-    <string name="pref_monospace_scrambles_title">Monospace scramble font</string>
+    <string name="send_email">メールアプリの選択</string>
+    <string name="email_developer_history_data">履歴データを開発者へ送信する</string>
 </resources>
