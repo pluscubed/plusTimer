@@ -31,6 +31,7 @@ import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.ui.widget.LockingViewPager;
 import com.pluscubed.plustimer.ui.widget.SlidingTabLayout;
+import com.pluscubed.plustimer.utils.PrefUtils;
 
 import io.fabric.sdk.android.Fabric;
 
@@ -143,7 +144,8 @@ public class CurrentSessionActivity extends DrawerActivity implements
     @Override
     public void lockDrawerAndViewPager(boolean lock) {
         mSlidingTabLayout.setClickEnabled(!lock);
-        mViewPager.setPagingEnabled(!lock);
+        if (!PrefUtils.isLockSwipingEnabled(this))
+            mViewPager.setPagingEnabled(!lock);
         lockDrawer(lock);
     }
 
@@ -236,6 +238,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
         // TODO: Only update Spinner, not invalidate whole action bar
         // When puzzle types are enabled/disabled, update Spinner
         queueInvalidateOptionsMenu();
+        mViewPager.setPagingEnabled(!PrefUtils.isLockSwipingEnabled(this));
     }
 
     private CurrentSessionTimerFragment getCurrentSessionTimerFragment() {

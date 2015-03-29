@@ -23,6 +23,12 @@
         android:summary="@string/pref_keepscreenon_summary"
         android:title="@string/pref_keepscreenon_title" />
 
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="pref_lock_swiping_checkbox"
+        android:summary="@string/pref_lock_swiping_summary"
+        android:title="@string/pref_lock_swiping_title" />
+
     <PreferenceCategory android:title="@string/pref_timer_category_title">
         <CheckBoxPreference
             android:defaultValue="true"
