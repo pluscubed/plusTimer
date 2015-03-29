@@ -21,7 +21,8 @@
             android:layout_height="wrap_content"
             android:background="?colorPrimary"
             android:elevation="4dp"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            tools:ignore="UnusedAttribute">
 
             <include layout="@layout/toolbar_actionbar" />
 
