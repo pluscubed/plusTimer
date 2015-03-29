@@ -86,7 +86,7 @@
 
     <style name="EdgeEffectThemeOverlayDark" parent="ThemeOverlay.AppCompat.Dark" />
 
-    <style name="ToolbarTheme" parent="ThemeOverlay.AppCompat.Dark">
+    <style name="ToolbarTheme" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
         <item name="toolbarStyle">@style/ToolbarStyle</item>
         <item name="selectableItemBackground">@drawable/item_background_dark</item>
         <item name="android:selectableItemBackground">@drawable/item_background_dark</item>
