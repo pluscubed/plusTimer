@@ -6,4 +6,4 @@
     android:layout_height="?actionBarSize"
     android:background="@null"
     app:contentInsetStart="72dp"
-    app:theme="@style/ToolbarTheme" />
+    app:theme="@style/ToolbarThemeOverlayDark" />

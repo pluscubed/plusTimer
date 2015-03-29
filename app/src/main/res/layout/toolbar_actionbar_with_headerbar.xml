@@ -7,4 +7,4 @@
     android:background="?colorPrimary"
     android:elevation="4dp"
     app:contentInsetStart="72dp"
-    app:theme="@style/ToolbarTheme" />
+    app:theme="@style/ToolbarThemeOverlayDark" />

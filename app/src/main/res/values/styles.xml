@@ -84,9 +84,12 @@
         <item name="android:textSize">14sp</item>
     </style>
 
-    <style name="EdgeEffectThemeOverlayDark" parent="ThemeOverlay.AppCompat.Dark" />
+    <style name="EdgeEffectThemeOverlayDark" parent="ThemeOverlay.AppCompat.Dark">
+        <item name="selectableItemBackground">@drawable/item_background_dark</item>
+        <item name="android:selectableItemBackground">@drawable/item_background_dark</item>
+    </style>
 
-    <style name="ToolbarTheme" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+    <style name="ToolbarThemeOverlayDark" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
         <item name="toolbarStyle">@style/ToolbarStyle</item>
         <item name="selectableItemBackground">@drawable/item_background_dark</item>
         <item name="android:selectableItemBackground">@drawable/item_background_dark</item>
