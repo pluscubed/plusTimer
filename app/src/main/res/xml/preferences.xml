@@ -59,7 +59,7 @@
             android:key="pref_sign_checkbox"
             android:title="@string/pref_sign_title" />
         <CheckBoxPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:key="pref_monospace_scrambles_checkbox"
             android:title="@string/pref_monospace_scrambles_title" />
     </PreferenceCategory>
