@@ -103,7 +103,7 @@ public class SettingsActivity extends ThemableActivity {
                     return true;
                 }
             });
-            scrambleSize.setSummary(size.getText());
+            scrambleSize.setSummary(scrambleSize.getText());
 
             ListPreference updateOccurrence = (ListPreference)
                     findPreference(PrefUtils.PREF_UPDATE_TIME_LIST);
