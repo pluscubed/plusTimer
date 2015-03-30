@@ -33,6 +33,7 @@ import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
+import com.pluscubed.plustimer.utils.ErrorUtils;
 import com.pluscubed.plustimer.utils.PrefUtils;
 import com.pluscubed.plustimer.utils.Utils;
 
@@ -152,11 +153,7 @@ public class HistorySessionListFragment extends ListFragment {
         layoutParams.setMargins(0, 0, 0, Utils.convertDpToPx(getActivity(), 20));
         mGraph.setLayoutParams(layoutParams);
         mGraph.setShowLegend(true);
-        mGraph.getGraphViewStyle().setLegendWidth(Utils.convertDpToPx
-                (getActivity(), 85));
-        mGraph.getGraphViewStyle().setLegendMarginBottom(Utils.convertDpToPx
-                (getActivity(), 12));
-        mGraph.setLegendAlign(GraphView.LegendAlign.BOTTOM);
+        mGraph.setLegendAlign(GraphView.LegendAlign.TOP);
         mGraph.setCustomLabelFormatter(new CustomLabelFormatter() {
             @Override
             public String formatLabel(double value, boolean isValueX) {
@@ -197,6 +194,7 @@ public class HistorySessionListFragment extends ListFragment {
             }
 
             //Add PB of all historySessions
+            //noinspection ConstantConditions
             s.append(getString(R.string.pb)).append(": ")
                     .append(Utils.getBestSolveOfList(bestSolvesOfSessionsArray)
                             .getTimeString(mMillisecondsEnabled));
@@ -269,7 +267,8 @@ public class HistorySessionListFragment extends ListFragment {
                     }
                     GraphViewSeries averageSeries = new GraphViewSeries(
                             String.format(getString(R.string.bao), bestAverageMatrix.keyAt(i)),
-                            new GraphViewSeries.GraphViewSeriesStyle(lineColor, Utils.convertDpToPx(getActivity(), 2)),
+                            new GraphViewSeries.GraphViewSeriesStyle(lineColor, Utils
+                                    .convertDpToPx(getActivity(), 2)),
                             bestTimesDataArray);
                     bestAverageGraphViewSeries.add(averageSeries);
                 }
@@ -280,11 +279,12 @@ public class HistorySessionListFragment extends ListFragment {
             SparseArray<Long> bestSolvesTimes = new SparseArray<>();
             for (int i = 0; i < historySessions.size(); i++) {
                 Session session = historySessions.get(i);
+                //noinspection ConstantConditions
                 if (Utils.getBestSolveOfList(session.getSolves()).getPenalty()
                         != Solve.Penalty.DNF) {
+                    //noinspection ConstantConditions
                     bestSolvesTimes
-                            .put(i, Utils.getBestSolveOfList(session.getSolves
-                                    ()).getTimeTwo());
+                            .put(i, Utils.getBestSolveOfList(session.getSolves()).getTimeTwo());
                 }
             }
             GraphView.GraphViewData[] bestTimesDataArray
@@ -296,7 +296,8 @@ public class HistorySessionListFragment extends ListFragment {
             }
 
             GraphViewSeries bestTimesSeries = new GraphViewSeries(getString(R.string.best_times),
-                    new GraphViewSeries.GraphViewSeriesStyle(Color.BLUE, Utils.convertDpToPx(getActivity(), 2)),
+                    new GraphViewSeries.GraphViewSeriesStyle(Color.BLUE, Utils.convertDpToPx
+                            (getActivity(), 2)),
                     bestTimesDataArray);
 
             boolean averageMoreThanOne = false;
@@ -313,6 +314,27 @@ public class HistorySessionListFragment extends ListFragment {
                         bestAverageGraphViewSeries) {
                     mGraph.addSeries(averageSeries);
                 }
+
+                //CALCULATE LONGEST SERIES NAME WIDTH TO SET IN LEGEND
+                String bestTimesSeriesName = getString(R.string.best_times);
+                String longestAverageSeriesName = String.format(getString(R.string.bao),
+                        bestAverageMatrix.keyAt(bestAverageMatrix.size() - 1));
+
+                TextView textView = new TextView(getActivity());
+                textView.setText(bestTimesSeriesName);
+                textView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+                int longestSeriesNameWidth = textView.getMeasuredWidth();
+                textView = new TextView(getActivity());
+                textView.setText(longestAverageSeriesName);
+                textView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+                if (textView.getMeasuredWidth() > longestSeriesNameWidth) {
+                    longestSeriesNameWidth = textView.getMeasuredWidth();
+                }
+
+                mGraph.getGraphViewStyle()
+                        .setLegendWidth(longestSeriesNameWidth);
+
+                //---
 
                 ArrayList<Long> allPointsValue = new ArrayList<>();
                 for (int i = 0; i < bestAverageMatrix.size(); i++) {
@@ -434,33 +456,39 @@ public class HistorySessionListFragment extends ListFragment {
         Spinner menuPuzzleSpinner = (Spinner) MenuItemCompat.getActionView
                 (menu.findItem(R.id
                         .menu_activity_history_sessionlist_puzzletype_spinner));
-        Context themedContext = ((ActionBarActivity) getActivity()).getSupportActionBar()
-                .getThemedContext();
-        if (themedContext == null) {
-            themedContext = getActivity();
-        }
-        ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter =
-                new SpinnerPuzzleTypeAdapter(
-                        getActivity().getLayoutInflater(),
-                        themedContext
-                );
-        menuPuzzleSpinner.setAdapter(puzzleTypeSpinnerAdapter);
-        menuPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition
-                (PuzzleType.valueOf(mPuzzleTypeName)), true);
-        menuPuzzleSpinner.setOnItemSelectedListener(new AdapterView
-                .OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view,
-                                       int position, long id) {
-                mPuzzleTypeName = (parent.getItemAtPosition(position))
-                        .toString();
-                onSessionListChanged();
+        ActionBarActivity activity = (ActionBarActivity) getActivity();
+        if (activity != null) {
+            Context themedContext;
+            if (activity.getSupportActionBar() != null) {
+                themedContext = activity.getSupportActionBar().getThemedContext();
+            } else {
+                themedContext = activity;
             }
+            ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter =
+                    new SpinnerPuzzleTypeAdapter(
+                            getActivity().getLayoutInflater(),
+                            themedContext
+                    );
+            menuPuzzleSpinner.setAdapter(puzzleTypeSpinnerAdapter);
+            menuPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition
+                    (PuzzleType.valueOf(mPuzzleTypeName)), true);
+            menuPuzzleSpinner.setOnItemSelectedListener(new AdapterView
+                    .OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view,
+                                           int position, long id) {
+                    mPuzzleTypeName = (parent.getItemAtPosition(position))
+                            .toString();
+                    onSessionListChanged();
+                }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+                }
+            });
+        } else {
+            ErrorUtils.logCrashlytics(new Exception("HistorySessionListFragment onCreateOptionsMenu(): activity is null"));
+        }
     }
 
     @Override

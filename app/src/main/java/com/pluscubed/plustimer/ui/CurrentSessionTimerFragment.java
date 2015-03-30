@@ -1,12 +1,15 @@
 package com.pluscubed.plustimer.ui;
 
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PictureDrawable;
@@ -17,7 +20,9 @@ import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Property;
 import android.util.TypedValue;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -47,7 +52,9 @@ import com.pluscubed.plustimer.utils.Utils;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * TimerFragment
@@ -65,63 +72,95 @@ public class CurrentSessionTimerFragment extends Fragment {
     private static final String STATE_INSPECTING = "inspecting_boolean";
     private static final String STATE_INSPECTION_START_TIME =
             "inspection_start_time_long";
+    //Preferences
+    private boolean mHoldToStartEnabled;
+    private boolean mInspectionEnabled;
+    private boolean mTwoRowTimeEnabled;
+    private PrefUtils.TimerUpdate mUpdateTimePref;
+    private boolean mMillisecondsEnabled;
+    private boolean mMonospaceScrambleFontEnabled;
+    private int mTimerTextSize;
+    private int mScrambleTextSize;
+    private boolean mKeepScreenOn;
+    private boolean mSignEnabled;
+    //Retained Fragment
+    private CurrentSessionTimerRetainedFragment mRetainedFragment;
+    //Views
+    private TextView mTimerText;
+    private TextView mTimerText2;
+    private TextView mScrambleText;
+    private View mScrambleTextShadow;
+    private RecyclerView mTimeBarRecycler;
+    private ImageView mScrambleImage;
+    private TextView mStatsSolvesText;
+    private TextView mStatsText;
+    private LinearLayout mLastBarLinearLayout;
+    private Button mLastDnfButton;
+    private Button mLastPlusTwoButton;
+    private Button mLastDeleteButton;
+    private FrameLayout mDynamicStatusBarFrame;
+    private TextView mDynamicStatusBarText;
+    //Handler
+    private Handler mUiHandler;
+    //Dynamic status variables
+    private boolean mDynamicStatusBarVisible;
+    private boolean mHoldTiming;
+    private long mHoldTimerStartTimestamp;
+    private boolean mInspecting;
+    private long mInspectionStartTimestamp;
+    private long mInspectionStopTimestamp;
+    private long mTimingStartTimestamp;
+    private boolean mFromSavedInstanceState;
+    private boolean mTiming;
+    private boolean mScrambleImageDisplay;
+    private boolean mLateStartPenalty;
+    private boolean mBldMode;
+    private AnimatorSet mLastBarAnimationSet;
+    private ValueAnimator mScrambleAnimator;
+    private ObjectAnimator mScrambleElevationAnimator;
 
-    private final PuzzleType.Observer puzzleTypeObserver =
-            new PuzzleType.Observer() {
-                @Override
-                public void onPuzzleTypeChanged() {
-                    //Update quick stats and hlistview
-                    onSessionSolvesChanged();
-
-                    //Set timer text to ready, scramble text to scrambling
-                    mScrambleText.setText(R.string.scrambling);
-
-                    //Update options menu (disable)
-                    enableMenuItems(false);
-                    showScrambleImage(false);
-
-                    mBldMode = PuzzleType.getCurrent().name().contains("BLD");
-
-                    resetGenerateScramble();
-
-                    resetTimer();
-
-                    PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
-                            .registerObserver(sessionObserver);
-                }
-            };
-
-    private final Session.Observer sessionObserver = new Session.Observer() {
+    //Runnables
+    private Runnable holdTimerRunnable = new Runnable() {
+        @Override
+        public void run() {
+            setTextColor(Color.GREEN);
+            setTimerTextToPrefSize();
+            if (!mInspecting) {
+                playExitAnimations();
+                getActivityCallback().lockDrawerAndViewPager(true);
+            }
+        }
+    };
+    private Session.Observer sessionObserver = new Session.Observer() {
         @Override
         public void onSolveAdded() {
             updateStatsAndTimer();
             SolveRecyclerAdapter adapter = (SolveRecyclerAdapter) mTimeBarRecycler.getAdapter();
-            adapter.updateSolvesList(-1, ObservedMode.ADD);
+            adapter.updateSolvesList(-1, Update.INSERT);
         }
 
         @Override
         public void onSolveChanged(int index) {
             updateStatsAndTimer();
             SolveRecyclerAdapter adapter = (SolveRecyclerAdapter) mTimeBarRecycler.getAdapter();
-            adapter.updateSolvesList(index, ObservedMode.SINGLE_CHANGE);
+            adapter.updateSolvesList(index, Update.SINGLE_CHANGE);
         }
 
         @Override
         public void onSolveRemoved(int index) {
             updateStatsAndTimer();
             SolveRecyclerAdapter adapter = (SolveRecyclerAdapter) mTimeBarRecycler.getAdapter();
-            adapter.updateSolvesList(index, ObservedMode.REMOVE);
+            adapter.updateSolvesList(index, Update.REMOVE);
         }
 
         @Override
         public void onReset() {
             updateStatsAndTimer();
             SolveRecyclerAdapter adapter = (SolveRecyclerAdapter) mTimeBarRecycler.getAdapter();
-            adapter.updateSolvesList(-1, ObservedMode.RESET);
+            adapter.updateSolvesList(-1, Update.REMOVE_ALL);
         }
     };
-
-    private final Runnable inspectionRunnable = new Runnable() {
+    private Runnable inspectionRunnable = new Runnable() {
         @Override
         public void run() {
             String[] array = Utils.timeStringsFromNsSplitByDecimal
@@ -146,8 +185,7 @@ public class CurrentSessionTimerFragment extends Fragment {
 
                     playEnterAnimations();
 
-                    Solve s = new Solve(mRetainedFragment
-                            .getCurrentScrambleAndSvg(), 0);
+                    Solve s = new Solve(mRetainedFragment.getCurrentScrambleAndSvg(), 0);
                     s.setPenalty(Solve.Penalty.DNF);
 
                     //Add the solve to the current session with the current
@@ -162,7 +200,7 @@ public class CurrentSessionTimerFragment extends Fragment {
 
 
                     if (mRetainedFragment.isScrambling()) {
-                        mScrambleText.setText(R.string.scrambling);
+                        setScrambleText(getString(R.string.scrambling));
                     }
                     mRetainedFragment.postSetScrambleViewsToCurrent();
                     return;
@@ -174,18 +212,31 @@ public class CurrentSessionTimerFragment extends Fragment {
             mUiHandler.postDelayed(this, REFRESH_RATE);
         }
     };
-    private final Runnable holdTimerRunnable = new Runnable() {
-        @Override
-        public void run() {
-            setTextColor(Color.GREEN);
-            setTimerTextToPrefSize();
-            if (!mInspecting) {
-                playExitAnimations();
-                getActivityCallback().lockDrawerAndViewPager(true);
-            }
-        }
-    };
-    private final Runnable timerRunnable = new Runnable() {
+    private PuzzleType.Observer puzzleTypeObserver =
+            new PuzzleType.Observer() {
+                @Override
+                public void onPuzzleTypeChanged() {
+                    //Update quick stats and hlistview
+                    onSessionSolvesChanged();
+
+                    //Set timer text to ready, scramble text to scrambling
+                    setScrambleText(getString(R.string.scrambling));
+
+                    //Update options menu (disable)
+                    enableMenuItems(false);
+                    showScrambleImage(false);
+
+                    mBldMode = PuzzleType.getCurrent().name().contains("BLD");
+
+                    resetGenerateScramble();
+
+                    resetTimer();
+
+                    PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
+                            .registerObserver(sessionObserver);
+                }
+            };
+    private Runnable timerRunnable = new Runnable() {
         @Override
         public void run() {
             if (mUpdateTimePref != PrefUtils.TimerUpdate.OFF) {
@@ -207,51 +258,24 @@ public class CurrentSessionTimerFragment extends Fragment {
         }
     };
 
-    //Preferences
-    private boolean mHoldToStartEnabled;
-    private boolean mInspectionEnabled;
-    private boolean mTwoRowTimeEnabled;
-    private PrefUtils.TimerUpdate mUpdateTimePref;
-    private boolean mMillisecondsEnabled;
-    private boolean mMonospaceScrambleFontEnabled;
-    private int mPrefSize;
-    private boolean mKeepScreenOn;
-    private boolean mSignEnabled;
+    //Taken from http://stackoverflow.com/questions/19908003
+    public static int getTextViewHeight(TextView textView) {
+        WindowManager wm =
+                (WindowManager) textView.getContext().getSystemService(Context.WINDOW_SERVICE);
+        Display display = wm.getDefaultDisplay();
 
-    //Retained Fragment
-    private CurrentSessionTimerRetainedFragment mRetainedFragment;
+        int deviceWidth;
 
-    //Views
-    private TextView mTimerText;
-    private TextView mTimerText2;
-    private TextView mScrambleText;
-    private RecyclerView mTimeBarRecycler;
-    private ImageView mScrambleImage;
-    private TextView mStatsSolvesText;
-    private TextView mStatsText;
-    private LinearLayout mLastBarLinearLayout;
-    private Button mLastDnfButton;
-    private Button mLastPlusTwoButton;
-    private Button mLastDeleteButton;
-    private FrameLayout mDynamicStatusBarFrame;
-    private TextView mDynamicStatusBarText;
+        Point size = new Point();
+        display.getSize(size);
+        deviceWidth = size.x;
 
-    //Handler
-    private Handler mUiHandler;
-
-    //Dynamic status variables
-    private boolean mHoldTiming;
-    private long mHoldTimerStartTimestamp;
-    private boolean mInspecting;
-    private long mInspectionStartTimestamp;
-    private long mInspectionStopTimestamp;
-    private long mTimingStartTimestamp;
-    private boolean mFromSavedInstanceState;
-    private boolean mTiming;
-    private boolean mScrambleImageDisplay;
-    private boolean mLateStartPenalty;
-    private boolean mBldMode;
-    private AnimatorSet mLastBarAnimationSet;
+        int widthMeasureSpec =
+                View.MeasureSpec.makeMeasureSpec(deviceWidth, View.MeasureSpec.AT_MOST);
+        int heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+        textView.measure(widthMeasureSpec, heightMeasureSpec);
+        return textView.getMeasuredHeight();
+    }
 
     //Generate string with specified current averages and mean of current
     // session
@@ -297,9 +321,65 @@ public class CurrentSessionTimerFragment extends Fragment {
         } else {
             mTimerText2.setVisibility(View.GONE);
             mTimerText.setText(array[0]);
-            if (!array[1].equals("") && !(mTiming && (mUpdateTimePref != PrefUtils.TimerUpdate.ON))) {
+            if (!array[1].equals("") && !(mTiming && (mUpdateTimePref != PrefUtils.TimerUpdate
+                    .ON))) {
                 mTimerText.append("." + array[1]);
             }
+        }
+    }
+
+    void setScrambleText(String text) {
+        mScrambleText.setText(text);
+        invalidateScrambleShadow(false);
+    }
+
+    private void invalidateScrambleShadow(final boolean overrideShowShadow) {
+        Runnable animate = new Runnable() {
+            @Override
+            public void run() {
+                if (mScrambleElevationAnimator != null) {
+                    mScrambleElevationAnimator.cancel();
+                }
+                Property<View, Float> property;
+                View view;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    property = View.TRANSLATION_Z;
+                    view = mScrambleText;
+                } else {
+                    property = View.ALPHA;
+                    view = mScrambleTextShadow;
+                }
+                mScrambleElevationAnimator = ObjectAnimator.ofFloat(view,
+                        property, getScrambleTextElevationOrShadowAlpha(overrideShowShadow));
+                mScrambleElevationAnimator.setDuration(150);
+                mScrambleElevationAnimator.start();
+            }
+        };
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            mScrambleText.postOnAnimation(animate);
+        } else {
+            mScrambleText.post(animate);
+        }
+    }
+
+    //Taken from http://stackoverflow.com/questions/3619693
+    private int getRelativeTop(View view) {
+        if (view.getParent() == view.getRootView())
+            return view.getTop();
+        else
+            return view.getTop() + getRelativeTop((View) view.getParent());
+    }
+
+    private float getScrambleTextElevationOrShadowAlpha(boolean override) {
+        boolean overlap = getRelativeTop(mScrambleText) + getTextViewHeight(mScrambleText)
+                > getRelativeTop(mTimerText);
+        float rootFrameTranslationY = getActivityCallback() != null ?
+                getActivityCallback().getContentFrameLayout().getTranslationY() : 0f;
+        boolean shadowShown = overlap || rootFrameTranslationY != 0 || override;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            return shadowShown ? Utils.convertDpToPx(getActivity(), 2) : 0f;
+        } else {
+            return shadowShown ? 1f : 0f;
         }
     }
 
@@ -322,7 +402,8 @@ public class CurrentSessionTimerFragment extends Fragment {
             }
             mScrambleImage.setImageDrawable(drawable);
 
-            mScrambleText.setText(ErrorUtils.getUiScramble(getActivity(), -1, currentScrambleAndSvg, mSignEnabled,
+            setScrambleText(ErrorUtils.getUiScramble(getActivity(), -1,
+                    currentScrambleAndSvg, mSignEnabled,
                     PuzzleType.getCurrent().name()));
         } else {
             mRetainedFragment.generateNextScramble();
@@ -335,7 +416,7 @@ public class CurrentSessionTimerFragment extends Fragment {
 
         //Update RecyclerView
         SolveRecyclerAdapter adapter = (SolveRecyclerAdapter) mTimeBarRecycler.getAdapter();
-        adapter.updateSolvesList(-1, ObservedMode.UPDATE_ALL);
+        adapter.updateSolvesList(-1, Update.DATA_RESET);
     }
 
     private void updateStatsAndTimer() {
@@ -397,19 +478,19 @@ public class CurrentSessionTimerFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_current_session_timer,
                 container, false);
 
-        mTimerText = (TextView) v.findViewById(R.id
-                .fragment_current_session_timer_time_textview);
-        mTimerText2 = (TextView) v.findViewById(R.id
-                .fragment_current_session_timer_timeSecondary_textview);
-        mScrambleText = (TextView) v.findViewById(R.id
-                .fragment_current_session_timer_scramble_textview);
-        mScrambleImage = (ImageView) v.findViewById(R.id
-                .fragment_current_session_timer_scramble_imageview);
-        mTimeBarRecycler = (RecyclerView) v.findViewById(R.id
-                .fragment_current_session_timer_timebar_recycler);
+        mTimerText = (TextView) v.findViewById(R.id.
+                fragment_current_session_timer_time_textview);
+        mTimerText2 = (TextView) v.findViewById(R.id.
+                fragment_current_session_timer_timeSecondary_textview);
+        mScrambleText = (TextView) v.findViewById(R.id.
+                fragment_current_session_timer_scramble_textview);
+        mScrambleTextShadow = v.findViewById(R.id.fragment_current_session_timer_scramble_shadow);
+        mScrambleImage = (ImageView) v.findViewById(R.id.
+                fragment_current_session_timer_scramble_imageview);
+        mTimeBarRecycler = (RecyclerView) v.findViewById(R.id.
+                fragment_current_session_timer_timebar_recycler);
 
-        mStatsText = (TextView) v.findViewById(R.id
-                .fragment_current_session_timer_stats_textview);
+        mStatsText = (TextView) v.findViewById(R.id.fragment_current_session_timer_stats_textview);
         mStatsSolvesText = (TextView) v.findViewById(R.id
                 .fragment_current_session_timer_stats_solves_number_textview);
 
@@ -425,7 +506,8 @@ public class CurrentSessionTimerFragment extends Fragment {
         mLastDnfButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Session currentSession = PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION);
+                Session currentSession = PuzzleType.getCurrent().getSession(PuzzleType
+                        .CURRENT_SESSION);
                 if (ErrorUtils.isSolveNonexistent(getActivity(), PuzzleType.getCurrent().name(),
                         PuzzleType.CURRENT_SESSION, currentSession.getNumberOfSolves() - 1)) {
                     return;
@@ -439,7 +521,8 @@ public class CurrentSessionTimerFragment extends Fragment {
         mLastPlusTwoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Session currentSession = PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION);
+                Session currentSession = PuzzleType.getCurrent().getSession(PuzzleType
+                        .CURRENT_SESSION);
                 if (ErrorUtils.isSolveNonexistent(getActivity(), PuzzleType.getCurrent().name(),
                         PuzzleType.CURRENT_SESSION, currentSession.getNumberOfSolves() - 1)) {
                     return;
@@ -453,7 +536,8 @@ public class CurrentSessionTimerFragment extends Fragment {
         mLastDeleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Session currentSession = PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION);
+                Session currentSession = PuzzleType.getCurrent().getSession(PuzzleType
+                        .CURRENT_SESSION);
                 if (ErrorUtils.isSolveNonexistent(getActivity(), PuzzleType.getCurrent().name(),
                         PuzzleType.CURRENT_SESSION, currentSession.getNumberOfSolves() - 1)) {
                     return;
@@ -469,8 +553,10 @@ public class CurrentSessionTimerFragment extends Fragment {
         mTimeBarRecycler.setHasFixedSize(true);
         mTimeBarRecycler.setAdapter(new SolveRecyclerAdapter());
 
-        mDynamicStatusBarFrame = (FrameLayout) v.findViewById(R.id.fragment_current_session_timer_dynamic_status_frame);
-        mDynamicStatusBarText = (TextView) v.findViewById(R.id.fragment_current_session_timer_dynamic_status_text);
+        mDynamicStatusBarFrame = (FrameLayout) v.findViewById(R.id
+                .fragment_current_session_timer_dynamic_status_frame);
+        mDynamicStatusBarText = (TextView) v.findViewById(R.id
+                .fragment_current_session_timer_dynamic_status_text);
 
         mRetainedFragment = getActivityCallback().getTimerRetainedFragment();
         mRetainedFragment.setTargetFragment(this, 0);
@@ -498,7 +584,7 @@ public class CurrentSessionTimerFragment extends Fragment {
             // generate a scramble.
             mRetainedFragment.resetScramblerThread();
             enableMenuItems(false);
-            mScrambleText.setText(R.string.scrambling);
+            setScrambleText(getString(R.string.scrambling));
             mRetainedFragment.generateNextScramble();
             mRetainedFragment.postSetScrambleViewsToCurrent();
         } else {
@@ -520,7 +606,7 @@ public class CurrentSessionTimerFragment extends Fragment {
                 // then update scramble views to current.
                 setScrambleTextAndImageToCurrent();
             } else {
-                mScrambleText.setText(R.string.scrambling);
+                setScrambleText(getString(R.string.scrambling));
             }
         }
 
@@ -561,6 +647,8 @@ public class CurrentSessionTimerFragment extends Fragment {
             mScrambleText.setTypeface(Typeface.DEFAULT);
         }
 
+        mScrambleText.setTextSize(mScrambleTextSize);
+
         //When Settings change
         onSessionSolvesChanged();
     }
@@ -571,6 +659,7 @@ public class CurrentSessionTimerFragment extends Fragment {
         getActivity().getWindow().clearFlags(WindowManager.LayoutParams
                 .FLAG_KEEP_SCREEN_ON);
         PuzzleType.getCurrent().saveCurrentSession(getActivity());
+        stopHoldTimer();
     }
 
     @Override
@@ -604,7 +693,8 @@ public class CurrentSessionTimerFragment extends Fragment {
                         && PrefUtils.isTwoRowTimeEnabled(getActivity());
         mUpdateTimePref = PrefUtils.getTimerUpdateMode(getActivity());
         mMillisecondsEnabled = PrefUtils.isDisplayMillisecondsEnabled(getActivity());
-        mPrefSize = PrefUtils.getTimerTextSize(getActivity());
+        mTimerTextSize = PrefUtils.getTimerTextSize(getActivity());
+        mScrambleTextSize = PrefUtils.getScrambleTextSize(getActivity());
         mKeepScreenOn = PrefUtils.isKeepScreenOnEnabled(getActivity());
         mSignEnabled = PrefUtils.isSignEnabled(getActivity());
         mMonospaceScrambleFontEnabled = PrefUtils.isMonospaceScrambleFontEnabled(getActivity());
@@ -615,13 +705,13 @@ public class CurrentSessionTimerFragment extends Fragment {
             if (mTimerText != null && mTimerText2 != null) {
                 if (mTwoRowTimeEnabled) {
                     mTimerText.setTextSize(TypedValue.COMPLEX_UNIT_SP,
-                            mPrefSize);
+                            mTimerTextSize);
                 } else {
                     mTimerText.setTextSize(TypedValue.COMPLEX_UNIT_SP,
-                            mPrefSize * 0.7F);
+                            mTimerTextSize * 0.7F);
                 }
                 mTimerText2.setTextSize(TypedValue.COMPLEX_UNIT_SP,
-                        mPrefSize / 2);
+                        mTimerTextSize / 2);
             }
         }
     }
@@ -702,18 +792,18 @@ public class CurrentSessionTimerFragment extends Fragment {
     }
 
     /**
-     * @return whether {@link com.pluscubed.plustimer.ui.CurrentSessionTimerFragment#onTimerTouchUp()}
+     * @return whether
+     * {@link com.pluscubed.plustimer.ui.CurrentSessionTimerFragment#onTimerTouchUp()}
      * will be triggered when touch is released
      */
-    private boolean onTimerTouchDown() {
+    private synchronized boolean onTimerTouchDown() {
         boolean scrambling = mRetainedFragment.isScrambling();
 
         //Currently Timing: User stopping timer
         if (mTiming) {
             Solve s;
             if (!mBldMode) {
-                s = new Solve(mRetainedFragment
-                        .getCurrentScrambleAndSvg(),
+                s = new Solve(mRetainedFragment.getCurrentScrambleAndSvg(),
                         System.nanoTime() - mTimingStartTimestamp);
             } else {
                 s = new BldSolve(mRetainedFragment.getCurrentScrambleAndSvg(),
@@ -729,7 +819,6 @@ public class CurrentSessionTimerFragment extends Fragment {
             PuzzleType.getCurrent().getSession(PuzzleType
                     .CURRENT_SESSION).addSolve(s);
             playLastBarEnterAnimation();
-            playDynamicStatusBarExitAnimation();
             playEnterAnimations();
             getActivityCallback().lockDrawerAndViewPager(false);
 
@@ -739,7 +828,7 @@ public class CurrentSessionTimerFragment extends Fragment {
 
 
             if (scrambling) {
-                mScrambleText.setText(R.string.scrambling);
+                setScrambleText(getString(R.string.scrambling));
             }
 
             mRetainedFragment.postSetScrambleViewsToCurrent();
@@ -773,7 +862,7 @@ public class CurrentSessionTimerFragment extends Fragment {
         return false;
     }
 
-    private boolean onTimerBldTouchDown(boolean scrambling) {
+    private synchronized boolean onTimerBldTouchDown(boolean scrambling) {
         //If inspecting: section 3
         //If not inspecting yet and not scrambling: section 1
         setTextColor(Color.GREEN);
@@ -781,7 +870,7 @@ public class CurrentSessionTimerFragment extends Fragment {
     }
 
 
-    private void onTimerTouchUp() {
+    private synchronized void onTimerTouchUp() {
         if ((mInspectionEnabled || mBldMode) && !mInspecting) {
             //Section 1
             //If inspection is on (or BLD) and not inspecting
@@ -823,68 +912,6 @@ public class CurrentSessionTimerFragment extends Fragment {
         }
     }
 
-    void playDynamicStatusBarEnterAnimation() {
-        ObjectAnimator enter = ObjectAnimator.ofFloat(mDynamicStatusBarFrame, View.TRANSLATION_Y, 0f);
-        enter.setDuration(125);
-        enter.setInterpolator(new DecelerateInterpolator());
-        AnimatorSet dynamicStatusBarAnimatorSet = new AnimatorSet();
-        dynamicStatusBarAnimatorSet.play(enter);
-        dynamicStatusBarAnimatorSet.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                if (mDynamicStatusBarFrame.getTranslationY() == 0) {
-                    mTimeBarRecycler.setVisibility(View.GONE);
-                }
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-
-            }
-        });
-        dynamicStatusBarAnimatorSet.start();
-    }
-
-    void playDynamicStatusBarExitAnimation() {
-        ObjectAnimator exit = ObjectAnimator.ofFloat(mDynamicStatusBarFrame, View.TRANSLATION_Y, mDynamicStatusBarFrame.getHeight());
-        exit.setDuration(125);
-        exit.setInterpolator(new AccelerateInterpolator());
-        AnimatorSet dynamicStatusBarAnimatorSet = new AnimatorSet();
-        dynamicStatusBarAnimatorSet.play(exit);
-        dynamicStatusBarAnimatorSet.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-                mTimeBarRecycler.setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-
-            }
-        });
-        dynamicStatusBarAnimatorSet.start();
-    }
-
     private void playExitAnimations() {
         Utils.lockOrientation(getActivity());
         playScrambleExitAnimation();
@@ -899,31 +926,24 @@ public class CurrentSessionTimerFragment extends Fragment {
         getActivityCallback().playToolbarEnterAnimation();
     }
 
-    private void playLastBarEnterAnimation() {
-        if (mLastBarAnimationSet != null) {
-            mLastBarAnimationSet.cancel();
-        }
-        mLastDeleteButton.setEnabled(true);
-        mLastDnfButton.setEnabled(true);
-        mLastPlusTwoButton.setEnabled(true);
-        ObjectAnimator enter = ObjectAnimator.ofFloat(mLastBarLinearLayout, View.TRANSLATION_Y, -mLastBarLinearLayout.getHeight());
-        ObjectAnimator exit = ObjectAnimator.ofFloat(mLastBarLinearLayout, View.TRANSLATION_Y, 0f);
+    private void playDynamicStatusBarEnterAnimation() {
+        mDynamicStatusBarVisible = true;
+        ObjectAnimator enter = ObjectAnimator.ofFloat(mDynamicStatusBarFrame, View.TRANSLATION_Y,
+                0f);
         enter.setDuration(125);
-        exit.setDuration(125);
-        exit.setStartDelay(1500);
         enter.setInterpolator(new DecelerateInterpolator());
-        exit.setInterpolator(new AccelerateInterpolator());
-        mLastBarAnimationSet = new AnimatorSet();
-        mLastBarAnimationSet.addListener(new Animator.AnimatorListener() {
+        AnimatorSet dynamicStatusBarAnimatorSet = new AnimatorSet();
+        dynamicStatusBarAnimatorSet.play(enter);
+        dynamicStatusBarAnimatorSet.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
-                mLastBarLinearLayout.setVisibility(View.VISIBLE);
+
             }
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                if (mLastBarLinearLayout.getTranslationY() == 0f) {
-                    mLastBarLinearLayout.setVisibility(View.GONE);
+                if (mDynamicStatusBarVisible) {
+                    mTimeBarRecycler.setVisibility(View.INVISIBLE);
                 }
             }
 
@@ -935,6 +955,52 @@ public class CurrentSessionTimerFragment extends Fragment {
             @Override
             public void onAnimationRepeat(Animator animation) {
 
+            }
+        });
+        dynamicStatusBarAnimatorSet.start();
+    }
+
+    private void playDynamicStatusBarExitAnimation() {
+        mDynamicStatusBarVisible = false;
+        ObjectAnimator exit = ObjectAnimator.ofFloat(mDynamicStatusBarFrame, View.TRANSLATION_Y,
+                mDynamicStatusBarFrame.getHeight());
+        exit.setDuration(125);
+        exit.setInterpolator(new AccelerateInterpolator());
+        AnimatorSet dynamicStatusBarAnimatorSet = new AnimatorSet();
+        dynamicStatusBarAnimatorSet.play(exit);
+        dynamicStatusBarAnimatorSet.start();
+        mTimeBarRecycler.setVisibility(View.VISIBLE);
+    }
+
+    private void playLastBarEnterAnimation() {
+        if (mLastBarAnimationSet != null) {
+            mLastBarAnimationSet.cancel();
+        }
+        mLastDeleteButton.setEnabled(true);
+        mLastDnfButton.setEnabled(true);
+        mLastPlusTwoButton.setEnabled(true);
+        ObjectAnimator enter = ObjectAnimator.ofFloat(mLastBarLinearLayout, View.TRANSLATION_Y,
+                -mLastBarLinearLayout.getHeight());
+        ObjectAnimator exit = ObjectAnimator.ofFloat(mLastBarLinearLayout, View.TRANSLATION_Y, 0f);
+        enter.setDuration(125);
+        exit.setDuration(125);
+        exit.setStartDelay(1500);
+        enter.setInterpolator(new DecelerateInterpolator());
+        exit.setInterpolator(new AccelerateInterpolator());
+        mLastBarAnimationSet = new AnimatorSet();
+        mLastBarAnimationSet.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                super.onAnimationStart(animation);
+                mLastBarLinearLayout.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                if (mLastBarLinearLayout.getTranslationY() == 0f) {
+                    mLastBarLinearLayout.setVisibility(View.GONE);
+                }
             }
         });
         mLastBarAnimationSet.playSequentially(enter, exit);
@@ -949,27 +1015,13 @@ public class CurrentSessionTimerFragment extends Fragment {
         exit.setDuration(125);
         exit.setInterpolator(new AccelerateInterpolator());
         AnimatorSet lastBarAnimationSet = new AnimatorSet();
-        lastBarAnimationSet.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-
-            }
-
+        lastBarAnimationSet.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
                 if (mLastBarLinearLayout.getTranslationY() == 0f) {
                     mLastBarLinearLayout.setVisibility(View.GONE);
                 }
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-
             }
         });
         lastBarAnimationSet.play(exit);
@@ -977,25 +1029,48 @@ public class CurrentSessionTimerFragment extends Fragment {
     }
 
     void playScrambleExitAnimation() {
-        ObjectAnimator exit = ObjectAnimator.ofFloat(mScrambleText, View.ALPHA, 0f);
-        exit.setDuration(300);
-        ObjectAnimator exit2 = ObjectAnimator.ofFloat(mScrambleText, View.TRANSLATION_Y, -Utils.convertDpToPx(getActivity(), 24));
-        exit2.setDuration(300);
-        exit2.setInterpolator(new AccelerateInterpolator());
-        AnimatorSet scrambleAnimatorSet = new AnimatorSet();
-        scrambleAnimatorSet.play(exit).with(exit2);
-        scrambleAnimatorSet.start();
+        if (mScrambleAnimator != null) {
+            mScrambleAnimator.cancel();
+        }
+        mScrambleAnimator = ObjectAnimator.ofFloat(mScrambleText, View.TRANSLATION_Y,
+                -mScrambleText.getHeight());
+        mScrambleAnimator.setDuration(300);
+        mScrambleAnimator.setInterpolator(new AccelerateInterpolator());
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP) {
+            mScrambleAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    mScrambleTextShadow.setTranslationY((int) (float) animation.getAnimatedValue());
+                }
+            });
+        }
+        mScrambleAnimator.start();
+        invalidateScrambleShadow(true);
     }
 
     void playScrambleEnterAnimation() {
-        ObjectAnimator enter = ObjectAnimator.ofFloat(mScrambleText, View.ALPHA, 1f);
-        enter.setDuration(300);
-        ObjectAnimator enter2 = ObjectAnimator.ofFloat(mScrambleText, View.TRANSLATION_Y, 0f);
-        enter2.setDuration(300);
-        enter2.setInterpolator(new DecelerateInterpolator());
-        AnimatorSet scrambleAnimatorSet = new AnimatorSet();
-        scrambleAnimatorSet.play(enter).with(enter2);
-        scrambleAnimatorSet.start();
+        if (mScrambleAnimator != null) {
+            mScrambleAnimator.cancel();
+        }
+        mScrambleAnimator = ObjectAnimator.ofFloat(mScrambleText, View.TRANSLATION_Y, 0f);
+        mScrambleAnimator.setDuration(300);
+        mScrambleAnimator.setInterpolator(new DecelerateInterpolator());
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP) {
+            mScrambleAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    mScrambleTextShadow.setTranslationY((int) (float) animation.getAnimatedValue());
+                }
+            });
+        }
+        mScrambleAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                invalidateScrambleShadow(false);
+            }
+        });
+        mScrambleAnimator.start();
     }
 
     void playStatsExitAnimation() {
@@ -1100,8 +1175,8 @@ public class CurrentSessionTimerFragment extends Fragment {
         return mUiHandler;
     }
 
-    public enum ObservedMode {
-        ADD, REMOVE, RESET, SINGLE_CHANGE, UPDATE_ALL
+    public enum Update {
+        INSERT, REMOVE, REMOVE_ALL, SINGLE_CHANGE, DATA_RESET
     }
 
     public interface ActivityCallback {
@@ -1114,18 +1189,19 @@ public class CurrentSessionTimerFragment extends Fragment {
         CurrentSessionTimerRetainedFragment getTimerRetainedFragment();
 
         void enableMenuItems(boolean enable);
+
+        FrameLayout getContentFrameLayout();
     }
 
-    public class SolveRecyclerAdapter extends RecyclerView
-            .Adapter<SolveRecyclerAdapter.ViewHolder> {
+    public class SolveRecyclerAdapter
+            extends RecyclerView.Adapter<SolveRecyclerAdapter.ViewHolder> {
 
         private List<Solve> mSolves;
-
         private Solve[] mBestAndWorstSolves;
 
         public SolveRecyclerAdapter() {
             mBestAndWorstSolves = new Solve[2];
-            updateSolvesList(-1, ObservedMode.UPDATE_ALL);
+            updateSolvesList(-1, Update.DATA_RESET);
         }
 
         @Override
@@ -1152,21 +1228,34 @@ public class CurrentSessionTimerFragment extends Fragment {
             return mSolves.size();
         }
 
-        private void updateSolvesList(int position, ObservedMode mode) {
+        private void updateSolvesList(int position, Update mode) {
             int oldSize = 0;
             if (mSolves != null) oldSize = mSolves.size();
+
+            Set<Solve> changed = new HashSet<>();
+            changed.addAll(Arrays.asList(mBestAndWorstSolves));
+
             mSolves = PuzzleType.getCurrent().getSession(PuzzleType
                     .CURRENT_SESSION).getSolves();
             mBestAndWorstSolves[0] = Utils.getBestSolveOfList(mSolves);
             mBestAndWorstSolves[1] = Utils.getWorstSolveOfList(mSolves);
 
+            if (mode != Update.DATA_RESET && mode != Update.REMOVE_ALL) {
+                changed.addAll(Arrays.asList(mBestAndWorstSolves));
+                for (Solve s : changed) {
+                    if (mSolves.contains(s)) {
+                        notifyItemChanged(mSolves.indexOf(s));
+                    }
+                }
+            }
+
             switch (mode) {
-                case UPDATE_ALL:
+                case DATA_RESET:
                     notifyDataSetChanged();
                     if (mSolves.size() >= 1)
                         mTimeBarRecycler.smoothScrollToPosition(mSolves.size() - 1);
                     break;
-                case ADD:
+                case INSERT:
                     //TODO: Smooth scroll so empty space for insertion opens up
                     notifyItemInserted(mSolves.size() - 1);
                     mTimeBarRecycler.postDelayed(new Runnable() {
@@ -1184,7 +1273,7 @@ public class CurrentSessionTimerFragment extends Fragment {
                 case SINGLE_CHANGE:
                     notifyItemChanged(position);
                     break;
-                case RESET:
+                case REMOVE_ALL:
                     notifyItemRangeRemoved(0, oldSize);
                     break;
             }
@@ -1199,8 +1288,12 @@ public class CurrentSessionTimerFragment extends Fragment {
                 textView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        SolveDialogUtils.createSolveDialog(getActivity(), false, PuzzleType.getCurrent().name(),
-                                PuzzleType.CURRENT_SESSION, getPosition());
+                        SolveDialogUtils.createSolveDialog(getActivity(),
+                                false,
+                                PuzzleType.getCurrent().name(),
+                                PuzzleType.CURRENT_SESSION,
+                                getLayoutPosition()
+                        );
                     }
                 });
             }

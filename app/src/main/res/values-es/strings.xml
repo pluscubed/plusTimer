@@ -21,6 +21,7 @@
     <string name="session_reset">Se ha reiniciado la sesión.</string>
     <string name="reset_warning">¿Reiniciar sesión?</string>
     <string name="reset_warning_message">¡Perderás todos los tiempos guardados en esta sesión!</string>
+    <string name="submit_warning_message">Submit session?</string>
     <string name="inspecting">Inspeccionando&#8230;</string>
     <string name="scrambling">Mezclando&#8230;</string>
     <string name="scramble_image">Imagen del Scramble</string>
@@ -58,8 +59,10 @@
     <string name="pref_keepscreenon_title">Mantener la pantalla encendida</string>
     <string name="pref_two_row_time_summary">>Horas:Minutos:Segundos arriba, milisegundos abajo</string>
     <string name="pref_two_row_time_title">Mostrar Tiempo en Dos Renglones</string>
-    <string name="pref_time_text_size_title">Tamaño del Texto del Cronómetro</string>
-    <string name="time_text_edittext_dialog_title">Configurar tamaño del cronómetro (predeterminado 100):</string>
+    <string name="pref_text_size_title">Tamaño del Texto</string>
+    <string name="pref_time_text_size_dialog_title">Configurar tamaño del cronómetro (predeterminado 100):</string>
+    <string name="text_size_warning">You can\'t set a text size larger than 500!</string>
+    <string name="pref_scramble_text_size_dialog_title">Set scramble text size (default 18):</string>
     <string name="pref_update_time_title">Actualización del cronómetro</string>
     <string-array name="pref_update_time_list_entries">
         <item>Encendido</item>
@@ -67,6 +70,7 @@
         <item>Ocultar</item>
     </string-array>
     <string name="pref_timer_category_title">Cronómetro</string>
+    <string name="pref_scrambles_category_title">Scrambles</string>
     <string name="pref_milliseconds_title">Usar milisegundos (0.001)</string>
     <string name="pref_sign_title">Usar Notación SiGN</string>
     <string name="puzzle_types_setup">Mostrar/Ocultar Tipos de puzzle</string>
@@ -77,6 +81,9 @@
         <item>Oscuro</item>
         <item>Negro</item>
     </string-array>
+    <string name="pref_monospace_scrambles_title">Monospace scramble font</string>
+    <string name="pref_lock_swiping_title">Prevent swiping between Timer and Session Details</string>
+    <string name="pref_lock_swiping_summary">This means you can switch between them only by pressing the actual tabs at the top.</string>
     <string name="current_session">Sesión Actual</string>
     <string name="history">Historial</string>
     <string name="current">Actual</string>
@@ -96,7 +103,4 @@
     <string name="share_dialog_title">Compartir tiempos vía&#8230;</string>
     <string name="send_email">Enviar email al desarrollador usando&#8230;</string>
     <string name="email_developer_history_data">Enviar Datos del Historial al Desarrollador</string>
-    <string name="text_size_warning">You can\'t set a text size larger than 500!</string>
-    <string name="scrambles">Scrambles</string>
-    <string name="pref_monospace_scrambles_title">Monospace scramble font</string>
 </resources>

@@ -38,5 +38,7 @@
 
     <style name="EdgeEffectThemeOverlayDark" parent="ThemeOverlay.AppCompat.Dark">
         <item name="android:colorEdgeEffect">@color/primary_material_light</item>
+        <item name="selectableItemBackground">@drawable/item_background_dark</item>
+        <item name="android:selectableItemBackground">@drawable/item_background_dark</item>
     </style>
 </resources>

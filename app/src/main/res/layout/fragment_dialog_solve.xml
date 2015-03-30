@@ -50,7 +50,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/penalty"
-        android:textColor="?hintColor"
+        android:textColor="?editTextLabelColor"
         android:textSize="12sp" />
 
     <Spinner
@@ -58,7 +58,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical|fill_horizontal"
-        android:background="?android:selectableItemBackground"
+        android:background="?selectableItemBackground"
         android:dropDownHorizontalOffset="32dp"
         android:translationX="-16dp" />
 </LinearLayout>

@@ -26,11 +26,12 @@ public class ErrorUtils {
 
     public static void logCrashlytics(Exception e) {
         if (BuildConfig.USE_CRASHLYTICS) {
-            logCrashlytics(e);
+            Crashlytics.logException(e);
         }
     }
 
-    public static void showErrorDialog(final Context context, String userReadableMessage, Exception e,
+    public static void showErrorDialog(final Context context, String userReadableMessage,
+                                       Exception e,
                                        boolean sendFileData) {
         try {
             MaterialDialog.Builder builder = new MaterialDialog.Builder(context)
@@ -61,12 +62,12 @@ public class ErrorUtils {
         showErrorDialog(c, "History/current data can't be read from storage.", e, true);
     }
 
-    public static String getUiScramble(Context c, int position, ScrambleAndSvg scrambleAndSvg, boolean signEnabled,
+    public static String getUiScramble(Context c, int position, ScrambleAndSvg scrambleAndSvg,
+                                       boolean signEnabled,
                                        String puzzleTypeName) {
         String uiScramble = "";
         try {
-            uiScramble = scrambleAndSvg.getUiScramble(signEnabled,
-                    puzzleTypeName);
+            uiScramble = scrambleAndSvg.getUiScramble(signEnabled, puzzleTypeName);
         } catch (NullPointerException e) {
             String positionString = String.valueOf(position);
             if (position == -1) {
@@ -78,7 +79,8 @@ public class ErrorUtils {
         return uiScramble;
     }
 
-    public static boolean isSolveNonexistent(Context c, String puzzleTypeName, int sessionIndex, int solveIndex) {
+    public static boolean isSolveNonexistent(Context c, String puzzleTypeName, int sessionIndex,
+                                             int solveIndex) {
         try {
             PuzzleType.valueOf(puzzleTypeName).getSession(sessionIndex).getSolveByPosition(solveIndex);
             return false;
@@ -88,7 +90,8 @@ public class ErrorUtils {
                         "Solve #" + solveIndex + " nonexistent",
                         PuzzleType.getCurrent()
                                 .getSession(sessionIndex)
-                                .toString(c, PuzzleType.getCurrent().name(), true, true, true, false)
+                                .toString(c, PuzzleType.getCurrent().name(), true, true, true,
+                                        false)
                 );
             }
             showErrorDialog(c, "Solve #" + solveIndex + " doesn't exist", e, false);
@@ -119,6 +122,7 @@ public class ErrorUtils {
                 } catch (FileNotFoundException e) {
                     // File not found: ignore
                 } catch (IOException e) {
+                    logCrashlytics(e);
                     showErrorDialog(context, "", e, false);
                 } finally {
                     if (r != null) {

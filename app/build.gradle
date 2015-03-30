@@ -25,14 +25,14 @@ task syncTask(type: Sync) {
 preBuild.dependsOn('syncTask')
 
 android {
-    compileSdkVersion 21
-    buildToolsVersion '21.1.2'
+    compileSdkVersion 22
+    buildToolsVersion '22.0.1'
     defaultConfig {
         applicationId "com.pluscubed.plustimer"
         minSdkVersion 14
-        targetSdkVersion 21
-        versionCode 21
-        versionName '0.2.3'
+        targetSdkVersion 22
+        versionCode 22
+        versionName '0.2.4'
     }
 
     if (project.hasProperty("RELEASE_STORE_FILE")) {
@@ -47,13 +47,14 @@ android {
     }
 
     buildTypes {
-        //noinspection GroovyMissingReturnStatement
         release {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             if (project.hasProperty("RELEASE_STORE_FILE")) {
                 signingConfig signingConfigs.release
+            } else {
+                signingConfig signingConfigs.debug
             }
         }
         debug {
@@ -80,12 +81,12 @@ android {
 
 dependencies {
     compile 'com.jjoe64:graphview:3.+'
-    compile 'com.android.support:appcompat-v7:21.+'
-    compile 'com.android.support:support-v13:21.+'
-    compile 'com.android.support:recyclerview-v7:21.+'
+    compile 'com.android.support:appcompat-v7:22.+'
+    compile 'com.android.support:support-v13:22.+'
+    compile 'com.android.support:recyclerview-v7:22.+'
     compile 'com.github.cubing:tnoodle-android:0.+@aar'
     compile 'com.caverock:androidsvg:1.2.1'
-    compile 'com.android.support:support-annotations:21.+'
+    compile 'com.android.support:support-annotations:22.+'
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.google.code.gson:gson:2.+'
     compile 'com.afollestad:material-dialogs:0.+'

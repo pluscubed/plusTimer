@@ -21,7 +21,8 @@
             android:layout_height="wrap_content"
             android:background="?colorPrimary"
             android:elevation="4dp"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            tools:ignore="UnusedAttribute">
 
             <include layout="@layout/toolbar_actionbar" />
 
@@ -44,7 +45,6 @@
                 android:layout_height="match_parent" />
 
             <View
-                android:id="@id/activity_current_session_toolbarshadow"
                 android:layout_width="match_parent"
                 android:layout_height="5dp"
                 android:background="?toolbarShadow" />

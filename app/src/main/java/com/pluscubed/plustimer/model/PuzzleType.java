@@ -172,14 +172,17 @@ public enum PuzzleType {
                                     throws JsonParseException {
 
                                 Gson gson = new GsonBuilder()
-                                        .registerTypeAdapter(ScrambleAndSvg.class, new JsonDeserializer<ScrambleAndSvg>() {
-                                            @Override
-                                            public ScrambleAndSvg deserialize(JsonElement json, Type typeOfT,
-                                                                              JsonDeserializationContext context)
-                                                    throws JsonParseException {
-                                                return new ScrambleAndSvg(json.getAsJsonPrimitive().getAsString(), null);
-                                            }
-                                        }).create();
+                                        .registerTypeAdapter(ScrambleAndSvg.class, new
+                                                JsonDeserializer<ScrambleAndSvg>() {
+                                                    @Override
+                                                    public ScrambleAndSvg deserialize(JsonElement json,
+                                                                                      Type typeOfT,
+                                                                                      JsonDeserializationContext context)
+                                                            throws JsonParseException {
+                                                        return new ScrambleAndSvg(json.getAsJsonPrimitive
+                                                                ().getAsString(), null);
+                                                    }
+                                                }).create();
 
                                 Session s = gson.fromJson(json, typeOfT);
                                 for (final Solve solve : s.getSolves()) {

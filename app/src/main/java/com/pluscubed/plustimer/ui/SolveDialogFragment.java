@@ -62,7 +62,6 @@ public class SolveDialogFragment extends DialogFragment {
 
     private boolean mAddMode;
 
-    private OnDialogDismissedListener mListener;
     private MaterialEditText mScrambleEdit;
     private Solve mSolve;
     private Solve mSolveCopy;
@@ -161,7 +160,8 @@ public class SolveDialogFragment extends DialogFragment {
                 textView.setText(getItem(position));
                 if (PrefUtils.getTheme(getActivity()) != PrefUtils.Theme.DARK
                         && PrefUtils.getTheme(getActivity()) != PrefUtils.Theme.BLACK) {
-                    ImageView triangle = (ImageView) convertView.findViewById(R.id.spinner_item_imageview);
+                    ImageView triangle = (ImageView) convertView.findViewById(R.id
+                            .spinner_item_imageview);
                     triangle.setColorFilter(Color.BLACK);
                 }
                 return convertView;
@@ -321,26 +321,27 @@ public class SolveDialogFragment extends DialogFragment {
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle
+            savedInstanceState) {
         if (mAddMode) {
-            getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+            getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams
+                    .SOFT_INPUT_STATE_VISIBLE);
         }
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 
     private void onNeutral() {
-        if (ErrorUtils.isSolveNonexistent(getActivity(), mPuzzleTypeName, mSessionIndex, mSolveIndex)) {
+        if (ErrorUtils.isSolveNonexistent(getActivity(), mPuzzleTypeName, mSessionIndex,
+                mSolveIndex)) {
             return;
         }
         PuzzleType.valueOf(mPuzzleTypeName).getSession
                 (mSessionIndex).deleteSolve
                 (mSolveIndex);
-        if (mListener != null) mListener.onDialogDismissed();
         dismiss();
     }
 
     private void onNegative() {
-        if (mListener != null) mListener.onDialogDismissed();
         dismiss();
     }
 
@@ -360,8 +361,6 @@ public class SolveDialogFragment extends DialogFragment {
             }
             mSolveCopy.getScrambleAndSvg().setScramble(scrambleText,
                     mPuzzleTypeName);
-            if (mListener != null)
-                mListener.onDialogDismissed();
             if (!mAddMode) {
                 mSolve.copy(mSolveCopy);
             } else {
@@ -373,16 +372,10 @@ public class SolveDialogFragment extends DialogFragment {
         }
     }
 
-    public void addListener(OnDialogDismissedListener listener) {
-        mListener = listener;
-    }
-
     void updateTitle() {
-        getDialog().setTitle(mSolveCopy.getDescriptiveTimeString
-                (mMillisecondsEnabled));
+        if (getDialog() != null) {
+            getDialog().setTitle(mSolveCopy.getDescriptiveTimeString(mMillisecondsEnabled));
+        }
     }
 
-    public interface OnDialogDismissedListener {
-        public void onDialogDismissed();
-    }
 }

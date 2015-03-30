@@ -73,7 +73,8 @@ public class SettingsActivity extends ThemableActivity {
                 public boolean onPreferenceChange(Preference preference,
                                                   Object newValue) {
                     if (Integer.valueOf(newValue.toString()) > 500) {
-                        Toast.makeText(getActivity(), getString(R.string.text_size_warning), Toast.LENGTH_SHORT)
+                        Toast.makeText(getActivity(), getString(R.string.text_size_warning),
+                                Toast.LENGTH_SHORT)
                                 .show();
                         return false;
                     }
@@ -83,6 +84,26 @@ public class SettingsActivity extends ThemableActivity {
                 }
             });
             size.setSummary(size.getText());
+
+            EditTextPreference scrambleSize = (EditTextPreference)
+                    findPreference(PrefUtils.PREF_SCRAMBLE_TEXT_SIZE_EDITTEXT);
+            scrambleSize.setOnPreferenceChangeListener(new Preference
+                    .OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference,
+                                                  Object newValue) {
+                    if (Integer.valueOf(newValue.toString()) > 500) {
+                        Toast.makeText(getActivity(), getString(R.string.text_size_warning),
+                                Toast.LENGTH_SHORT)
+                                .show();
+                        return false;
+                    }
+                    EditTextPreference scrambleSize = (EditTextPreference) preference;
+                    scrambleSize.setSummary(newValue.toString());
+                    return true;
+                }
+            });
+            scrambleSize.setSummary(size.getText());
 
             ListPreference updateOccurrence = (ListPreference)
                     findPreference(PrefUtils.PREF_UPDATE_TIME_LIST);
@@ -100,7 +121,8 @@ public class SettingsActivity extends ThemableActivity {
 
 
             MultiSelectListPreference puzzleTypeMultiList =
-                    (MultiSelectListPreference) findPreference(PrefUtils.PREF_PUZZLETYPES_MULTISELECTLIST);
+                    (MultiSelectListPreference) findPreference(PrefUtils
+                            .PREF_PUZZLETYPES_MULTISELECTLIST);
 
             if (puzzleTypeMultiList.getValues().size() == 0) {
                 Set<String> all = new HashSet<>();

@@ -1,8 +1,10 @@
 package com.pluscubed.plustimer.ui;
 
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.graphics.Color;
@@ -19,6 +21,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 
@@ -28,6 +31,7 @@ import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.ui.widget.LockingViewPager;
 import com.pluscubed.plustimer.ui.widget.SlidingTabLayout;
+import com.pluscubed.plustimer.utils.PrefUtils;
 
 import io.fabric.sdk.android.Fabric;
 
@@ -50,6 +54,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
     private boolean mInvalidateActionBarOnDrawerClosed;
     private SlidingTabLayout mSlidingTabLayout;
     private LockingViewPager mViewPager;
+    private int mContentFrameLayoutHeight;
 
     private static String makeFragmentName(int viewId, int index) {
         return "android:switcher:" + viewId + ":" + index;
@@ -60,69 +65,77 @@ public class CurrentSessionActivity extends DrawerActivity implements
     }
 
     @Override
+    public FrameLayout getContentFrameLayout() {
+        return (FrameLayout) findViewById(R.id
+                .activity_current_session_framelayout);
+    }
+
+    @Override
     public void playToolbarExitAnimation() {
-        final LinearLayout toolbar = (LinearLayout) findViewById(R.id.activity_current_session_headerbar);
-        findViewById(R.id.activity_current_session_toolbarshadow).setVisibility(View.GONE);
-        ObjectAnimator exit = ObjectAnimator.ofFloat(toolbar, View.Y,
+        final LinearLayout toolbar = (LinearLayout) findViewById(R.id
+                .activity_current_session_headerbar);
+        final FrameLayout layout = (FrameLayout) findViewById(R.id
+                .activity_current_session_framelayout);
+        mContentFrameLayoutHeight = layout.getHeight();
+
+        ObjectAnimator exit = ObjectAnimator.ofFloat(toolbar, View.TRANSLATION_Y,
                 -toolbar.getHeight());
         exit.setDuration(300);
         exit.setInterpolator(new AccelerateInterpolator());
-        AnimatorSet scrambleAnimatorSet = new AnimatorSet();
-        scrambleAnimatorSet.play(exit);
-        scrambleAnimatorSet.addListener(new Animator.AnimatorListener() {
+        exit.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
-            public void onAnimationStart(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                if (toolbar.getY() == -toolbar.getHeight()) {
-                    toolbar.setVisibility(View.GONE);
-                }
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-
+            public void onAnimationUpdate(ValueAnimator animation) {
+                LinearLayout.LayoutParams params =
+                        (LinearLayout.LayoutParams) layout.getLayoutParams();
+                params.height =
+                        mContentFrameLayoutHeight - (int) (float) animation.getAnimatedValue();
+                params.weight = 0;
+                layout.setLayoutParams(params);
+                layout.setTranslationY((int) (float) animation.getAnimatedValue());
             }
         });
+
+        AnimatorSet scrambleAnimatorSet = new AnimatorSet();
+        scrambleAnimatorSet.play(exit);
         scrambleAnimatorSet.start();
     }
 
     @Override
     public void playToolbarEnterAnimation() {
-        final LinearLayout toolbar = (LinearLayout) findViewById(R.id.activity_current_session_headerbar);
-        ObjectAnimator exit = ObjectAnimator.ofFloat(toolbar, View.Y, 0f);
+        final LinearLayout toolbar = (LinearLayout) findViewById(R.id
+                .activity_current_session_headerbar);
+        final FrameLayout layout = (FrameLayout) findViewById(R.id
+                .activity_current_session_framelayout);
+
+        ObjectAnimator exit = ObjectAnimator.ofFloat(toolbar, View.TRANSLATION_Y, 0f);
         exit.setDuration(300);
         exit.setInterpolator(new DecelerateInterpolator());
+        exit.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                LinearLayout.LayoutParams params =
+                        (LinearLayout.LayoutParams) layout.getLayoutParams();
+                params.height =
+                        mContentFrameLayoutHeight - (int) (float) animation.getAnimatedValue();
+                params.weight = 0;
+                layout.setLayoutParams(params);
+                layout.setTranslationY((int) (float) animation.getAnimatedValue());
+            }
+        });
+
         AnimatorSet scrambleAnimatorSet = new AnimatorSet();
         scrambleAnimatorSet.play(exit);
         toolbar.setVisibility(View.VISIBLE);
-        scrambleAnimatorSet.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-
-            }
-
+        scrambleAnimatorSet.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                findViewById(R.id.activity_current_session_toolbarshadow).setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-
+                if (toolbar.getTranslationY() == 0) {
+                    LinearLayout.LayoutParams params =
+                            (LinearLayout.LayoutParams) layout.getLayoutParams();
+                    params.height = 0;
+                    params.weight = 1;
+                    layout.setLayoutParams(params);
+                }
             }
         });
         scrambleAnimatorSet.start();
@@ -131,7 +144,8 @@ public class CurrentSessionActivity extends DrawerActivity implements
     @Override
     public void lockDrawerAndViewPager(boolean lock) {
         mSlidingTabLayout.setClickEnabled(!lock);
-        mViewPager.setPagingEnabled(!lock);
+        if (!PrefUtils.isLockSwipingEnabled(this))
+            mViewPager.setPagingEnabled(!lock);
         lockDrawer(lock);
     }
 
@@ -207,7 +221,6 @@ public class CurrentSessionActivity extends DrawerActivity implements
                 if (state == ViewPager.SCROLL_STATE_DRAGGING || state ==
                         ViewPager.SCROLL_STATE_SETTLING) {
                     getCurrentSessionTimerFragment().stopHoldTimer();
-                    getCurrentSessionTimerFragment().playEnterAnimations();
                     getSolveListFragment().finishActionMode();
                 }
             }
@@ -225,6 +238,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
         // TODO: Only update Spinner, not invalidate whole action bar
         // When puzzle types are enabled/disabled, update Spinner
         queueInvalidateOptionsMenu();
+        mViewPager.setPagingEnabled(!PrefUtils.isLockSwipingEnabled(this));
     }
 
     private CurrentSessionTimerFragment getCurrentSessionTimerFragment() {
@@ -267,7 +281,6 @@ public class CurrentSessionActivity extends DrawerActivity implements
     protected void onNavDrawerSlide(float offset) {
         getSolveListFragment().finishActionMode();
         getCurrentSessionTimerFragment().stopHoldTimer();
-        getCurrentSessionTimerFragment().playEnterAnimations();
     }
 
     @Override
@@ -284,7 +297,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
         }
         getMenuInflater().inflate(R.menu.menu_current_session, menu);
 
-        Spinner menuPuzzleSpinner = (Spinner) MenuItemCompat.getActionView
+        final Spinner menuPuzzleSpinner = (Spinner) MenuItemCompat.getActionView
                 (menu.findItem(R.id
                         .menu_activity_current_session_puzzletype_spinner));
         ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter = new
@@ -298,11 +311,12 @@ public class CurrentSessionActivity extends DrawerActivity implements
             @Override
             public void onItemSelected(AdapterView<?> parent, View view,
                                        int position, long id) {
-                PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
-                        .unregisterAllObservers();
-                PuzzleType.setCurrent((PuzzleType) parent.getItemAtPosition
-                        (position), CurrentSessionActivity.this);
-
+                PuzzleType newPuzzleType = (PuzzleType) parent.getItemAtPosition(position);
+                if (newPuzzleType != PuzzleType.getCurrent()) {
+                    PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
+                            .unregisterAllObservers();
+                    PuzzleType.setCurrent(newPuzzleType, CurrentSessionActivity.this);
+                }
             }
 
             @Override

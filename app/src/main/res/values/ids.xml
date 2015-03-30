@@ -76,7 +76,7 @@
     <item name="fragment_about_email_history_button" type="id" />
     <item name="activity_current_session_headerbar" type="id" />
     <item name="activity_current_session_framelayout" type="id" />
-    <item name="activity_current_session_toolbarshadow" type="id" />
+    <item name="fragment_current_session_timer_scramble_shadow" type="id" />
 
 
 </resources>

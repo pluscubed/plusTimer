@@ -11,8 +11,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class PrefUtils {
+    public static final String PREF_SCRAMBLE_TEXT_SIZE_EDITTEXT =
+            "pref_scramble_display_size_edittext";
     public static final String PREF_TIME_TEXT_SIZE_EDITTEXT =
             "pref_time_display_size_edittext";
+    public static final String PREF_LOCK_SWIPING_CHECKBOX =
+            "pref_lock_swiping_checkbox";
     public static final String PREF_UPDATE_TIME_LIST =
             "pref_update_time_list";
     public static final String PREF_PUZZLETYPES_MULTISELECTLIST =
@@ -72,12 +76,17 @@ public class PrefUtils {
 
     public static boolean isMonospaceScrambleFontEnabled(final Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREF_MONOSPACE_SCRAMBLES_CHECKBOX, false);
+        return sp.getBoolean(PREF_MONOSPACE_SCRAMBLES_CHECKBOX, true);
     }
 
     public static boolean isWelcomeDone(final Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         return sp.getBoolean(PREF_WELCOME_DONE, false);
+    }
+
+    public static boolean isLockSwipingEnabled(final Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        return sp.getBoolean(PREF_LOCK_SWIPING_CHECKBOX, false);
     }
 
     public static void markWelcomeDone(final Context context) {
@@ -94,6 +103,11 @@ public class PrefUtils {
     public static int getTimerTextSize(final Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         return Integer.parseInt(sp.getString(PREF_TIME_TEXT_SIZE_EDITTEXT, "100"));
+    }
+
+    public static int getScrambleTextSize(final Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        return Integer.parseInt(sp.getString(PREF_SCRAMBLE_TEXT_SIZE_EDITTEXT, "18"));
     }
 
     public static void saveVersionCode(final Context context) {
