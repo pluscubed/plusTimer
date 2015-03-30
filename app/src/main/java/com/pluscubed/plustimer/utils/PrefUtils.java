@@ -76,7 +76,7 @@ public class PrefUtils {
 
     public static boolean isMonospaceScrambleFontEnabled(final Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREF_MONOSPACE_SCRAMBLES_CHECKBOX, false);
+        return sp.getBoolean(PREF_MONOSPACE_SCRAMBLES_CHECKBOX, true);
     }
 
     public static boolean isWelcomeDone(final Context context) {
