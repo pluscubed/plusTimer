@@ -31,8 +31,8 @@ android {
         applicationId "com.pluscubed.plustimer"
         minSdkVersion 14
         targetSdkVersion 22
-        versionCode 21
-        versionName '0.2.3'
+        versionCode 22
+        versionName '0.2.4'
     }
 
     if (project.hasProperty("RELEASE_STORE_FILE")) {
