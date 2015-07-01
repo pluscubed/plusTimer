@@ -33,6 +33,7 @@ android {
         targetSdkVersion 22
         versionCode 22
         versionName '0.2.4'
+        manifestPlaceholders = [appName: "@string/app_name"]
     }
 
     if (project.hasProperty("RELEASE_STORE_FILE")) {
@@ -63,6 +64,7 @@ android {
             applicationIdSuffix '.debug'
             versionNameSuffix '-DEBUG'
             buildConfigField "boolean", "USE_CRASHLYTICS", "false"
+            manifestPlaceholders = [appName: "plusTimer DEBUG"]
             ext.enableCrashlytics = false
         }
     }

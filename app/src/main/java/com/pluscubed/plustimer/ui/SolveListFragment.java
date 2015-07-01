@@ -349,7 +349,7 @@ public class SolveListFragment extends Fragment {
     public void onPause() {
         super.onPause();
         getPuzzleType().getHistorySessions().save(getActivity());
-        if (mCurrentToggle) getPuzzleType().saveCurrentSession(getActivity());
+        // if (mCurrentToggle) getPuzzleType().saveCurrentSession(getActivity());
     }
 
     void onSessionSolvesChanged() {
@@ -371,7 +371,7 @@ public class SolveListFragment extends Fragment {
         updateStats();
         if (mCurrentToggle) {
             enableResetSubmitButtons(getPuzzleType().getSession(PuzzleType
-                    .CURRENT_SESSION).getNumberOfSolves() > 0);
+                    .currentSessionIndex).getNumberOfSolves() > 0);
         } else {
             getActivity().setTitle(PuzzleType.valueOf(mPuzzleTypeName)
                     .getSession(mSessionIndex).getTimestampString(getActivity

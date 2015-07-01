@@ -1,5 +1,7 @@
 package com.pluscubed.plustimer.model;
 
+import android.support.annotation.Nullable;
+
 import com.pluscubed.plustimer.utils.Utils;
 
 /**
@@ -8,10 +10,11 @@ import com.pluscubed.plustimer.utils.Utils;
 
 public class ScrambleAndSvg {
 
+    @Nullable
     private transient String mSvg;
     private String mScramble;
 
-    public ScrambleAndSvg(String scramble, String svg) {
+    public ScrambleAndSvg(String scramble, @Nullable String svg) {
         mScramble = scramble;
         mSvg = svg;
     }

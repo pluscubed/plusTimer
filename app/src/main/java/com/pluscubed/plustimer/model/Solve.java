@@ -1,5 +1,9 @@
 package com.pluscubed.plustimer.model;
 
+import android.database.Cursor;
+import android.support.annotation.IntRange;
+
+import com.pluscubed.plustimer.sql.DbCon;
 import com.pluscubed.plustimer.utils.Utils;
 
 /**
@@ -19,6 +23,15 @@ public class Solve {
 
     public Solve(Solve s) {
         copy(s);
+    }
+
+    public Solve(Cursor cursor){
+        String scramble = cursor.getString(cursor.getColumnIndex(DbCon.Entry.COLUMN_NAME_SCRAMBLE));
+        mScrambleAndSvg = new ScrambleAndSvg(scramble, null);
+        int penalty = cursor.getInt(cursor.getColumnIndex(DbCon.Entry.COLUMN_NAME_PENALTY));
+        setPenaltyInt(penalty);
+        mRawTime = cursor.getLong(cursor.getColumnIndex(DbCon.Entry.COLUMN_NAME_TIME));
+        mTimestamp = cursor.getLong(cursor.getColumnIndex(DbCon.Entry.COLUMN_NAME_TIMESTAMP));
     }
 
     public Solve(ScrambleAndSvg scramble, long time) {
@@ -110,6 +123,30 @@ public class Solve {
         if (mPenalty != penalty) {
             mPenalty = penalty;
             notifyChanged();
+        }
+    }
+
+    @IntRange(from=0,to=2)
+    public int getPenaltyInt(){
+        switch(mPenalty){
+            case NONE:
+                return 0;
+            case PLUSTWO:
+                return 1;
+            case DNF:
+                return 2;
+        }
+        return 0;
+    }
+
+    public void setPenaltyInt(@IntRange(from=0,to=2) int penalty){
+        switch(penalty){
+            case 0:
+                mPenalty = Penalty.NONE;
+            case 1:
+                mPenalty = Penalty.PLUSTWO;
+            case 2:
+                mPenalty = Penalty.DNF;
         }
     }
 

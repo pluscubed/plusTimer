@@ -1,6 +1,7 @@
 package com.pluscubed.plustimer.model;
 
 import android.content.Context;
+import android.support.annotation.Nullable;
 
 import com.pluscubed.plustimer.utils.Utils;
 
@@ -14,6 +15,8 @@ import java.util.List;
  */
 public class HistorySessions {
 
+    @Deprecated
+    @Nullable
     private String mFilename;
 
     private List<Session> mHistorySessionsList;
@@ -23,10 +26,12 @@ public class HistorySessions {
      *
      * @param filename the filename to use for saving and loading
      */
-    public HistorySessions(String filename) {
+    @Deprecated
+    public HistorySessions(@Nullable String filename) {
         mFilename = filename;
     }
 
+    @Deprecated
     public void setFilename(String filename) {
         mFilename = filename;
     }
@@ -58,6 +63,7 @@ public class HistorySessions {
     /**
      * Save the list to a file.
      */
+    @Deprecated
     public void save(Context context) {
         Utils.saveSessionListToFile(context, mFilename, mHistorySessionsList);
     }

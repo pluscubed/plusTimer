@@ -192,7 +192,7 @@ public class CurrentSessionTimerFragment extends Fragment {
                     // scramble/scramble
                     // image and DNF
                     PuzzleType.getCurrent().getSession(PuzzleType
-                            .CURRENT_SESSION)
+                            .currentSessionIndex)
                             .addSolve(s);
 
                     resetTimer();
@@ -232,7 +232,7 @@ public class CurrentSessionTimerFragment extends Fragment {
 
                     resetTimer();
 
-                    PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
+                    PuzzleType.getCurrent().getSession(PuzzleType.currentSessionIndex)
                             .registerObserver(sessionObserver);
                 }
             };
@@ -284,19 +284,19 @@ public class CurrentSessionTimerFragment extends Fragment {
         Arrays.sort(currentAverages, Collections.reverseOrder());
         String s = "";
         for (int i : currentAverages) {
-            if (PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
+            if (PuzzleType.getCurrent().getSession(PuzzleType.currentSessionIndex)
                     .getNumberOfSolves() >= i) {
                 s += String.format(context.getString(R.string.cao),
                         i) + ": " + PuzzleType.getCurrent().getSession
-                        (PuzzleType.CURRENT_SESSION)
+                        (PuzzleType.currentSessionIndex)
                         .getStringCurrentAverageOf(i, mMillisecondsEnabled) +
                         "\n";
             }
         }
-        if (PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
+        if (PuzzleType.getCurrent().getSession(PuzzleType.currentSessionIndex)
                 .getNumberOfSolves() > 0) {
             s += context.getString(R.string.mean) + PuzzleType.getCurrent()
-                    .getSession(PuzzleType.CURRENT_SESSION).getStringMean
+                    .getSession(PuzzleType.currentSessionIndex).getStringMean
                             (mMillisecondsEnabled);
         }
         return s;
@@ -422,7 +422,7 @@ public class CurrentSessionTimerFragment extends Fragment {
     private void updateStatsAndTimer() {
         //Update stats
         mStatsSolvesText.setText(getString(R.string.solves) + PuzzleType
-                .getCurrent().getSession(PuzzleType.CURRENT_SESSION)
+                .getCurrent().getSession(PuzzleType.currentSessionIndex)
                 .getNumberOfSolves());
         mStatsText.setText(buildStatsWithAveragesOf(getActivity(), 5, 12, 100));
 
@@ -447,7 +447,7 @@ public class CurrentSessionTimerFragment extends Fragment {
         setHasOptionsMenu(true);
 
         PuzzleType.registerObserver(puzzleTypeObserver);
-        PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
+        PuzzleType.getCurrent().getSession(PuzzleType.currentSessionIndex)
                 .registerObserver(sessionObserver);
 
         //Set up UIHandler
@@ -507,9 +507,9 @@ public class CurrentSessionTimerFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Session currentSession = PuzzleType.getCurrent().getSession(PuzzleType
-                        .CURRENT_SESSION);
+                        .currentSessionIndex);
                 if (ErrorUtils.isSolveNonexistent(getActivity(), PuzzleType.getCurrent().name(),
-                        PuzzleType.CURRENT_SESSION, currentSession.getNumberOfSolves() - 1)) {
+                        PuzzleType.currentSessionIndex, currentSession.getNumberOfSolves() - 1)) {
                     return;
                 }
                 currentSession.getLastSolve().setPenalty(Solve
@@ -522,9 +522,9 @@ public class CurrentSessionTimerFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Session currentSession = PuzzleType.getCurrent().getSession(PuzzleType
-                        .CURRENT_SESSION);
+                        .currentSessionIndex);
                 if (ErrorUtils.isSolveNonexistent(getActivity(), PuzzleType.getCurrent().name(),
-                        PuzzleType.CURRENT_SESSION, currentSession.getNumberOfSolves() - 1)) {
+                        PuzzleType.currentSessionIndex, currentSession.getNumberOfSolves() - 1)) {
                     return;
                 }
                 currentSession.getLastSolve().setPenalty(Solve
@@ -537,9 +537,9 @@ public class CurrentSessionTimerFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Session currentSession = PuzzleType.getCurrent().getSession(PuzzleType
-                        .CURRENT_SESSION);
+                        .currentSessionIndex);
                 if (ErrorUtils.isSolveNonexistent(getActivity(), PuzzleType.getCurrent().name(),
-                        PuzzleType.CURRENT_SESSION, currentSession.getNumberOfSolves() - 1)) {
+                        PuzzleType.currentSessionIndex, currentSession.getNumberOfSolves() - 1)) {
                     return;
                 }
                 currentSession.deleteSolve(currentSession.getLastSolve());
@@ -658,7 +658,7 @@ public class CurrentSessionTimerFragment extends Fragment {
         super.onPause();
         getActivity().getWindow().clearFlags(WindowManager.LayoutParams
                 .FLAG_KEEP_SCREEN_ON);
-        PuzzleType.getCurrent().saveCurrentSession(getActivity());
+        //PuzzleType.getCurrent().saveCurrentSession(getActivity());
         stopHoldTimer();
     }
 
@@ -680,7 +680,7 @@ public class CurrentSessionTimerFragment extends Fragment {
         mUiHandler.removeCallbacksAndMessages(null);
         mRetainedFragment.setTargetFragment(null, 0);
 
-        PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
+        PuzzleType.getCurrent().getSession(PuzzleType.currentSessionIndex)
                 .unregisterObserver(sessionObserver);
         PuzzleType.unregisterObserver(puzzleTypeObserver);
     }
@@ -743,10 +743,10 @@ public class CurrentSessionTimerFragment extends Fragment {
      * set to ready. Updates the timer text's size.
      */
     void setTimerTextToLastSolveTime() {
-        if (PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
+        if (PuzzleType.getCurrent().getSession(PuzzleType.currentSessionIndex)
                 .getNumberOfSolves() != 0) {
             setTimerText(PuzzleType.getCurrent().getSession(PuzzleType
-                    .CURRENT_SESSION)
+                    .currentSessionIndex)
                     .getLastSolve().getTimeStringArray(mMillisecondsEnabled));
         } else {
             setTimerText(new String[]{getString(R.string.ready), ""});
@@ -814,10 +814,18 @@ public class CurrentSessionTimerFragment extends Fragment {
             if (mInspectionEnabled && mLateStartPenalty) {
                 s.setPenalty(Solve.Penalty.PLUSTWO);
             }
+
+
             //Add the solve to the current session with the
             // current scramble/scramble image and time
             PuzzleType.getCurrent().getSession(PuzzleType
-                    .CURRENT_SESSION).addSolve(s);
+                    .currentSessionIndex).addSolve(s);
+            PuzzleType.getDataSource().writeSolve(
+                    s,
+                    PuzzleType.getCurrent(),
+                    PuzzleType.currentSessionIndex);
+
+
             playLastBarEnterAnimation();
             playEnterAnimations();
             getActivityCallback().lockDrawerAndViewPager(false);
@@ -1235,8 +1243,7 @@ public class CurrentSessionTimerFragment extends Fragment {
             Set<Solve> changed = new HashSet<>();
             changed.addAll(Arrays.asList(mBestAndWorstSolves));
 
-            mSolves = PuzzleType.getCurrent().getSession(PuzzleType
-                    .CURRENT_SESSION).getSolves();
+            mSolves = PuzzleType.getCurrent().getCurrentSession().getSolves();
             mBestAndWorstSolves[0] = Utils.getBestSolveOfList(mSolves);
             mBestAndWorstSolves[1] = Utils.getWorstSolveOfList(mSolves);
 
@@ -1291,7 +1298,7 @@ public class CurrentSessionTimerFragment extends Fragment {
                         SolveDialogUtils.createSolveDialog(getActivity(),
                                 false,
                                 PuzzleType.getCurrent().name(),
-                                PuzzleType.CURRENT_SESSION,
+                                PuzzleType.currentSessionIndex,
                                 getLayoutPosition()
                         );
                     }

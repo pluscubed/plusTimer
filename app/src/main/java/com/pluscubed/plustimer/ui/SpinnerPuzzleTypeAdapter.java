@@ -21,7 +21,7 @@ class SpinnerPuzzleTypeAdapter extends ArrayAdapter<PuzzleType> {
     private Context mContext;
 
     public SpinnerPuzzleTypeAdapter(LayoutInflater inflater, Context context) {
-        super(context, 0, PuzzleType.valuesExcludeDisabled());
+        super(context, 0, PuzzleType.valuesExcludingDisabled());
         mLayoutInflater = inflater;
         mContext = context;
     }

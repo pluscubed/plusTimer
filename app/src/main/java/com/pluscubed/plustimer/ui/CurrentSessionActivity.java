@@ -313,7 +313,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
                                        int position, long id) {
                 PuzzleType newPuzzleType = (PuzzleType) parent.getItemAtPosition(position);
                 if (newPuzzleType != PuzzleType.getCurrent()) {
-                    PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
+                    PuzzleType.getCurrent().getSession(PuzzleType.currentSessionIndex)
                             .unregisterAllObservers();
                     PuzzleType.setCurrent(newPuzzleType, CurrentSessionActivity.this);
                 }
@@ -368,7 +368,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
                 case 1:
                     return SolveListFragment.newInstance(true,
                             PuzzleType.getCurrent().name(),
-                            PuzzleType.CURRENT_SESSION);
+                            PuzzleType.currentSessionIndex);
             }
             return null;
         }
