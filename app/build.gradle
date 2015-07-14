@@ -26,7 +26,7 @@ preBuild.dependsOn('syncTask')
 
 android {
     compileSdkVersion 22
-    buildToolsVersion '22.0.1'
+    buildToolsVersion '23.0.0 rc3'
     defaultConfig {
         applicationId "com.pluscubed.plustimer"
         minSdkVersion 14
@@ -89,7 +89,6 @@ dependencies {
     compile 'com.github.cubing:tnoodle-android:0.+@aar'
     compile 'com.caverock:androidsvg:1.2.1'
     compile 'com.android.support:support-annotations:22.+'
-    compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.google.code.gson:gson:2.+'
     compile 'com.afollestad:material-dialogs:0.+'
     compile 'com.rengwuxian.materialedittext:library:2.+'

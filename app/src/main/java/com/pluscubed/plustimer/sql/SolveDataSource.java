@@ -5,6 +5,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.provider.BaseColumns;
+import android.support.annotation.NonNull;
 
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Session;
@@ -15,6 +17,7 @@ import com.pluscubed.plustimer.model.Solve;
  */
 public class SolveDataSource {
 
+    public static final String SESSION_SOLVES_ORDER = SolveDbEntry.COLUMN_NAME_SESSION_INDEX + ", " + SolveDbEntry.COLUMN_NAME_TIMESTAMP;
     private SQLiteDatabase mDatabase;
     private SolveDbHelper mDbHelper;
 
@@ -22,41 +25,56 @@ public class SolveDataSource {
         mDbHelper = new SolveDbHelper(context);
     }
 
-    public void loadSessionForPuzzleType(PuzzleType puzzleType, int sessionIndex) {
+    @NonNull
+    public Session loadSessionForPuzzleType(PuzzleType puzzleType, int sessionIndex) {
         Cursor cursor = mDatabase.query(
-                DbCon.Entry.TABLE_NAME,
+                SolveDbEntry.TABLE_NAME,
                 new String[]{
-                        DbCon.Entry.COLUMN_NAME_SCRAMBLE,
-                        DbCon.Entry.COLUMN_NAME_PENALTY,
-                        DbCon.Entry.COLUMN_NAME_TIME,
-                        DbCon.Entry.COLUMN_NAME_TIMESTAMP
+                        SolveDbEntry.COLUMN_NAME_SCRAMBLE,
+                        SolveDbEntry.COLUMN_NAME_PENALTY,
+                        SolveDbEntry.COLUMN_NAME_TIME,
+                        SolveDbEntry.COLUMN_NAME_TIMESTAMP
                 },
-                DbCon.Entry.COLUMN_NAME_PUZZLETYPE_NAME + " = ? AND " + DbCon.Entry.COLUMN_NAME_SESSION_INDEX + " = ?",
+                SolveDbEntry.COLUMN_NAME_PUZZLETYPE_NAME + " = ? AND " + SolveDbEntry.COLUMN_NAME_SESSION_INDEX + " = ?",
                 new String[]{puzzleType.name(), String.valueOf(sessionIndex)},
                 null, null,
-                DbCon.Entry.COLUMN_NAME_SESSION_INDEX + ", " + DbCon.Entry.COLUMN_NAME_TIMESTAMP);
+                SESSION_SOLVES_ORDER);
 
         Session session = new Session();
-        cursor.moveToFirst();
-        do {
-            Solve s = new Solve(cursor);
-            session.addSolve(s);
-        } while (cursor.moveToNext());
-        cursor.close();
+        if (cursor.moveToFirst()) {
+            do {
+                Solve s = new Solve(cursor);
+                session.addSolveNoWrite(s);
+            } while (cursor.moveToNext());
+            cursor.close();
+        }
+        return session;
     }
 
     public void writeSolve(Solve solve, PuzzleType type, int sessionIndex) {
         ContentValues values = new ContentValues();
 
-        values.put(DbCon.Entry.COLUMN_NAME_PUZZLETYPE_NAME, type.name());
-        values.put(DbCon.Entry.COLUMN_NAME_SESSION_INDEX, sessionIndex);
+        values.put(SolveDbEntry.COLUMN_NAME_PUZZLETYPE_NAME, type.name());
+        values.put(SolveDbEntry.COLUMN_NAME_SESSION_INDEX, sessionIndex);
 
-        values.put(DbCon.Entry.COLUMN_NAME_PENALTY, solve.getPenaltyInt());
-        values.put(DbCon.Entry.COLUMN_NAME_SCRAMBLE, solve.getScrambleAndSvg().getScramble());
-        values.put(DbCon.Entry.COLUMN_NAME_TIME, solve.getRawTime());
-        values.put(DbCon.Entry.COLUMN_NAME_TIMESTAMP, solve.getTimestamp());
+        values.put(SolveDbEntry.COLUMN_NAME_PENALTY, solve.getPenaltyInt());
+        values.put(SolveDbEntry.COLUMN_NAME_SCRAMBLE, solve.getScrambleAndSvg().getScramble());
+        values.put(SolveDbEntry.COLUMN_NAME_TIME, solve.getRawTime());
+        values.put(SolveDbEntry.COLUMN_NAME_TIMESTAMP, solve.getTimestamp());
 
-        mDatabase.insert(DbCon.Entry.TABLE_NAME, null, values);
+        mDatabase.insert(SolveDbEntry.TABLE_NAME, null, values);
+    }
+
+    public void deleteSolve(PuzzleType type, int sessionIndex, int solveIndex) {
+        mDatabase.delete(SolveDbEntry.TABLE_NAME,
+
+                SolveDbEntry._ID + " IN " +
+                        "(SELECT " + SolveDbEntry._ID + " FROM " + SolveDbEntry.TABLE_NAME
+                        + " WHERE " + SolveDbEntry.COLUMN_NAME_PUZZLETYPE_NAME + " = ?"
+                        + " AND " + SolveDbEntry.COLUMN_NAME_SESSION_INDEX + " = ?"
+                        + " ORDER BY " + SESSION_SOLVES_ORDER + " ASC LIMIT 1 OFFSET ?)"
+
+                , new String[]{type.name(), String.valueOf(sessionIndex), String.valueOf(solveIndex)});
     }
 
     public void open() throws SQLException {
@@ -65,6 +83,19 @@ public class SolveDataSource {
 
     public void close() {
         mDbHelper.close();
+    }
+
+    public static abstract class SolveDbEntry implements BaseColumns {
+        /* Inner class that defines the table contents */
+        public static final String TABLE_NAME = "solves";
+
+        public static final String COLUMN_NAME_PUZZLETYPE_NAME = "puzzletype";
+        public static final String COLUMN_NAME_SESSION_INDEX = "session_index";
+
+        public static final String COLUMN_NAME_SCRAMBLE = "scramble";
+        public static final String COLUMN_NAME_PENALTY = "penalty";
+        public static final String COLUMN_NAME_TIME = "time";
+        public static final String COLUMN_NAME_TIMESTAMP = "timestamp";
     }
 
 }

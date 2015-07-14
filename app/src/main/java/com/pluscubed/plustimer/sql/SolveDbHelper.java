@@ -9,17 +9,17 @@ public class SolveDbHelper extends SQLiteOpenHelper {
     public static final int DATABASE_VERSION = 1;
     public static final String DATABASE_NAME = "solves.db";
     private static final String SQL_CREATE_ENTRIES =
-            "CREATE TABLE " + DbCon.Entry.TABLE_NAME + " (" +
-                    DbCon.Entry._ID + " INTEGER PRIMARY KEY," +
-                    DbCon.Entry.COLUMN_NAME_PUZZLETYPE_NAME + " TEXT NOT NULL," +
-                    DbCon.Entry.COLUMN_NAME_SESSION_INDEX + " INTEGER NOT NULL," +
-                    DbCon.Entry.COLUMN_NAME_SCRAMBLE + " TEXT NOT NULL," +
-                    DbCon.Entry.COLUMN_NAME_PENALTY + " INTEGER NOT NULL," +
-                    DbCon.Entry.COLUMN_NAME_TIME + " REAL NOT NULL," +
-                    DbCon.Entry.COLUMN_NAME_TIMESTAMP + " INTEGER NOT NULL" +
+            "CREATE TABLE " + SolveDataSource.SolveDbEntry.TABLE_NAME + " (" +
+                    SolveDataSource.SolveDbEntry._ID + " INTEGER PRIMARY KEY," +
+                    SolveDataSource.SolveDbEntry.COLUMN_NAME_PUZZLETYPE_NAME + " TEXT NOT NULL," +
+                    SolveDataSource.SolveDbEntry.COLUMN_NAME_SESSION_INDEX + " INTEGER NOT NULL," +
+                    SolveDataSource.SolveDbEntry.COLUMN_NAME_SCRAMBLE + " TEXT NOT NULL," +
+                    SolveDataSource.SolveDbEntry.COLUMN_NAME_PENALTY + " INTEGER NOT NULL," +
+                    SolveDataSource.SolveDbEntry.COLUMN_NAME_TIME + " REAL NOT NULL," +
+                    SolveDataSource.SolveDbEntry.COLUMN_NAME_TIMESTAMP + " INTEGER NOT NULL" +
                     " )";
     private static final String SQL_DELETE_ENTRIES =
-            "DROP TABLE IF EXISTS " + DbCon.Entry.TABLE_NAME;
+            "DROP TABLE IF EXISTS " + SolveDataSource.SolveDbEntry.TABLE_NAME;
 
     public SolveDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -34,6 +34,7 @@ public class SolveDbHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // This database is only a cache for online data, so its upgrade policy is
         // to simply to discard the data and start over
+        //TODO: Implement onUpgrade
         db.execSQL(SQL_DELETE_ENTRIES);
         onCreate(db);
     }

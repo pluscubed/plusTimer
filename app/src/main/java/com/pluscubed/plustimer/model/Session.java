@@ -88,11 +88,19 @@ public class Session {
         mObservers.clear();
     }
 
-    public void addSolve(final Solve s) {
+    public void addSolve(final Solve s, PuzzleType type) {
         mSolves.add(s);
         s.attachSession(this);
 
+        PuzzleType.getDataSource().writeSolve(
+                s, type, type.indexOfSession(this));
+
         notifySolveAdded();
+    }
+
+    public void addSolveNoWrite(final Solve s) {
+        mSolves.add(s);
+        s.attachSession(this);
     }
 
     public int getNumberOfSolves() {
@@ -210,15 +218,14 @@ public class Session {
         return getLastSolve().getTimestamp();
     }
 
-    public void deleteSolve(int position) {
+    public void deleteSolve(int position, PuzzleType type) {
         mSolves.remove(position);
+        PuzzleType.getDataSource().deleteSolve(type, type.indexOfSession(this), position);
         notifySolveDeleted(position);
     }
 
-    public void deleteSolve(Solve i) {
-        int position = mSolves.indexOf(i);
-        mSolves.remove(i);
-        notifySolveDeleted(position);
+    public void deleteSolve(Solve i, PuzzleType type) {
+        deleteSolve(mSolves.indexOf(i), type);
     }
 
     public String toString(Context context, String puzzleTypeName,

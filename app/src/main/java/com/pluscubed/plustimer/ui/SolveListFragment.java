@@ -313,7 +313,7 @@ public class SolveListFragment extends Fragment {
                         for (int i = mListView.getCount() - 1; i >= 0; i--) {
                             if (mListView.isItemChecked(i)) {
                                 mSession.deleteSolve((Solve) mListView
-                                        .getItemAtPosition(i));
+                                        .getItemAtPosition(i),PuzzleType.valueOf(mPuzzleTypeName));
                             }
                         }
                         mode.finish();
@@ -348,7 +348,7 @@ public class SolveListFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        getPuzzleType().getHistorySessions().save(getActivity());
+        //getPuzzleType().getHistorySessions().save(getActivity());
         // if (mCurrentToggle) getPuzzleType().saveCurrentSession(getActivity());
     }
 
@@ -370,12 +370,10 @@ public class SolveListFragment extends Fragment {
         }
         updateStats();
         if (mCurrentToggle) {
-            enableResetSubmitButtons(getPuzzleType().getSession(PuzzleType
-                    .currentSessionIndex).getNumberOfSolves() > 0);
+            enableResetSubmitButtons(getPuzzleType().getCurrentSession().getNumberOfSolves() > 0);
         } else {
             getActivity().setTitle(PuzzleType.valueOf(mPuzzleTypeName)
-                    .getSession(mSessionIndex).getTimestampString(getActivity
-                            ()));
+                    .getSession(mSessionIndex).getTimestampString(getActivity()));
         }
     }
 

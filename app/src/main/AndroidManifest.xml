@@ -8,12 +8,12 @@
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
+        android:label="${appName}"
         android:supportsRtl="true"
         android:theme="@style/Theme.PlusTimer"
-        tools:replace="android:theme, android:icon">
+        tools:replace="android:theme, android:icon, android:label">
         <activity
             android:name="com.pluscubed.plustimer.ui.CurrentSessionActivity"
-            android:label="${appName}"
             android:theme="@style/Theme.PlusTimer.WithNavDrawer">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

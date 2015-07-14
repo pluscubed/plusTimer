@@ -13,6 +13,7 @@ import java.util.List;
 /**
  * Container for history sessions
  */
+@Deprecated
 public class HistorySessions {
 
     @Deprecated

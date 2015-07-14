@@ -43,7 +43,7 @@ public class PrefUtils {
             "pref_version_code";
     private static final String PREF_CURRENT_PUZZLETYPE =
             "current_puzzletype";
-    private static final String PREF_CURRENT_SESSION_INDEX =
+    private static final String PREF_CURRENT_SESSION_INDEX_PREFIX =
             "current_session";
     private static final String PREF_WELCOME_DONE =
             "welcome_done";
@@ -136,14 +136,14 @@ public class PrefUtils {
         sp.edit().putString(PrefUtils.PREF_CURRENT_PUZZLETYPE, name).apply();
     }
 
-    public static int getCurrentSessionIndex(final Context context) {
+    public static int getCurrentSessionIndex(PuzzleType type, final Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getInt(PrefUtils.PREF_CURRENT_SESSION_INDEX, 1);
+        return sp.getInt(PrefUtils.PREF_CURRENT_SESSION_INDEX_PREFIX + type.name(), 0);
     }
 
-    public static void saveCurrentSessionIndex(final Context context, int index) {
+    public static void saveCurrentSessionIndex(PuzzleType type, final Context context, int index) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putInt(PrefUtils.PREF_CURRENT_SESSION_INDEX, index).apply();
+        sp.edit().putInt(PrefUtils.PREF_CURRENT_SESSION_INDEX_PREFIX + type.name(), index).apply();
     }
 
     public static TimerUpdate getTimerUpdateMode(final Context context) {

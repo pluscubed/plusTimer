@@ -63,8 +63,8 @@ public class HistorySessionListFragment extends ListFragment {
     @Override
     public void onPause() {
         super.onPause();
-        PuzzleType.valueOf(mPuzzleTypeName).getHistorySessions().save
-                (getActivity());
+        //PuzzleType.valueOf(mPuzzleTypeName).getHistorySessions().save
+        //(getActivity());
     }
 
     @Override
@@ -77,7 +77,7 @@ public class HistorySessionListFragment extends ListFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        PuzzleType.initialize(getActivity());
+
         if (savedInstanceState != null) {
             mPuzzleTypeName = savedInstanceState.getString
                     (STATE_PUZZLETYPE_DISPLAYNAME);

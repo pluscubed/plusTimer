@@ -3,7 +3,7 @@ package com.pluscubed.plustimer.model;
 import android.database.Cursor;
 import android.support.annotation.IntRange;
 
-import com.pluscubed.plustimer.sql.DbCon;
+import com.pluscubed.plustimer.sql.SolveDataSource;
 import com.pluscubed.plustimer.utils.Utils;
 
 /**
@@ -26,12 +26,12 @@ public class Solve {
     }
 
     public Solve(Cursor cursor){
-        String scramble = cursor.getString(cursor.getColumnIndex(DbCon.Entry.COLUMN_NAME_SCRAMBLE));
+        String scramble = cursor.getString(cursor.getColumnIndex(SolveDataSource.SolveDbEntry.COLUMN_NAME_SCRAMBLE));
         mScrambleAndSvg = new ScrambleAndSvg(scramble, null);
-        int penalty = cursor.getInt(cursor.getColumnIndex(DbCon.Entry.COLUMN_NAME_PENALTY));
+        int penalty = cursor.getInt(cursor.getColumnIndex(SolveDataSource.SolveDbEntry.COLUMN_NAME_PENALTY));
         setPenaltyInt(penalty);
-        mRawTime = cursor.getLong(cursor.getColumnIndex(DbCon.Entry.COLUMN_NAME_TIME));
-        mTimestamp = cursor.getLong(cursor.getColumnIndex(DbCon.Entry.COLUMN_NAME_TIMESTAMP));
+        mRawTime = cursor.getLong(cursor.getColumnIndex(SolveDataSource.SolveDbEntry.COLUMN_NAME_TIME));
+        mTimestamp = cursor.getLong(cursor.getColumnIndex(SolveDataSource.SolveDbEntry.COLUMN_NAME_TIMESTAMP));
     }
 
     public Solve(ScrambleAndSvg scramble, long time) {
@@ -143,10 +143,13 @@ public class Solve {
         switch(penalty){
             case 0:
                 mPenalty = Penalty.NONE;
+                break;
             case 1:
                 mPenalty = Penalty.PLUSTWO;
+                break;
             case 2:
                 mPenalty = Penalty.DNF;
+                break;
         }
     }
 

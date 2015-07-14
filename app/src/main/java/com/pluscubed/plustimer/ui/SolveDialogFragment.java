@@ -80,12 +80,6 @@ public class SolveDialogFragment extends DialogFragment {
         return d;
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        PuzzleType.initialize(getActivity());
-    }
-
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -335,9 +329,7 @@ public class SolveDialogFragment extends DialogFragment {
                 mSolveIndex)) {
             return;
         }
-        PuzzleType.valueOf(mPuzzleTypeName).getSession
-                (mSessionIndex).deleteSolve
-                (mSolveIndex);
+        PuzzleType.valueOf(mPuzzleTypeName).getSession(mSessionIndex).deleteSolve(mSolveIndex, PuzzleType.valueOf(mPuzzleTypeName));
         dismiss();
     }
 
@@ -364,7 +356,7 @@ public class SolveDialogFragment extends DialogFragment {
             if (!mAddMode) {
                 mSolve.copy(mSolveCopy);
             } else {
-                PuzzleType.valueOf(mPuzzleTypeName).getSession(mSessionIndex).addSolve(mSolveCopy);
+                PuzzleType.valueOf(mPuzzleTypeName).getSession(mSessionIndex).addSolve(mSolveCopy, PuzzleType.valueOf(mPuzzleTypeName));
             }
             dismiss();
         } catch (InvalidScrambleException e) {

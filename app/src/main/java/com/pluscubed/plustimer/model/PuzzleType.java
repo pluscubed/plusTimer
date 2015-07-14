@@ -50,7 +50,7 @@ public enum PuzzleType {
     TWO("222");
 
     private static final int NOT_SPECIAL_STRING_INDEX = -1;
-    public static int currentSessionIndex;
+
     private static PuzzleType sCurrentPuzzleType;
     private static List<Observer> mObservers;
 
@@ -68,11 +68,16 @@ public enum PuzzleType {
     private final String currentSessionFileName;
     @Deprecated
     private final String historyFileName;
+    private int mCurrentSessionIndex;
+    @Deprecated
     private HistorySessions mHistorySessions;
+
+
     private Session mCurrentSession;
+    private List<Session> mHistorySessionsList;
+
     private boolean mEnabled;
     private Puzzle mPuzzle;
-    private boolean mInitialized;
 
     PuzzleType(String scramblerSpec, int stringIndex) {
         this.scramblerSpec = scramblerSpec;
@@ -113,6 +118,7 @@ public enum PuzzleType {
         PrefUtils.saveCurrentPuzzleType(context, type.name());
         if (type != sCurrentPuzzleType) {
             sCurrentPuzzleType = type;
+            sCurrentPuzzleType.initializeData(context);
             notifyPuzzleTypeChanged();
         }
     }
@@ -133,12 +139,15 @@ public enum PuzzleType {
         mDataSource = new SolveDataSource(context);
         mDataSource.open();
 
-        currentSessionIndex = PrefUtils.getCurrentSessionIndex(context);
-
         for (PuzzleType puzzleType : values()) {
             puzzleType.init(context);
         }
+        sCurrentPuzzleType.initializeData(context);
         PrefUtils.saveVersionCode(context);
+    }
+
+    public synchronized static void deinitialize() {
+        mDataSource.close();
     }
 
     @NonNull
@@ -156,15 +165,35 @@ public enum PuzzleType {
         return currentSessionFileName;
     }
 
+    @Deprecated
     public HistorySessions getHistorySessions() {
         return mHistorySessions;
     }
 
-    private synchronized void init(Context context) {
-        if (mInitialized) {
-            return;
-        }
+    public void initializeHistoryData() {
+        //TODO: IMPLEMENT AND USE
+    }
 
+    public int getCurrentSessionIndex() {
+        return mCurrentSessionIndex;
+    }
+
+    public int indexOfSession(Session session) {
+        if (mCurrentSession == session) {
+            return mCurrentSessionIndex;
+        } else {
+            //TODO: cycle through history data
+            return 0;
+        }
+    }
+
+    private synchronized void init(Context context) {
+        Set<String> selected = PrefUtils.getSelectedPuzzleTypeNames(context);
+        mEnabled = (selected.size() == 0 || selected.contains(name()));
+        mCurrentSessionIndex = PrefUtils.getCurrentSessionIndex(this, context);
+    }
+
+    private synchronized void initializeData(Context context) {
         //AFTER UPDATING APP////////////
         int savedVersionCode = PrefUtils.getVersionCode(context);
 
@@ -218,19 +247,10 @@ public enum PuzzleType {
             Utils.updateData(context, currentSessionFileName, gson);
         }
 
-        ////////////////////////////
         mHistorySessions.setFilename(null);
-        //mHistorySessions.init(context);
-        Set<String> selected = PrefUtils.getSelectedPuzzleTypeNames(context);
-        mEnabled = (selected.size() == 0 || selected.contains(name()));
-        List<Session> currentSessions =
-                Utils.getSessionListFromFile(context, currentSessionFileName);
-        if (currentSessions.size() > 0) {
-            mCurrentSession = currentSessions.get(0);
-        } else {
-            mCurrentSession = new Session();
-        }
-        mInitialized = true;
+        ////////////////////////////
+
+        mCurrentSession = mDataSource.loadSessionForPuzzleType(sCurrentPuzzleType, mCurrentSessionIndex);
     }
 
     //TODO: Incremental save to database, not at once
@@ -248,6 +268,9 @@ public enum PuzzleType {
             resetCurrentSession();
         }*/
         //Get largest session index and add one and set as current
+
+        mCurrentSessionIndex++;
+        PrefUtils.saveCurrentSessionIndex(this, context, mCurrentSessionIndex);
     }
 
     public Puzzle getPuzzle() {
@@ -287,12 +310,12 @@ public enum PuzzleType {
     }
 
     public Session getCurrentSession() {
-        return getSession(currentSessionIndex);
+        return getSession(mCurrentSessionIndex);
     }
 
     @Nullable
     public Session getSession(int index) {
-        if (index == currentSessionIndex) {
+        if (index == mCurrentSessionIndex) {
             //Check that if the current session is null (from reset or
             // initializing)
             return mCurrentSession;

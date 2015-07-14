@@ -36,6 +36,7 @@ public class HistorySolveListActivity extends ThemableActivity {
         setContentView(R.layout.activity_with_toolbar);
 
         PuzzleType.initialize(this);
+
         int position = getIntent().getIntExtra
                 (EXTRA_HISTORY_SESSION_POSITION, 0);
         String puzzleType = getIntent().getStringExtra
@@ -58,6 +59,12 @@ public class HistorySolveListActivity extends ThemableActivity {
 
         setTitle(PuzzleType.valueOf(puzzleType).getSession(position)
                 .getTimestampString(this));
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        PuzzleType.deinitialize();
     }
 
 
