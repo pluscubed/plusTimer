@@ -79,17 +79,17 @@ public class ErrorUtils {
         return uiScramble;
     }
 
-    public static boolean isSolveNonexistent(Context c, String puzzleTypeName, int sessionIndex,
+    public static boolean isSolveNonexistent(Context c, String puzzleTypeName, int sessionId,
                                              int solveIndex) {
         try {
-            PuzzleType.valueOf(puzzleTypeName).getSession(sessionIndex).getSolveByPosition(solveIndex);
+            PuzzleType.valueOf(puzzleTypeName).getSession(sessionId).getSolveByPosition(solveIndex);
             return false;
         } catch (IndexOutOfBoundsException e) {
             if (BuildConfig.USE_CRASHLYTICS) {
                 Crashlytics.log(Log.ERROR,
                         "Solve #" + solveIndex + " nonexistent",
                         PuzzleType.getCurrent()
-                                .getSession(sessionIndex)
+                                .getSession(sessionId)
                                 .toString(c, PuzzleType.getCurrent().name(), true, true, true,
                                         false)
                 );

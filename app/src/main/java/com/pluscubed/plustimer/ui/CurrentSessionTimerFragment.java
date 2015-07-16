@@ -144,6 +144,11 @@ public class CurrentSessionTimerFragment extends Fragment {
             updateStatsAndTimer();
             SolveRecyclerAdapter adapter = (SolveRecyclerAdapter) mTimeBarRecycler.getAdapter();
             adapter.updateSolvesList(index, Update.SINGLE_CHANGE);
+
+            PuzzleType.getDataSource().updateSolve(PuzzleType.getCurrent().getCurrentSession().getSolveByPosition(index),
+                    PuzzleType.getCurrent(),
+                    PuzzleType.getCurrent().getCurrentSessionId(),
+                    index);
         }
 
         @Override
@@ -154,7 +159,7 @@ public class CurrentSessionTimerFragment extends Fragment {
         }
 
         @Override
-        public void onReset() {
+        public void onNewSession() {
             updateStatsAndTimer();
             SolveRecyclerAdapter adapter = (SolveRecyclerAdapter) mTimeBarRecycler.getAdapter();
             adapter.updateSolvesList(-1, Update.REMOVE_ALL);
@@ -505,7 +510,7 @@ public class CurrentSessionTimerFragment extends Fragment {
             public void onClick(View v) {
                 Session currentSession = PuzzleType.getCurrent().getCurrentSession();
                 if (ErrorUtils.isSolveNonexistent(getActivity(), PuzzleType.getCurrent().name(),
-                        PuzzleType.getCurrent().getCurrentSessionIndex(), currentSession.getNumberOfSolves() - 1)) {
+                        PuzzleType.getCurrent().getCurrentSessionId(), currentSession.getNumberOfSolves() - 1)) {
                     return;
                 }
                 currentSession.getLastSolve().setPenalty(Solve
@@ -519,7 +524,7 @@ public class CurrentSessionTimerFragment extends Fragment {
             public void onClick(View v) {
                 Session currentSession = PuzzleType.getCurrent().getCurrentSession();
                 if (ErrorUtils.isSolveNonexistent(getActivity(), PuzzleType.getCurrent().name(),
-                        PuzzleType.getCurrent().getCurrentSessionIndex(), currentSession.getNumberOfSolves() - 1)) {
+                        PuzzleType.getCurrent().getCurrentSessionId(), currentSession.getNumberOfSolves() - 1)) {
                     return;
                 }
                 currentSession.getLastSolve().setPenalty(Solve
@@ -533,7 +538,7 @@ public class CurrentSessionTimerFragment extends Fragment {
             public void onClick(View v) {
                 Session currentSession = PuzzleType.getCurrent().getCurrentSession();
                 if (ErrorUtils.isSolveNonexistent(getActivity(), PuzzleType.getCurrent().name(),
-                        PuzzleType.getCurrent().getCurrentSessionIndex(), currentSession.getNumberOfSolves() - 1)) {
+                        PuzzleType.getCurrent().getCurrentSessionId(), currentSession.getNumberOfSolves() - 1)) {
                     return;
                 }
                 currentSession.deleteSolve(currentSession.getLastSolve(), PuzzleType.getCurrent());
@@ -1285,7 +1290,7 @@ public class CurrentSessionTimerFragment extends Fragment {
                         SolveDialogUtils.createSolveDialog(getActivity(),
                                 false,
                                 PuzzleType.getCurrent().name(),
-                                PuzzleType.getCurrent().getCurrentSessionIndex(),
+                                PuzzleType.getCurrent().getCurrentSessionId(),
                                 getLayoutPosition()
                         );
                     }

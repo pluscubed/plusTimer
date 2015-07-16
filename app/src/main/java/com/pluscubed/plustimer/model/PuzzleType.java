@@ -24,6 +24,8 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -68,13 +70,14 @@ public enum PuzzleType {
     private final String currentSessionFileName;
     @Deprecated
     private final String historyFileName;
-    private int mCurrentSessionIndex;
+    private int mCurrentSessionId;
     @Deprecated
-    private HistorySessions mHistorySessions;
+    private HistorySessions mHistorySessionsLegacy;
 
 
     private Session mCurrentSession;
-    private List<Session> mHistorySessionsList;
+    @Nullable
+    private Set<Session> mAllSessions;
 
     private boolean mEnabled;
     private Puzzle mPuzzle;
@@ -85,7 +88,7 @@ public enum PuzzleType {
         official = !this.scramblerSpec.contains("fast");
         historyFileName = name() + ".json";
         currentSessionFileName = name() + "-current.json";
-        mHistorySessions = new HistorySessions(historyFileName);
+        mHistorySessionsLegacy = new HistorySessions(historyFileName);
     }
 
     PuzzleType(String scramblerSpec) {
@@ -118,7 +121,7 @@ public enum PuzzleType {
         PrefUtils.saveCurrentPuzzleType(context, type.name());
         if (type != sCurrentPuzzleType) {
             sCurrentPuzzleType = type;
-            sCurrentPuzzleType.initializeData(context);
+            sCurrentPuzzleType.initializeCurrentSessionData();
             notifyPuzzleTypeChanged();
         }
     }
@@ -137,17 +140,12 @@ public enum PuzzleType {
         if (sCurrentPuzzleType == null)
             sCurrentPuzzleType = PrefUtils.getCurrentPuzzleType(context);
         mDataSource = new SolveDataSource(context);
-        mDataSource.open();
 
         for (PuzzleType puzzleType : values()) {
             puzzleType.init(context);
+            puzzleType.upgradeDatabase(context);
         }
-        sCurrentPuzzleType.initializeData(context);
         PrefUtils.saveVersionCode(context);
-    }
-
-    public synchronized static void deinitialize() {
-        mDataSource.close();
     }
 
     @NonNull
@@ -165,35 +163,55 @@ public enum PuzzleType {
         return currentSessionFileName;
     }
 
-    @Deprecated
+    /*@Deprecated
     public HistorySessions getHistorySessions() {
-        return mHistorySessions;
+        return mHistorySessionsLegacy;
+    }*/
+
+    public void deleteSession(Session session) {
+        mDataSource.deleteSession(this, session.getId());
     }
 
-    public void initializeHistoryData() {
-        //TODO: IMPLEMENT AND USE
-    }
-
-    public int getCurrentSessionIndex() {
-        return mCurrentSessionIndex;
-    }
-
-    public int indexOfSession(Session session) {
-        if (mCurrentSession == session) {
-            return mCurrentSessionIndex;
-        } else {
-            //TODO: cycle through history data
-            return 0;
+    public List<Session> getSortedHistorySessions() {
+        List<Session> sessions = new ArrayList<>(mAllSessions);
+        if (sessions.size() > 0) {
+            sessions.remove(getSession(mCurrentSessionId));
+            Collections.sort(sessions, new Comparator<Session>() {
+                @Override
+                public int compare(Session lhs, Session rhs) {
+                    if (lhs.getTimestamp() > rhs.getTimestamp()) {
+                        return 1;
+                    } else if (lhs.getTimestamp() < rhs.getTimestamp()) {
+                        return -1;
+                    } else {
+                        return 0;
+                    }
+                }
+            });
         }
+        return sessions;
+    }
+
+
+    public int getCurrentSessionId() {
+        return mCurrentSessionId;
     }
 
     private synchronized void init(Context context) {
         Set<String> selected = PrefUtils.getSelectedPuzzleTypeNames(context);
         mEnabled = (selected.size() == 0 || selected.contains(name()));
-        mCurrentSessionIndex = PrefUtils.getCurrentSessionIndex(this, context);
+        mCurrentSessionId = PrefUtils.getCurrentSessionIndex(this, context);
     }
 
-    private synchronized void initializeData(Context context) {
+    public synchronized void initializeAllSessionData() {
+        mAllSessions = mDataSource.loadHistorySessionsForPuzzleType(this);
+    }
+
+    public synchronized void initializeCurrentSessionData() {
+        mCurrentSession = mDataSource.loadSessionForPuzzleType(this, mCurrentSessionId);
+    }
+
+    private void upgradeDatabase(Context context) {
         //AFTER UPDATING APP////////////
         int savedVersionCode = PrefUtils.getVersionCode(context);
 
@@ -201,11 +219,11 @@ public enum PuzzleType {
             //Version <=10: Set up history sessions with old
             // name first
             if (!scramblerSpec.equals("333") || name().equals("THREE")) {
-                mHistorySessions.setFilename(scramblerSpec + ".json");
-                mHistorySessions.init(context);
-                mHistorySessions.setFilename(historyFileName);
-                if (mHistorySessions.getList().size() > 0) {
-                    mHistorySessions.save(context);
+                mHistorySessionsLegacy.setFilename(scramblerSpec + ".json");
+                mHistorySessionsLegacy.init(context);
+                mHistorySessionsLegacy.setFilename(historyFileName);
+                if (mHistorySessionsLegacy.getList().size() > 0) {
+                    mHistorySessionsLegacy.save(context);
                 }
                 File oldFile = new File(context.getFilesDir(),
                         scramblerSpec + ".json");
@@ -247,30 +265,18 @@ public enum PuzzleType {
             Utils.updateData(context, currentSessionFileName, gson);
         }
 
-        mHistorySessions.setFilename(null);
+        mHistorySessionsLegacy.setFilename(null);
         ////////////////////////////
-
-        mCurrentSession = mDataSource.loadSessionForPuzzleType(sCurrentPuzzleType, mCurrentSessionIndex);
     }
 
-    //TODO: Incremental save to database, not at once
-    /*public void saveCurrentSession(Context context) {
-        ArrayList<Session> session = new ArrayList<>();
-        session.add(mCurrentSession);
-        Utils.saveSessionListToFile(context, currentSessionFileName, session);
-    }*/
-
     public void submitCurrentSession(Context context) {
-        //TODO: Submitting current into History
-       /* if (mCurrentSession != null &&
-                mCurrentSession.getNumberOfSolves() > 0) {
-            mHistorySessions.addSession(mCurrentSession, context);
-            resetCurrentSession();
-        }*/
-        //Get largest session index and add one and set as current
-
-        mCurrentSessionIndex++;
-        PrefUtils.saveCurrentSessionIndex(this, context, mCurrentSessionIndex);
+        //Insert a copy of the current session in the second to last position. The "new" current session
+        //will be at the last position.
+        if (mAllSessions != null)
+            mAllSessions.add(new Session(mCurrentSession));
+        mCurrentSession.newSession();
+        mCurrentSessionId = mCurrentSession.getId();
+        PrefUtils.saveCurrentSessionIndex(this, context, mCurrentSessionId);
     }
 
     public Puzzle getPuzzle() {
@@ -310,24 +316,27 @@ public enum PuzzleType {
     }
 
     public Session getCurrentSession() {
-        return getSession(mCurrentSessionIndex);
+        return getSession(mCurrentSessionId);
     }
 
     @Nullable
-    public Session getSession(int index) {
-        if (index == mCurrentSessionIndex) {
+    public Session getSession(int id) {
+        if (id == mCurrentSessionId) {
             //Check that if the current session is null (from reset or
             // initializing)
             return mCurrentSession;
-        } else if (mHistorySessions != null) {
-            return mHistorySessions.getList().get(index);
-        } else {
-            return null;
+        } else if (mAllSessions != null) {
+            for (Session session : mAllSessions) {
+                if (session.getId() == id) {
+                    return session;
+                }
+            }
         }
+        return null;
     }
 
     public void resetCurrentSession() {
-        mCurrentSession.reset();
+        mCurrentSession.newSession();
     }
 
     boolean isEnabled() {

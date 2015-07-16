@@ -43,7 +43,7 @@ public class SolveDialogFragment extends DialogFragment {
     private static final String ARG_DIALOG_INIT_PUZZLETYPE_DISPLAY_NAME
             = "com.pluscubed.plustimer.dialog.puzzleType";
 
-    private static final String ARG_DIALOG_INIT_SESSION_INDEX
+    private static final String ARG_DIALOG_INIT_SESSION_ID
             = "com.pluscubed.plustimer.dialog.sessionIndex";
 
     private static final String ARG_DIALOG_INIT_SOLVE_INDEX
@@ -57,7 +57,7 @@ public class SolveDialogFragment extends DialogFragment {
     private static final int DIALOG_PENALTY_DNF = 2;
 
     private String mPuzzleTypeName;
-    private int mSessionIndex;
+    private int mSessionId;
     private int mSolveIndex;
 
     private boolean mAddMode;
@@ -72,7 +72,7 @@ public class SolveDialogFragment extends DialogFragment {
                                                   int sessionIndex, int solveIndex) {
         SolveDialogFragment d = new SolveDialogFragment();
         Bundle args = new Bundle();
-        args.putInt(ARG_DIALOG_INIT_SESSION_INDEX, sessionIndex);
+        args.putInt(ARG_DIALOG_INIT_SESSION_ID, sessionIndex);
         args.putInt(ARG_DIALOG_INIT_SOLVE_INDEX, solveIndex);
         args.putString(ARG_DIALOG_INIT_PUZZLETYPE_DISPLAY_NAME, puzzleTypeName);
         args.putBoolean(ARG_DIALOG_INIT_ADD_MODE, addMode);
@@ -87,12 +87,11 @@ public class SolveDialogFragment extends DialogFragment {
         mAddMode = getArguments().getBoolean(ARG_DIALOG_INIT_ADD_MODE);
         mPuzzleTypeName = getArguments().getString
                 (ARG_DIALOG_INIT_PUZZLETYPE_DISPLAY_NAME);
-        mSessionIndex = getArguments().getInt(ARG_DIALOG_INIT_SESSION_INDEX);
+        mSessionId = getArguments().getInt(ARG_DIALOG_INIT_SESSION_ID);
         mSolveIndex = getArguments().getInt(ARG_DIALOG_INIT_SOLVE_INDEX);
 
         if (!mAddMode) {
-            mSolve = PuzzleType.valueOf(mPuzzleTypeName).getSession
-                    (mSessionIndex).getSolveByPosition(mSolveIndex);
+            mSolve = PuzzleType.valueOf(mPuzzleTypeName).getSession(mSessionId).getSolveByPosition(mSolveIndex);
             mSolveCopy = new Solve(mSolve);
         } else {
             mSolveCopy = new Solve(new ScrambleAndSvg("", ""), 0);
@@ -325,11 +324,11 @@ public class SolveDialogFragment extends DialogFragment {
     }
 
     private void onNeutral() {
-        if (ErrorUtils.isSolveNonexistent(getActivity(), mPuzzleTypeName, mSessionIndex,
+        if (ErrorUtils.isSolveNonexistent(getActivity(), mPuzzleTypeName, mSessionId,
                 mSolveIndex)) {
             return;
         }
-        PuzzleType.valueOf(mPuzzleTypeName).getSession(mSessionIndex).deleteSolve(mSolveIndex, PuzzleType.valueOf(mPuzzleTypeName));
+        PuzzleType.valueOf(mPuzzleTypeName).getSession(mSessionId).deleteSolve(mSolveIndex, PuzzleType.valueOf(mPuzzleTypeName));
         dismiss();
     }
 
@@ -356,7 +355,7 @@ public class SolveDialogFragment extends DialogFragment {
             if (!mAddMode) {
                 mSolve.copy(mSolveCopy);
             } else {
-                PuzzleType.valueOf(mPuzzleTypeName).getSession(mSessionIndex).addSolve(mSolveCopy, PuzzleType.valueOf(mPuzzleTypeName));
+                PuzzleType.valueOf(mPuzzleTypeName).getSession(mSessionId).addSolve(mSolveCopy, PuzzleType.valueOf(mPuzzleTypeName));
             }
             dismiss();
         } catch (InvalidScrambleException e) {

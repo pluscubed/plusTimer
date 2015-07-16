@@ -9,17 +9,17 @@ public class SolveDbHelper extends SQLiteOpenHelper {
     public static final int DATABASE_VERSION = 1;
     public static final String DATABASE_NAME = "solves.db";
     private static final String SQL_CREATE_ENTRIES =
-            "CREATE TABLE " + SolveDataSource.SolveDbEntry.TABLE_NAME + " (" +
-                    SolveDataSource.SolveDbEntry._ID + " INTEGER PRIMARY KEY," +
-                    SolveDataSource.SolveDbEntry.COLUMN_NAME_PUZZLETYPE_NAME + " TEXT NOT NULL," +
-                    SolveDataSource.SolveDbEntry.COLUMN_NAME_SESSION_INDEX + " INTEGER NOT NULL," +
-                    SolveDataSource.SolveDbEntry.COLUMN_NAME_SCRAMBLE + " TEXT NOT NULL," +
-                    SolveDataSource.SolveDbEntry.COLUMN_NAME_PENALTY + " INTEGER NOT NULL," +
-                    SolveDataSource.SolveDbEntry.COLUMN_NAME_TIME + " REAL NOT NULL," +
-                    SolveDataSource.SolveDbEntry.COLUMN_NAME_TIMESTAMP + " INTEGER NOT NULL" +
+            "CREATE TABLE " + SolveDbEntry.TABLE_NAME + " (" +
+                    SolveDbEntry._ID + " INTEGER PRIMARY KEY," +
+                    SolveDbEntry.COLUMN_NAME_PUZZLETYPE_NAME + " TEXT NOT NULL," +
+                    SolveDbEntry.COLUMN_NAME_SESSION_ID + " INTEGER NOT NULL," +
+                    SolveDbEntry.COLUMN_NAME_SCRAMBLE + " TEXT NOT NULL," +
+                    SolveDbEntry.COLUMN_NAME_PENALTY + " INTEGER NOT NULL," +
+                    SolveDbEntry.COLUMN_NAME_TIME + " REAL NOT NULL," +
+                    SolveDbEntry.COLUMN_NAME_TIMESTAMP + " INTEGER NOT NULL" +
                     " )";
     private static final String SQL_DELETE_ENTRIES =
-            "DROP TABLE IF EXISTS " + SolveDataSource.SolveDbEntry.TABLE_NAME;
+            "DROP TABLE IF EXISTS " + SolveDbEntry.TABLE_NAME;
 
     public SolveDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);

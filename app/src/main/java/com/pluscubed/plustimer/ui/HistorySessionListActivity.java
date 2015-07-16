@@ -5,7 +5,6 @@ import android.app.FragmentManager;
 import android.os.Bundle;
 
 import com.pluscubed.plustimer.R;
-import com.pluscubed.plustimer.model.PuzzleType;
 
 /**
  * History session list activity
@@ -35,7 +34,6 @@ public class HistorySessionListActivity extends DrawerActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_history_sessionlist);
-        PuzzleType.initialize(this);
 
         FragmentManager fm = getFragmentManager();
         Fragment fragment = fm.findFragmentById(R.id
@@ -48,11 +46,5 @@ public class HistorySessionListActivity extends DrawerActivity {
         }
 
         overridePendingTransition(0, 0);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        PuzzleType.deinitialize();
     }
 }

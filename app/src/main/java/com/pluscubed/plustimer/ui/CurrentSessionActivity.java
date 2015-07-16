@@ -170,6 +170,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
         setContentView(R.layout.activity_current_session);
 
         PuzzleType.initialize(this);
+        PuzzleType.getCurrent().initializeCurrentSessionData();
 
         if (savedInstanceState != null) {
             mScrambleImageActionEnable = savedInstanceState.getBoolean
@@ -229,12 +230,6 @@ public class CurrentSessionActivity extends DrawerActivity implements
         getSupportActionBar().setElevation(0);
 
         overridePendingTransition(0, 0);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        PuzzleType.deinitialize();
     }
 
     @Override
@@ -372,7 +367,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
                 case 1:
                     return SolveListFragment.newInstance(true,
                             PuzzleType.getCurrent().name(),
-                            PuzzleType.getCurrent().getCurrentSessionIndex());
+                            PuzzleType.getCurrent().getCurrentSessionId());
             }
             return null;
         }
