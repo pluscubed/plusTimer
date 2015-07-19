@@ -1,6 +1,8 @@
 package com.pluscubed.plustimer.model;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -9,6 +11,7 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.pluscubed.plustimer.R;
+import com.pluscubed.plustimer.sql.SolveDataSource;
 import com.pluscubed.plustimer.utils.PrefUtils;
 import com.pluscubed.plustimer.utils.Utils;
 
@@ -21,6 +24,8 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -46,10 +51,12 @@ public enum PuzzleType {
     THREE_BLD("333ni"),
     TWO("222");
 
-    public static final int CURRENT_SESSION = -1;
-    private static final int NOT_SPECIAL_STRING = -1;
+    private static final int NOT_SPECIAL_STRING_INDEX = -1;
+
     private static PuzzleType sCurrentPuzzleType;
     private static List<Observer> mObservers;
+
+    private static SolveDataSource mDataSource;
 
     static {
         mObservers = new ArrayList<>();
@@ -57,14 +64,23 @@ public enum PuzzleType {
 
     public final String scramblerSpec;
     public final boolean official;
-    private final String currentSessionFileName;
-    private final String historyFileName;
     private final int mStringIndex;
-    private HistorySessions mHistorySessions;
+    //Pre-SQL legacy code
+    @Deprecated
+    private final String currentSessionFileName;
+    @Deprecated
+    private final String historyFileName;
+    private int mCurrentSessionId;
+    @Deprecated
+    private HistorySessions mHistorySessionsLegacy;
+
+
     private Session mCurrentSession;
+    @Nullable
+    private Set<Session> mAllSessions;
+
     private boolean mEnabled;
     private Puzzle mPuzzle;
-    private boolean mInitialized;
 
     PuzzleType(String scramblerSpec, int stringIndex) {
         this.scramblerSpec = scramblerSpec;
@@ -72,11 +88,11 @@ public enum PuzzleType {
         official = !this.scramblerSpec.contains("fast");
         historyFileName = name() + ".json";
         currentSessionFileName = name() + "-current.json";
-        mHistorySessions = new HistorySessions(historyFileName);
+        mHistorySessionsLegacy = new HistorySessions(historyFileName);
     }
 
     PuzzleType(String scramblerSpec) {
-        this(scramblerSpec, NOT_SPECIAL_STRING);
+        this(scramblerSpec, NOT_SPECIAL_STRING_INDEX);
     }
 
     public static void registerObserver(Observer observer) {
@@ -105,11 +121,12 @@ public enum PuzzleType {
         PrefUtils.saveCurrentPuzzleType(context, type.name());
         if (type != sCurrentPuzzleType) {
             sCurrentPuzzleType = type;
+            sCurrentPuzzleType.initializeCurrentSessionData();
             notifyPuzzleTypeChanged();
         }
     }
 
-    public static List<PuzzleType> valuesExcludeDisabled() {
+    public static List<PuzzleType> valuesExcludingDisabled() {
         List<PuzzleType> array = new ArrayList<>();
         for (PuzzleType i : values()) {
             if (i.isEnabled()) {
@@ -122,108 +139,144 @@ public enum PuzzleType {
     public synchronized static void initialize(Context context) {
         if (sCurrentPuzzleType == null)
             sCurrentPuzzleType = PrefUtils.getCurrentPuzzleType(context);
+        mDataSource = new SolveDataSource(context);
+
         for (PuzzleType puzzleType : values()) {
             puzzleType.init(context);
+            puzzleType.upgradeDatabase(context);
         }
         PrefUtils.saveVersionCode(context);
     }
 
+    @NonNull
+    public static SolveDataSource getDataSource() {
+        return mDataSource;
+    }
+
+    @Deprecated
     public String getHistoryFileName() {
         return historyFileName;
     }
 
+    @Deprecated
     public String getCurrentSessionFileName() {
         return currentSessionFileName;
     }
 
+    /*@Deprecated
     public HistorySessions getHistorySessions() {
-        return mHistorySessions;
+        return mHistorySessionsLegacy;
+    }*/
+
+    public void deleteSession(Session session) {
+        mDataSource.deleteSession(this, session.getId());
+    }
+
+    public List<Session> getSortedHistorySessions() {
+        List<Session> sessions = new ArrayList<>(mAllSessions);
+        if (sessions.size() > 0) {
+            sessions.remove(getSession(mCurrentSessionId));
+            Collections.sort(sessions, new Comparator<Session>() {
+                @Override
+                public int compare(Session lhs, Session rhs) {
+                    if (lhs.getTimestamp() > rhs.getTimestamp()) {
+                        return 1;
+                    } else if (lhs.getTimestamp() < rhs.getTimestamp()) {
+                        return -1;
+                    } else {
+                        return 0;
+                    }
+                }
+            });
+        }
+        return sessions;
+    }
+
+
+    public int getCurrentSessionId() {
+        return mCurrentSessionId;
     }
 
     private synchronized void init(Context context) {
-        if (!mInitialized) {
-
-            //AFTER UPDATING APP////////////
-            int savedVersionCode = PrefUtils.getVersionCode(context);
-
-            if (savedVersionCode <= 10) {
-                //Version <=10: Set up history sessions with old
-                // name first
-                if (!scramblerSpec.equals("333") || name().equals("THREE")) {
-                    mHistorySessions.setFilename(scramblerSpec + ".json");
-                    mHistorySessions.init(context);
-                    mHistorySessions.setFilename(historyFileName);
-                    if (mHistorySessions.getList().size() > 0) {
-                        mHistorySessions.save(context);
-                    }
-                    File oldFile = new File(context.getFilesDir(),
-                            scramblerSpec + ".json");
-                    oldFile.delete();
-                }
-            }
-
-            if (savedVersionCode <= 13) {
-                //Version <=13: ScrambleAndSvg json structure changes
-                Gson gson = new GsonBuilder()
-                        .registerTypeAdapter(Session.class, new JsonDeserializer<Session>() {
-                            @Override
-                            public Session deserialize(JsonElement json, Type typeOfT,
-                                                       JsonDeserializationContext context)
-                                    throws JsonParseException {
-
-                                Gson gson = new GsonBuilder()
-                                        .registerTypeAdapter(ScrambleAndSvg.class, new
-                                                JsonDeserializer<ScrambleAndSvg>() {
-                                                    @Override
-                                                    public ScrambleAndSvg deserialize(JsonElement json,
-                                                                                      Type typeOfT,
-                                                                                      JsonDeserializationContext context)
-                                                            throws JsonParseException {
-                                                        return new ScrambleAndSvg(json.getAsJsonPrimitive
-                                                                ().getAsString(), null);
-                                                    }
-                                                }).create();
-
-                                Session s = gson.fromJson(json, typeOfT);
-                                for (final Solve solve : s.getSolves()) {
-                                    solve.attachSession(s);
-                                }
-                                return s;
-                            }
-                        })
-                        .create();
-                Utils.updateData(context, historyFileName, gson);
-                Utils.updateData(context, currentSessionFileName, gson);
-            }
-
-            ////////////////////////////
-
-            mHistorySessions.init(context);
-            Set<String> selected = PrefUtils.getSelectedPuzzleTypeNames(context);
-            mEnabled = (selected.size() == 0 || selected.contains(name()));
-            List<Session> currentSessions =
-                    Utils.getSessionListFromFile(context, currentSessionFileName);
-            if (currentSessions.size() > 0) {
-                mCurrentSession = currentSessions.get(0);
-            } else {
-                mCurrentSession = new Session();
-            }
-        }
-        mInitialized = true;
+        Set<String> selected = PrefUtils.getSelectedPuzzleTypeNames(context);
+        mEnabled = (selected.size() == 0 || selected.contains(name()));
+        mCurrentSessionId = PrefUtils.getCurrentSessionIndex(this, context);
     }
 
-    public void saveCurrentSession(Context context) {
-        ArrayList<Session> session = new ArrayList<>();
-        session.add(mCurrentSession);
-        Utils.saveSessionListToFile(context, currentSessionFileName, session);
+    public synchronized void initializeAllSessionData() {
+        mAllSessions = mDataSource.loadHistorySessionsForPuzzleType(this);
+    }
+
+    public synchronized void initializeCurrentSessionData() {
+        mCurrentSession = mDataSource.loadSessionForPuzzleType(this, mCurrentSessionId);
+    }
+
+    private void upgradeDatabase(Context context) {
+        //AFTER UPDATING APP////////////
+        int savedVersionCode = PrefUtils.getVersionCode(context);
+
+        if (savedVersionCode <= 10) {
+            //Version <=10: Set up history sessions with old
+            // name first
+            if (!scramblerSpec.equals("333") || name().equals("THREE")) {
+                mHistorySessionsLegacy.setFilename(scramblerSpec + ".json");
+                mHistorySessionsLegacy.init(context);
+                mHistorySessionsLegacy.setFilename(historyFileName);
+                if (mHistorySessionsLegacy.getList().size() > 0) {
+                    mHistorySessionsLegacy.save(context);
+                }
+                File oldFile = new File(context.getFilesDir(),
+                        scramblerSpec + ".json");
+                oldFile.delete();
+            }
+        }
+
+        if (savedVersionCode <= 13) {
+            //Version <=13: ScrambleAndSvg json structure changes
+            Gson gson = new GsonBuilder()
+                    .registerTypeAdapter(Session.class, new JsonDeserializer<Session>() {
+                        @Override
+                        public Session deserialize(JsonElement json, Type typeOfT,
+                                                   JsonDeserializationContext context)
+                                throws JsonParseException {
+
+                            Gson gson = new GsonBuilder()
+                                    .registerTypeAdapter(ScrambleAndSvg.class, new
+                                            JsonDeserializer<ScrambleAndSvg>() {
+                                                @Override
+                                                public ScrambleAndSvg deserialize(JsonElement json,
+                                                                                  Type typeOfT,
+                                                                                  JsonDeserializationContext context)
+                                                        throws JsonParseException {
+                                                    return new ScrambleAndSvg(json.getAsJsonPrimitive
+                                                            ().getAsString(), null);
+                                                }
+                                            }).create();
+
+                            Session s = gson.fromJson(json, typeOfT);
+                            for (final Solve solve : s.getSolves()) {
+                                solve.attachSession(s);
+                            }
+                            return s;
+                        }
+                    })
+                    .create();
+            Utils.updateData(context, historyFileName, gson);
+            Utils.updateData(context, currentSessionFileName, gson);
+        }
+
+        mHistorySessionsLegacy.setFilename(null);
+        ////////////////////////////
     }
 
     public void submitCurrentSession(Context context) {
-        if (mCurrentSession != null &&
-                mCurrentSession.getNumberOfSolves() > 0) {
-            mHistorySessions.addSession(mCurrentSession, context);
-            resetCurrentSession();
-        }
+        //Insert a copy of the current session in the second to last position. The "new" current session
+        //will be at the last position.
+        if (mAllSessions != null)
+            mAllSessions.add(new Session(mCurrentSession));
+        mCurrentSession.newSession();
+        mCurrentSessionId = mCurrentSession.getId();
+        PrefUtils.saveCurrentSessionIndex(this, context, mCurrentSessionId);
     }
 
     public Puzzle getPuzzle() {
@@ -240,7 +293,7 @@ public enum PuzzleType {
     }
 
     public String getUiName(Context context) {
-        if (mStringIndex == NOT_SPECIAL_STRING) {
+        if (mStringIndex == NOT_SPECIAL_STRING_INDEX) {
             int order = Integer.parseInt(scramblerSpec.substring(0, 1));
             String addon = null;
             if (name().contains("BLD")) {
@@ -262,18 +315,28 @@ public enum PuzzleType {
                 [mStringIndex];
     }
 
-    public Session getSession(int index) {
-        if (index == CURRENT_SESSION) {
+    public Session getCurrentSession() {
+        return getSession(mCurrentSessionId);
+    }
+
+    @Nullable
+    public Session getSession(int id) {
+        if (id == mCurrentSessionId) {
             //Check that if the current session is null (from reset or
             // initializing)
             return mCurrentSession;
-        } else {
-            return mHistorySessions.getList().get(index);
+        } else if (mAllSessions != null) {
+            for (Session session : mAllSessions) {
+                if (session.getId() == id) {
+                    return session;
+                }
+            }
         }
+        return null;
     }
 
     public void resetCurrentSession() {
-        mCurrentSession.reset();
+        mCurrentSession.newSession();
     }
 
     boolean isEnabled() {

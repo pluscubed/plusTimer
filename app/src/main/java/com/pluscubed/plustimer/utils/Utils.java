@@ -87,6 +87,7 @@ public class Utils {
     /**
      * Save a list of sessions to a file.
      */
+    @Deprecated
     public static void saveSessionListToFile(Context context,
                                              String fileName,
                                              List<Session> sessionList) {
@@ -114,6 +115,7 @@ public class Utils {
     /**
      * Get list and save new list
      */
+    @Deprecated
     private static void updateData(Context context, String fileName) {
         List<Session> historySessions = getSessionListFromFile(context, fileName);
         saveSessionListToFile(context, fileName, historySessions);
@@ -122,6 +124,7 @@ public class Utils {
     /**
      * For updating data w/ old JSON structure
      */
+    @Deprecated
     public static void updateData(Context context, String fileName, Gson oldGson) {
         Gson current = gson;
         gson = oldGson;
@@ -133,6 +136,7 @@ public class Utils {
      * Load up the sessions stored in the list. If the file doesn't exist,
      * create an empty list.
      */
+    @Deprecated
     public static List<Session> getSessionListFromFile(Context context,
                                                        String fileName) {
         BufferedReader reader = null;

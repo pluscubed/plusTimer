@@ -144,6 +144,11 @@ public class CurrentSessionTimerFragment extends Fragment {
             updateStatsAndTimer();
             SolveRecyclerAdapter adapter = (SolveRecyclerAdapter) mTimeBarRecycler.getAdapter();
             adapter.updateSolvesList(index, Update.SINGLE_CHANGE);
+
+            PuzzleType.getDataSource().updateSolve(PuzzleType.getCurrent().getCurrentSession().getSolveByPosition(index),
+                    PuzzleType.getCurrent(),
+                    PuzzleType.getCurrent().getCurrentSessionId(),
+                    index);
         }
 
         @Override
@@ -154,7 +159,7 @@ public class CurrentSessionTimerFragment extends Fragment {
         }
 
         @Override
-        public void onReset() {
+        public void onNewSession() {
             updateStatsAndTimer();
             SolveRecyclerAdapter adapter = (SolveRecyclerAdapter) mTimeBarRecycler.getAdapter();
             adapter.updateSolvesList(-1, Update.REMOVE_ALL);
@@ -191,9 +196,8 @@ public class CurrentSessionTimerFragment extends Fragment {
                     //Add the solve to the current session with the current
                     // scramble/scramble
                     // image and DNF
-                    PuzzleType.getCurrent().getSession(PuzzleType
-                            .CURRENT_SESSION)
-                            .addSolve(s);
+                    PuzzleType.getCurrent().getCurrentSession()
+                            .addSolve(s, PuzzleType.getCurrent());
 
                     resetTimer();
                     setTimerTextToLastSolveTime();
@@ -232,7 +236,7 @@ public class CurrentSessionTimerFragment extends Fragment {
 
                     resetTimer();
 
-                    PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
+                    PuzzleType.getCurrent().getCurrentSession()
                             .registerObserver(sessionObserver);
                 }
             };
@@ -284,20 +288,18 @@ public class CurrentSessionTimerFragment extends Fragment {
         Arrays.sort(currentAverages, Collections.reverseOrder());
         String s = "";
         for (int i : currentAverages) {
-            if (PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
+            if (PuzzleType.getCurrent().getCurrentSession()
                     .getNumberOfSolves() >= i) {
                 s += String.format(context.getString(R.string.cao),
-                        i) + ": " + PuzzleType.getCurrent().getSession
-                        (PuzzleType.CURRENT_SESSION)
+                        i) + ": " + PuzzleType.getCurrent().getCurrentSession()
                         .getStringCurrentAverageOf(i, mMillisecondsEnabled) +
                         "\n";
             }
         }
-        if (PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
+        if (PuzzleType.getCurrent().getCurrentSession()
                 .getNumberOfSolves() > 0) {
-            s += context.getString(R.string.mean) + PuzzleType.getCurrent()
-                    .getSession(PuzzleType.CURRENT_SESSION).getStringMean
-                            (mMillisecondsEnabled);
+            s += context.getString(R.string.mean) + PuzzleType.getCurrent().getCurrentSession().getStringMean
+                    (mMillisecondsEnabled);
         }
         return s;
     }
@@ -422,7 +424,7 @@ public class CurrentSessionTimerFragment extends Fragment {
     private void updateStatsAndTimer() {
         //Update stats
         mStatsSolvesText.setText(getString(R.string.solves) + PuzzleType
-                .getCurrent().getSession(PuzzleType.CURRENT_SESSION)
+                .getCurrent().getCurrentSession()
                 .getNumberOfSolves());
         mStatsText.setText(buildStatsWithAveragesOf(getActivity(), 5, 12, 100));
 
@@ -447,7 +449,7 @@ public class CurrentSessionTimerFragment extends Fragment {
         setHasOptionsMenu(true);
 
         PuzzleType.registerObserver(puzzleTypeObserver);
-        PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
+        PuzzleType.getCurrent().getCurrentSession()
                 .registerObserver(sessionObserver);
 
         //Set up UIHandler
@@ -506,10 +508,9 @@ public class CurrentSessionTimerFragment extends Fragment {
         mLastDnfButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Session currentSession = PuzzleType.getCurrent().getSession(PuzzleType
-                        .CURRENT_SESSION);
+                Session currentSession = PuzzleType.getCurrent().getCurrentSession();
                 if (ErrorUtils.isSolveNonexistent(getActivity(), PuzzleType.getCurrent().name(),
-                        PuzzleType.CURRENT_SESSION, currentSession.getNumberOfSolves() - 1)) {
+                        PuzzleType.getCurrent().getCurrentSessionId(), currentSession.getNumberOfSolves() - 1)) {
                     return;
                 }
                 currentSession.getLastSolve().setPenalty(Solve
@@ -521,10 +522,9 @@ public class CurrentSessionTimerFragment extends Fragment {
         mLastPlusTwoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Session currentSession = PuzzleType.getCurrent().getSession(PuzzleType
-                        .CURRENT_SESSION);
+                Session currentSession = PuzzleType.getCurrent().getCurrentSession();
                 if (ErrorUtils.isSolveNonexistent(getActivity(), PuzzleType.getCurrent().name(),
-                        PuzzleType.CURRENT_SESSION, currentSession.getNumberOfSolves() - 1)) {
+                        PuzzleType.getCurrent().getCurrentSessionId(), currentSession.getNumberOfSolves() - 1)) {
                     return;
                 }
                 currentSession.getLastSolve().setPenalty(Solve
@@ -536,13 +536,12 @@ public class CurrentSessionTimerFragment extends Fragment {
         mLastDeleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Session currentSession = PuzzleType.getCurrent().getSession(PuzzleType
-                        .CURRENT_SESSION);
+                Session currentSession = PuzzleType.getCurrent().getCurrentSession();
                 if (ErrorUtils.isSolveNonexistent(getActivity(), PuzzleType.getCurrent().name(),
-                        PuzzleType.CURRENT_SESSION, currentSession.getNumberOfSolves() - 1)) {
+                        PuzzleType.getCurrent().getCurrentSessionId(), currentSession.getNumberOfSolves() - 1)) {
                     return;
                 }
-                currentSession.deleteSolve(currentSession.getLastSolve());
+                currentSession.deleteSolve(currentSession.getLastSolve(), PuzzleType.getCurrent());
                 playLastBarExitAnimation();
             }
         });
@@ -658,7 +657,7 @@ public class CurrentSessionTimerFragment extends Fragment {
         super.onPause();
         getActivity().getWindow().clearFlags(WindowManager.LayoutParams
                 .FLAG_KEEP_SCREEN_ON);
-        PuzzleType.getCurrent().saveCurrentSession(getActivity());
+        //PuzzleType.getCurrent().saveCurrentSession(getActivity());
         stopHoldTimer();
     }
 
@@ -680,7 +679,7 @@ public class CurrentSessionTimerFragment extends Fragment {
         mUiHandler.removeCallbacksAndMessages(null);
         mRetainedFragment.setTargetFragment(null, 0);
 
-        PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
+        PuzzleType.getCurrent().getCurrentSession()
                 .unregisterObserver(sessionObserver);
         PuzzleType.unregisterObserver(puzzleTypeObserver);
     }
@@ -743,10 +742,9 @@ public class CurrentSessionTimerFragment extends Fragment {
      * set to ready. Updates the timer text's size.
      */
     void setTimerTextToLastSolveTime() {
-        if (PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
+        if (PuzzleType.getCurrent().getCurrentSession()
                 .getNumberOfSolves() != 0) {
-            setTimerText(PuzzleType.getCurrent().getSession(PuzzleType
-                    .CURRENT_SESSION)
+            setTimerText(PuzzleType.getCurrent().getCurrentSession()
                     .getLastSolve().getTimeStringArray(mMillisecondsEnabled));
         } else {
             setTimerText(new String[]{getString(R.string.ready), ""});
@@ -814,10 +812,12 @@ public class CurrentSessionTimerFragment extends Fragment {
             if (mInspectionEnabled && mLateStartPenalty) {
                 s.setPenalty(Solve.Penalty.PLUSTWO);
             }
+
+
             //Add the solve to the current session with the
             // current scramble/scramble image and time
-            PuzzleType.getCurrent().getSession(PuzzleType
-                    .CURRENT_SESSION).addSolve(s);
+            PuzzleType.getCurrent().getCurrentSession().addSolve(s, PuzzleType.getCurrent());
+
             playLastBarEnterAnimation();
             playEnterAnimations();
             getActivityCallback().lockDrawerAndViewPager(false);
@@ -1235,8 +1235,7 @@ public class CurrentSessionTimerFragment extends Fragment {
             Set<Solve> changed = new HashSet<>();
             changed.addAll(Arrays.asList(mBestAndWorstSolves));
 
-            mSolves = PuzzleType.getCurrent().getSession(PuzzleType
-                    .CURRENT_SESSION).getSolves();
+            mSolves = PuzzleType.getCurrent().getCurrentSession().getSolves();
             mBestAndWorstSolves[0] = Utils.getBestSolveOfList(mSolves);
             mBestAndWorstSolves[1] = Utils.getWorstSolveOfList(mSolves);
 
@@ -1291,7 +1290,7 @@ public class CurrentSessionTimerFragment extends Fragment {
                         SolveDialogUtils.createSolveDialog(getActivity(),
                                 false,
                                 PuzzleType.getCurrent().name(),
-                                PuzzleType.CURRENT_SESSION,
+                                PuzzleType.getCurrent().getCurrentSessionId(),
                                 getLayoutPosition()
                         );
                     }

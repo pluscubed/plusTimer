@@ -164,13 +164,13 @@ public class CurrentSessionActivity extends DrawerActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_current_session);
-
         if (BuildConfig.USE_CRASHLYTICS) {
             Fabric.with(this, new Crashlytics());
         }
+        setContentView(R.layout.activity_current_session);
 
         PuzzleType.initialize(this);
+        PuzzleType.getCurrent().initializeCurrentSessionData();
 
         if (savedInstanceState != null) {
             mScrambleImageActionEnable = savedInstanceState.getBoolean
@@ -313,8 +313,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
                                        int position, long id) {
                 PuzzleType newPuzzleType = (PuzzleType) parent.getItemAtPosition(position);
                 if (newPuzzleType != PuzzleType.getCurrent()) {
-                    PuzzleType.getCurrent().getSession(PuzzleType.CURRENT_SESSION)
-                            .unregisterAllObservers();
+                    PuzzleType.getCurrent().getCurrentSession().unregisterAllObservers();
                     PuzzleType.setCurrent(newPuzzleType, CurrentSessionActivity.this);
                 }
             }
@@ -368,7 +367,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
                 case 1:
                     return SolveListFragment.newInstance(true,
                             PuzzleType.getCurrent().name(),
-                            PuzzleType.CURRENT_SESSION);
+                            PuzzleType.getCurrent().getCurrentSessionId());
             }
             return null;
         }

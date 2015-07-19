@@ -4,13 +4,13 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 
 import com.pluscubed.plustimer.utils.ThemeUtils;
 
 
-public abstract class ThemableActivity extends ActionBarActivity {
+public abstract class ThemableActivity extends AppCompatActivity {
 
     private ThemeUtils mThemeUtils;
 

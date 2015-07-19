@@ -119,8 +119,6 @@ public class CurrentSessionTimerRetainedFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
 
-        PuzzleType.initialize(getActivity());
-
         startScramblerThread();
 
         if (savedInstanceState != null) {

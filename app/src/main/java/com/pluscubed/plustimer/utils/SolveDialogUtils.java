@@ -13,17 +13,17 @@ public class SolveDialogUtils {
     public static final String DIALOG_SOLVE_TAG = "SOLVE_DIALOG";
 
     public static void createSolveDialog(Activity activity, boolean addMode, String puzzleTypeName,
-                                         int sessionIndex, int solveIndex) {
+                                         int sessionId, int solveIndex) {
         FragmentManager fragmentManager = activity.getFragmentManager();
         DialogFragment dialog = (DialogFragment) fragmentManager.findFragmentByTag
                 (DIALOG_SOLVE_TAG);
-        if (ErrorUtils.isSolveNonexistent(activity, puzzleTypeName, sessionIndex, solveIndex)) {
+        if (ErrorUtils.isSolveNonexistent(activity, puzzleTypeName, sessionId, solveIndex)) {
             return;
         }
         if (dialog == null) {
             SolveDialogFragment d = SolveDialogFragment
                     .newInstance(addMode, puzzleTypeName,
-                            sessionIndex, solveIndex);
+                            sessionId, solveIndex);
             d.show(fragmentManager, DIALOG_SOLVE_TAG);
         }
     }

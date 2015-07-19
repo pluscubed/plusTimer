@@ -18,24 +18,29 @@ import java.util.List;
 /**
  * Session data
  */
+//TODO: Make a utility class instead
 public class Session {
 
     public static final int GET_AVERAGE_INVALID_NOT_ENOUGH = -1;
 
     private List<Solve> mSolves;
-
+    private int mId;
     private transient List<Observer> mObservers;
 
     /**
      * Constructs a Session with an empty list of Solves
      */
-    public Session() {
+    public Session(int id) {
         mObservers = new ArrayList<>();
         mSolves = new ArrayList<>();
+        mId = id;
     }
 
+    /**
+     * ID stays the same.
+     */
     public Session(Session s) {
-        this();
+        this(s.getId());
         mSolves = new ArrayList<>(s.getSolves());
     }
 
@@ -47,9 +52,14 @@ public class Session {
         return new ArrayList<>(Collections.unmodifiableList(mSolves));
     }
 
-    public void reset() {
+    public int getId() {
+        return mId;
+    }
+
+    public void newSession() {
         mSolves.clear();
-        notifyReset();
+        mId++;
+        notifyNewSession();
     }
 
     void notifySolveAdded() {
@@ -70,9 +80,9 @@ public class Session {
         }
     }
 
-    void notifyReset() {
+    void notifyNewSession() {
         for (Observer s : mObservers) {
-            s.onReset();
+            s.onNewSession();
         }
     }
 
@@ -88,11 +98,18 @@ public class Session {
         mObservers.clear();
     }
 
-    public void addSolve(final Solve s) {
+    public void addSolve(final Solve s, PuzzleType type) {
         mSolves.add(s);
         s.attachSession(this);
 
+        PuzzleType.getDataSource().writeSolve(s, type, mId);
+
         notifySolveAdded();
+    }
+
+    public void addSolveNoWrite(final Solve s) {
+        mSolves.add(s);
+        s.attachSession(this);
     }
 
     public int getNumberOfSolves() {
@@ -210,15 +227,14 @@ public class Session {
         return getLastSolve().getTimestamp();
     }
 
-    public void deleteSolve(int position) {
+    public void deleteSolve(int position, PuzzleType type) {
         mSolves.remove(position);
+        PuzzleType.getDataSource().deleteSolve(type, mId, position);
         notifySolveDeleted(position);
     }
 
-    public void deleteSolve(Solve i) {
-        int position = mSolves.indexOf(i);
-        mSolves.remove(i);
-        notifySolveDeleted(position);
+    public void deleteSolve(Solve i, PuzzleType type) {
+        deleteSolve(mSolves.indexOf(i), type);
     }
 
     public String toString(Context context, String puzzleTypeName,
@@ -313,7 +329,7 @@ public class Session {
         public void onSolveRemoved(int index) {
         }
 
-        public void onReset() {
+        public void onNewSession() {
         }
     }
 

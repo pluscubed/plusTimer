@@ -37,10 +37,14 @@ public class PrefUtils {
             "pref_sign_checkbox";
     private static final String PREF_MONOSPACE_SCRAMBLES_CHECKBOX =
             "pref_monospace_scrambles_checkbox";
+
+
     private static final String PREF_VERSION_CODE =
             "pref_version_code";
     private static final String PREF_CURRENT_PUZZLETYPE =
             "current_puzzletype";
+    private static final String PREF_CURRENT_SESSION_INDEX_PREFIX =
+            "current_session";
     private static final String PREF_WELCOME_DONE =
             "welcome_done";
 
@@ -130,6 +134,16 @@ public class PrefUtils {
     public static void saveCurrentPuzzleType(final Context context, String name) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         sp.edit().putString(PrefUtils.PREF_CURRENT_PUZZLETYPE, name).apply();
+    }
+
+    public static int getCurrentSessionIndex(PuzzleType type, final Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        return sp.getInt(PrefUtils.PREF_CURRENT_SESSION_INDEX_PREFIX + type.name(), 0);
+    }
+
+    public static void saveCurrentSessionIndex(PuzzleType type, final Context context, int index) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        sp.edit().putInt(PrefUtils.PREF_CURRENT_SESSION_INDEX_PREFIX + type.name(), index).apply();
     }
 
     public static TimerUpdate getTimerUpdateMode(final Context context) {
