@@ -19,12 +19,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.firebase.client.ChildEventListener;
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
-import com.pluscubed.plustimer.model.ScrambleAndSvg;
 import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
-import com.pluscubed.plustimer.utils.ErrorUtils;
 import com.pluscubed.plustimer.utils.PrefUtils;
 import com.pluscubed.plustimer.utils.SolveDialogUtils;
 import com.pluscubed.plustimer.utils.Utils;
@@ -43,12 +45,11 @@ public class SolveListFragment extends Fragment {
 
     private static final String ARG_PUZZLETYPE_DISPLAYNAME
             = "com.pluscubed.plustimer.solvelist.display_name";
-
     private static final String ARG_SESSION_ID
             = "com.pluscubed.plustimer.solvelist.session_position";
-
     private static final String ARG_CURRENT_BOOLEAN
             = "com.pluscubed.plustimer.solvelist.current_boolean";
+
     private Session mSession;
     private boolean mMillisecondsEnabled;
     private boolean mSignEnabled;
@@ -56,52 +57,63 @@ public class SolveListFragment extends Fragment {
     private ListView mListView;
     private TextView mEmptyView;
     private SolveListAdapter mListAdapter;
-    private int mSessionId;
-    private String mPuzzleTypeName;
+    private String mSessionId;
+    private String mPuzzleTypeId;
     private boolean mCurrentToggle;
+    private final ChildEventListener sessionObserver = new ChildEventListener() {
+        @Override
+        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            onSessionSolvesChanged();
+        }
+
+        @Override
+        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+            onSessionSolvesChanged();
+
+            //TODO
+            /*PuzzleType.getDataSource().updateSolve(PuzzleType.valueOf(mPuzzleTypeId).getSession(mSessionId).getSolveByPosition(index),
+                    PuzzleType.valueOf(mPuzzleTypeId),
+                    mSessionId,
+                    index);*/
+        }
+
+        @Override
+        public void onChildRemoved(DataSnapshot dataSnapshot) {
+            onSessionSolvesChanged();
+        }
+
+        @Override
+        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onCancelled(FirebaseError firebaseError) {
+
+        }
+    };
+    private final ValueEventListener puzzleTypeObserver = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            onSessionSolvesChanged();
+            //TODO
+            /*mSession.registerObserver(sessionObserver);*/
+        }
+
+        @Override
+        public void onCancelled(FirebaseError firebaseError) {
+
+        }
+    };
     private ActionMode mActionMode;
     private LinearLayout mResetSubmitLinearLayout;
-    private final Session.Observer sessionObserver = new Session.Observer() {
-        @Override
-        public void onSolveAdded() {
-            onSessionSolvesChanged();
-        }
-
-        @Override
-        public void onSolveChanged(int index) {
-            onSessionSolvesChanged();
-
-            PuzzleType.getDataSource().updateSolve(PuzzleType.valueOf(mPuzzleTypeName).getSession(mSessionId).getSolveByPosition(index),
-                    PuzzleType.valueOf(mPuzzleTypeName),
-                    mSessionId,
-                    index);
-        }
-
-        @Override
-        public void onSolveRemoved(int index) {
-            onSessionSolvesChanged();
-        }
-
-        @Override
-        public void onNewSession() {
-            onSessionSolvesChanged();
-        }
-    };
-    private final PuzzleType.Observer puzzleTypeObserver = new PuzzleType
-            .Observer() {
-        @Override
-        public void onPuzzleTypeChanged() {
-            onSessionSolvesChanged();
-            mSession.registerObserver(sessionObserver);
-        }
-    };
 
     public static SolveListFragment newInstance(boolean current,
                                                 String puzzleTypeName,
-                                                int sessionIndex) {
+                                                String sessionIndex) {
         SolveListFragment f = new SolveListFragment();
         Bundle args = new Bundle();
-        args.putInt(ARG_SESSION_ID, sessionIndex);
+        args.putString(ARG_SESSION_ID, sessionIndex);
         args.putString(ARG_PUZZLETYPE_DISPLAYNAME, puzzleTypeName);
         args.putBoolean(ARG_CURRENT_BOOLEAN, current);
         f.setArguments(args);
@@ -127,7 +139,7 @@ public class SolveListFragment extends Fragment {
         intent.setType("text/plain");
         intent.putExtra(
                 Intent.EXTRA_TEXT,
-                mSession.toString(getActivity(), mPuzzleTypeName,
+                mSession.toString(getActivity(), mPuzzleTypeId,
                         mCurrentToggle, true, mMillisecondsEnabled,
                         mSignEnabled)
         );
@@ -139,11 +151,12 @@ public class SolveListFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mCurrentToggle = getArguments().getBoolean(ARG_CURRENT_BOOLEAN);
-        mPuzzleTypeName = getArguments().getString(ARG_PUZZLETYPE_DISPLAYNAME);
-        mSessionId = getArguments().getInt(ARG_SESSION_ID);
+        mPuzzleTypeId = getArguments().getString(ARG_PUZZLETYPE_DISPLAYNAME);
+        mSessionId = getArguments().getString(ARG_SESSION_ID);
         mSession = getPuzzleType().getSession(mSessionId);
-        PuzzleType.registerObserver(puzzleTypeObserver);
-        mSession.registerObserver(sessionObserver);
+        //TODO
+        /*PuzzleType.registerObserver(puzzleTypeObserver);
+        mSession.registerObserver(sessionObserver);*/
         setHasOptionsMenu(true);
     }
 
@@ -151,7 +164,7 @@ public class SolveListFragment extends Fragment {
         if (mCurrentToggle) {
             return PuzzleType.getCurrent();
         } else {
-            return PuzzleType.valueOf(mPuzzleTypeName);
+            return PuzzleType.get(mPuzzleTypeId);
         }
     }
 
@@ -162,21 +175,21 @@ public class SolveListFragment extends Fragment {
                 share();
                 return true;
             case R.id.menu_history_solvelist_delete_menuitem:
-                if (getPuzzleType().getSortedHistorySessions().size() >= mSessionId) {
-                    getPuzzleType().deleteSession(getPuzzleType().getSession(mSessionId));
-                } else {
+                //TODO
+               /* if (getPuzzleType().getSortedHistorySessions().size() >= mSessionId) {*/
+                getPuzzleType().deleteSession(getPuzzleType().getSession(mSessionId));
+                /*} else {
                     NullPointerException e = new NullPointerException(
                             "SolveListFragment onOptionsItemSelected: " +
                                     "delete failed for history session #"
                                     + mSessionId + ", is null");
                     ErrorUtils.showErrorDialog(getActivity(), "Error: ", e, true);
                     ErrorUtils.logCrashlytics(e);
-                }
+                }*/
                 getActivity().finish();
                 return true;
             case R.id.menu_solvelist_add_menuitem:
-                SolveDialogUtils.createSolveDialog(getActivity(), true, mPuzzleTypeName,
-                        mSessionId, 0);
+                SolveDialogUtils.createSolveDialog(getActivity(), true, mPuzzleTypeId, mSessionId, null);
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -244,13 +257,14 @@ public class SolveListFragment extends Fragment {
                                 @Override
                                 public void onPositive(MaterialDialog dialog) {
                                     super.onPositive(dialog);
-                                    if (mSession.getNumberOfSolves() == 0) {
+                                    //TODO
+                                    /*if (mSession.getNumberOfSolves() == 0) {
                                         Toast.makeText(getActivity().getApplicationContext(),
                                                 getResources().getText(R.string.session_no_solves),
                                                 Toast.LENGTH_SHORT
                                         ).show();
                                         return;
-                                    }
+                                    }*/
 
                                     Toast.makeText(getActivity().getApplicationContext(),
                                             getResources().getText(R.string.session_submitted),
@@ -281,9 +295,8 @@ public class SolveListFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
-                SolveDialogUtils.createSolveDialog(getActivity(), false, mPuzzleTypeName,
-                        mSessionId,
-                        mSession.getPosition((Solve) mListView.getItemAtPosition(position)));
+                SolveDialogUtils.createSolveDialog(getActivity(), false, mPuzzleTypeId, mSessionId,
+                        ((Solve) mListView.getItemAtPosition(position)).getId());
             }
         });
 
@@ -318,7 +331,7 @@ public class SolveListFragment extends Fragment {
                         for (int i = mListView.getCount() - 1; i >= 0; i--) {
                             if (mListView.isItemChecked(i)) {
                                 mSession.deleteSolve((Solve) mListView
-                                        .getItemAtPosition(i),PuzzleType.valueOf(mPuzzleTypeName));
+                                        .getItemAtPosition(i), PuzzleType.get(mPuzzleTypeId));
                             }
                         }
                         mode.finish();
@@ -341,8 +354,9 @@ public class SolveListFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mSession.unregisterObserver(sessionObserver);
-        PuzzleType.unregisterObserver(puzzleTypeObserver);
+        //TODO
+        /*mSession.unregisterObserver(sessionObserver);
+        PuzzleType.unregisterObserver(puzzleTypeObserver);*/
     }
 
     void enableResetSubmitButtons(boolean enable) {
@@ -359,7 +373,8 @@ public class SolveListFragment extends Fragment {
 
     void onSessionSolvesChanged() {
         mSession = getPuzzleType().getSession(mSessionId);
-        if (!mCurrentToggle && mSession.getNumberOfSolves() <= 0) {
+        //TODO
+        if (!mCurrentToggle /*&& mSession.getNumberOfSolves() <= 0*/) {
             getPuzzleType().deleteSession(mSession);
             getActivity().finish();
             return;
@@ -374,10 +389,11 @@ public class SolveListFragment extends Fragment {
         }
         updateStats();
         if (mCurrentToggle) {
-            enableResetSubmitButtons(getPuzzleType().getCurrentSession().getNumberOfSolves() > 0);
+            //TODO
+            /*enableResetSubmitButtons(getPuzzleType().getCurrentSession().getNumberOfSolves() > 0);*/
         } else {
-            getActivity().setTitle(PuzzleType.valueOf(mPuzzleTypeName)
-                    .getSession(mSessionId).getTimestampString(getActivity()));
+            getActivity().setTitle(PuzzleType.get(mPuzzleTypeId).getSession(mSessionId)
+                    .getTimestampString(getActivity()));
         }
     }
 
@@ -417,9 +433,11 @@ public class SolveListFragment extends Fragment {
                 time.setText(s.getDescriptiveTimeString(mMillisecondsEnabled));
             }
 
-            ScrambleAndSvg scrambleAndSvg = s.getScrambleAndSvg();
-            String uiScramble = ErrorUtils.getUiScramble(getActivity(), position, scrambleAndSvg,
-                    mSignEnabled, mPuzzleTypeName);
+            String scramble = s.getScramble();
+            //TODO
+            /*String uiScramble = ErrorUtils.getUiScramble(getActivity(), position, scramble,
+                    mSignEnabled, mPuzzleTypeId);*/
+            String uiScramble = scramble;
 
             desc.setText(uiScramble);
 

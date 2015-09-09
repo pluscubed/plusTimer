@@ -79,10 +79,10 @@ public class ErrorUtils {
         return uiScramble;
     }
 
-    public static boolean isSolveNonexistent(Context c, String puzzleTypeName, int sessionId,
+    public static boolean isSolveNonexistent(Context c, String puzzleTypeId, String sessionId,
                                              int solveIndex) {
         try {
-            PuzzleType.valueOf(puzzleTypeName).getSession(sessionId).getSolveByPosition(solveIndex);
+            PuzzleType.get(puzzleTypeId).getSession(sessionId).getSolveByPosition(solveIndex);
             return false;
         } catch (IndexOutOfBoundsException e) {
             if (BuildConfig.USE_CRASHLYTICS) {
@@ -90,8 +90,7 @@ public class ErrorUtils {
                         "Solve #" + solveIndex + " nonexistent",
                         PuzzleType.getCurrent()
                                 .getSession(sessionId)
-                                .toString(c, PuzzleType.getCurrent().name(), true, true, true,
-                                        false)
+                                .toString(c, PuzzleType.getCurrentId(), true, true, true, false)
                 );
             }
             showErrorDialog(c, "Solve #" + solveIndex + " doesn't exist", e, false);
@@ -103,7 +102,7 @@ public class ErrorUtils {
     public static void sendFileDataEmail(Context context) {
         BufferedReader r = null;
         StringBuilder total = new StringBuilder();
-        for (PuzzleType p : PuzzleType.values()) {
+        for (PuzzleType p : PuzzleType.getPuzzleTypes()) {
             for (int i = 0; i < 2; i++) {
                 try {
                     String fileName;

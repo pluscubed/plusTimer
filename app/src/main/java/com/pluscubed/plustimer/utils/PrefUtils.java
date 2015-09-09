@@ -5,10 +5,6 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import com.pluscubed.plustimer.BuildConfig;
-import com.pluscubed.plustimer.model.PuzzleType;
-
-import java.util.HashSet;
-import java.util.Set;
 
 public class PrefUtils {
     public static final String PREF_SCRAMBLE_TEXT_SIZE_EDITTEXT =
@@ -41,10 +37,6 @@ public class PrefUtils {
 
     private static final String PREF_VERSION_CODE =
             "pref_version_code";
-    private static final String PREF_CURRENT_PUZZLETYPE =
-            "current_puzzletype";
-    private static final String PREF_CURRENT_SESSION_INDEX_PREFIX =
-            "current_session";
     private static final String PREF_WELCOME_DONE =
             "welcome_done";
 
@@ -98,12 +90,6 @@ public class PrefUtils {
         sp.edit().putBoolean(PREF_WELCOME_DONE, true).apply();
     }
 
-    public static Set<String> getSelectedPuzzleTypeNames(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getStringSet(PREF_PUZZLETYPES_MULTISELECTLIST,
-                new HashSet<String>());
-    }
-
     public static int getTimerTextSize(final Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         return Integer.parseInt(sp.getString(PREF_TIME_TEXT_SIZE_EDITTEXT, "100"));
@@ -122,28 +108,6 @@ public class PrefUtils {
     public static int getVersionCode(final Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         return sp.getInt(PREF_VERSION_CODE, 10);
-    }
-
-    public static PuzzleType getCurrentPuzzleType(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return PuzzleType.valueOf(sp.getString(
-                PrefUtils.PREF_CURRENT_PUZZLETYPE, PuzzleType.THREE.name()
-        ));
-    }
-
-    public static void saveCurrentPuzzleType(final Context context, String name) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putString(PrefUtils.PREF_CURRENT_PUZZLETYPE, name).apply();
-    }
-
-    public static int getCurrentSessionIndex(PuzzleType type, final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getInt(PrefUtils.PREF_CURRENT_SESSION_INDEX_PREFIX + type.name(), 0);
-    }
-
-    public static void saveCurrentSessionIndex(PuzzleType type, final Context context, int index) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putInt(PrefUtils.PREF_CURRENT_SESSION_INDEX_PREFIX + type.name(), index).apply();
     }
 
     public static TimerUpdate getTimerUpdateMode(final Context context) {

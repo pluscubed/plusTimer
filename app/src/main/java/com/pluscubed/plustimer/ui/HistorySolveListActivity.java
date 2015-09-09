@@ -16,9 +16,9 @@ import com.pluscubed.plustimer.model.PuzzleType;
  */
 public class HistorySolveListActivity extends ThemableActivity {
 
-    public static final String EXTRA_HISTORY_SESSION_POSITION = "com" +
+    public static final String EXTRA_HISTORY_SESSION_ID = "com" +
             ".pluscubed.plustimer.history_session_position";
-    public static final String EXTRA_HISTORY_PUZZLETYPE_DISPLAYNAME = "com" +
+    public static final String EXTRA_HISTORY_PUZZLETYPE_ID = "com" +
             ".pluscubed.plustimer.history_puzzletype_displayname";
 
     private static final String HISTORY_DIALOG_SOLVE_TAG =
@@ -35,12 +35,12 @@ public class HistorySolveListActivity extends ThemableActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_with_toolbar);
 
-        int position = getIntent().getIntExtra
-                (EXTRA_HISTORY_SESSION_POSITION, 0);
-        String puzzleType = getIntent().getStringExtra
-                (EXTRA_HISTORY_PUZZLETYPE_DISPLAYNAME);
+        String position = getIntent().getStringExtra(EXTRA_HISTORY_SESSION_ID);
+        String puzzleType = getIntent().getStringExtra(EXTRA_HISTORY_PUZZLETYPE_ID);
 
-        PuzzleType.valueOf(puzzleType).initializeAllSessionData();
+        //TODO
+/*
+        PuzzleType.get(puzzleType).initializeAllSessionData();*/
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
         setSupportActionBar(toolbar);
@@ -49,16 +49,14 @@ public class HistorySolveListActivity extends ThemableActivity {
         Fragment f = fm.findFragmentById(R.id
                 .activity_with_toolbar_content_framelayout);
         if (f == null) {
-            f = SolveListFragment.newInstance(false, puzzleType,
-                    position);
+            f = SolveListFragment.newInstance(false, puzzleType, position);
             fm.beginTransaction()
                     .replace(R.id.activity_with_toolbar_content_framelayout, f)
                     .commit();
         }
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        setTitle(PuzzleType.valueOf(puzzleType).getSession(position)
-                .getTimestampString(this));
+        setTitle(PuzzleType.get(puzzleType).getSession(position).getTimestampString(this));
     }
 
     @Override

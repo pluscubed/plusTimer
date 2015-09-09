@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.MultiSelectListPreference;
-import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -67,41 +66,31 @@ public class SettingsActivity extends ThemableActivity {
 
             EditTextPreference size = (EditTextPreference)
                     findPreference(PrefUtils.PREF_TIME_TEXT_SIZE_EDITTEXT);
-            size.setOnPreferenceChangeListener(new Preference
-                    .OnPreferenceChangeListener() {
-                @Override
-                public boolean onPreferenceChange(Preference preference,
-                                                  Object newValue) {
-                    if (Integer.valueOf(newValue.toString()) > 500) {
-                        Toast.makeText(getActivity(), getString(R.string.text_size_warning),
-                                Toast.LENGTH_SHORT)
-                                .show();
-                        return false;
-                    }
-                    EditTextPreference size = (EditTextPreference) preference;
-                    size.setSummary(newValue.toString());
-                    return true;
+            size.setOnPreferenceChangeListener((preference, newValue) -> {
+                if (Integer.valueOf(newValue.toString()) > 500) {
+                    Toast.makeText(getActivity(), getString(R.string.text_size_warning),
+                            Toast.LENGTH_SHORT)
+                            .show();
+                    return false;
                 }
+                EditTextPreference size1 = (EditTextPreference) preference;
+                size1.setSummary(newValue.toString());
+                return true;
             });
             size.setSummary(size.getText());
 
             EditTextPreference scrambleSize = (EditTextPreference)
                     findPreference(PrefUtils.PREF_SCRAMBLE_TEXT_SIZE_EDITTEXT);
-            scrambleSize.setOnPreferenceChangeListener(new Preference
-                    .OnPreferenceChangeListener() {
-                @Override
-                public boolean onPreferenceChange(Preference preference,
-                                                  Object newValue) {
-                    if (Integer.valueOf(newValue.toString()) > 500) {
-                        Toast.makeText(getActivity(), getString(R.string.text_size_warning),
-                                Toast.LENGTH_SHORT)
-                                .show();
-                        return false;
-                    }
-                    EditTextPreference scrambleSize = (EditTextPreference) preference;
-                    scrambleSize.setSummary(newValue.toString());
-                    return true;
+            scrambleSize.setOnPreferenceChangeListener((preference, newValue) -> {
+                if (Integer.valueOf(newValue.toString()) > 500) {
+                    Toast.makeText(getActivity(), getString(R.string.text_size_warning),
+                            Toast.LENGTH_SHORT)
+                            .show();
+                    return false;
                 }
+                EditTextPreference scrambleSize1 = (EditTextPreference) preference;
+                scrambleSize1.setSummary(newValue.toString());
+                return true;
             });
             scrambleSize.setSummary(scrambleSize.getText());
 
@@ -111,12 +100,9 @@ public class SettingsActivity extends ThemableActivity {
 
             ListPreference theme = (ListPreference) findPreference(PrefUtils.PREF_THEME_LIST);
             theme.setEntryValues(new String[]{"0", "1", "2"});
-            theme.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-                @Override
-                public boolean onPreferenceChange(Preference preference, Object newValue) {
-                    getActivity().recreate();
-                    return true;
-                }
+            theme.setOnPreferenceChangeListener((preference, newValue) -> {
+                getActivity().recreate();
+                return true;
             });
 
 
@@ -126,16 +112,16 @@ public class SettingsActivity extends ThemableActivity {
 
             if (puzzleTypeMultiList.getValues().size() == 0) {
                 Set<String> all = new HashSet<>();
-                for (PuzzleType p : PuzzleType.values()) {
-                    all.add(p.name());
+                for (PuzzleType p : PuzzleType.getPuzzleTypes()) {
+                    all.add(p.getId());
                 }
                 puzzleTypeMultiList.setValues(all);
             }
 
             List<String> entries = new ArrayList<>();
-            for (PuzzleType i : PuzzleType.values()) {
-                String uiName = i.getUiName(getActivity());
-                if (!i.official) {
+            for (PuzzleType i : PuzzleType.getPuzzleTypes()) {
+                String uiName = i.getUiName();
+                if (!i.isScramblerOfficial()) {
                     uiName += " - " + getString(R.string.unofficial);
                 }
                 entries.add(uiName);
@@ -144,31 +130,25 @@ public class SettingsActivity extends ThemableActivity {
                     CharSequence[entries.size()]));
 
             List<String> entryValues = new ArrayList<>();
-            for (PuzzleType p : PuzzleType.values()) {
-                entryValues.add(p.name());
+            for (PuzzleType p : PuzzleType.getPuzzleTypes()) {
+                entryValues.add(p.getId());
             }
             puzzleTypeMultiList.setEntryValues(entryValues.toArray(new
                     CharSequence[entryValues.size()]));
 
-            puzzleTypeMultiList.setOnPreferenceChangeListener(new Preference
-                    .OnPreferenceChangeListener() {
-                @Override
-                public boolean onPreferenceChange(Preference preference,
-                                                  Object newValue) {
-                    Set selected = (Set) newValue;
-                    if (selected.size() == 0) {
-                        Toast.makeText(getActivity(),
-                                getString(R.string
-                                        .no_disable_all_puzzletypes),
-                                Toast.LENGTH_SHORT).show();
-                        return false;
-                    }
-                    for (PuzzleType p : PuzzleType.values()) {
-                        PuzzleType.valueOf(p.name()).setEnabled(selected
-                                .contains(p.name()));
-                    }
-                    return true;
+            puzzleTypeMultiList.setOnPreferenceChangeListener((preference, newValue) -> {
+                Set selected = (Set) newValue;
+                if (selected.size() == 0) {
+                    Toast.makeText(getActivity(),
+                            getString(R.string
+                                    .no_disable_all_puzzletypes),
+                            Toast.LENGTH_SHORT).show();
+                    return false;
                 }
+                for (PuzzleType p : PuzzleType.getPuzzleTypes()) {
+                    p.setEnabled(selected.contains(p.getId()));
+                }
+                return true;
             });
         }
     }

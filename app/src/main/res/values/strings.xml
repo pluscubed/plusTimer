@@ -12,7 +12,7 @@
     <string name="oh">OH</string>
     <string name="bld">BLD</string>
     <string name="feet">Feet</string>
-    <string-array name="puzzles">
+    <string-array name="scrambler_names">
         <item>Square-1</item>
         <item>Skewb</item>
         <item>Pyraminx</item>

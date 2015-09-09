@@ -6,10 +6,12 @@ buildscript {
 
     dependencies {
         classpath 'io.fabric.tools:gradle:1.+'
+        classpath 'me.tatarka:gradle-retrolambda:3.+'
     }
 }
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
+apply plugin: 'me.tatarka.retrolambda'
 
 repositories {
     maven { url 'https://maven.fabric.io/public' }
@@ -24,7 +26,14 @@ preBuild.dependsOn('syncTask')
 
 android {
     compileSdkVersion 23
-    buildToolsVersion '23.0.0'
+    buildToolsVersion '23.0.1'
+
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE-FIREBASE.txt'
+        exclude 'META-INF/NOTICE'
+    }
+
     defaultConfig {
         applicationId "com.pluscubed.plustimer"
         minSdkVersion 14
@@ -32,6 +41,7 @@ android {
         versionCode 23
         versionName '0.3.0-beta'
         manifestPlaceholders = [appName: "@string/app_name"]
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
     if (project.hasProperty("RELEASE_STORE_FILE")) {
@@ -77,18 +87,37 @@ android {
             ext.enableCrashlytics = false
         }
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+retrolambda {
+    jvmArgs '-noverify'
 }
 
 dependencies {
+    compile 'com.firebase:firebase-client-android:2.+'
+    compile 'io.reactivex:rxandroid:1.+'
+
     compile 'com.jjoe64:graphview:3.+'
 
-    compile 'com.android.support:support-annotations:23.+'
     compile 'com.android.support:appcompat-v7:23.+'
     compile 'com.android.support:support-v13:23.+'
     compile 'com.android.support:recyclerview-v7:23.+'
     compile 'com.android.support:preference-v14:23.+'
 
-    compile 'com.github.cubing:tnoodle-android:0.+@aar'
+    androidTestCompile 'com.android.support:support-annotations:23.+'
+    androidTestCompile 'com.android.support.test:runner:0.+'
+    // Set this dependency to use JUnit 4 rules
+    androidTestCompile 'com.android.support.test:rules:0.+'
+    androidTestCompile 'org.hamcrest:hamcrest-library:1.+'
+
+    compile('com.github.cubing:tnoodle-android:0.+@aar') {
+        transitive = true;
+    }
     compile 'com.caverock:androidsvg:1.2.1'
 
     compile 'com.google.code.gson:gson:2.+'

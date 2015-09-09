@@ -2,37 +2,36 @@ package com.pluscubed.plustimer.model;
 
 import android.content.Context;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
-import com.pluscubed.plustimer.R;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 import com.pluscubed.plustimer.utils.Utils;
 
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+
+import rx.Observable;
+import rx.Subscriber;
 
 /**
  * Session data
  */
-//TODO: Make a utility class instead
 public class Session {
 
     public static final int GET_AVERAGE_INVALID_NOT_ENOUGH = -1;
 
-    private List<Solve> mSolves;
-    private int mId;
-    private transient List<Observer> mObservers;
+    private String puzzletype;
+    private long timestamp;
+
+    @JsonIgnore
+    private String mId;
+
 
     /**
      * Constructs a Session with an empty list of Solves
      */
-    public Session(int id) {
-        mObservers = new ArrayList<>();
-        mSolves = new ArrayList<>();
+    public Session(String id) {
         mId = id;
     }
 
@@ -41,88 +40,61 @@ public class Session {
      */
     public Session(Session s) {
         this(s.getId());
-        mSolves = new ArrayList<>(s.getSolves());
     }
 
     public int getPosition(Solve i) {
-        return mSolves.indexOf(i);
+        return 0;
     }
 
+    //TODO
     public List<Solve> getSolves() {
-        return new ArrayList<>(Collections.unmodifiableList(mSolves));
+        return null;
     }
 
-    public int getId() {
+    public String getId() {
         return mId;
     }
 
-    public void newSession() {
-        mSolves.clear();
-        mId++;
-        notifyNewSession();
+    public void addSolve(final Solve s) {
+        Firebase solves = new Firebase("https://plustimer.firebaseio.com/web/data/users/test1/solves");
+        Firebase newSolve = solves.push();
+        s.setId(newSolve.getKey());
+        Firebase sessionSolves = new Firebase("https://plustimer.firebaseio.com/web/data/users/test1/session-solves/" + getId() + "/" + s.getId());
+        sessionSolves.setValue(true);
+        timestamp = s.getTimestamp();
     }
 
-    void notifySolveAdded() {
-        for (Observer s : mObservers) {
-            s.onSolveAdded();
-        }
+    public Observable<Long> getNumberOfSolves() {
+        return Observable.create(new Observable.OnSubscribe<Long>() {
+            @Override
+            public void call(final Subscriber<? super Long> subscriber) {
+                Firebase sessionSolves = new Firebase("https://plustimer.firebaseio.com/web/data/users/test1/session-solves/" + getId());
+                sessionSolves.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        subscriber.onNext(dataSnapshot.getChildrenCount());
+                        subscriber.onCompleted();
+                    }
+
+                    @Override
+                    public void onCancelled(FirebaseError firebaseError) {
+                    }
+                });
+            }
+        });
     }
 
-    void notifySolveDeleted(int index) {
-        for (Observer s : mObservers) {
-            s.onSolveRemoved(index);
-        }
-    }
-
-    public void notifySolveChanged(int index) {
-        for (Observer s : mObservers) {
-            s.onSolveChanged(index);
-        }
-    }
-
-    void notifyNewSession() {
-        for (Observer s : mObservers) {
-            s.onNewSession();
-        }
-    }
-
-    public void registerObserver(Observer observer) {
-        mObservers.add(observer);
-    }
-
-    public void unregisterObserver(Observer observer) {
-        mObservers.remove(observer);
-    }
-
-    public void unregisterAllObservers() {
-        mObservers.clear();
-    }
-
-    public void addSolve(final Solve s, PuzzleType type) {
-        mSolves.add(s);
-        s.attachSession(this);
-
-        PuzzleType.getDataSource().writeSolve(s, type, mId);
-
-        notifySolveAdded();
-    }
-
-    public void addSolveNoWrite(final Solve s) {
-        mSolves.add(s);
-        s.attachSession(this);
-    }
-
-    public int getNumberOfSolves() {
-        return mSolves.size();
-    }
-
+    //TODO
     public Solve getLastSolve() {
-        return mSolves.get(mSolves.size() - 1);
+        return null;
     }
 
+    //TODO
     public Solve getSolveByPosition(int position) {
-        return mSolves.get(position);
+        return null;
     }
+
+    //TODO
 
     /**
      * Returns a String of the current average of some number of solves.
@@ -135,7 +107,7 @@ public class Session {
      */
     public String getStringCurrentAverageOf(int number,
                                             boolean millisecondsEnabled) {
-        if (number >= 3 && mSolves.size() >= number) {
+        /*if (number >= 3 && mSolves.size() >= number) {
             List<Solve> solves = new ArrayList<>();
 
             //Add the most recent solves
@@ -152,6 +124,7 @@ public class Session {
                 return Utils.timeStringFromNs(result, millisecondsEnabled);
             }
         }
+        return "";*/
         return "";
     }
 
@@ -175,6 +148,8 @@ public class Session {
         return Utils.timeStringFromNs(bestAverage, millisecondsEnabled);
     }
 
+    //TODO
+
     /**
      * Returns the milliseconds value of the best average of some number of
      * solves.
@@ -186,7 +161,7 @@ public class Session {
      * @return the best average of some number of solves
      */
     public long getBestAverageOf(int number) {
-        if (number >= 3 && mSolves.size() >= number) {
+        /*if (number >= 3 && mSolves.size() >= number) {
             long bestAverage = 0;
             //Iterates through the list, starting with the [number] most
             // recent solves
@@ -202,20 +177,22 @@ public class Session {
                 }
             }
             return bestAverage;
-        }
+        }*/
         return GET_AVERAGE_INVALID_NOT_ENOUGH;
     }
 
+    //TODO
     public String getStringMean(boolean milliseconds) {
-        long sum = 0;
+        /*long sum = 0;
         for (Solve i : mSolves) {
             if (!(i.getPenalty() == Solve.Penalty.DNF)) {
                 sum += i.getTimeTwo();
             } else {
                 return "DNF";
             }
-        }
-        return Utils.timeStringFromNs(sum / mSolves.size(), milliseconds);
+        }*/
+        /*return Utils.timeStringFromNs(sum / mSolves.size(), milliseconds);*/
+        return "";
     }
 
     public String getTimestampString(Context context) {
@@ -227,21 +204,24 @@ public class Session {
         return getLastSolve().getTimestamp();
     }
 
+    //TODO
     public void deleteSolve(int position, PuzzleType type) {
-        mSolves.remove(position);
+        /*mSolves.remove(position);
         PuzzleType.getDataSource().deleteSolve(type, mId, position);
-        notifySolveDeleted(position);
+        notifySolveDeleted(position);*/
     }
 
+    //TODO
     public void deleteSolve(Solve i, PuzzleType type) {
-        deleteSolve(mSolves.indexOf(i), type);
+        /*deleteSolve(mSolves.indexOf(i), type);*/
     }
 
+    //TODO
     public String toString(Context context, String puzzleTypeName,
                            boolean current, boolean displaySolves,
                            boolean milliseconds, boolean sign) {
         StringBuilder s = new StringBuilder();
-        if (displaySolves) {
+        /*if (displaySolves) {
             s.append(PuzzleType.valueOf(puzzleTypeName).getUiName(context)).append("\n\n");
         }
         s.append(context.getString(R.string.number_solves)).append
@@ -309,41 +289,14 @@ public class Session {
                             .timeDateStringFromTimestamp(context,
                                     i.getTimestamp()))
                             .append("\n").append("     ").append(i
-                            .getScrambleAndSvg().getUiScramble(sign,
+                            .getScramble().getUiScramble(sign,
                                     puzzleTypeName))
                             .append("\n\n");
                     c++;
                 }
             }
-        }
+        }*/
         return s.toString();
-    }
-
-    public static class Observer {
-        public void onSolveAdded() {
-        }
-
-        public void onSolveChanged(int index) {
-        }
-
-        public void onSolveRemoved(int index) {
-        }
-
-        public void onNewSession() {
-        }
-    }
-
-    public static class Deserializer implements JsonDeserializer<Session> {
-        @Override
-        public Session deserialize(JsonElement json, Type typeOfT,
-                                   JsonDeserializationContext context) throws
-                JsonParseException {
-            Session s = new Gson().fromJson(json, typeOfT);
-            for (final Solve solve : s.mSolves) {
-                solve.attachSession(s);
-            }
-            return s;
-        }
     }
 
 }

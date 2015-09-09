@@ -25,15 +25,11 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 
-import com.crashlytics.android.Crashlytics;
-import com.pluscubed.plustimer.BuildConfig;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.ui.widget.LockingViewPager;
 import com.pluscubed.plustimer.ui.widget.SlidingTabLayout;
 import com.pluscubed.plustimer.utils.PrefUtils;
-
-import io.fabric.sdk.android.Fabric;
 
 /**
  * Current Session Activity
@@ -164,13 +160,9 @@ public class CurrentSessionActivity extends DrawerActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (BuildConfig.USE_CRASHLYTICS) {
-            Fabric.with(this, new Crashlytics());
-        }
         setContentView(R.layout.activity_current_session);
 
         PuzzleType.initialize(this);
-        PuzzleType.getCurrent().initializeCurrentSessionData();
 
         if (savedInstanceState != null) {
             mScrambleImageActionEnable = savedInstanceState.getBoolean
@@ -304,17 +296,15 @@ public class CurrentSessionActivity extends DrawerActivity implements
                 SpinnerPuzzleTypeAdapter(getLayoutInflater(),
                 getSupportActionBar().getThemedContext());
         menuPuzzleSpinner.setAdapter(puzzleTypeSpinnerAdapter);
-        menuPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition
-                (PuzzleType.getCurrent()), true);
-        menuPuzzleSpinner.setOnItemSelectedListener(new AdapterView
-                .OnItemSelectedListener() {
+        menuPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition(
+                PuzzleType.getCurrent()), true);
+        menuPuzzleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view,
                                        int position, long id) {
                 PuzzleType newPuzzleType = (PuzzleType) parent.getItemAtPosition(position);
-                if (newPuzzleType != PuzzleType.getCurrent()) {
-                    PuzzleType.getCurrent().getCurrentSession().unregisterAllObservers();
-                    PuzzleType.setCurrent(newPuzzleType, CurrentSessionActivity.this);
+                if (!newPuzzleType.equals(PuzzleType.getCurrent())) {
+                    PuzzleType.setCurrent(newPuzzleType.getId());
                 }
             }
 
@@ -366,7 +356,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
                     return new CurrentSessionTimerFragment();
                 case 1:
                     return SolveListFragment.newInstance(true,
-                            PuzzleType.getCurrent().name(),
+                            PuzzleType.getCurrentId(),
                             PuzzleType.getCurrent().getCurrentSessionId());
             }
             return null;

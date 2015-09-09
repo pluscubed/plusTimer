@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
@@ -96,7 +97,7 @@ public abstract class DrawerActivity extends ThemableActivity {
     private void setupNavDrawer() {
         mDrawerLayout = (DrawerLayout) findViewById(R.id
                 .activity_drawer_drawerlayout);
-        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, Gravity.START);
+        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
         Resources resources = getResources();
         if (PrefUtils.getTheme(this) != PrefUtils.Theme.BLACK) {
             mDrawerLayout.setStatusBarBackgroundColor(resources.getColor(R.color.primary_dark));
@@ -107,7 +108,7 @@ public abstract class DrawerActivity extends ThemableActivity {
                 .OnClickListener() {
             @Override
             public void onClick(View view) {
-                mDrawerLayout.openDrawer(Gravity.START);
+                mDrawerLayout.openDrawer(GravityCompat.START);
             }
         });
 
@@ -155,7 +156,7 @@ public abstract class DrawerActivity extends ThemableActivity {
 
         if (!PrefUtils.isWelcomeDone(this)) {
             PrefUtils.markWelcomeDone(this);
-            mDrawerLayout.openDrawer(Gravity.START);
+            mDrawerLayout.openDrawer(GravityCompat.START);
         }
 
         //INFLATE LAYOUTS AND SET CLICK LISTENERS

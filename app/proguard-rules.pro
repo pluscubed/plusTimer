@@ -42,3 +42,5 @@
 
 ##---------------End: proguard configuration for Gson  ----------
 
+#retrolambda
+-dontwarn java.lang.invoke.*

@@ -1,110 +1,107 @@
 package com.pluscubed.plustimer.model;
 
-import android.database.Cursor;
-import android.support.annotation.IntRange;
+import android.support.annotation.IntDef;
 
-import com.pluscubed.plustimer.sql.SolveDbEntry;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.pluscubed.plustimer.utils.Utils;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Solve data object
  */
-//TODO: Make a utility class instead
 public class Solve {
 
-    private ScrambleAndSvg mScrambleAndSvg;
-
-    private Penalty mPenalty;
-
-    private long mRawTime;
-
-    private long mTimestamp;
-
-    private transient Session mAttachedSession;
-
+    public static final int PENALTY_DNF = 2;
+    public static final int PENALTY_PLUSTWO = 1;
+    public static final int PENALTY_NONE = 0;
+    @JsonIgnore
+    private String mId;
+    private String scramble;
+    private int penalty;
+    private long time;
+    private long timestamp;
     public Solve(Solve s) {
         copy(s);
     }
 
-    public Solve(Cursor cursor){
-        String scramble = cursor.getString(cursor.getColumnIndex(SolveDbEntry.COLUMN_NAME_SCRAMBLE));
-        mScrambleAndSvg = new ScrambleAndSvg(scramble, null);
-        int penalty = cursor.getInt(cursor.getColumnIndex(SolveDbEntry.COLUMN_NAME_PENALTY));
-        setPenaltyInt(penalty);
-        mRawTime = cursor.getLong(cursor.getColumnIndex(SolveDbEntry.COLUMN_NAME_TIME));
-        mTimestamp = cursor.getLong(cursor.getColumnIndex(SolveDbEntry.COLUMN_NAME_TIMESTAMP));
+    public Solve(String scramble, long time) {
+        this.scramble = scramble;
+        this.time = time;
+        this.penalty = PENALTY_NONE;
+        this.timestamp = System.currentTimeMillis();
     }
 
-    public Solve(ScrambleAndSvg scramble, long time) {
-        mScrambleAndSvg = scramble;
-        mRawTime = time;
-        mPenalty = Penalty.NONE;
-        mTimestamp = System.currentTimeMillis();
+    public String getId() {
+        return mId;
+    }
+
+    public void setId(String id) {
+        mId = id;
     }
 
     public void copy(Solve s) {
-        mScrambleAndSvg = s.getScrambleAndSvg();
-        mRawTime = s.getRawTime();
-        mPenalty = s.getPenalty();
-        mTimestamp = s.getTimestamp();
-        notifyChanged();
+        scramble = s.getScramble();
+        time = s.getRawTime();
+        penalty = s.getPenalty();
+        timestamp = s.getTimestamp();
+        mId = s.getId();
     }
 
-    private void notifyChanged() {
-        if (mAttachedSession != null) {
-            mAttachedSession.notifySolveChanged(mAttachedSession.getSolves().indexOf(this));
-        }
+    public String getScramble() {
+        return scramble;
     }
 
-    public ScrambleAndSvg getScrambleAndSvg() {
-        return mScrambleAndSvg;
+    public void setScramble(String scramble) {
+        this.scramble = scramble;
     }
 
     public long getTimestamp() {
-        return mTimestamp;
+        return timestamp;
     }
 
     public long getTimeTwo() {
-        return mRawTime + (mPenalty == Penalty.PLUSTWO ? 2000000000L : 0);
+        return time + (penalty == PENALTY_PLUSTWO ? 2000000000L : 0);
     }
 
     public String getTimeString(boolean milliseconds) {
-        switch (mPenalty) {
-            case DNF:
+        switch (penalty) {
+            case PENALTY_DNF:
                 return "DNF";
-            case PLUSTWO:
-                return Utils.timeStringFromNs(mRawTime + 2000000000L,
+            case PENALTY_PLUSTWO:
+                return Utils.timeStringFromNs(time + 2000000000L,
                         milliseconds) + "+";
-            case NONE:
+            case PENALTY_NONE:
             default:
-                return Utils.timeStringFromNs(mRawTime, milliseconds);
+                return Utils.timeStringFromNs(time, milliseconds);
         }
     }
 
     public String[] getTimeStringArray(boolean milliseconds) {
-        switch (mPenalty) {
-            case DNF:
+        switch (penalty) {
+            case PENALTY_DNF:
                 return new String[]{"DNF", ""};
-            case PLUSTWO:
-                long nanoseconds = mRawTime + 2000000000L;
+            case PENALTY_PLUSTWO:
+                long nanoseconds = time + 2000000000L;
                 String[] timeStringsSplitByDecimal = Utils
                         .timeStringsFromNsSplitByDecimal(nanoseconds,
                                 milliseconds);
                 timeStringsSplitByDecimal[1] = timeStringsSplitByDecimal[1] +
                         "+";
                 return timeStringsSplitByDecimal;
-            case NONE:
+            case PENALTY_NONE:
             default:
-                return Utils.timeStringsFromNsSplitByDecimal(mRawTime,
+                return Utils.timeStringsFromNsSplitByDecimal(time,
                         milliseconds);
         }
     }
 
     public String getDescriptiveTimeString(boolean milliseconds) {
-        switch (mPenalty) {
-            case DNF:
-                if (mRawTime != 0) {
-                    return "DNF (" + Utils.timeStringFromNs(mRawTime,
+        switch (penalty) {
+            case PENALTY_DNF:
+                if (time != 0) {
+                    return "DNF (" + Utils.timeStringFromNs(time,
                             milliseconds) + ")";
                 }
             default:
@@ -112,61 +109,28 @@ public class Solve {
         }
     }
 
-    public void attachSession(Session session) {
-        mAttachedSession = session;
+    @Penalty
+    public int getPenalty() {
+        return penalty;
     }
 
-    public Penalty getPenalty() {
-        return mPenalty;
-    }
-
-    public void setPenalty(Penalty penalty) {
-        if (mPenalty != penalty) {
-            mPenalty = penalty;
-            notifyChanged();
-        }
-    }
-
-    @IntRange(from=0,to=2)
-    public int getPenaltyInt(){
-        switch(mPenalty){
-            case NONE:
-                return 0;
-            case PLUSTWO:
-                return 1;
-            case DNF:
-                return 2;
-        }
-        return 0;
-    }
-
-    private void setPenaltyInt(@IntRange(from=0,to=2) int penalty){
-        switch(penalty){
-            case 0:
-                mPenalty = Penalty.NONE;
-                break;
-            case 1:
-                mPenalty = Penalty.PLUSTWO;
-                break;
-            case 2:
-                mPenalty = Penalty.DNF;
-                break;
-        }
+    public void setPenalty(@Penalty int penalty) {
+        this.penalty = penalty;
     }
 
     public long getRawTime() {
-        return mRawTime;
+        return time;
     }
 
     public void setRawTime(long time) {
-        if (mRawTime != time) {
-            mRawTime = time;
-            notifyChanged();
+        if (this.time != time) {
+            this.time = time;
         }
     }
 
-    public enum Penalty {
-        NONE, PLUSTWO, DNF
+    @IntDef({PENALTY_DNF, PENALTY_PLUSTWO, PENALTY_NONE})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Penalty {
     }
 
 

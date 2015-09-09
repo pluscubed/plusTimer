@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="scramblers" translateable="false">
+        <item>sq1fast</item>
+        <item>skewb</item>
+        <item>pyram</item>
+        <item>minx</item>
+        <item>clock</item>
+        <item>777</item>
+        <item>666</item>
+        <item>555</item>
+        <item>555ni</item>
+        <item>444</item>
+        <item>444ni</item>
+        <item>444fast</item>
+        <item>333</item>
+        <item>333ni</item>
+        <item>222</item>
+    </string-array>
+
+    <string-array name="default_custom_puzzletypes" translateable="false">
+        <item>333,feet</item>
+        <item>333,oh</item>
+    </string-array>
+
+    <string-array name="legacy_names" translateable="false">
+        <item>SQ1FAST</item>
+        <item>SKEWB</item>
+        <item>PYRAMINX</item>
+        <item>MINX</item>
+        <item>CLOCK</item>
+        <item>SEVEN</item>
+        <item>SIX</item>
+        <item>FIVE</item>
+        <item>FIVE_BLD</item>
+        <item>FOUR</item>
+        <item>FOUR_BLD</item>
+        <item>FOURFAST</item>
+        <item>THREE</item>
+        <item>THREE_BLD</item>
+        <item>TWO</item>
+        <item>THREE_OH</item>
+        <item>THREE_FEET</item>
+    </string-array>
+</resources>

@@ -4,13 +4,17 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Point;
 import android.os.Build;
 import android.view.Display;
 import android.view.Surface;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.pluscubed.plustimer.model.PuzzleType;
@@ -44,7 +48,14 @@ public class Utils {
 
     static {
         gson = new GsonBuilder()
-                .registerTypeAdapter(Session.class, new Session.Deserializer())
+                .registerTypeAdapter(Session.class, (JsonDeserializer<Session>) (json, typeOfT, context) -> {
+                    Session s = new Gson().fromJson(json, typeOfT);
+                    //TODO: Something something legacy
+                    /*for (final Solve solve : s.mSolves) {
+                        solve.attachSession(s);
+                    }*/
+                    return s;
+                })
                 .create();
         SESSION_LIST_TYPE = new TypeToken<List<Session>>() {
         }.getType();
@@ -283,7 +294,7 @@ public class Utils {
     private static List<Long> getListTimeTwoNoDnf(List<Solve> list) {
         ArrayList<Long> timeTwo = new ArrayList<>();
         for (Solve i : list) {
-            if (!(i.getPenalty() == Solve.Penalty.DNF)) {
+            if (!(i.getPenalty() == Solve.PENALTY_DNF)) {
                 timeTwo.add(i.getTimeTwo());
             }
         }
@@ -292,7 +303,7 @@ public class Utils {
 
     /**
      * Gets the best {@code Solve} out of the list (lowest time).
-     * <p/>
+     * <p>
      * If the list contains no solves, null is returned. If the list contains
      * only DNFs, the last DNF solve is returned.
      *
@@ -307,7 +318,7 @@ public class Utils {
             if (times.size() > 0) {
                 long bestTimeTwo = Collections.min(times);
                 for (Solve i : solveList) {
-                    if (!(i.getPenalty() == Solve.Penalty.DNF) && i
+                    if (!(i.getPenalty() == Solve.PENALTY_DNF) && i
                             .getTimeTwo() == bestTimeTwo) {
                         return i;
                     }
@@ -321,7 +332,7 @@ public class Utils {
 
     /**
      * Gets the worst {@code Solve} out of the list (highest time).
-     * <p/>
+     * <p>
      * If the list contains DNFs, the last DNF solve is returned.
      * If the list contains no solves, null is returned.
      *
@@ -333,7 +344,7 @@ public class Utils {
         if (solveList.size() > 0) {
             Collections.reverse(solveList);
             for (Solve i : solveList) {
-                if (i.getPenalty() == Solve.Penalty.DNF) {
+                if (i.getPenalty() == Solve.PENALTY_DNF) {
                     return i;
                 }
             }
@@ -356,9 +367,8 @@ public class Utils {
      * @param wca the sequence of moves in WCA notation
      * @return the converted sequence of moves in SiGN notation
      */
-    public static String wcaToSignNotation(String wca, String puzzleTypeName) {
-        if (Character.isDigit(PuzzleType.valueOf(puzzleTypeName)
-                .scramblerSpec.charAt(0))) {
+    public static String wcaToSignNotation(String wca, String puzzleTypeId) {
+        if (Character.isDigit(PuzzleType.get(puzzleTypeId).getScrambler().charAt(0))) {
             String[] moves = wca.split(" ");
             for (int i = 0; i < moves.length; i++) {
                 if (moves[i].contains("w")) {
@@ -383,9 +393,8 @@ public class Utils {
      * @param sign the sequence of moves in SiGN notation
      * @return the converted sequence of moves in WCA notation
      */
-    public static String signToWcaNotation(String sign, String puzzleTypeName) {
-        if (Character.isDigit(PuzzleType.valueOf(puzzleTypeName)
-                .scramblerSpec.charAt(0))) {
+    public static String signToWcaNotation(String sign, String puzzleTypeId) {
+        if (Character.isDigit(PuzzleType.get(puzzleTypeId).getScrambler().charAt(0))) {
             String[] moves = sign.split(" ");
             for (int i = 0; i < moves.length; i++) {
                 if (!moves[i].equals(moves[i].toUpperCase())) {
@@ -424,7 +433,7 @@ public class Utils {
 
             int dnfCount = 0;
             for (Solve i : list) {
-                if (i.getPenalty() == Solve.Penalty.DNF) dnfCount++;
+                if (i.getPenalty() == Solve.PENALTY_DNF) dnfCount++;
             }
 
             //If the number of DNFs can be cut off by the trim
@@ -440,5 +449,24 @@ public class Utils {
             return Long.MAX_VALUE;
         }
         return Session.GET_AVERAGE_INVALID_NOT_ENOUGH;
+    }
+
+    //Taken from http://stackoverflow.com/questions/19908003
+    public static int getTextViewHeight(TextView textView) {
+        WindowManager wm =
+                (WindowManager) textView.getContext().getSystemService(Context.WINDOW_SERVICE);
+        Display display = wm.getDefaultDisplay();
+
+        int deviceWidth;
+
+        Point size = new Point();
+        display.getSize(size);
+        deviceWidth = size.x;
+
+        int widthMeasureSpec =
+                View.MeasureSpec.makeMeasureSpec(deviceWidth, View.MeasureSpec.AT_MOST);
+        int heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+        textView.measure(widthMeasureSpec, heightMeasureSpec);
+        return textView.getMeasuredHeight();
     }
 }

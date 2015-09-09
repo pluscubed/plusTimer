@@ -29,17 +29,17 @@ class SpinnerPuzzleTypeAdapter extends ArrayAdapter<PuzzleType> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
-        convertView = getItem(position).official ? mLayoutInflater
+        convertView = getItem(position).isScramblerOfficial() ? mLayoutInflater
                 .inflate(R.layout.spinner_item, parent, false)
                 : mLayoutInflater.inflate(R.layout.spinner_item2, parent,
                 false);
 
         TextView textView = (TextView) convertView.findViewById(android.R.id
                 .text1);
-        textView.setText(getItem(position).getUiName(mContext));
+        textView.setText(getItem(position).getUiName());
         textView.setTextColor(Color.WHITE);
 
-        if (!getItem(position).official) {
+        if (!getItem(position).isScramblerOfficial()) {
             TextView textView2 = (TextView) convertView.findViewById(android
                     .R.id.text2);
             textView2.setText(mContext.getString(R.string.unofficial));
@@ -51,17 +51,17 @@ class SpinnerPuzzleTypeAdapter extends ArrayAdapter<PuzzleType> {
     @Override
     public View getDropDownView(int position, View convertView,
                                 ViewGroup parent) {
-        convertView = getItem(position).official ? mLayoutInflater
+        convertView = getItem(position).isScramblerOfficial() ? mLayoutInflater
                 .inflate(R.layout.spinner_item_dropdown, parent, false)
                 : mLayoutInflater.inflate(R.layout.spinner_item_dropdown2,
                 parent, false);
 
         TextView textView = (TextView) convertView.findViewById(android.R.id
                 .text1);
-        textView.setText(getItem(position).getUiName(mContext));
+        textView.setText(getItem(position).getUiName());
         textView.setTextColor(mContext.getResources().getColorStateList(R
                 .color.list_dropdown_color_dark));
-        if (!getItem(position).official) {
+        if (!getItem(position).isScramblerOfficial()) {
             TextView textView2 = (TextView) convertView.findViewById(android
                     .R.id.text2);
             textView2.setText(mContext.getString(R.string.unofficial));

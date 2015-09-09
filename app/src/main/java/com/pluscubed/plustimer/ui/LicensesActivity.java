@@ -39,6 +39,7 @@ public class LicensesActivity extends ThemableActivity {
                             new LicensesFragment())
                     .commit();
         }
+        //noinspection ConstantConditions
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle(R.string.open_source_licenses);
     }

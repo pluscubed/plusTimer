@@ -11,7 +11,7 @@ import com.pluscubed.plustimer.utils.Utils;
 public class ScrambleAndSvg {
 
     @Nullable
-    private transient String mSvg;
+    private String mSvg;
     private String mScramble;
 
     public ScrambleAndSvg(String scramble, @Nullable String svg) {
