@@ -38,7 +38,7 @@ android {
         applicationId "com.pluscubed.plustimer"
         minSdkVersion 14
         targetSdkVersion 23
-        versionCode 23
+        versionCode 24
         versionName '0.3.0-beta'
         manifestPlaceholders = [appName: "@string/app_name"]
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -91,6 +91,27 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    applicationVariants.all { variant ->
+        variant.assemble.doLast {
+            //If this is a 'release' build, reveal the compiled apk in finder/explorer
+            if (variant.buildType.name.contains('release')) {
+
+                def path;
+                variant.outputs.each { output ->
+                    path = output.outputFile
+                }
+
+                exec {
+                    if (System.properties['os.name'].toLowerCase().contains('mac os x')) {
+                        ['open', '-R', path].execute()
+                    } else if (System.properties['os.name'].toLowerCase().contains('windows')) {
+                        ['explorer', '/select,', path].execute()
+                    }
+                }
+            }
+        }
     }
 }
 

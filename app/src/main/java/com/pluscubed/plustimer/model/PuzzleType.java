@@ -3,7 +3,9 @@ package com.pluscubed.plustimer.model;
 import android.content.Context;
 import android.support.annotation.Nullable;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
@@ -11,6 +13,7 @@ import com.firebase.client.ValueEventListener;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
+import com.pluscubed.plustimer.App;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.utils.PrefUtils;
 import com.pluscubed.plustimer.utils.Utils;
@@ -25,31 +28,42 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import rx.Observable;
+
 /**
- * Enum for puzzle
+ * Puzzle Type object
  */
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY,
+        getterVisibility = JsonAutoDetect.Visibility.NONE,
+        setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class PuzzleType {
-    @JsonIgnore
     private static String sCurrentId;
-    @JsonIgnore
     private static List<PuzzleType> sPuzzleTypes;
+
     @JsonIgnore
     private final String mId;
+    @JsonIgnore
+    private Puzzle mPuzzle;
+
+    @JsonProperty("scrambler")
+    private String mScrambler;
+    @JsonProperty("currentSessionId")
+    private String mCurrentSessionId;
+    @JsonProperty("enabled")
+    private boolean mEnabled;
+    @JsonProperty("inspection")
+    private boolean mInspectionOn;
+    @JsonProperty("name")
+    private String mName;
+    @JsonProperty("bld")
+    private boolean mIsBld;
     //Pre-SQL legacy code
     @JsonIgnore
     @Deprecated
-    private final String mCurrentSessionFileName;
+    private String mCurrentSessionFileName;
     @JsonIgnore
     @Deprecated
-    private final String mHistoryFileName;
-    private String scrambler;
-    private String currentSessionId;
-    private boolean enabled;
-    private boolean inspection;
-    private String name;
-    private boolean bld;
-    @JsonIgnore
-    private Puzzle mPuzzle;
+    private String mHistoryFileName;
     @JsonIgnore
     @Deprecated
     private HistorySessions mHistorySessionsLegacy;
@@ -57,9 +71,13 @@ public class PuzzleType {
     @Deprecated
     private String mLegacyName;
 
-    PuzzleType(String scrambler, String uiName, String legacyName, String id) {
-        this.scrambler = scrambler;
-        this.name = uiName;
+    public PuzzleType() {
+        mId = null;
+    }
+
+    public PuzzleType(String scrambler, String uiName, String legacyName, String id) {
+        this.mScrambler = scrambler;
+        this.mName = uiName;
         mId = id;
 
         mLegacyName = legacyName;
@@ -72,6 +90,7 @@ public class PuzzleType {
         return sPuzzleTypes;
     }
 
+    @Nullable
     public static PuzzleType get(String id) {
         for (PuzzleType type : sPuzzleTypes) {
             if (type.getId().equals(id)) {
@@ -81,6 +100,7 @@ public class PuzzleType {
         return sPuzzleTypes.get(0);
     }
 
+    @Nullable
     public static PuzzleType getCurrent() {
         return get(sCurrentId);
     }
@@ -94,7 +114,7 @@ public class PuzzleType {
         return sCurrentId;
     }
 
-    public static List<PuzzleType> valuesExcludingDisabled() {
+    public static List<PuzzleType> getEnabledPuzzleTypes() {
         List<PuzzleType> array = new ArrayList<>();
         for (PuzzleType i : sPuzzleTypes) {
             if (i.isEnabled()) {
@@ -104,97 +124,163 @@ public class PuzzleType {
         return array;
     }
 
-    public synchronized static void initialize(Context context) {
+    public synchronized static Observable<Object> initialize(Context context) {
+        sPuzzleTypes = new ArrayList<>();
         int savedVersionCode = PrefUtils.getVersionCode(context);
-        Firebase puzzletypes = new Firebase("https://plustimer.firebaseio.com/web/data/users/test1/puzzletypes");
+        //TODO: Nicer Rx structure
+        return App.getFirebaseUserRef().flatMap(firebase -> {
+            Firebase puzzletypes = firebase.child("puzzletypes");
+            Firebase currentPuzzleType = firebase.child("current-puzzle-type");
 
-        if (savedVersionCode < 24) {
+            Observable<Object> stuff;
 
-            //Generate default puzzle types from this...
-            String[] scramblers = context.getResources().getStringArray(R.array.scramblers);
-            //and this, with the appropriate UI names...
-            String[] defaultCustomPuzzleTypes = context.getResources().getStringArray(R.array.default_custom_puzzletypes);
-            //from this
-            String[] puzzles = context.getResources().getStringArray(R.array.scrambler_names);
-            //and the legacy names from this
-            String[] legacyNames = context.getResources().getStringArray(R.array.legacy_names);
+            if (savedVersionCode < 24) {
+                stuff = Observable.create(subscriber -> {
+                    //Generate default puzzle types from this...
+                    String[] scramblers = context.getResources().getStringArray(R.array.scramblers);
+                    //and this, with the appropriate UI names...
+                    String[] defaultCustomPuzzleTypes = context.getResources()
+                            .getStringArray(R.array.default_custom_puzzletypes);
+                    //from this
+                    String[] puzzles = context.getResources().getStringArray(R.array.scrambler_names);
+                    //and the legacy names from this
+                    String[] legacyNames = context.getResources().getStringArray(R.array.legacy_names);
 
 
-            for (int i = 0; i < scramblers.length + defaultCustomPuzzleTypes.length; i++) {
-                String scrambler;
-                String customType = null;
-                if (scramblers.length > i) {
-                    scrambler = scramblers[i];
-                } else {
-                    customType = defaultCustomPuzzleTypes[i - scramblers.length];
-                    scrambler = customType.substring(0, customType.indexOf(","));
-                }
+                    for (int i = 0; i < scramblers.length + defaultCustomPuzzleTypes.length; i++) {
+                        String scrambler;
+                        String customType = null;
+                        if (scramblers.length > i) {
+                            scrambler = scramblers[i];
+                        } else {
+                            customType = defaultCustomPuzzleTypes[i - scramblers.length];
+                            scrambler = customType.substring(0, customType.indexOf(","));
+                        }
 
-                String uiName;
-                if (puzzles.length > i) {
-                    uiName = context.getResources().getStringArray(R.array.scrambler_names)[i];
-                } else {
-                    int order = Integer.parseInt(scrambler.substring(0, 1));
-                    String addon = null;
-                    if (scrambler.contains("ni")) {
-                        addon = context.getString(R.string.bld);
-                    }
-                    if (customType != null) {
-                        if (customType.contains("feet")) {
-                            addon = context.getString(R.string.feet);
-                        } else if (customType.contains("oh")) {
-                            addon = context.getString(R.string.oh);
+                        String uiName;
+                        if (puzzles.length > i) {
+                            uiName = context.getResources().getStringArray(R.array.scrambler_names)[i];
+                        } else {
+                            int order = Integer.parseInt(scrambler.substring(0, 1));
+                            String addon = null;
+                            if (scrambler.contains("ni")) {
+                                addon = context.getString(R.string.bld);
+                            }
+                            if (customType != null) {
+                                if (customType.contains("feet")) {
+                                    addon = context.getString(R.string.feet);
+                                } else if (customType.contains("oh")) {
+                                    addon = context.getString(R.string.oh);
+                                }
+                            }
+                            if (addon != null) {
+                                uiName = order + "x" + order + "-" + addon;
+                            } else {
+                                uiName = order + "x" + order;
+                            }
+                        }
+
+                        Firebase newTypeRef = puzzletypes.push();
+                        PuzzleType type =
+                                new PuzzleType(scrambler, uiName, legacyNames[i], newTypeRef.getKey());
+                        newTypeRef.setValue(type);
+                        sPuzzleTypes.add(type);
+
+                        if (type.getName().equals("3x3")) {
+                            //Default current puzzle type
+                            currentPuzzleType.setValue(newTypeRef.getKey());
+                            sCurrentId = newTypeRef.getKey();
                         }
                     }
-                    if (addon != null) {
-                        uiName = order + "x" + order + "-" + addon;
-                    } else {
-                        uiName = order + "x" + order;
-                    }
-                }
+                    subscriber.onCompleted();
+                });
+            } else {
+                stuff = Observable.combineLatest(Observable.create(
+                        subscriber -> puzzletypes.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                while (dataSnapshot.getChildren().iterator().hasNext()) {
+                                    PuzzleType type = dataSnapshot.getChildren().iterator().next()
+                                            .getValue(PuzzleType.class);
+                                    sPuzzleTypes.add(type);
+                                }
+                                subscriber.onCompleted();
+                            }
 
-                Firebase newTypeRef = puzzletypes.push();
-                PuzzleType type = new PuzzleType(scrambler, uiName, legacyNames[i], newTypeRef.getKey());
-                newTypeRef.setValue(type);
-                sPuzzleTypes.add(type);
+                            @Override
+                            public void onCancelled(FirebaseError firebaseError) {
+                                subscriber.onError(firebaseError.toException());
+                            }
+                        })), Observable.create(subscriber -> {
+                    currentPuzzleType.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            sCurrentId = dataSnapshot.getValue(String.class);
+                            subscriber.onCompleted();
+                        }
+
+                        @Override
+                        public void onCancelled(FirebaseError firebaseError) {
+                            subscriber.onError(firebaseError.toException());
+                        }
+                    });
+                    subscriber.onCompleted();
+                }), (o, o2) -> null);
+
+
             }
-        } else {
-            puzzletypes.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    while (dataSnapshot.getChildren().iterator().hasNext()) {
-                        PuzzleType type = dataSnapshot.getChildren().iterator().next().getValue(PuzzleType.class);
-                        sPuzzleTypes.add(type);
-                    }
-                }
 
-                @Override
-                public void onCancelled(FirebaseError firebaseError) {
-                }
-            });
-        }
+            return stuff;
 
-        for (PuzzleType puzzleType : sPuzzleTypes) {
-            puzzleType.upgradeDatabase(context);
-        }
+        }).flatMap(o -> Observable.create(subscriber -> {
+            for (PuzzleType puzzleType : sPuzzleTypes) {
+                puzzleType.upgradeDatabase(context);
+            }
 
-        PrefUtils.saveVersionCode(context);
+            PrefUtils.saveVersionCode(context);
+            subscriber.onCompleted();
+        }));
+    }
+
+    public String getCurrentSessionId() {
+        return mCurrentSessionId;
     }
 
     public boolean isBld() {
-        return bld;
+        return mIsBld;
+    }
+
+    public boolean isScramblerOfficial() {
+        return !mScrambler.contains("fast");
+    }
+
+    public String getScrambler() {
+        return mScrambler;
+    }
+
+    public String getName() {
+        return mName;
+    }
+
+    boolean isEnabled() {
+        return mEnabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        //TODO
+        this.mEnabled = enabled;
+        if (mId.equals(sCurrentId) && !this.mEnabled) {
+            for (PuzzleType i : sPuzzleTypes) {
+                if (i.mEnabled) {
+                    sCurrentId = i.getId();
+                    break;
+                }
+            }
+        }
     }
 
     public String getId() {
         return mId;
-    }
-
-    public boolean isScramblerOfficial() {
-        return !scrambler.contains("fast");
-    }
-
-    public String getScrambler() {
-        return scrambler;
     }
 
     @Deprecated
@@ -221,7 +307,7 @@ public class PuzzleType {
     public List<Session> getSortedHistorySessions() {
         //TODO
         /*if (sessions.size() > 0) {
-            sessions.remove(getSession(currentSessionId));
+            sessions.remove(getSession(mCurrentSessionId));
             Collections.sort(sessions, new Comparator<Session>() {
                 @Override
                 public int compare(Session lhs, Session rhs) {
@@ -239,11 +325,6 @@ public class PuzzleType {
         return null;
     }
 
-
-    public String getCurrentSessionId() {
-        return currentSessionId;
-    }
-
     private void upgradeDatabase(Context context) {
         //TODO
         //AFTER UPDATING APP////////////
@@ -252,15 +333,15 @@ public class PuzzleType {
         if (savedVersionCode <= 10) {
             //Version <=10: Set up history sessions with old
             // name first
-            if (!scrambler.equals("333") || mLegacyName.equals("THREE")) {
-                mHistorySessionsLegacy.setFilename(scrambler + ".json");
+            if (!mScrambler.equals("333") || mLegacyName.equals("THREE")) {
+                mHistorySessionsLegacy.setFilename(mScrambler + ".json");
                 mHistorySessionsLegacy.init(context);
                 mHistorySessionsLegacy.setFilename(mHistoryFileName);
                 if (mHistorySessionsLegacy.getList().size() > 0) {
                     mHistorySessionsLegacy.save(context);
                 }
                 File oldFile = new File(context.getFilesDir(),
-                        scrambler + ".json");
+                        mScrambler + ".json");
                 oldFile.delete();
             }
         }
@@ -300,14 +381,14 @@ public class PuzzleType {
         /*if (mAllSessions != null)
             mAllSessions.add(new Session(mCurrentSession));
         mCurrentSession.newSession();
-        currentSessionId = mCurrentSession.getId();
-        PrefUtils.saveCurrentSessionIndex(this, context, currentSessionId);*/
+        mCurrentSessionId = mCurrentSession.getId();
+        PrefUtils.saveCurrentSessionIndex(this, context, mCurrentSessionId);*/
     }
 
     public Puzzle getPuzzle() {
         if (mPuzzle == null) {
             try {
-                mPuzzle = PuzzlePlugins.getScramblers().get(scrambler)
+                mPuzzle = PuzzlePlugins.getScramblers().get(mScrambler)
                         .cachedInstance();
             } catch (LazyInstantiatorException |
                     BadLazyClassDescriptionException | IOException e) {
@@ -317,19 +398,15 @@ public class PuzzleType {
         return mPuzzle;
     }
 
-    public String getUiName() {
-        return name;
-    }
-
     public Session getCurrentSession() {
         //TODO
-        return getSession(currentSessionId);
+        return getSession(mCurrentSessionId);
     }
 
     @Nullable
     public Session getSession(String id) {
         //TODO
-        /*if (id == currentSessionId) {
+        /*if (id == mCurrentSessionId) {
             //Check that if the current session is null (from reset or
             // initializing)
             return mCurrentSession;
@@ -346,23 +423,6 @@ public class PuzzleType {
     public void resetCurrentSession() {
         //TODO
         /*mCurrentSession.newSession();*/
-    }
-
-    boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        //TODO
-        this.enabled = enabled;
-        if (mId.equals(sCurrentId) && !this.enabled) {
-            for (PuzzleType i : sPuzzleTypes) {
-                if (i.enabled) {
-                    sCurrentId = i.getId();
-                    break;
-                }
-            }
-        }
     }
 
     @Override

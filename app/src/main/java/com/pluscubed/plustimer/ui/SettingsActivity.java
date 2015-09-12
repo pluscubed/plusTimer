@@ -120,7 +120,7 @@ public class SettingsActivity extends ThemableActivity {
 
             List<String> entries = new ArrayList<>();
             for (PuzzleType i : PuzzleType.getPuzzleTypes()) {
-                String uiName = i.getUiName();
+                String uiName = i.getName();
                 if (!i.isScramblerOfficial()) {
                     uiName += " - " + getString(R.string.unofficial);
                 }

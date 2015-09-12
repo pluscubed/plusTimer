@@ -336,26 +336,23 @@ public class CurrentSessionTimerFragment extends Fragment {
     }
 
     private void invalidateScrambleShadow(final boolean overrideShowShadow) {
-        Runnable animate = new Runnable() {
-            @Override
-            public void run() {
-                if (mScrambleElevationAnimator != null) {
-                    mScrambleElevationAnimator.cancel();
-                }
-                Property<View, Float> property;
-                View view;
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    property = View.TRANSLATION_Z;
-                    view = mScrambleText;
-                } else {
-                    property = View.ALPHA;
-                    view = mScrambleTextShadow;
-                }
-                mScrambleElevationAnimator = ObjectAnimator.ofFloat(view,
-                        property, getScrambleTextElevationOrShadowAlpha(overrideShowShadow));
-                mScrambleElevationAnimator.setDuration(150);
-                mScrambleElevationAnimator.start();
+        Runnable animate = () -> {
+            if (mScrambleElevationAnimator != null) {
+                mScrambleElevationAnimator.cancel();
             }
+            Property<View, Float> property;
+            View view;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                property = View.TRANSLATION_Z;
+                view = mScrambleText;
+            } else {
+                property = View.ALPHA;
+                view = mScrambleTextShadow;
+            }
+            mScrambleElevationAnimator = ObjectAnimator.ofFloat(view,
+                    property, getScrambleTextElevationOrShadowAlpha(overrideShowShadow));
+            mScrambleElevationAnimator.setDuration(150);
+            mScrambleElevationAnimator.start();
         };
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             mScrambleText.postOnAnimation(animate);

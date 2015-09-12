@@ -4,7 +4,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.graphics.Color;
@@ -24,12 +23,15 @@ import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.ui.widget.LockingViewPager;
 import com.pluscubed.plustimer.ui.widget.SlidingTabLayout;
 import com.pluscubed.plustimer.utils.PrefUtils;
+
+import rx.Subscriber;
 
 /**
  * Current Session Activity
@@ -78,17 +80,14 @@ public class CurrentSessionActivity extends DrawerActivity implements
                 -toolbar.getHeight());
         exit.setDuration(300);
         exit.setInterpolator(new AccelerateInterpolator());
-        exit.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                LinearLayout.LayoutParams params =
-                        (LinearLayout.LayoutParams) layout.getLayoutParams();
-                params.height =
-                        mContentFrameLayoutHeight - (int) (float) animation.getAnimatedValue();
-                params.weight = 0;
-                layout.setLayoutParams(params);
-                layout.setTranslationY((int) (float) animation.getAnimatedValue());
-            }
+        exit.addUpdateListener(animation -> {
+            LinearLayout.LayoutParams params =
+                    (LinearLayout.LayoutParams) layout.getLayoutParams();
+            params.height =
+                    mContentFrameLayoutHeight - (int) (float) animation.getAnimatedValue();
+            params.weight = 0;
+            layout.setLayoutParams(params);
+            layout.setTranslationY((int) (float) animation.getAnimatedValue());
         });
 
         AnimatorSet scrambleAnimatorSet = new AnimatorSet();
@@ -106,17 +105,14 @@ public class CurrentSessionActivity extends DrawerActivity implements
         ObjectAnimator exit = ObjectAnimator.ofFloat(toolbar, View.TRANSLATION_Y, 0f);
         exit.setDuration(300);
         exit.setInterpolator(new DecelerateInterpolator());
-        exit.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                LinearLayout.LayoutParams params =
-                        (LinearLayout.LayoutParams) layout.getLayoutParams();
-                params.height =
-                        mContentFrameLayoutHeight - (int) (float) animation.getAnimatedValue();
-                params.weight = 0;
-                layout.setLayoutParams(params);
-                layout.setTranslationY((int) (float) animation.getAnimatedValue());
-            }
+        exit.addUpdateListener(animation -> {
+            LinearLayout.LayoutParams params =
+                    (LinearLayout.LayoutParams) layout.getLayoutParams();
+            params.height =
+                    mContentFrameLayoutHeight - (int) (float) animation.getAnimatedValue();
+            params.weight = 0;
+            layout.setLayoutParams(params);
+            layout.setTranslationY((int) (float) animation.getAnimatedValue());
         });
 
         AnimatorSet scrambleAnimatorSet = new AnimatorSet();
@@ -162,7 +158,23 @@ public class CurrentSessionActivity extends DrawerActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_current_session);
 
-        PuzzleType.initialize(this);
+        PuzzleType.initialize(this).subscribe(new Subscriber<Object>() {
+            @Override
+            public void onCompleted() {
+                //TODO: Notify fragments
+                supportInvalidateOptionsMenu();
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                Toast.makeText(CurrentSessionActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onNext(Object o) {
+
+            }
+        });
 
         if (savedInstanceState != null) {
             mScrambleImageActionEnable = savedInstanceState.getBoolean
@@ -219,6 +231,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
         });
         mViewPager.setCurrentItem(0);
 
+        //noinspection ConstantConditions
         getSupportActionBar().setElevation(0);
 
         overridePendingTransition(0, 0);
@@ -289,29 +302,31 @@ public class CurrentSessionActivity extends DrawerActivity implements
         }
         getMenuInflater().inflate(R.menu.menu_current_session, menu);
 
-        final Spinner menuPuzzleSpinner = (Spinner) MenuItemCompat.getActionView
-                (menu.findItem(R.id
-                        .menu_activity_current_session_puzzletype_spinner));
-        ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter = new
-                SpinnerPuzzleTypeAdapter(getLayoutInflater(),
-                getSupportActionBar().getThemedContext());
-        menuPuzzleSpinner.setAdapter(puzzleTypeSpinnerAdapter);
-        menuPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition(
-                PuzzleType.getCurrent()), true);
-        menuPuzzleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view,
-                                       int position, long id) {
-                PuzzleType newPuzzleType = (PuzzleType) parent.getItemAtPosition(position);
-                if (!newPuzzleType.equals(PuzzleType.getCurrent())) {
-                    PuzzleType.setCurrent(newPuzzleType.getId());
+        if (PuzzleType.getCurrentId() != null) {
+            final Spinner menuPuzzleSpinner = (Spinner) MenuItemCompat
+                    .getActionView(menu.findItem(R.id.menu_activity_current_session_puzzletype_spinner));
+            //noinspection ConstantConditions
+            ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter = new
+                    SpinnerPuzzleTypeAdapter(getLayoutInflater(),
+                    getSupportActionBar().getThemedContext());
+            menuPuzzleSpinner.setAdapter(puzzleTypeSpinnerAdapter);
+            menuPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition(
+                    PuzzleType.getCurrent()), true);
+            menuPuzzleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view,
+                                           int position, long id) {
+                    PuzzleType newPuzzleType = (PuzzleType) parent.getItemAtPosition(position);
+                    if (!newPuzzleType.equals(PuzzleType.getCurrent())) {
+                        PuzzleType.setCurrent(newPuzzleType.getId());
+                    }
                 }
-            }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+                }
+            });
+        }
 
         MenuItem displayScrambleImage = menu.findItem(
                 R.id.menu_activity_current_session_scramble_image_menuitem);

@@ -2,7 +2,9 @@ package com.pluscubed.plustimer.model;
 
 import android.support.annotation.IntDef;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.pluscubed.plustimer.utils.Utils;
 
 import java.lang.annotation.Retention;
@@ -11,26 +13,38 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * Solve data object
  */
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY,
+        getterVisibility = JsonAutoDetect.Visibility.NONE,
+        setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class Solve {
-
     public static final int PENALTY_DNF = 2;
     public static final int PENALTY_PLUSTWO = 1;
     public static final int PENALTY_NONE = 0;
+
     @JsonIgnore
     private String mId;
-    private String scramble;
-    private int penalty;
-    private long time;
-    private long timestamp;
+
+    @JsonProperty("scramble")
+    private String mScramble;
+    @JsonProperty("penalty")
+    private int mPenalty;
+    @JsonProperty("time")
+    private long mTime;
+    @JsonProperty("timestamp")
+    private long mTimestamp;
+
+    public Solve() {
+    }
+
     public Solve(Solve s) {
         copy(s);
     }
 
     public Solve(String scramble, long time) {
-        this.scramble = scramble;
-        this.time = time;
-        this.penalty = PENALTY_NONE;
-        this.timestamp = System.currentTimeMillis();
+        this.mScramble = scramble;
+        this.mTime = time;
+        this.mPenalty = PENALTY_NONE;
+        this.mTimestamp = System.currentTimeMillis();
     }
 
     public String getId() {
@@ -42,48 +56,48 @@ public class Solve {
     }
 
     public void copy(Solve s) {
-        scramble = s.getScramble();
-        time = s.getRawTime();
-        penalty = s.getPenalty();
-        timestamp = s.getTimestamp();
+        mScramble = s.getScramble();
+        mTime = s.getRawTime();
+        mPenalty = s.getPenalty();
+        mTimestamp = s.getTimestamp();
         mId = s.getId();
     }
 
     public String getScramble() {
-        return scramble;
+        return mScramble;
     }
 
     public void setScramble(String scramble) {
-        this.scramble = scramble;
+        this.mScramble = scramble;
     }
 
     public long getTimestamp() {
-        return timestamp;
+        return mTimestamp;
     }
 
     public long getTimeTwo() {
-        return time + (penalty == PENALTY_PLUSTWO ? 2000000000L : 0);
+        return mTime + (mPenalty == PENALTY_PLUSTWO ? 2000000000L : 0);
     }
 
     public String getTimeString(boolean milliseconds) {
-        switch (penalty) {
+        switch (mPenalty) {
             case PENALTY_DNF:
                 return "DNF";
             case PENALTY_PLUSTWO:
-                return Utils.timeStringFromNs(time + 2000000000L,
+                return Utils.timeStringFromNs(mTime + 2000000000L,
                         milliseconds) + "+";
             case PENALTY_NONE:
             default:
-                return Utils.timeStringFromNs(time, milliseconds);
+                return Utils.timeStringFromNs(mTime, milliseconds);
         }
     }
 
     public String[] getTimeStringArray(boolean milliseconds) {
-        switch (penalty) {
+        switch (mPenalty) {
             case PENALTY_DNF:
                 return new String[]{"DNF", ""};
             case PENALTY_PLUSTWO:
-                long nanoseconds = time + 2000000000L;
+                long nanoseconds = mTime + 2000000000L;
                 String[] timeStringsSplitByDecimal = Utils
                         .timeStringsFromNsSplitByDecimal(nanoseconds,
                                 milliseconds);
@@ -92,16 +106,16 @@ public class Solve {
                 return timeStringsSplitByDecimal;
             case PENALTY_NONE:
             default:
-                return Utils.timeStringsFromNsSplitByDecimal(time,
+                return Utils.timeStringsFromNsSplitByDecimal(mTime,
                         milliseconds);
         }
     }
 
     public String getDescriptiveTimeString(boolean milliseconds) {
-        switch (penalty) {
+        switch (mPenalty) {
             case PENALTY_DNF:
-                if (time != 0) {
-                    return "DNF (" + Utils.timeStringFromNs(time,
+                if (mTime != 0) {
+                    return "DNF (" + Utils.timeStringFromNs(mTime,
                             milliseconds) + ")";
                 }
             default:
@@ -111,20 +125,20 @@ public class Solve {
 
     @Penalty
     public int getPenalty() {
-        return penalty;
+        return mPenalty;
     }
 
     public void setPenalty(@Penalty int penalty) {
-        this.penalty = penalty;
+        this.mPenalty = penalty;
     }
 
     public long getRawTime() {
-        return time;
+        return mTime;
     }
 
     public void setRawTime(long time) {
-        if (this.time != time) {
-            this.time = time;
+        if (this.mTime != time) {
+            this.mTime = time;
         }
     }
 

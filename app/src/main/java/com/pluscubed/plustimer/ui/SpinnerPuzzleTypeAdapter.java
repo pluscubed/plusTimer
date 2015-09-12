@@ -21,7 +21,7 @@ class SpinnerPuzzleTypeAdapter extends ArrayAdapter<PuzzleType> {
     private Context mContext;
 
     public SpinnerPuzzleTypeAdapter(LayoutInflater inflater, Context context) {
-        super(context, 0, PuzzleType.valuesExcludingDisabled());
+        super(context, 0, PuzzleType.getEnabledPuzzleTypes());
         mLayoutInflater = inflater;
         mContext = context;
     }
@@ -36,7 +36,7 @@ class SpinnerPuzzleTypeAdapter extends ArrayAdapter<PuzzleType> {
 
         TextView textView = (TextView) convertView.findViewById(android.R.id
                 .text1);
-        textView.setText(getItem(position).getUiName());
+        textView.setText(getItem(position).getName());
         textView.setTextColor(Color.WHITE);
 
         if (!getItem(position).isScramblerOfficial()) {
@@ -58,7 +58,7 @@ class SpinnerPuzzleTypeAdapter extends ArrayAdapter<PuzzleType> {
 
         TextView textView = (TextView) convertView.findViewById(android.R.id
                 .text1);
-        textView.setText(getItem(position).getUiName());
+        textView.setText(getItem(position).getName());
         textView.setTextColor(mContext.getResources().getColorStateList(R
                 .color.list_dropdown_color_dark));
         if (!getItem(position).isScramblerOfficial()) {

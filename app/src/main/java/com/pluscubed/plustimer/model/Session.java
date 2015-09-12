@@ -2,31 +2,40 @@ package com.pluscubed.plustimer.model;
 
 import android.content.Context;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
+import com.pluscubed.plustimer.App;
 import com.pluscubed.plustimer.utils.Utils;
 
 import java.util.List;
 
 import rx.Observable;
-import rx.Subscriber;
 
 /**
  * Session data
  */
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY,
+        getterVisibility = JsonAutoDetect.Visibility.NONE,
+        setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class Session {
-
     public static final int GET_AVERAGE_INVALID_NOT_ENOUGH = -1;
 
-    private String puzzletype;
-    private long timestamp;
+    @JsonProperty("puzzletype")
+    private String mPuzzletypeId;
+    @JsonProperty("timestamp")
+    private long mTimestamp;
 
     @JsonIgnore
     private String mId;
 
+
+    public Session() {
+    }
 
     /**
      * Constructs a Session with an empty list of Solves
@@ -56,32 +65,32 @@ public class Session {
     }
 
     public void addSolve(final Solve s) {
-        Firebase solves = new Firebase("https://plustimer.firebaseio.com/web/data/users/test1/solves");
-        Firebase newSolve = solves.push();
-        s.setId(newSolve.getKey());
-        Firebase sessionSolves = new Firebase("https://plustimer.firebaseio.com/web/data/users/test1/session-solves/" + getId() + "/" + s.getId());
-        sessionSolves.setValue(true);
-        timestamp = s.getTimestamp();
+        App.getFirebaseUserRef().subscribe(firebase -> {
+            Firebase solves = firebase.child("solves");
+            Firebase newSolve = solves.push();
+            s.setId(newSolve.getKey());
+            Firebase sessionSolves = firebase.child("session-solves/" + getId() + "/" + s.getId());
+            sessionSolves.setValue(true);
+            mTimestamp = s.getTimestamp();
+        });
     }
 
     public Observable<Long> getNumberOfSolves() {
-        return Observable.create(new Observable.OnSubscribe<Long>() {
-            @Override
-            public void call(final Subscriber<? super Long> subscriber) {
-                Firebase sessionSolves = new Firebase("https://plustimer.firebaseio.com/web/data/users/test1/session-solves/" + getId());
-                sessionSolves.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        subscriber.onNext(dataSnapshot.getChildrenCount());
-                        subscriber.onCompleted();
-                    }
+        return App.getFirebaseUserRef()
+                .flatMap(firebase -> Observable.create(subscriber -> {
+                    Firebase sessionSolves = firebase.child("session-solves/" + getId());
+                    sessionSolves.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            subscriber.onNext(dataSnapshot.getChildrenCount());
+                            subscriber.onCompleted();
+                        }
 
-                    @Override
-                    public void onCancelled(FirebaseError firebaseError) {
-                    }
-                });
-            }
-        });
+                        @Override
+                        public void onCancelled(FirebaseError firebaseError) {
+                        }
+                    });
+                }));
     }
 
     //TODO
@@ -222,7 +231,7 @@ public class Session {
                            boolean milliseconds, boolean sign) {
         StringBuilder s = new StringBuilder();
         /*if (displaySolves) {
-            s.append(PuzzleType.valueOf(puzzleTypeName).getUiName(context)).append("\n\n");
+            s.append(PuzzleType.valueOf(puzzleTypeName).getName(context)).append("\n\n");
         }
         s.append(context.getString(R.string.number_solves)).append
                 (getNumberOfSolves());
