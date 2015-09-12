@@ -1,6 +1,7 @@
 package com.pluscubed.plustimer.model;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -37,11 +38,13 @@ import rx.Observable;
         getterVisibility = JsonAutoDetect.Visibility.NONE,
         setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class PuzzleType {
+    @Nullable
     private static String sCurrentId;
+    @Nullable
     private static List<PuzzleType> sPuzzleTypes;
 
     @JsonIgnore
-    private final String mId;
+    private String mId;
     @JsonIgnore
     private Puzzle mPuzzle;
 
@@ -57,6 +60,7 @@ public class PuzzleType {
     private String mName;
     @JsonProperty("bld")
     private boolean mIsBld;
+
     //Pre-SQL legacy code
     @JsonIgnore
     @Deprecated
@@ -75,10 +79,15 @@ public class PuzzleType {
         mId = null;
     }
 
-    public PuzzleType(String scrambler, String uiName, String legacyName, String id) {
-        this.mScrambler = scrambler;
-        this.mName = uiName;
+    public PuzzleType(String id, String scrambler, String name, String currentSessionId,
+                      boolean inspectionOn, boolean isBld, String legacyName) {
+        mScrambler = scrambler;
+        mName = name;
         mId = id;
+        mEnabled = true;
+        mCurrentSessionId = currentSessionId;
+        mInspectionOn = inspectionOn;
+        mIsBld = isBld;
 
         mLegacyName = legacyName;
         mHistoryFileName = mLegacyName + ".json";
@@ -110,6 +119,7 @@ public class PuzzleType {
         sCurrentId = currentId;
     }
 
+    @Nullable
     public static String getCurrentId() {
         return sCurrentId;
     }
@@ -128,106 +138,15 @@ public class PuzzleType {
         sPuzzleTypes = new ArrayList<>();
         int savedVersionCode = PrefUtils.getVersionCode(context);
         //TODO: Nicer Rx structure
-        return App.getFirebaseUserRef().flatMap(firebase -> {
-            Firebase puzzletypes = firebase.child("puzzletypes");
-            Firebase currentPuzzleType = firebase.child("current-puzzle-type");
+        return App.getFirebaseUserRef().flatMap(userRef -> {
+            Firebase puzzletypesRef = userRef.child("puzzletypes");
+            Firebase currentPuzzleTypeRef = userRef.child("current-puzzle-type");
 
-            Observable<Object> stuff;
-
+            Observable<?> stuff;
             if (savedVersionCode < 24) {
-                stuff = Observable.create(subscriber -> {
-                    //Generate default puzzle types from this...
-                    String[] scramblers = context.getResources().getStringArray(R.array.scramblers);
-                    //and this, with the appropriate UI names...
-                    String[] defaultCustomPuzzleTypes = context.getResources()
-                            .getStringArray(R.array.default_custom_puzzletypes);
-                    //from this
-                    String[] puzzles = context.getResources().getStringArray(R.array.scrambler_names);
-                    //and the legacy names from this
-                    String[] legacyNames = context.getResources().getStringArray(R.array.legacy_names);
-
-
-                    for (int i = 0; i < scramblers.length + defaultCustomPuzzleTypes.length; i++) {
-                        String scrambler;
-                        String customType = null;
-                        if (scramblers.length > i) {
-                            scrambler = scramblers[i];
-                        } else {
-                            customType = defaultCustomPuzzleTypes[i - scramblers.length];
-                            scrambler = customType.substring(0, customType.indexOf(","));
-                        }
-
-                        String uiName;
-                        if (puzzles.length > i) {
-                            uiName = context.getResources().getStringArray(R.array.scrambler_names)[i];
-                        } else {
-                            int order = Integer.parseInt(scrambler.substring(0, 1));
-                            String addon = null;
-                            if (scrambler.contains("ni")) {
-                                addon = context.getString(R.string.bld);
-                            }
-                            if (customType != null) {
-                                if (customType.contains("feet")) {
-                                    addon = context.getString(R.string.feet);
-                                } else if (customType.contains("oh")) {
-                                    addon = context.getString(R.string.oh);
-                                }
-                            }
-                            if (addon != null) {
-                                uiName = order + "x" + order + "-" + addon;
-                            } else {
-                                uiName = order + "x" + order;
-                            }
-                        }
-
-                        Firebase newTypeRef = puzzletypes.push();
-                        PuzzleType type =
-                                new PuzzleType(scrambler, uiName, legacyNames[i], newTypeRef.getKey());
-                        newTypeRef.setValue(type);
-                        sPuzzleTypes.add(type);
-
-                        if (type.getName().equals("3x3")) {
-                            //Default current puzzle type
-                            currentPuzzleType.setValue(newTypeRef.getKey());
-                            sCurrentId = newTypeRef.getKey();
-                        }
-                    }
-                    subscriber.onCompleted();
-                });
+                stuff = initializePuzzleTypesFirstRun(context, puzzletypesRef, currentPuzzleTypeRef);
             } else {
-                stuff = Observable.combineLatest(Observable.create(
-                        subscriber -> puzzletypes.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                while (dataSnapshot.getChildren().iterator().hasNext()) {
-                                    PuzzleType type = dataSnapshot.getChildren().iterator().next()
-                                            .getValue(PuzzleType.class);
-                                    sPuzzleTypes.add(type);
-                                }
-                                subscriber.onCompleted();
-                            }
-
-                            @Override
-                            public void onCancelled(FirebaseError firebaseError) {
-                                subscriber.onError(firebaseError.toException());
-                            }
-                        })), Observable.create(subscriber -> {
-                    currentPuzzleType.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            sCurrentId = dataSnapshot.getValue(String.class);
-                            subscriber.onCompleted();
-                        }
-
-                        @Override
-                        public void onCancelled(FirebaseError firebaseError) {
-                            subscriber.onError(firebaseError.toException());
-                        }
-                    });
-                    subscriber.onCompleted();
-                }), (o, o2) -> null);
-
-
+                stuff = initializePuzzleTypes(puzzletypesRef, currentPuzzleTypeRef);
             }
 
             return stuff;
@@ -240,6 +159,127 @@ public class PuzzleType {
             PrefUtils.saveVersionCode(context);
             subscriber.onCompleted();
         }));
+    }
+
+    @NonNull
+    private static Observable<?> initializePuzzleTypes(Firebase puzzletypes, Firebase currentPuzzleType) {
+        return Observable.combineLatest(Observable.create(
+                subscriber -> puzzletypes.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        while (dataSnapshot.getChildren().iterator().hasNext()) {
+                            DataSnapshot puzzleTypeSnapshot = dataSnapshot.getChildren().iterator().next();
+                            PuzzleType type = puzzleTypeSnapshot.getValue(PuzzleType.class);
+                            type.mId = puzzleTypeSnapshot.getKey();
+
+                            sPuzzleTypes.add(type);
+                        }
+                        subscriber.onCompleted();
+                    }
+
+                    @Override
+                    public void onCancelled(FirebaseError firebaseError) {
+                        subscriber.onError(firebaseError.toException());
+                    }
+                })), Observable.create(subscriber -> {
+            currentPuzzleType.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    sCurrentId = dataSnapshot.getValue(String.class);
+                    subscriber.onCompleted();
+                }
+
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {
+                    subscriber.onError(firebaseError.toException());
+                }
+            });
+            subscriber.onCompleted();
+        }), (o, o2) -> null);
+    }
+
+    @NonNull
+    private static Observable<?> initializePuzzleTypesFirstRun(Context context, Firebase puzzletypes, Firebase currentPuzzleType) {
+        return Observable.create(subscriber -> {
+            //Generate default puzzle types from this...
+            String[] scramblers = context.getResources().getStringArray(R.array.scramblers);
+            //and this, with the appropriate UI names...
+            String[] defaultCustomPuzzleTypes = context.getResources()
+                    .getStringArray(R.array.default_custom_puzzletypes);
+            //from this
+            String[] puzzles = context.getResources().getStringArray(R.array.scrambler_names);
+            //and the legacy names from this
+            String[] legacyNames = context.getResources().getStringArray(R.array.legacy_names);
+
+
+            for (int i = 0; i < scramblers.length + defaultCustomPuzzleTypes.length; i++) {
+                String scrambler;
+                String defaultCustomType = null;
+                String uiName;
+                boolean bld = false;
+
+                if (scramblers.length > i) {
+                    scrambler = scramblers[i];
+                } else {
+                    defaultCustomType = defaultCustomPuzzleTypes[i - scramblers.length];
+                    scrambler = defaultCustomType.substring(0, defaultCustomType.indexOf(","));
+                }
+
+
+                if (puzzles.length > i) {
+                    uiName = context.getResources().getStringArray(R.array.scrambler_names)[i];
+                } else {
+                    int order = Integer.parseInt(scrambler.substring(0, 1));
+                    String addon = null;
+                    if (scrambler.contains("ni")) {
+                        addon = context.getString(R.string.bld);
+                        bld = true;
+                    }
+                    if (defaultCustomType != null) {
+                        if (defaultCustomType.contains("feet")) {
+                            addon = context.getString(R.string.feet);
+                        } else if (defaultCustomType.contains("oh")) {
+                            addon = context.getString(R.string.oh);
+                        }
+                    }
+                    if (addon != null) {
+                        uiName = order + "x" + order + "-" + addon;
+                    } else {
+                        uiName = order + "x" + order;
+                    }
+                }
+
+                Firebase newTypeRef = puzzletypes.push();
+                PuzzleType type = new PuzzleType(newTypeRef.getKey(), scrambler, uiName,
+                        null, true, bld, legacyNames[i]);
+
+                if (uiName.equals("3x3")) {
+                    //Default current puzzle type
+                    currentPuzzleType.setValue(type.getId());
+                    sCurrentId = type.getId();
+                    type.addNewSession(puzzletypes.getParent());
+                }
+
+                newTypeRef.setValue(type);
+                sPuzzleTypes.add(type);
+            }
+            subscriber.onCompleted();
+        });
+    }
+
+    public void addNewSession(Firebase userRef) {
+        Firebase sessions = userRef.child("sessions");
+
+        Firebase newSessionRef = sessions.push();
+
+        Session session = new Session(getId(), newSessionRef.getKey());
+        newSessionRef.setValue(this);
+
+        Firebase puzzleTypeSession = userRef.child(
+                "puzzletype-sessions/" + getId() + session.getId());
+        puzzleTypeSession.setValue(true);
+
+        mCurrentSessionId = session.getId();
     }
 
     public String getCurrentSessionId() {

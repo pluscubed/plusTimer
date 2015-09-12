@@ -24,31 +24,34 @@ import rx.Observable;
         setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class Session {
     public static final int GET_AVERAGE_INVALID_NOT_ENOUGH = -1;
-
+    public static final long TIMESTAMP_NO_SOLVES = Long.MIN_VALUE;
+    @JsonIgnore
+    private final String mId;
     @JsonProperty("puzzletype")
-    private String mPuzzletypeId;
+    private String mPuzzleTypeId;
     @JsonProperty("timestamp")
     private long mTimestamp;
 
-    @JsonIgnore
-    private String mId;
-
-
     public Session() {
+        mId = null;
     }
 
-    /**
-     * Constructs a Session with an empty list of Solves
-     */
-    public Session(String id) {
+
+    public Session(String puzzleTypeId, String id) {
+        mPuzzleTypeId = puzzleTypeId;
         mId = id;
+        mTimestamp = TIMESTAMP_NO_SOLVES;
     }
 
     /**
      * ID stays the same.
      */
     public Session(Session s) {
-        this(s.getId());
+        this(s.getPuzzleTypeId(), s.getId());
+    }
+
+    public String getPuzzleTypeId() {
+        return mPuzzleTypeId;
     }
 
     public int getPosition(Solve i) {
