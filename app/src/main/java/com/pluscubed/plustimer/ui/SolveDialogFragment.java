@@ -86,7 +86,8 @@ public class SolveDialogFragment extends DialogFragment {
 
         if (!mAddMode) {
             //TODO
-            mSolve = PuzzleType.get(mPuzzleTypeId).getSession(mSessionId).getSolveByPosition(0);
+            /*mSolve = PuzzleType.get(mPuzzleTypeId).getSession(mSessionId).getSolveByPosition(0);*/
+            mSolve = new Solve();
             mSolveCopy = new Solve(mSolve);
         } else {
             mSolveCopy = new Solve("", 0);
@@ -302,7 +303,7 @@ public class SolveDialogFragment extends DialogFragment {
         /*if (ErrorUtils.isSolveNonexistent(getActivity(), mPuzzleTypeId, mSessionId, mSolveId)) {
             return;
         }*/
-        PuzzleType.get(mPuzzleTypeId).getSession(mSessionId).deleteSolve(/*mSolveId*/0, PuzzleType.get(mPuzzleTypeId));
+        /*PuzzleType.get(mPuzzleTypeId).getSession(mSessionId).deleteSolve(*//*mSolveId*//*0, PuzzleType.get(mPuzzleTypeId));*/
         dismiss();
     }
 
@@ -327,7 +328,8 @@ public class SolveDialogFragment extends DialogFragment {
             if (!mAddMode) {
                 mSolve.copy(mSolveCopy);
             } else {
-                PuzzleType.get(mPuzzleTypeId).getSession(mSessionId).addSolve(mSolveCopy);
+                //TODO
+                /*PuzzleType.get(mPuzzleTypeId).getSession(mSessionId).addSolve(mSolveCopy);*/
             }
             dismiss();
         } catch (InvalidScrambleException e) {

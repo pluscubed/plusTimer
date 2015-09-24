@@ -27,7 +27,7 @@
     <string name="scramble_image">Scramble-Bild</string>
     <string name="session_no_solves">Session ist leer!\nLos, mach ein paar Solves!</string>
     <string name="timing">Timing</string>
-    <string name="solves">"Solves: "</string>
+    <string name="solves_colon">"Solves: "</string>
     <string name="cao">aktueller Ao%1$d</string>
     <string name="lao">letzter Ao%1$d</string>
     <string name="bao">bester Ao%1$d</string>

@@ -3,7 +3,6 @@ package com.pluscubed.plustimer.utils;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.util.Log;
 import android.view.WindowManager;
 
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -81,7 +80,8 @@ public class ErrorUtils {
 
     public static boolean isSolveNonexistent(Context c, String puzzleTypeId, String sessionId,
                                              int solveIndex) {
-        try {
+        //TODO
+        /*try {
             PuzzleType.get(puzzleTypeId).getSession(sessionId).getSolveByPosition(solveIndex);
             return false;
         } catch (IndexOutOfBoundsException e) {
@@ -96,7 +96,8 @@ public class ErrorUtils {
             showErrorDialog(c, "Solve #" + solveIndex + " doesn't exist", e, false);
             logCrashlytics(e);
             return true;
-        }
+        }*/
+        return false;
     }
 
     public static void sendFileDataEmail(Context context) {

@@ -58,6 +58,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+
 /**
  * TimerFragment
  */
@@ -223,7 +227,12 @@ public class CurrentSessionTimerFragment extends Fragment {
                     //Add the solve to the current session with the current
                     // scramble/scramble
                     // image and DNF
-                    PuzzleType.getCurrent().getCurrentSession().addSolve(s);
+                    PuzzleType.getCurrent().getCurrentSession().subscribe(new Action1<Session>() {
+                        @Override
+                        public void call(Session session) {
+                            session.addSolve(s);
+                        }
+                    });
 
                     resetTimer();
                     setTimerTextToLastSolveTime();
@@ -420,10 +429,26 @@ public class CurrentSessionTimerFragment extends Fragment {
 
     private void updateStatsAndTimer() {
         //Update stats
-        mStatsSolvesText.setText(getString(R.string.solves) + PuzzleType
-                .getCurrent().getCurrentSession()
-                .getNumberOfSolves());
-        mStatsText.setText(buildStatsWithAveragesOf(getActivity(), 5, 12, 100));
+        PuzzleType.getCurrent().getCurrentSession()
+                .flatMap(Session::getNumberOfSolves)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Integer>() {
+                    @Override
+                    public void onCompleted() {
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                    }
+
+                    @Override
+                    public void onNext(Integer numberOfSolves) {
+                        mStatsSolvesText.setText(getString(R.string.solves_colon) + numberOfSolves);
+                        mStatsText.setText(buildStatsWithAveragesOf(getActivity(), 5, 12, 100));
+                    }
+                });
+
+
 
         if (!mTiming && !mInspecting) setTimerTextToLastSolveTime();
     }
@@ -504,36 +529,44 @@ public class CurrentSessionTimerFragment extends Fragment {
                 .fragment_current_session_timer_last_delete_button);
 
         mLastDnfButton.setOnClickListener(v1 -> {
-            Session currentSession = PuzzleType.getCurrent().getCurrentSession();
+            PuzzleType.getCurrent().getCurrentSession()
+                    .flatMap(Session::getLastSolve)
+                    .subscribeOn(AndroidSchedulers.mainThread())
+                    .subscribe(solve -> {
+                        solve.setPenalty(Solve.PENALTY_DNF);
+                        playLastBarExitAnimation();
+                    });
             //TODO
             /*if (ErrorUtils.isSolveNonexistent(getActivity(), PuzzleType.getCurrentId().getId(),
                     PuzzleType.getCurrentId().getCurrentSessionId(), currentSession.getNumberOfSolves() - 1)) {
                 return;
             }*/
-            currentSession.getLastSolve().setPenalty(Solve.PENALTY_DNF);
-            playLastBarExitAnimation();
         });
 
         mLastPlusTwoButton.setOnClickListener(v1 -> {
-            Session currentSession = PuzzleType.getCurrent().getCurrentSession();
-            //TODO
-            /*if (ErrorUtils.isSolveNonexistent(getActivity(), PuzzleType.getCurrentId().getId(),
-                    PuzzleType.getCurrentId().getCurrentSessionId(), currentSession.getNumberOfSolves() - 1)) {
-                return;
-            }*/
-            currentSession.getLastSolve().setPenalty(Solve.PENALTY_PLUSTWO);
-            playLastBarExitAnimation();
+            PuzzleType.getCurrent().getCurrentSession()
+                    .flatMap(Session::getLastSolve)
+                    .subscribeOn(AndroidSchedulers.mainThread())
+                    .subscribe(solve -> {
+                        solve.setPenalty(Solve.PENALTY_PLUSTWO);
+                        playLastBarExitAnimation();
+                    });
         });
 
         mLastDeleteButton.setOnClickListener(v1 -> {
-            Session currentSession = PuzzleType.getCurrent().getCurrentSession();
+            PuzzleType.getCurrent().getCurrentSession()
+                    .doOnNext(session -> session.getLastSolve().subscribe(solve -> {
+                        session.deleteSolve(solve.getId(), PuzzleType.getCurrent());
+                    }))
+                    .subscribeOn(AndroidSchedulers.mainThread())
+                    .subscribe(solve -> {
+                        playLastBarExitAnimation();
+                    });
             //TODO
            /* if (ErrorUtils.isSolveNonexistent(getActivity(), PuzzleType.getCurrentId().getId(),
                     PuzzleType.getCurrentId().getCurrentSessionId(), currentSession.getNumberOfSolves() - 1)) {
                 return;
             }*/
-            currentSession.deleteSolve(currentSession.getLastSolve(), PuzzleType.getCurrent());
-            playLastBarExitAnimation();
         });
 
         LinearLayoutManager timeBarLayoutManager = new LinearLayoutManager(getActivity(),
@@ -606,11 +639,14 @@ public class CurrentSessionTimerFragment extends Fragment {
 
         mScrambleImage.setOnClickListener(v1 -> toggleScrambleImage());
 
-        mBldMode = PuzzleType.getCurrent().isBld();
-
         onSessionSolvesChanged();
 
         return v;
+    }
+
+    public void setInitialized() {
+        mBldMode = PuzzleType.getCurrent().isBld();
+
     }
 
     @Override
@@ -764,12 +800,9 @@ public class CurrentSessionTimerFragment extends Fragment {
             if (!mRetainedFragment.isScrambling()) {
                 mScrambleImageDisplay = true;
                 mScrambleImage.setVisibility(View.VISIBLE);
-                mScrambleImage.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        mScrambleImageDisplay = false;
-                        mScrambleImage.setVisibility(View.GONE);
-                    }
+                mScrambleImage.setOnClickListener(v -> {
+                    mScrambleImageDisplay = false;
+                    mScrambleImage.setVisibility(View.GONE);
                 });
             }
         }
@@ -805,7 +838,9 @@ public class CurrentSessionTimerFragment extends Fragment {
 
             //Add the solve to the current session with the
             // current scramble/scramble image and time
-            PuzzleType.getCurrent().getCurrentSession().addSolve(s);
+            PuzzleType.getCurrent().getCurrentSession().subscribe(session -> {
+                session.addSolve(s);
+            });
 
 
             playLastBarEnterAnimation();
@@ -1027,12 +1062,7 @@ public class CurrentSessionTimerFragment extends Fragment {
         mScrambleAnimator.setDuration(300);
         mScrambleAnimator.setInterpolator(new AccelerateInterpolator());
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP) {
-            mScrambleAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    mScrambleTextShadow.setTranslationY((int) (float) animation.getAnimatedValue());
-                }
-            });
+            mScrambleAnimator.addUpdateListener(animation -> mScrambleTextShadow.setTranslationY((int) (float) animation.getAnimatedValue()));
         }
         mScrambleAnimator.start();
         invalidateScrambleShadow(true);
@@ -1046,12 +1076,7 @@ public class CurrentSessionTimerFragment extends Fragment {
         mScrambleAnimator.setDuration(300);
         mScrambleAnimator.setInterpolator(new DecelerateInterpolator());
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP) {
-            mScrambleAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    mScrambleTextShadow.setTranslationY((int) (float) animation.getAnimatedValue());
-                }
-            });
+            mScrambleAnimator.addUpdateListener(animation -> mScrambleTextShadow.setTranslationY((int) (float) animation.getAnimatedValue()));
         }
         mScrambleAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
@@ -1183,6 +1208,7 @@ public class CurrentSessionTimerFragment extends Fragment {
         FrameLayout getContentFrameLayout();
     }
 
+    //TODO: Do stuff in this here adapter
     public class SolveRecyclerAdapter
             extends RecyclerView.Adapter<SolveRecyclerAdapter.ViewHolder> {
 
@@ -1215,7 +1241,8 @@ public class CurrentSessionTimerFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            return mSolves.size();
+            //return mSolves.size();
+            return 0;
         }
 
         private void updateSolvesList(int position, Update mode) {
@@ -1225,7 +1252,7 @@ public class CurrentSessionTimerFragment extends Fragment {
             Set<Solve> changed = new HashSet<>();
             changed.addAll(Arrays.asList(mBestAndWorstSolves));
 
-            mSolves = PuzzleType.getCurrent().getCurrentSession().getSolves();
+            //mSolves = PuzzleType.getCurrent().getCurrentSession()
             mBestAndWorstSolves[0] = Utils.getBestSolveOfList(mSolves);
             mBestAndWorstSolves[1] = Utils.getWorstSolveOfList(mSolves);
 
@@ -1247,13 +1274,10 @@ public class CurrentSessionTimerFragment extends Fragment {
                 case INSERT:
                     //TODO: Smooth scroll so empty space for insertion opens up
                     notifyItemInserted(mSolves.size() - 1);
-                    mTimeBarRecycler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            //Run after status bar goes down
-                            if (mSolves.size() >= 1)
-                                mTimeBarRecycler.smoothScrollToPosition(mSolves.size() - 1);
-                        }
+                    mTimeBarRecycler.postDelayed(() -> {
+                        //Run after status bar goes down
+                        if (mSolves.size() >= 1)
+                            mTimeBarRecycler.smoothScrollToPosition(mSolves.size() - 1);
                     }, 200);
                     break;
                 case REMOVE:

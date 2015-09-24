@@ -3,13 +3,11 @@ package com.pluscubed.plustimer.ui;
 import android.app.ListFragment;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.SparseArray;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -26,12 +24,10 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.GraphViewSeries;
 import com.jjoe64.graphview.LineGraphView;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Session;
-import com.pluscubed.plustimer.model.Solve;
 import com.pluscubed.plustimer.utils.ErrorUtils;
 import com.pluscubed.plustimer.utils.PrefUtils;
 import com.pluscubed.plustimer.utils.Utils;
@@ -174,8 +170,9 @@ public class HistorySessionListFragment extends ListFragment {
         ((SessionListAdapter) getListAdapter()).onSessionListChanged();
     }
 
+    //TODO: do stuff with stats
     void updateStats() {
-        List<Session> historySessions = PuzzleType.get(mPuzzleTypeId).getSortedHistorySessions();
+        /*List<Session> historySessions = PuzzleType.get(mPuzzleTypeId).getSortedHistorySessions();
         if (historySessions.size() > 0) {
             StringBuilder s = new StringBuilder();
 
@@ -214,7 +211,7 @@ public class HistorySessionListFragment extends ListFragment {
                 for (int i = 0; i < historySessions.size(); i++) {
                     Session session = historySessions.get(i);
                     //TODO
-                    /*if (session.getNumberOfSolves() >= averageNumber) {
+                    *//*if (session.getNumberOfSolves() >= averageNumber) {
                         long bestAverage = session.getBestAverageOf
                                 (averageNumber);
                         if (bestAverage != Long.MAX_VALUE
@@ -222,7 +219,7 @@ public class HistorySessionListFragment extends ListFragment {
                                 .GET_AVERAGE_INVALID_NOT_ENOUGH) {
                             timesSparseArray.put(i, bestAverage);
                         }
-                    }*/
+                    }*//*
                 }
                 if (timesSparseArray.size() > 0) {
                     bestAverageMatrix.put(averageNumber, timesSparseArray);
@@ -399,6 +396,7 @@ public class HistorySessionListFragment extends ListFragment {
                 mGraph.setVisibility(View.GONE);
             }
         }
+    */
     }
 
     /**
@@ -408,9 +406,10 @@ public class HistorySessionListFragment extends ListFragment {
      * @param sessions list of sessions
      * @return String with the best averages of [numbers]
      */
+    //TODO
     String getBestAverageOfNumberOfSessions(int[] numbers,
                                             List<Session> sessions) {
-        StringBuilder builder = new StringBuilder();
+        /*StringBuilder builder = new StringBuilder();
         for (int number : numbers) {
             ArrayList<Long> bestAverages = new ArrayList<>();
             if (sessions.size() > 0) {
@@ -433,7 +432,8 @@ public class HistorySessionListFragment extends ListFragment {
                 }
             }
         }
-        return builder.toString();
+        return builder.toString();*/
+        return "";
     }
 
     public void finishActionMode() {

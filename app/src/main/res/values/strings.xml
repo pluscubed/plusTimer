@@ -38,7 +38,7 @@
     <string name="timing">Timing…</string>
 
     <!--Stats-->
-    <string name="solves">"Solves: "</string>
+    <string name="solves_colon">"Solves: "</string>
     <string name="cao">Current Ao%1$d</string>
     <string name="lao">Last Ao%1$d</string>
     <string name="bao">Best Ao%1$d</string>

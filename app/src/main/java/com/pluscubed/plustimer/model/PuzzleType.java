@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -39,7 +40,7 @@ import rx.Observable;
         setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class PuzzleType {
     @Nullable
-    private static String sCurrentId;
+    private static String sCurrentTypeId;
     @Nullable
     private static List<PuzzleType> sPuzzleTypes;
 
@@ -76,7 +77,6 @@ public class PuzzleType {
     private String mLegacyName;
 
     public PuzzleType() {
-        mId = null;
     }
 
     public PuzzleType(String id, String scrambler, String name, String currentSessionId,
@@ -111,17 +111,17 @@ public class PuzzleType {
 
     @Nullable
     public static PuzzleType getCurrent() {
-        return get(sCurrentId);
+        return get(sCurrentTypeId);
     }
 
     public static void setCurrent(String currentId) {
         //TODO
-        sCurrentId = currentId;
+        sCurrentTypeId = currentId;
     }
 
     @Nullable
     public static String getCurrentId() {
-        return sCurrentId;
+        return sCurrentTypeId;
     }
 
     public static List<PuzzleType> getEnabledPuzzleTypes() {
@@ -163,39 +163,42 @@ public class PuzzleType {
 
     @NonNull
     private static Observable<?> initializePuzzleTypes(Firebase puzzletypes, Firebase currentPuzzleType) {
-        return Observable.combineLatest(Observable.create(
-                subscriber -> puzzletypes.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        while (dataSnapshot.getChildren().iterator().hasNext()) {
-                            DataSnapshot puzzleTypeSnapshot = dataSnapshot.getChildren().iterator().next();
-                            PuzzleType type = puzzleTypeSnapshot.getValue(PuzzleType.class);
-                            type.mId = puzzleTypeSnapshot.getKey();
+        return Observable.combineLatest(
+                Observable.create(
+                        subscriber -> puzzletypes.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                for (DataSnapshot puzzleTypeSnapshot : dataSnapshot.getChildren()) {
+                                    PuzzleType type = puzzleTypeSnapshot.getValue(PuzzleType.class);
+                                    type.mId = puzzleTypeSnapshot.getKey();
 
-                            sPuzzleTypes.add(type);
+                                    if (sPuzzleTypes != null) {
+                                        sPuzzleTypes.add(type);
+                                    }
+                                }
+                                subscriber.onCompleted();
+                            }
+
+                            @Override
+                            public void onCancelled(FirebaseError firebaseError) {
+                                subscriber.onError(firebaseError.toException());
+                            }
+                        })),
+                Observable.create(subscriber -> {
+                    currentPuzzleType.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            sCurrentTypeId = dataSnapshot.getValue(String.class);
+                            subscriber.onCompleted();
                         }
-                        subscriber.onCompleted();
-                    }
 
-                    @Override
-                    public void onCancelled(FirebaseError firebaseError) {
-                        subscriber.onError(firebaseError.toException());
-                    }
-                })), Observable.create(subscriber -> {
-            currentPuzzleType.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    sCurrentId = dataSnapshot.getValue(String.class);
+                        @Override
+                        public void onCancelled(FirebaseError firebaseError) {
+                            subscriber.onError(firebaseError.toException());
+                        }
+                    });
                     subscriber.onCompleted();
-                }
-
-                @Override
-                public void onCancelled(FirebaseError firebaseError) {
-                    subscriber.onError(firebaseError.toException());
-                }
-            });
-            subscriber.onCompleted();
-        }), (o, o2) -> null);
+                }), (o, o2) -> null);
     }
 
     @NonNull
@@ -256,7 +259,7 @@ public class PuzzleType {
                 if (uiName.equals("3x3")) {
                     //Default current puzzle type
                     currentPuzzleType.setValue(type.getId());
-                    sCurrentId = type.getId();
+                    sCurrentTypeId = type.getId();
                     type.addNewSession(puzzletypes.getParent());
                 }
 
@@ -309,10 +312,10 @@ public class PuzzleType {
     public void setEnabled(boolean enabled) {
         //TODO
         this.mEnabled = enabled;
-        if (mId.equals(sCurrentId) && !this.mEnabled) {
+        if (mId.equals(sCurrentTypeId) && !this.mEnabled) {
             for (PuzzleType i : sPuzzleTypes) {
                 if (i.mEnabled) {
-                    sCurrentId = i.getId();
+                    sCurrentTypeId = i.getId();
                     break;
                 }
             }
@@ -340,8 +343,12 @@ public class PuzzleType {
     }*/
 
     public void deleteSession(Session session) {
-        //TODO
-        //mDataSource.deleteSession(this, session.getId());
+        /*App.getFirebaseUserRef().doOnNext(userRef -> {
+            Firebase solve = userRef.child("solves").child(id);
+            solve.removeValue();
+            Firebase sessionSolves = userRef.child("session-solves").child(getId()).child(id);
+            sessionSolves.removeValue();
+        })*/
     }
 
     public List<Session> getSortedHistorySessions() {
@@ -399,10 +406,10 @@ public class PuzzleType {
                                         .create();
 
                                 Session s = gson1.fromJson(json, typeOfT);
-                                for (final Solve solve : s.getSolves()) {
+                                /*for (final Solve solve : s.getSolves()) {
                                     //TODO: Legacy
                                     //solve.attachSession(s);
-                                }
+                                }*/
                                 return s;
                             })
                     .create();
@@ -438,26 +445,30 @@ public class PuzzleType {
         return mPuzzle;
     }
 
-    public Session getCurrentSession() {
-        //TODO
+    public Observable<Session> getCurrentSession() {
         return getSession(mCurrentSessionId);
     }
 
-    @Nullable
-    public Session getSession(String id) {
-        //TODO
-        /*if (id == mCurrentSessionId) {
-            //Check that if the current session is null (from reset or
-            // initializing)
-            return mCurrentSession;
-        } else if (mAllSessions != null) {
-            for (Session session : mAllSessions) {
-                if (session.getId() == id) {
-                    return session;
+    public Observable<Session> getSession(String id) {
+        return App.getFirebaseUserRef().<Session>flatMap(userRef -> Observable.create(subscriber -> {
+            Firebase sessions = userRef.child("sessions");
+            Query queryRef = sessions.orderByKey().equalTo(id);
+            queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    Session session = dataSnapshot.getChildren().iterator().next().getValue(Session.class);
+                    session.setId(dataSnapshot.getKey());
+                    subscriber.onNext(session);
+                    subscriber.onCompleted();
                 }
-            }
-        }*/
-        return null;
+
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {
+                    subscriber.onError(firebaseError.toException());
+                }
+            });
+        }));
+
     }
 
     public void resetCurrentSession() {

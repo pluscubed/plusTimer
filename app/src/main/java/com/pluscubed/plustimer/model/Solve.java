@@ -142,6 +142,16 @@ public class Solve {
         }
     }
 
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof Solve &&
+                mId.equals(((Solve) o).getId()) &&
+                mTime == ((Solve) o).getRawTime() &&
+                mTimestamp == ((Solve) o).getTimestamp() &&
+                mScramble.equals(((Solve) o).getScramble()) &&
+                mPenalty == ((Solve) o).getPenalty();
+    }
+
     @IntDef({PENALTY_DNF, PENALTY_PLUSTWO, PENALTY_NONE})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Penalty {

@@ -12,6 +12,7 @@ import com.firebase.client.ValueEventListener;
 import com.pluscubed.plustimer.App;
 import com.pluscubed.plustimer.utils.Utils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import rx.Observable;
@@ -26,14 +27,13 @@ public class Session {
     public static final int GET_AVERAGE_INVALID_NOT_ENOUGH = -1;
     public static final long TIMESTAMP_NO_SOLVES = Long.MIN_VALUE;
     @JsonIgnore
-    private final String mId;
+    private String mId;
     @JsonProperty("puzzletype")
     private String mPuzzleTypeId;
     @JsonProperty("timestamp")
     private long mTimestamp;
 
     public Session() {
-        mId = null;
     }
 
 
@@ -54,17 +54,51 @@ public class Session {
         return mPuzzleTypeId;
     }
 
-    public int getPosition(Solve i) {
-        return 0;
-    }
+    public Observable<List<Solve>> getSolves() {
+        return App.getFirebaseUserRef()
+                .flatMap(userRef -> Observable.<Solve>create(subscriber -> {
+                    Firebase solves = userRef.child("solves");
+                    Firebase sessionSolves = userRef.child("session-solves").child(getId());
+                    sessionSolves.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot includedSolvesBool) {
+                            solves.orderByChild("timestamp").addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot allSolves) {
+                                    for (DataSnapshot solveSs : allSolves.getChildren()) {
+                                        for (DataSnapshot solveIncludedSs : includedSolvesBool.getChildren()) {
+                                            if (solveSs.getKey().equals(solveIncludedSs.getKey())) {
+                                                Solve solve = solveSs.getValue(Solve.class);
+                                                solve.setId(solveSs.getKey());
+                                                subscriber.onNext(solve);
+                                            }
+                                        }
+                                    }
 
-    //TODO
-    public List<Solve> getSolves() {
-        return null;
+                                    subscriber.onCompleted();
+                                }
+
+                                @Override
+                                public void onCancelled(FirebaseError firebaseError) {
+                                    subscriber.onError(firebaseError.toException());
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onCancelled(FirebaseError firebaseError) {
+                            subscriber.onError(firebaseError.toException());
+                        }
+                    });
+                })).toList();
     }
 
     public String getId() {
         return mId;
+    }
+
+    public void setId(String id) {
+        mId = id;
     }
 
     public void addSolve(final Solve s) {
@@ -72,38 +106,37 @@ public class Session {
             Firebase solves = firebase.child("solves");
             Firebase newSolve = solves.push();
             s.setId(newSolve.getKey());
-            Firebase sessionSolves = firebase.child("session-solves/" + getId() + "/" + s.getId());
+            Firebase sessionSolves = firebase.child("session-solves").child(getId()).child(s.getId());
             sessionSolves.setValue(true);
             mTimestamp = s.getTimestamp();
         });
     }
 
-    public Observable<Long> getNumberOfSolves() {
+    public Observable<Integer> getNumberOfSolves() {
         return App.getFirebaseUserRef()
                 .flatMap(firebase -> Observable.create(subscriber -> {
-                    Firebase sessionSolves = firebase.child("session-solves/" + getId());
+                    Firebase sessionSolves = firebase.child("session-solves").child(getId());
                     sessionSolves.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
-                            subscriber.onNext(dataSnapshot.getChildrenCount());
+                            subscriber.onNext((int) dataSnapshot.getChildrenCount());
                             subscriber.onCompleted();
                         }
 
                         @Override
                         public void onCancelled(FirebaseError firebaseError) {
+                            subscriber.onError(firebaseError.toException());
                         }
                     });
                 }));
     }
 
-    //TODO
-    public Solve getLastSolve() {
-        return null;
+    public Observable<Solve> getLastSolve() {
+        return getSolves().map(solves -> solves.get(solves.size() - 1));
     }
 
-    //TODO
-    public Solve getSolveByPosition(int position) {
-        return null;
+    public Observable<Solve> getSolveByPosition(int position) {
+        return getSolves().map(solves -> solves.get(position));
     }
 
     //TODO
@@ -117,27 +150,30 @@ public class Session {
      * @param millisecondsEnabled whether to display milliseconds
      * @return the current average of some number of solves
      */
-    public String getStringCurrentAverageOf(int number,
-                                            boolean millisecondsEnabled) {
-        /*if (number >= 3 && mSolves.size() >= number) {
-            List<Solve> solves = new ArrayList<>();
+    public Observable<String> getStringCurrentAverageOf(int number, boolean millisecondsEnabled) {
+        return getNumberOfSolves()
+                .flatMap(numberOfSolves -> {
+                    if (number >= 3 && numberOfSolves >= number) {
+                        return getSolves();
+                    }
+                    return Observable.empty();
+                }).map(solves -> {
+                    List<Solve> recent = new ArrayList<>();
 
-            //Add the most recent solves
-            for (int i = 0; i < number; i++) {
-                Solve x = mSolves.get(mSolves.size() - i - 1);
-                solves.add(x);
-            }
+                    //Add the most recent solves
+                    for (int i = 0; i < number; i++) {
+                        Solve x = solves.get(solves.size() - i - 1);
+                        recent.add(x);
+                    }
 
-            long result = Utils.getAverageOf(solves);
+                    long result = Utils.getAverageOf(recent);
 
-            if (result == Long.MAX_VALUE) {
-                return "DNF";
-            } else {
-                return Utils.timeStringFromNs(result, millisecondsEnabled);
-            }
-        }
-        return "";*/
-        return "";
+                    if (result == Long.MAX_VALUE) {
+                        return "DNF";
+                    } else {
+                        return Utils.timeStringFromNs(result, millisecondsEnabled);
+                    }
+                }).defaultIfEmpty("");
     }
 
     /**
@@ -148,19 +184,18 @@ public class Session {
      * @param millisecondsEnabled whether to display milliseconds
      * @return the best average of some number of solves
      */
-    String getStringBestAverageOf(int number,
-                                  boolean millisecondsEnabled) {
-        long bestAverage = getBestAverageOf(number);
-        if (bestAverage == GET_AVERAGE_INVALID_NOT_ENOUGH) {
-            return "";
-        }
-        if (bestAverage == Long.MAX_VALUE) {
-            return "DNF";
-        }
-        return Utils.timeStringFromNs(bestAverage, millisecondsEnabled);
+    public Observable<String> getStringBestAverageOf(int number, boolean millisecondsEnabled) {
+        return getBestAverageOf(number).map(bestAverage -> {
+            if (bestAverage == GET_AVERAGE_INVALID_NOT_ENOUGH) {
+                return "";
+            }
+            if (bestAverage == Long.MAX_VALUE) {
+                return "DNF";
+            }
+            return Utils.timeStringFromNs(bestAverage, millisecondsEnabled);
+        });
     }
 
-    //TODO
 
     /**
      * Returns the milliseconds value of the best average of some number of
@@ -172,61 +207,80 @@ public class Session {
      * @param number the number of solves to average
      * @return the best average of some number of solves
      */
-    public long getBestAverageOf(int number) {
-        /*if (number >= 3 && mSolves.size() >= number) {
-            long bestAverage = 0;
-            //Iterates through the list, starting with the [number] most
-            // recent solves
-            for (int i = 0; mSolves.size() - (number + i) >= 0; i++) {
-                //Sublist the [number] of solves, offset by i from the most
-                // recent. Gets the average.
-                long average = Utils.getAverageOf(mSolves.subList(mSolves.size
-                        () - (number + i), mSolves.size() - i));
-                //If the average is less than the current best (or on the
-                // first loop), set the best average to the average
-                if (i == 0 || average < bestAverage) {
-                    bestAverage = average;
-                }
-            }
-            return bestAverage;
-        }*/
-        return GET_AVERAGE_INVALID_NOT_ENOUGH;
+    public Observable<Long> getBestAverageOf(int number) {
+        return getNumberOfSolves()
+                .flatMap(numberOfSolves -> {
+                    if (number >= 3 && numberOfSolves >= number) {
+                        return getSolves();
+                    }
+                    return Observable.empty();
+                }).map(solves -> {
+                    long bestAverage = 0;
+                    //Iterates through the list, starting with the [number] most
+                    // recent solves
+                    for (int i = 0; solves.size() - (number + i) >= 0; i++) {
+                        //Sublist the [number] of solves, offset by i from the most
+                        // recent. Gets the average.
+                        long average = Utils.getAverageOf(solves.subList(solves.size
+                                () - (number + i), solves.size() - i));
+                        //If the average is less than the current best (or on the
+                        // first loop), set the best average to the average
+                        if (i == 0 || average < bestAverage) {
+                            bestAverage = average;
+                        }
+                    }
+                    return bestAverage;
+                }).defaultIfEmpty((long) GET_AVERAGE_INVALID_NOT_ENOUGH);
     }
 
-    //TODO
-    public String getStringMean(boolean milliseconds) {
-        /*long sum = 0;
-        for (Solve i : mSolves) {
-            if (!(i.getPenalty() == Solve.Penalty.DNF)) {
-                sum += i.getTimeTwo();
-            } else {
-                return "DNF";
+
+    public Observable<String> getStringMean(boolean milliseconds) {
+        return getSolves().map(solves -> {
+            long sum = 0;
+            for (Solve i : solves) {
+                if (!(i.getPenalty() == Solve.PENALTY_DNF)) {
+                    sum += i.getTimeTwo();
+                } else {
+                    return "DNF";
+                }
             }
-        }*/
-        /*return Utils.timeStringFromNs(sum / mSolves.size(), milliseconds);*/
-        return "";
+            return Utils.timeStringFromNs(sum / solves.size(), milliseconds);
+        });
     }
 
     public String getTimestampString(Context context) {
-        return Utils.timeDateStringFromTimestamp(context,
-                getLastSolve().getTimestamp());
+        return Utils.timeDateStringFromTimestamp(context, mTimestamp);
     }
 
     public long getTimestamp() {
-        return getLastSolve().getTimestamp();
+        return mTimestamp;
     }
 
-    //TODO
-    public void deleteSolve(int position, PuzzleType type) {
-        /*mSolves.remove(position);
-        PuzzleType.getDataSource().deleteSolve(type, mId, position);
-        notifySolveDeleted(position);*/
+    public void deleteSolve(String id, PuzzleType type) {
+        App.getFirebaseUserRef().doOnNext(userRef -> {
+            Firebase solve = userRef.child("solves").child(id);
+            solve.removeValue();
+            Firebase sessionSolves = userRef.child("session-solves").child(getId()).child(id);
+            sessionSolves.removeValue();
+        }).flatMap(firebase -> getNumberOfSolves())
+                .subscribe(numberOfSolves -> {
+                    if (numberOfSolves == 0) {
+                        //TODO: Emptied out session, self destruct needed
+                    }
+                });
     }
 
-    //TODO
+    /*//TODO
     public void deleteSolve(Solve i, PuzzleType type) {
-        /*deleteSolve(mSolves.indexOf(i), type);*/
-    }
+        App.getFirebaseUserRef().subscribe(userRef -> {
+            Firebase solves = userRef.child("solves");
+            Firebase newSolve = solves.push();
+            s.setId(newSolve.getKey());
+            Firebase sessionSolves = userRef.child("session-solves").child(getId()).child(s.getId());
+            sessionSolves.setValue(true);
+            mTimestamp = s.getTimestamp();
+        });
+    }*/
 
     //TODO
     public String toString(Context context, String puzzleTypeName,

@@ -35,7 +35,7 @@ public class HistorySolveListActivity extends ThemableActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_with_toolbar);
 
-        String position = getIntent().getStringExtra(EXTRA_HISTORY_SESSION_ID);
+        String sessionId = getIntent().getStringExtra(EXTRA_HISTORY_SESSION_ID);
         String puzzleType = getIntent().getStringExtra(EXTRA_HISTORY_PUZZLETYPE_ID);
 
         //TODO
@@ -49,14 +49,17 @@ public class HistorySolveListActivity extends ThemableActivity {
         Fragment f = fm.findFragmentById(R.id
                 .activity_with_toolbar_content_framelayout);
         if (f == null) {
-            f = SolveListFragment.newInstance(false, puzzleType, position);
+            f = SolveListFragment.newInstance(false, puzzleType, sessionId);
             fm.beginTransaction()
                     .replace(R.id.activity_with_toolbar_content_framelayout, f)
                     .commit();
         }
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        setTitle(PuzzleType.get(puzzleType).getSession(position).getTimestampString(this));
+        PuzzleType.get(puzzleType).getSession(sessionId).subscribe(session -> {
+            setTitle(session.getTimestampString(HistorySolveListActivity.this));
+        });
+
     }
 
     @Override

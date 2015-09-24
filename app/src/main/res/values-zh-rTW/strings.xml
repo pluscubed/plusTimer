@@ -32,7 +32,7 @@
 
     <string name="session_no_solves">本組目前無成績!</string>
     <string name="timing">還原</string>
-    <string name="solves">"總數: "</string>
+    <string name="solves_colon">"總數: "</string>
     <string name="cao">"當前%1$d次去尾"</string>
     <string name="lao">"當前%1$d次去尾"</string>
     <string name="bao">"最快%1$d次去尾"</string>

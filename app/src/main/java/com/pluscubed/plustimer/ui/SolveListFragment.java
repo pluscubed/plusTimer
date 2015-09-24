@@ -29,11 +29,8 @@ import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
 import com.pluscubed.plustimer.utils.PrefUtils;
 import com.pluscubed.plustimer.utils.SolveDialogUtils;
-import com.pluscubed.plustimer.utils.Utils;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 
 /**
@@ -153,7 +150,7 @@ public class SolveListFragment extends Fragment {
         mCurrentToggle = getArguments().getBoolean(ARG_CURRENT_BOOLEAN);
         mPuzzleTypeId = getArguments().getString(ARG_PUZZLETYPE_DISPLAYNAME);
         mSessionId = getArguments().getString(ARG_SESSION_ID);
-        mSession = getPuzzleType().getSession(mSessionId);
+        /*mSession = getPuzzleType().getSession(mSessionId);*/
         //TODO
         /*PuzzleType.registerObserver(puzzleTypeObserver);
         mSession.registerObserver(sessionObserver);*/
@@ -177,7 +174,7 @@ public class SolveListFragment extends Fragment {
             case R.id.menu_history_solvelist_delete_menuitem:
                 //TODO
                /* if (getPuzzleType().getSortedHistorySessions().size() >= mSessionId) {*/
-                getPuzzleType().deleteSession(getPuzzleType().getSession(mSessionId));
+                /*getPuzzleType().deleteSession(getPuzzleType().getSession(mSessionId));*/
                 /*} else {
                     NullPointerException e = new NullPointerException(
                             "SolveListFragment onOptionsItemSelected: " +
@@ -330,8 +327,9 @@ public class SolveListFragment extends Fragment {
                     case R.id.context_solvelist_delete_menuitem:
                         for (int i = mListView.getCount() - 1; i >= 0; i--) {
                             if (mListView.isItemChecked(i)) {
-                                mSession.deleteSolve((Solve) mListView
-                                        .getItemAtPosition(i), PuzzleType.get(mPuzzleTypeId));
+                                //TODO
+                                /*mSession.deleteSolve((Solve) mListView
+                                        .getItemAtPosition(i), PuzzleType.get(mPuzzleTypeId));*/
                             }
                         }
                         mode.finish();
@@ -372,7 +370,8 @@ public class SolveListFragment extends Fragment {
     }
 
     void onSessionSolvesChanged() {
-        mSession = getPuzzleType().getSession(mSessionId);
+        //TODO
+        /*mSession = getPuzzleType().getSession(mSessionId);*/
         //TODO
         if (!mCurrentToggle /*&& mSession.getNumberOfSolves() <= 0*/) {
             getPuzzleType().deleteSession(mSession);
@@ -392,8 +391,9 @@ public class SolveListFragment extends Fragment {
             //TODO
             /*enableResetSubmitButtons(getPuzzleType().getCurrentSession().getNumberOfSolves() > 0);*/
         } else {
-            getActivity().setTitle(PuzzleType.get(mPuzzleTypeId).getSession(mSessionId)
-                    .getTimestampString(getActivity()));
+            //TODO
+            /*getActivity().setTitle(PuzzleType.get(mPuzzleTypeId).getSession(mSessionId)
+                    .getTimestampString(getActivity()));*/
         }
     }
 
@@ -446,14 +446,15 @@ public class SolveListFragment extends Fragment {
 
         public void onSolveListChanged() {
             clear();
-            List<Solve> solves = mSession.getSolves();
+            //TODO
+            /*List<Solve> solves = mSession.getSolves();
             Collections.reverse(solves);
             addAll(solves);
             mBestAndWorstSolves = new ArrayList<>();
             mBestAndWorstSolves.add(Utils.getBestSolveOfList(mSession
                     .getSolves()));
             mBestAndWorstSolves.add(Utils.getWorstSolveOfList(mSession
-                    .getSolves()));
+                    .getSolves()));*/
             mSignEnabled = PrefUtils.isSignEnabled(getActivity());
             notifyDataSetChanged();
         }
