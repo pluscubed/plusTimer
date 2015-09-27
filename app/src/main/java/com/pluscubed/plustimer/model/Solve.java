@@ -3,7 +3,6 @@ package com.pluscubed.plustimer.model;
 import android.support.annotation.IntDef;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.pluscubed.plustimer.utils.Utils;
 
@@ -13,15 +12,17 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * Solve data object
  */
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY,
+@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE,
+        fieldVisibility = JsonAutoDetect.Visibility.NONE,
         getterVisibility = JsonAutoDetect.Visibility.NONE,
-        setterVisibility = JsonAutoDetect.Visibility.NONE)
+        isGetterVisibility = JsonAutoDetect.Visibility.NONE,
+        setterVisibility = JsonAutoDetect.Visibility.NONE
+)
 public class Solve {
     public static final int PENALTY_DNF = 2;
     public static final int PENALTY_PLUSTWO = 1;
     public static final int PENALTY_NONE = 0;
 
-    @JsonIgnore
     private String mId;
 
     @JsonProperty("scramble")

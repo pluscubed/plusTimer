@@ -10,7 +10,6 @@ import com.crashlytics.android.Crashlytics;
 import com.pluscubed.plustimer.BuildConfig;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
-import com.pluscubed.plustimer.model.ScrambleAndSvg;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -59,23 +58,6 @@ public class ErrorUtils {
     public static void showJsonSyntaxError(Context c, Exception e) {
         logCrashlytics(e);
         showErrorDialog(c, "History/current data can't be read from storage.", e, true);
-    }
-
-    public static String getUiScramble(Context c, int position, ScrambleAndSvg scrambleAndSvg,
-                                       boolean signEnabled,
-                                       String puzzleTypeName) {
-        String uiScramble = "";
-        try {
-            uiScramble = scrambleAndSvg.getUiScramble(signEnabled, puzzleTypeName);
-        } catch (NullPointerException e) {
-            String positionString = String.valueOf(position);
-            if (position == -1) {
-                positionString = "CurrentScrambleAndSvg";
-            }
-            logCrashlytics(e);
-            showErrorDialog(c, "Solve #" + positionString + " UI scramble doesn't exist", e, false);
-        }
-        return uiScramble;
     }
 
     public static boolean isSolveNonexistent(Context c, String puzzleTypeId, String sessionId,

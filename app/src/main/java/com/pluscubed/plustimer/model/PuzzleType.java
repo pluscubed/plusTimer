@@ -2,10 +2,8 @@ package com.pluscubed.plustimer.model;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
@@ -35,18 +33,17 @@ import rx.Observable;
 /**
  * Puzzle Type object
  */
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY,
+@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE,
+        fieldVisibility = JsonAutoDetect.Visibility.NONE,
         getterVisibility = JsonAutoDetect.Visibility.NONE,
-        setterVisibility = JsonAutoDetect.Visibility.NONE)
+        isGetterVisibility = JsonAutoDetect.Visibility.NONE,
+        setterVisibility = JsonAutoDetect.Visibility.NONE
+)
 public class PuzzleType {
-    @Nullable
     private static String sCurrentTypeId;
-    @Nullable
     private static List<PuzzleType> sPuzzleTypes;
 
-    @JsonIgnore
     private String mId;
-    @JsonIgnore
     private Puzzle mPuzzle;
 
     @JsonProperty("scrambler")
@@ -63,16 +60,12 @@ public class PuzzleType {
     private boolean mIsBld;
 
     //Pre-SQL legacy code
-    @JsonIgnore
     @Deprecated
     private String mCurrentSessionFileName;
-    @JsonIgnore
     @Deprecated
     private String mHistoryFileName;
-    @JsonIgnore
     @Deprecated
     private HistorySessions mHistorySessionsLegacy;
-    @JsonIgnore
     @Deprecated
     private String mLegacyName;
 
@@ -99,7 +92,6 @@ public class PuzzleType {
         return sPuzzleTypes;
     }
 
-    @Nullable
     public static PuzzleType get(String id) {
         for (PuzzleType type : sPuzzleTypes) {
             if (type.getId().equals(id)) {
@@ -109,7 +101,6 @@ public class PuzzleType {
         return sPuzzleTypes.get(0);
     }
 
-    @Nullable
     public static PuzzleType getCurrent() {
         return get(sCurrentTypeId);
     }
@@ -119,7 +110,6 @@ public class PuzzleType {
         sCurrentTypeId = currentId;
     }
 
-    @Nullable
     public static String getCurrentId() {
         return sCurrentTypeId;
     }
@@ -151,21 +141,20 @@ public class PuzzleType {
 
             return stuff;
 
-        }).flatMap(o -> Observable.create(subscriber -> {
+        }).doOnCompleted(() -> {
             for (PuzzleType puzzleType : sPuzzleTypes) {
                 puzzleType.upgradeDatabase(context);
             }
 
             PrefUtils.saveVersionCode(context);
-            subscriber.onCompleted();
-        }));
+        });
     }
 
     @NonNull
     private static Observable<?> initializePuzzleTypes(Firebase puzzletypes, Firebase currentPuzzleType) {
         return Observable.combineLatest(
-                Observable.create(
-                        subscriber -> puzzletypes.addListenerForSingleValueEvent(new ValueEventListener() {
+                Observable.create(subscriber ->
+                        puzzletypes.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 for (DataSnapshot puzzleTypeSnapshot : dataSnapshot.getChildren()) {
@@ -198,7 +187,9 @@ public class PuzzleType {
                         }
                     });
                     subscriber.onCompleted();
-                }), (o, o2) -> null);
+                }),
+                (o, o2) -> null
+        );
     }
 
     @NonNull
@@ -276,10 +267,10 @@ public class PuzzleType {
         Firebase newSessionRef = sessions.push();
 
         Session session = new Session(getId(), newSessionRef.getKey());
-        newSessionRef.setValue(this);
+        newSessionRef.setValue(session);
 
-        Firebase puzzleTypeSession = userRef.child(
-                "puzzletype-sessions/" + getId() + session.getId());
+        Firebase puzzleTypeSession = userRef
+                .child("puzzletype-sessions").child(getId()).child(session.getId());
         puzzleTypeSession.setValue(true);
 
         mCurrentSessionId = session.getId();
@@ -456,8 +447,9 @@ public class PuzzleType {
             queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    Session session = dataSnapshot.getChildren().iterator().next().getValue(Session.class);
-                    session.setId(dataSnapshot.getKey());
+                    DataSnapshot sessionSnapshot = dataSnapshot.getChildren().iterator().next();
+                    Session session = sessionSnapshot.getValue(Session.class);
+                    session.setId(sessionSnapshot.getKey());
                     subscriber.onNext(session);
                     subscriber.onCompleted();
                 }

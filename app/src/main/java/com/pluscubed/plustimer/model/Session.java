@@ -3,7 +3,6 @@ package com.pluscubed.plustimer.model;
 import android.content.Context;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
@@ -20,14 +19,18 @@ import rx.Observable;
 /**
  * Session data
  */
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY,
+@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE,
+        fieldVisibility = JsonAutoDetect.Visibility.NONE,
         getterVisibility = JsonAutoDetect.Visibility.NONE,
-        setterVisibility = JsonAutoDetect.Visibility.NONE)
+        isGetterVisibility = JsonAutoDetect.Visibility.NONE,
+        setterVisibility = JsonAutoDetect.Visibility.NONE
+)
 public class Session {
     public static final int GET_AVERAGE_INVALID_NOT_ENOUGH = -1;
     public static final long TIMESTAMP_NO_SOLVES = Long.MIN_VALUE;
-    @JsonIgnore
+
     private String mId;
+
     @JsonProperty("puzzletype")
     private String mPuzzleTypeId;
     @JsonProperty("timestamp")
@@ -104,8 +107,11 @@ public class Session {
     public void addSolve(final Solve s) {
         App.getFirebaseUserRef().subscribe(firebase -> {
             Firebase solves = firebase.child("solves");
+
             Firebase newSolve = solves.push();
+            newSolve.setValue(s);
             s.setId(newSolve.getKey());
+
             Firebase sessionSolves = firebase.child("session-solves").child(getId()).child(s.getId());
             sessionSolves.setValue(true);
             mTimestamp = s.getTimestamp();

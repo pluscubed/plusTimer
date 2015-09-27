@@ -19,11 +19,6 @@ public class ScrambleAndSvg {
         mSvg = svg;
     }
 
-    public String getUiScramble(boolean sign, String puzzleTypeName) {
-        return sign ? Utils.wcaToSignNotation(mScramble,
-                puzzleTypeName) : mScramble;
-    }
-
     public String getScramble() {
         return mScramble;
     }

@@ -49,7 +49,7 @@ public class HistorySolveListActivity extends ThemableActivity {
         Fragment f = fm.findFragmentById(R.id
                 .activity_with_toolbar_content_framelayout);
         if (f == null) {
-            f = SolveListFragment.newInstance(false, puzzleType, sessionId);
+            f = new SolveListFragment();
             fm.beginTransaction()
                     .replace(R.id.activity_with_toolbar_content_framelayout, f)
                     .commit();

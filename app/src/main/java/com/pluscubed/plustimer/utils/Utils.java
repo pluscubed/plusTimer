@@ -469,4 +469,20 @@ public class Utils {
         textView.measure(widthMeasureSpec, heightMeasureSpec);
         return textView.getMeasuredHeight();
     }
+
+    //TODO fix
+    public static String getUiScramble(String scramble,
+                                       boolean signEnabled,
+                                       String puzzleTypeName) {
+        /*try {*/
+        return signEnabled ? Utils.wcaToSignNotation(scramble, puzzleTypeName) : scramble;
+        /*} catch (NullPointerException e) {
+            String positionString = String.valueOf(position);
+            if (position == -1) {
+                positionString = "CurrentScrambleAndSvg";
+            }
+            ErrorUtils.logCrashlytics(e);
+            ErrorUtils.showErrorDialog(c, "Solve #" + positionString + " UI scramble doesn't exist", e, false);
+        }*/
+    }
 }

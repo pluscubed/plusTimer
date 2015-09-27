@@ -47,7 +47,6 @@ import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.ScrambleAndSvg;
 import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
-import com.pluscubed.plustimer.utils.ErrorUtils;
 import com.pluscubed.plustimer.utils.PrefUtils;
 import com.pluscubed.plustimer.utils.SolveDialogUtils;
 import com.pluscubed.plustimer.utils.Utils;
@@ -60,7 +59,6 @@ import java.util.Set;
 
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
 
 /**
  * TimerFragment
@@ -71,13 +69,12 @@ public class CurrentSessionTimerFragment extends Fragment {
     public static final String TAG = "CURRENT_SESSION_TIMER_FRAGMENT";
     private static final long HOLD_TIME = 550000000L;
     private static final int REFRESH_RATE = 15;
-    private static final String STATE_IMAGE_DISPLAYED =
-            "scramble_image_displayed_boolean";
+    private static final String STATE_IMAGE_DISPLAYED = "scramble_image_displayed_boolean";
     private static final String STATE_START_TIME = "start_time_long";
     private static final String STATE_RUNNING = "running_boolean";
     private static final String STATE_INSPECTING = "inspecting_boolean";
-    private static final String STATE_INSPECTION_START_TIME =
-            "inspection_start_time_long";
+    private static final String STATE_INSPECTION_START_TIME = "inspection_start_time_long";
+
     //Preferences
     private boolean mHoldToStartEnabled;
     private boolean mInspectionEnabled;
@@ -227,11 +224,8 @@ public class CurrentSessionTimerFragment extends Fragment {
                     //Add the solve to the current session with the current
                     // scramble/scramble
                     // image and DNF
-                    PuzzleType.getCurrent().getCurrentSession().subscribe(new Action1<Session>() {
-                        @Override
-                        public void call(Session session) {
-                            session.addSolve(s);
-                        }
+                    PuzzleType.getCurrent().getCurrentSession().subscribe(session -> {
+                        session.addSolve(s);
                     });
 
                     resetTimer();
@@ -410,8 +404,8 @@ public class CurrentSessionTimerFragment extends Fragment {
             }
             mScrambleImage.setImageDrawable(drawable);
 
-            setScrambleText(ErrorUtils.getUiScramble(getActivity(), -1,
-                    currentScrambleAndSvg, mSignEnabled,
+            setScrambleText(Utils.getUiScramble(
+                    currentScrambleAndSvg.getScramble(), mSignEnabled,
                     PuzzleType.getCurrentId()));
         } else {
             mRetainedFragment.generateNextScramble();
@@ -531,7 +525,7 @@ public class CurrentSessionTimerFragment extends Fragment {
         mLastDnfButton.setOnClickListener(v1 -> {
             PuzzleType.getCurrent().getCurrentSession()
                     .flatMap(Session::getLastSolve)
-                    .subscribeOn(AndroidSchedulers.mainThread())
+                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(solve -> {
                         solve.setPenalty(Solve.PENALTY_DNF);
                         playLastBarExitAnimation();
@@ -546,7 +540,7 @@ public class CurrentSessionTimerFragment extends Fragment {
         mLastPlusTwoButton.setOnClickListener(v1 -> {
             PuzzleType.getCurrent().getCurrentSession()
                     .flatMap(Session::getLastSolve)
-                    .subscribeOn(AndroidSchedulers.mainThread())
+                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(solve -> {
                         solve.setPenalty(Solve.PENALTY_PLUSTWO);
                         playLastBarExitAnimation();
@@ -558,7 +552,7 @@ public class CurrentSessionTimerFragment extends Fragment {
                     .doOnNext(session -> session.getLastSolve().subscribe(solve -> {
                         session.deleteSolve(solve.getId(), PuzzleType.getCurrent());
                     }))
-                    .subscribeOn(AndroidSchedulers.mainThread())
+                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(solve -> {
                         playLastBarExitAnimation();
                     });
@@ -607,8 +601,6 @@ public class CurrentSessionTimerFragment extends Fragment {
             mRetainedFragment.resetScramblerThread();
             enableMenuItems(false);
             setScrambleText(getString(R.string.scrambling));
-            mRetainedFragment.generateNextScramble();
-            mRetainedFragment.postSetScrambleViewsToCurrent();
         } else {
             if (mInspecting) {
                 mUiHandler.post(inspectionRunnable);
@@ -639,14 +631,18 @@ public class CurrentSessionTimerFragment extends Fragment {
 
         mScrambleImage.setOnClickListener(v1 -> toggleScrambleImage());
 
-        onSessionSolvesChanged();
+        //TODO
+        //onSessionSolvesChanged();
 
         return v;
     }
 
     public void setInitialized() {
         mBldMode = PuzzleType.getCurrent().isBld();
-
+        if (!mFromSavedInstanceState) {
+            mRetainedFragment.generateNextScramble();
+            mRetainedFragment.postSetScrambleViewsToCurrent();
+        }
     }
 
     @Override
@@ -669,8 +665,9 @@ public class CurrentSessionTimerFragment extends Fragment {
 
         mScrambleText.setTextSize(mScrambleTextSize);
 
+        //TODO
         //When Settings change
-        onSessionSolvesChanged();
+        //onSessionSolvesChanged();
     }
 
     @Override
@@ -1217,7 +1214,7 @@ public class CurrentSessionTimerFragment extends Fragment {
 
         public SolveRecyclerAdapter() {
             mBestAndWorstSolves = new Solve[2];
-            updateSolvesList(-1, Update.DATA_RESET);
+            //updateSolvesList(-1, Update.DATA_RESET);
         }
 
         @Override

@@ -1,17 +1,19 @@
 buildscript {
     repositories {
         maven { url 'https://maven.fabric.io/public' }
-        mavenCentral()
+        jcenter()
     }
 
     dependencies {
-        classpath 'io.fabric.tools:gradle:1.+'
-        classpath 'me.tatarka:gradle-retrolambda:3.2.2'
+        classpath 'io.fabric.tools:gradle:1.20.1'
+        classpath 'me.tatarka:gradle-retrolambda:3.2.3'
+        classpath 'com.github.ben-manes:gradle-versions-plugin:0.11.3'
     }
 }
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 apply plugin: 'me.tatarka.retrolambda'
+apply plugin: 'com.github.ben-manes.versions'
 
 repositories {
     maven { url 'https://maven.fabric.io/public' }
@@ -121,31 +123,35 @@ retrolambda {
 }
 
 dependencies {
-    compile 'com.firebase:firebase-client-android:2.+'
-    compile 'io.reactivex:rxandroid:1.+'
+    compile 'com.hannesdorfmann.mosby:mvp:2.0.0'
+    compile 'com.hannesdorfmann.mosby:viewstate:2.0.0'
 
-    compile 'com.jjoe64:graphview:3.+'
+    compile 'com.firebase:firebase-client-android:2.4.0'
+    compile 'com.firebase:firebase-ui:0.1.0'
+    compile 'io.reactivex:rxandroid:1.0.1'
 
-    compile 'com.android.support:appcompat-v7:23.+'
-    compile 'com.android.support:support-v13:23.+'
-    compile 'com.android.support:recyclerview-v7:23.+'
-    compile 'com.android.support:preference-v14:23.+'
+    compile 'com.jjoe64:graphview:3.1.4'
 
-    androidTestCompile 'com.android.support:support-annotations:23.+'
-    androidTestCompile 'com.android.support.test:runner:0.+'
+    compile 'com.android.support:appcompat-v7:23.0.1'
+    compile 'com.android.support:support-v13:23.0.1'
+    compile 'com.android.support:recyclerview-v7:23.0.1'
+    compile 'com.android.support:preference-v14:23.0.1'
+
+    androidTestCompile 'com.android.support:support-annotations:23.0.1'
+    androidTestCompile 'com.android.support.test:runner:0.4'
     // Set this dependency to use JUnit 4 rules
-    androidTestCompile 'com.android.support.test:rules:0.+'
-    androidTestCompile 'org.hamcrest:hamcrest-library:1.+'
+    androidTestCompile 'com.android.support.test:rules:0.4'
+    androidTestCompile 'org.hamcrest:hamcrest-library:1.4-atlassian-1'
 
-    compile('com.github.cubing:tnoodle-android:0.+@aar') {
+    compile('com.github.cubing:tnoodle-android:0.8.9@aar') {
         transitive = true;
     }
     compile 'com.caverock:androidsvg:1.2.1'
 
-    compile 'com.google.code.gson:gson:2.+'
-    compile 'com.afollestad.material-dialogs:core:0.+'
-    compile 'com.rengwuxian.materialedittext:library:2.+'
-    compile('com.crashlytics.sdk.android:crashlytics:2.+@aar') {
+    compile 'com.google.code.gson:gson:2.3.1'
+    compile 'com.afollestad.material-dialogs:core:0.8.1.0'
+    compile 'com.rengwuxian.materialedittext:library:2.1.4'
+    compile('com.crashlytics.sdk.android:crashlytics:2.5.2@aar') {
         transitive = true;
     }
 }

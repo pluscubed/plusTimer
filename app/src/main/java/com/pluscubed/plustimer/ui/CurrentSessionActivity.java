@@ -32,6 +32,7 @@ import com.pluscubed.plustimer.ui.widget.SlidingTabLayout;
 import com.pluscubed.plustimer.utils.PrefUtils;
 
 import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
 
 /**
  * Current Session Activity
@@ -158,10 +159,13 @@ public class CurrentSessionActivity extends DrawerActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_current_session);
 
-        PuzzleType.initialize(this).subscribe(new Subscriber<Object>() {
+        PuzzleType.initialize(this)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Object>() {
             @Override
             public void onCompleted() {
-                //TODO: Notify fragments
+                getCurrentSessionTimerFragment().setInitialized();
+                getSolveListFragment().setInitialized();
                 supportInvalidateOptionsMenu();
             }
 
@@ -177,8 +181,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
         });
 
         if (savedInstanceState != null) {
-            mScrambleImageActionEnable = savedInstanceState.getBoolean
-                    (STATE_MENU_ITEMS_ENABLE_BOOLEAN);
+            mScrambleImageActionEnable = savedInstanceState.getBoolean(STATE_MENU_ITEMS_ENABLE_BOOLEAN);
         }
 
         Fragment retainedFragment =
@@ -370,9 +373,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
                 case 0:
                     return new CurrentSessionTimerFragment();
                 case 1:
-                    return SolveListFragment.newInstance(true,
-                            PuzzleType.getCurrentId(),
-                            PuzzleType.getCurrent().getCurrentSessionId());
+                    return new SolveListFragment();
             }
             return null;
         }

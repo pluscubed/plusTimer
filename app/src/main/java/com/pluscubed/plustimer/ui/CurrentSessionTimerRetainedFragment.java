@@ -34,35 +34,25 @@ public class CurrentSessionTimerRetainedFragment extends Fragment {
     }
 
     public void generateNextScramble() {
-        postToScrambleThread(new Runnable() {
-            @Override
-            public void run() {
-                mScrambling = true;
-                mNextScrambleAndSvg = generateScramble();
-                mScrambling = false;
-
-            }
+        postToScrambleThread(() -> {
+            mScrambling = true;
+            mNextScrambleAndSvg = generateScramble();
+            mScrambling = false;
         });
 
     }
 
     public void postSetScrambleViewsToCurrent() {
-        postToScrambleThread(new Runnable() {
-            @Override
-            public void run() {
-                mCurrentScrambleAndSvg = mNextScrambleAndSvg;
-                mNextScrambleAndSvg = null;
-                if (getTargetFragment() != null) {
-                    final CurrentSessionTimerFragment targetFragment =
-                            (CurrentSessionTimerFragment) getTargetFragment();
-                    targetFragment.getUiHandler().post(new Runnable() {
-                        @Override
-                        public void run() {
-                            targetFragment.setScrambleTextAndImageToCurrent();
-                            targetFragment.enableMenuItems(true);
-                        }
-                    });
-                }
+        postToScrambleThread(() -> {
+            mCurrentScrambleAndSvg = mNextScrambleAndSvg;
+            mNextScrambleAndSvg = null;
+            if (getTargetFragment() != null) {
+                final CurrentSessionTimerFragment targetFragment =
+                        (CurrentSessionTimerFragment) getTargetFragment();
+                targetFragment.getUiHandler().post(() -> {
+                    targetFragment.setScrambleTextAndImageToCurrent();
+                    targetFragment.enableMenuItems(true);
+                });
             }
         });
 
