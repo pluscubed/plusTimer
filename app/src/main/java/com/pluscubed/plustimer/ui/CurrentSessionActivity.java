@@ -159,6 +159,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_current_session);
 
+        //TODO What to do on config changes?
         PuzzleType.initialize(this)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Object>() {
@@ -172,6 +173,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
             @Override
             public void onError(Throwable e) {
                 Toast.makeText(CurrentSessionActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                e.printStackTrace();
             }
 
             @Override

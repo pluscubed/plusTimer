@@ -83,9 +83,6 @@ public class PuzzleType {
         mIsBld = isBld;
 
         mLegacyName = legacyName;
-        mHistoryFileName = mLegacyName + ".json";
-        mCurrentSessionFileName = mLegacyName + "-current.json";
-        mHistorySessionsLegacy = new HistorySessions(mHistoryFileName);
     }
 
     public static List<PuzzleType> getPuzzleTypes() {
@@ -186,7 +183,6 @@ public class PuzzleType {
                             subscriber.onError(firebaseError.toException());
                         }
                     });
-                    subscriber.onCompleted();
                 }),
                 (o, o2) -> null
         );
@@ -364,6 +360,10 @@ public class PuzzleType {
     }
 
     private void upgradeDatabase(Context context) {
+        mHistoryFileName = mLegacyName + ".json";
+        mCurrentSessionFileName = mLegacyName + "-current.json";
+        mHistorySessionsLegacy = new HistorySessions(mHistoryFileName);
+
         //TODO
         //AFTER UPDATING APP////////////
         int savedVersionCode = PrefUtils.getVersionCode(context);

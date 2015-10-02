@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rx.Observable;
+import rx.Single;
 
 /**
  * Session data
@@ -57,6 +58,7 @@ public class Session {
         return mPuzzleTypeId;
     }
 
+    //TODO: Chronological order
     public Observable<List<Solve>> getSolves() {
         return App.getFirebaseUserRef()
                 .flatMap(userRef -> Observable.<Solve>create(subscriber -> {
@@ -143,6 +145,31 @@ public class Session {
 
     public Observable<Solve> getSolveByPosition(int position) {
         return getSolves().map(solves -> solves.get(position));
+    }
+
+    public Single<Solve> getSolve(String solveId) {
+        return App.getFirebaseUserRef().toSingle()
+                .flatMap(userRef -> Single.<Solve>create(subscriber -> {
+                    Firebase solves = userRef.child("solves").child(solveId);
+                    solves.orderByChild("timestamp").addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot solve) {
+                            if (solve.exists()) {
+                                Solve value = solve.getValue(Solve.class);
+                                value.setId(solveId);
+                                subscriber.onSuccess(value);
+                            } else {
+                                subscriber.onError(FirebaseError
+                                        .fromCode(FirebaseError.UNKNOWN_ERROR).toException());
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(FirebaseError firebaseError) {
+                            subscriber.onError(firebaseError.toException());
+                        }
+                    });
+                }));
     }
 
     //TODO
