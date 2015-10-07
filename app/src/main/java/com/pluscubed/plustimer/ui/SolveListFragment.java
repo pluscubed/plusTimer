@@ -125,7 +125,7 @@ public class SolveListFragment extends Fragment {
 
         //TODO
         //When Settings change
-        //onSessionSolvesChanged();
+        //onPuzzleTypeChanged();
     }
 
     private void initSharedPrefs() {
@@ -344,7 +344,7 @@ public class SolveListFragment extends Fragment {
         });
 
         //TODO
-        //onSessionSolvesChanged();
+        //onPuzzleTypeChanged();
         return v;
     }
 

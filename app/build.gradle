@@ -1,12 +1,13 @@
 buildscript {
     repositories {
         maven { url 'https://maven.fabric.io/public' }
+        maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
         jcenter()
     }
 
     dependencies {
         classpath 'io.fabric.tools:gradle:1.20.1'
-        classpath 'me.tatarka:gradle-retrolambda:3.2.3'
+        classpath 'me.tatarka:gradle-retrolambda:3.3.0-beta2'
         classpath 'com.github.ben-manes:gradle-versions-plugin:0.11.3'
     }
 }
@@ -18,6 +19,7 @@ apply plugin: 'com.github.ben-manes.versions'
 repositories {
     maven { url 'https://maven.fabric.io/public' }
     maven { url "https://jitpack.io" }
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
 }
 
 task syncTask(type: Sync) {
@@ -70,8 +72,6 @@ android {
             }
         }
         debug {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             applicationIdSuffix '.debug'
             versionNameSuffix '-DEBUG'
             buildConfigField "boolean", "USE_CRASHLYTICS", "false"
@@ -154,4 +154,7 @@ dependencies {
     compile('com.crashlytics.sdk.android:crashlytics:2.5.2@aar') {
         transitive = true;
     }
+
+    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.4-SNAPSHOT'
+    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-SNAPSHOT'
 }

@@ -1,4 +1,4 @@
-package com.pluscubed.plustimer.ui;
+package com.pluscubed.plustimer.ui.currentsession;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -37,30 +37,22 @@ import android.widget.TextView;
 
 import com.caverock.androidsvg.SVG;
 import com.caverock.androidsvg.SVGParseException;
-import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
-import com.pluscubed.plustimer.App;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.BldSolve;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.ScrambleAndSvg;
 import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
+import com.pluscubed.plustimer.ui.TimeBarRecyclerAdapter;
 import com.pluscubed.plustimer.utils.PrefUtils;
-import com.pluscubed.plustimer.utils.SolveDialogUtils;
 import com.pluscubed.plustimer.utils.Utils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
-import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 
@@ -68,7 +60,7 @@ import rx.android.schedulers.AndroidSchedulers;
  * TimerFragment
  */
 
-public class CurrentSessionTimerFragment extends Fragment {
+public class CurrentSessionTimerFragment extends Fragment implements CurrentSessionTimerView {
 
     public static final String TAG = "CURRENT_SESSION_TIMER_FRAGMENT";
     private static final long HOLD_TIME = 550000000L;
@@ -78,6 +70,8 @@ public class CurrentSessionTimerFragment extends Fragment {
     private static final String STATE_RUNNING = "running_boolean";
     private static final String STATE_INSPECTING = "inspecting_boolean";
     private static final String STATE_INSPECTION_START_TIME = "inspection_start_time_long";
+
+    private CurrentSessionTimerPresenter mPresenter;
 
     //Preferences
     private boolean mHoldToStartEnabled;
@@ -120,38 +114,7 @@ public class CurrentSessionTimerFragment extends Fragment {
     private boolean mFromSavedInstanceState;
     private boolean mTiming;
 
-    private final ChildEventListener sessionSolvesListener = new ChildEventListener() {
 
-        @Override
-        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-            updateStatsAndTimer();
-            SolveRecyclerAdapter adapter = (SolveRecyclerAdapter) mTimeBarRecycler.getAdapter();
-            adapter.updateSolvesList(dataSnapshot, Update.INSERT);
-        }
-
-        @Override
-        public void onChildChanged(DataSnapshot dataSnapshot, String previousChildKey) {
-            updateStatsAndTimer();
-            SolveRecyclerAdapter adapter = (SolveRecyclerAdapter) mTimeBarRecycler.getAdapter();
-            adapter.updateSolvesList(dataSnapshot, Update.SINGLE_CHANGE);
-        }
-
-        @Override
-        public void onChildRemoved(DataSnapshot dataSnapshot) {
-            updateStatsAndTimer();
-            SolveRecyclerAdapter adapter = (SolveRecyclerAdapter) mTimeBarRecycler.getAdapter();
-            adapter.updateSolvesList(dataSnapshot, Update.REMOVE);
-        }
-
-        @Override
-        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-        }
-
-        @Override
-        public void onCancelled(FirebaseError firebaseError) {
-        }
-    };
     private boolean mScrambleImageDisplay;
     private boolean mLateStartPenalty;
     private boolean mBldMode;
@@ -247,7 +210,7 @@ public class CurrentSessionTimerFragment extends Fragment {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
             //Update quick stats and hlistview
-            onSessionSolvesChanged();
+            onPuzzleTypeChanged();
 
             //Set timer text to ready, scramble text to scrambling
             setScrambleText(getString(R.string.scrambling));
@@ -276,9 +239,9 @@ public class CurrentSessionTimerFragment extends Fragment {
 
     //TODO
     public void onNewSession() {
-        updateStatsAndTimer();
-        SolveRecyclerAdapter adapter = (SolveRecyclerAdapter) mTimeBarRecycler.getAdapter();
-        adapter.updateSolvesList(null, Update.REMOVE_ALL);
+        updateStatsAndTimerText();
+        TimeBarRecyclerAdapter adapter = (TimeBarRecyclerAdapter) mTimeBarRecycler.getAdapter();
+        adapter.notifyChange(null, TimeBarRecyclerAdapter.Update.REMOVE_ALL);
     }
 
     //TODO
@@ -411,15 +374,16 @@ public class CurrentSessionTimerFragment extends Fragment {
         }
     }
 
-    void onSessionSolvesChanged() {
-        updateStatsAndTimer();
+    void onPuzzleTypeChanged() {
+        updateStatsAndTimerText();
 
         //Update RecyclerView
-        SolveRecyclerAdapter adapter = (SolveRecyclerAdapter) mTimeBarRecycler.getAdapter();
-        adapter.updateSolvesList(null, Update.DATA_RESET);
+        TimeBarRecyclerAdapter adapter = (TimeBarRecyclerAdapter) mTimeBarRecycler.getAdapter();
+        adapter.notifyChange(null, TimeBarRecyclerAdapter.Update.DATA_RESET);
     }
 
-    private void updateStatsAndTimer() {
+    @Override
+    public void updateStatsAndTimerText() {
         //Update stats
         PuzzleType.getCurrent().getCurrentSession()
                 .flatMap(Session::getNumberOfSolves)
@@ -461,6 +425,9 @@ public class CurrentSessionTimerFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+
+        mPresenter = new CurrentSessionTimerPresenter();
+        mPresenter.attachView(this);
 
         //TODO
         /*PuzzleType.getCurrentId().(puzzleTypeObserver);
@@ -567,7 +534,7 @@ public class CurrentSessionTimerFragment extends Fragment {
         };
         mTimeBarRecycler.setLayoutManager(timeBarLayoutManager);
         mTimeBarRecycler.setHasFixedSize(true);
-        mTimeBarRecycler.setAdapter(new SolveRecyclerAdapter());
+        mTimeBarRecycler.setAdapter(new TimeBarRecyclerAdapter(getActivity(), this));
 
         mDynamicStatusBarFrame = (FrameLayout) v.findViewById(R.id
                 .fragment_current_session_timer_dynamic_status_frame);
@@ -629,31 +596,22 @@ public class CurrentSessionTimerFragment extends Fragment {
         mScrambleImage.setOnClickListener(v1 -> toggleScrambleImage());
 
         //TODO
-        //onSessionSolvesChanged();
+        //onPuzzleTypeChanged();
 
         return v;
     }
 
+    public CurrentSessionTimerPresenter getPresenter() {
+        return mPresenter;
+    }
+
+    @Override
     public void setInitialized() {
         mBldMode = PuzzleType.getCurrent().isBld();
         if (!mFromSavedInstanceState) {
             mRetainedFragment.generateNextScramble();
             mRetainedFragment.postSetScrambleViewsToCurrent();
         }
-
-        addSessionListener();
-    }
-
-    private void addSessionListener() {
-        App.getFirebaseUserRef().subscribe(userRef -> {
-            if (!PuzzleType.getPuzzleTypes().isEmpty()) {
-                String currentSessionId = PuzzleType.getCurrent().getCurrentSessionId();
-                Firebase sessionSolves = userRef.child("session-solves").child(currentSessionId);
-                sessionSolves.addChildEventListener(sessionSolvesListener);
-
-                App.getChildEventListenerMap().put("session-solves/" + currentSessionId, sessionSolvesListener);
-            }
-        });
     }
 
     @Override
@@ -661,11 +619,9 @@ public class CurrentSessionTimerFragment extends Fragment {
         super.onResume();
         initSharedPrefs();
         if (mKeepScreenOn) {
-            getActivity().getWindow().addFlags(WindowManager.LayoutParams
-                    .FLAG_KEEP_SCREEN_ON);
+            getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         } else {
-            getActivity().getWindow().clearFlags(WindowManager.LayoutParams
-                    .FLAG_KEEP_SCREEN_ON);
+            getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
 
         if (mMonospaceScrambleFontEnabled) {
@@ -676,11 +632,11 @@ public class CurrentSessionTimerFragment extends Fragment {
 
         mScrambleText.setTextSize(mScrambleTextSize);
 
-        addSessionListener();
+        mPresenter.onResume();
 
         //TODO
         //When Settings change
-        //onSessionSolvesChanged();
+        //onPuzzleTypeChanged();
     }
 
     @Override
@@ -690,11 +646,7 @@ public class CurrentSessionTimerFragment extends Fragment {
         //PuzzleType.getCurrentId().saveCurrentSession(getActivity());
         stopHoldTimer();
 
-        App.getFirebaseUserRef().subscribe(userRef -> {
-            String currentSessionId = PuzzleType.getCurrent().getCurrentSessionId();
-            Firebase sessionSolves = userRef.child("session-solves").child(currentSessionId);
-            sessionSolves.removeEventListener(sessionSolvesListener);
-        });
+        mPresenter.onPause();
     }
 
     @Override
@@ -708,12 +660,24 @@ public class CurrentSessionTimerFragment extends Fragment {
                 mInspectionStartTimestamp);
     }
 
+    public void scrollRecyclerView(int position) {
+        mTimeBarRecycler.smoothScrollToPosition(position);
+    }
+
+    public TimeBarRecyclerAdapter getTimeBarAdapter() {
+        return (TimeBarRecyclerAdapter) mTimeBarRecycler.getAdapter();
+    }
+
+
     @Override
     public void onDestroy() {
         super.onDestroy();
         //When destroyed, stop timer runnable
         mUiHandler.removeCallbacksAndMessages(null);
         mRetainedFragment.setTargetFragment(null, 0);
+
+
+        mPresenter.detachView(false);
 
         //TODO
         /*PuzzleType.getCurrentId().getCurrentSession()
@@ -825,7 +789,7 @@ public class CurrentSessionTimerFragment extends Fragment {
 
     /**
      * @return whether
-     * {@link com.pluscubed.plustimer.ui.CurrentSessionTimerFragment#onTimerTouchUp()}
+     * {@link CurrentSessionTimerFragment#onTimerTouchUp()}
      * will be triggered when touch is released
      */
     private synchronized boolean onTimerTouchDown() {
@@ -1205,9 +1169,6 @@ public class CurrentSessionTimerFragment extends Fragment {
         return mUiHandler;
     }
 
-    public enum Update {
-        INSERT, REMOVE, REMOVE_ALL, SINGLE_CHANGE, DATA_RESET
-    }
 
     public interface ActivityCallback {
         void lockDrawerAndViewPager(boolean lock);
@@ -1221,129 +1182,6 @@ public class CurrentSessionTimerFragment extends Fragment {
         void enableMenuItems(boolean enable);
 
         FrameLayout getContentFrameLayout();
-    }
-
-    //TODO: Do stuff in this here adapter
-    public class SolveRecyclerAdapter
-            extends RecyclerView.Adapter<SolveRecyclerAdapter.ViewHolder> {
-
-        private List<Solve> mSolves;
-        private Solve[] mBestAndWorstSolves;
-
-        public SolveRecyclerAdapter() {
-            mBestAndWorstSolves = new Solve[2];
-            mSolves = new ArrayList<>();
-        }
-
-        @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            TextView v = (TextView) LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.recycler_item_solve, parent, false);
-            return new ViewHolder(v);
-        }
-
-        @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
-            Solve s = mSolves.get(position);
-            String timeString = s.getTimeString(mMillisecondsEnabled);
-            holder.textView.setText(timeString);
-            for (Solve a : mBestAndWorstSolves) {
-                if (a == s) {
-                    holder.textView.setText("(" + timeString + ")");
-                }
-            }
-        }
-
-        @Override
-        public int getItemCount() {
-            return mSolves.size();
-        }
-
-        private void updateSolvesList(DataSnapshot solveDataSnapshot, Update mode) {
-            int oldSize = mSolves != null ? mSolves.size() : 0;
-
-            Set<Solve> changed = new HashSet<>();
-            changed.addAll(Arrays.asList(mBestAndWorstSolves));
-
-            PuzzleType.getCurrent().getCurrentSession()
-                    .flatMap(session -> {
-                        if (mode != Update.REMOVE) {
-                            return session.getSolve(solveDataSnapshot.getKey()).toObservable();
-                        } else {
-                            return Observable.empty();
-                        }
-                    })
-                    .defaultIfEmpty(null)
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(solve -> {
-                        //Collections.reverse(mSolves);
-
-                        int solvePosition = 0;
-                        if (mode == Update.REMOVE || mode == Update.SINGLE_CHANGE) {
-                            for (int i = 0; i < mSolves.size(); i++) {
-                                Solve foundSolve = mSolves.get(i);
-                                if (foundSolve.getId().equals(solveDataSnapshot.getKey())) {
-                                    solvePosition = i;
-                                }
-                            }
-                        }
-
-                        switch (mode) {
-                            case DATA_RESET:
-                                notifyDataSetChanged();
-                                if (mSolves.size() >= 1)
-                                    mTimeBarRecycler.smoothScrollToPosition(mSolves.size() - 1);
-                                break;
-                            case INSERT:
-                                mSolves.add(solve);
-                                notifyItemInserted(mSolves.size() - 1);
-                                if (mSolves.size() >= 1)
-                                    mTimeBarRecycler.smoothScrollToPosition(mSolves.size() - 1);
-                                break;
-                            case REMOVE:
-                                //TODO
-                                mSolves.remove(solvePosition);
-                                notifyItemRemoved(solvePosition);
-                                break;
-                            case SINGLE_CHANGE:
-                                mSolves.set(solvePosition, solve);
-                                notifyItemChanged(solvePosition);
-                                break;
-                            case REMOVE_ALL:
-                                notifyItemRangeRemoved(0, oldSize);
-                                break;
-                        }
-
-                        mBestAndWorstSolves[0] = Utils.getBestSolveOfList(mSolves);
-                        mBestAndWorstSolves[1] = Utils.getWorstSolveOfList(mSolves);
-
-                        if (mode != Update.DATA_RESET && mode != Update.REMOVE_ALL) {
-                            changed.addAll(Arrays.asList(mBestAndWorstSolves));
-                            for (Solve s : changed) {
-                                if (mSolves.contains(s)) {
-                                    notifyItemChanged(mSolves.indexOf(s));
-                                }
-                            }
-                        }
-                    });
-        }
-
-        public class ViewHolder extends RecyclerView.ViewHolder {
-            public TextView textView;
-
-            public ViewHolder(TextView v) {
-                super(v);
-                textView = v;
-                textView.setOnClickListener(v1 -> SolveDialogUtils.createSolveDialog(getActivity(),
-                        false,
-                        PuzzleType.getCurrent().getId(),
-                        PuzzleType.getCurrent().getCurrentSessionId(),
-                        mSolves.get(getAdapterPosition()).getId()
-                ));
-            }
-        }
-
-
     }
 
 

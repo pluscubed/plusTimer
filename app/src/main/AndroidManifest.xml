@@ -15,7 +15,7 @@
         android:theme="@style/Theme.PlusTimer"
         tools:replace="android:theme, android:icon, android:label">
         <activity
-            android:name="com.pluscubed.plustimer.ui.CurrentSessionActivity"
+            android:name=".ui.currentsession.CurrentSessionActivity"
             android:theme="@style/Theme.PlusTimer.WithNavDrawer">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -14,7 +14,7 @@ import com.pluscubed.plustimer.model.PuzzleType;
 /**
  * An Adapter for a Spinner with values of the PuzzleTypes
  */
-class SpinnerPuzzleTypeAdapter extends ArrayAdapter<PuzzleType> {
+public class SpinnerPuzzleTypeAdapter extends ArrayAdapter<PuzzleType> {
 
     private LayoutInflater mLayoutInflater;
 

@@ -1,4 +1,4 @@
-package com.pluscubed.plustimer.ui;
+package com.pluscubed.plustimer.ui.currentsession;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -27,6 +27,9 @@ import android.widget.Toast;
 
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
+import com.pluscubed.plustimer.ui.DrawerActivity;
+import com.pluscubed.plustimer.ui.SolveListFragment;
+import com.pluscubed.plustimer.ui.SpinnerPuzzleTypeAdapter;
 import com.pluscubed.plustimer.ui.widget.LockingViewPager;
 import com.pluscubed.plustimer.ui.widget.SlidingTabLayout;
 import com.pluscubed.plustimer.utils.PrefUtils;
@@ -149,7 +152,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
     }
 
     @Override
-    protected int getSelfNavDrawerItem() {
+    public int getSelfNavDrawerItem() {
         return NAVDRAWER_ITEM_CURRENT_SESSION;
     }
 
@@ -165,7 +168,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
                 .subscribe(new Subscriber<Object>() {
             @Override
             public void onCompleted() {
-                getCurrentSessionTimerFragment().setInitialized();
+                getCurrentSessionTimerFragment().getPresenter().setInitialized();
                 getSolveListFragment().setInitialized();
                 supportInvalidateOptionsMenu();
             }

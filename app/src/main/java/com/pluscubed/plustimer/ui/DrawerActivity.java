@@ -9,7 +9,6 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -19,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.pluscubed.plustimer.R;
+import com.pluscubed.plustimer.ui.currentsession.CurrentSessionActivity;
 import com.pluscubed.plustimer.utils.PrefUtils;
 
 /**
@@ -26,8 +26,8 @@ import com.pluscubed.plustimer.utils.PrefUtils;
  */
 public abstract class DrawerActivity extends ThemableActivity {
 
-    static final int NAVDRAWER_ITEM_CURRENT_SESSION = 0;
-    static final int NAVDRAWER_ITEM_HISTORY = 1;
+    protected static final int NAVDRAWER_ITEM_CURRENT_SESSION = 0;
+    protected static final int NAVDRAWER_ITEM_HISTORY = 1;
     private static final int NAVDRAWER_ITEM_SETTINGS = -3;
     private static final int NAVDRAWER_ITEM_HELP = -4;
     private static final int NAVDRAWER_ITEM_ABOUT = -5;
@@ -66,14 +66,14 @@ public abstract class DrawerActivity extends ThemableActivity {
      * Subclasses of BaseActivity override this to indicate what nav drawer item
      * corresponds to them.
      */
-    int getSelfNavDrawerItem() {
+    protected int getSelfNavDrawerItem() {
         return NAVDRAWER_ITEM_INVALID;
     }
 
-    void onNavDrawerSlide(float offset) {
+    protected void onNavDrawerSlide(float offset) {
     }
 
-    void onNavDrawerClosed() {
+    protected void onNavDrawerClosed() {
     }
 
     @Override
@@ -81,7 +81,7 @@ public abstract class DrawerActivity extends ThemableActivity {
         return true;
     }
 
-    Toolbar getActionBarToolbar() {
+    protected Toolbar getActionBarToolbar() {
         if (mActionBarToolbar == null) {
             mActionBarToolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
             if (mActionBarToolbar != null) {
@@ -203,7 +203,7 @@ public abstract class DrawerActivity extends ThemableActivity {
         });
     }
 
-    void lockDrawer(boolean lock) {
+    protected void lockDrawer(boolean lock) {
         if (lock) {
             mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         } else {
@@ -251,7 +251,7 @@ public abstract class DrawerActivity extends ThemableActivity {
 
     private void onNavDrawerItemClicked(final int itemId) {
         if (itemId == getSelfNavDrawerItem()) {
-            mDrawerLayout.closeDrawer(Gravity.START);
+            mDrawerLayout.closeDrawer(GravityCompat.START);
             return;
         }
 
@@ -270,7 +270,7 @@ public abstract class DrawerActivity extends ThemableActivity {
             }
         }
 
-        mDrawerLayout.closeDrawer(Gravity.START);
+        mDrawerLayout.closeDrawer(GravityCompat.START);
     }
 
     private boolean isNormalItem(int itemId) {
@@ -278,14 +278,13 @@ public abstract class DrawerActivity extends ThemableActivity {
                 NAVDRAWER_ITEM_HELP && itemId != NAVDRAWER_ITEM_ABOUT;
     }
 
-    boolean isNavDrawerOpen() {
-        return mDrawerLayout != null && mDrawerLayout.isDrawerOpen(Gravity
-                .START);
+    protected boolean isNavDrawerOpen() {
+        return mDrawerLayout != null && mDrawerLayout.isDrawerOpen(GravityCompat.START);
     }
 
     void closeNavDrawer() {
         if (mDrawerLayout != null) {
-            mDrawerLayout.closeDrawer(Gravity.START);
+            mDrawerLayout.closeDrawer(GravityCompat.START);
         }
     }
 
