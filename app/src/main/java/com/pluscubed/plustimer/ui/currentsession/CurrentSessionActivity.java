@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.graphics.Color;
@@ -23,25 +24,24 @@ import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.ui.DrawerActivity;
-import com.pluscubed.plustimer.ui.SolveListFragment;
 import com.pluscubed.plustimer.ui.SpinnerPuzzleTypeAdapter;
+import com.pluscubed.plustimer.ui.currentsessiontimer.CurrentSessionTimerFragment;
+import com.pluscubed.plustimer.ui.currentsessiontimer.CurrentSessionTimerRetainedFragment;
+import com.pluscubed.plustimer.ui.solvelist.SolveListFragment;
+import com.pluscubed.plustimer.ui.solvelist.SolveListPresenter;
 import com.pluscubed.plustimer.ui.widget.LockingViewPager;
 import com.pluscubed.plustimer.ui.widget.SlidingTabLayout;
 import com.pluscubed.plustimer.utils.PrefUtils;
-
-import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
 
 /**
  * Current Session Activity
  */
 public class CurrentSessionActivity extends DrawerActivity implements
-        CurrentSessionTimerFragment.ActivityCallback {
+        CurrentSessionTimerFragment.ActivityCallback, CurrentSessionView {
 
     private static final String STATE_MENU_ITEMS_ENABLE_BOOLEAN =
             "menu_items_enable_boolean";
@@ -57,6 +57,8 @@ public class CurrentSessionActivity extends DrawerActivity implements
     private SlidingTabLayout mSlidingTabLayout;
     private LockingViewPager mViewPager;
     private int mContentFrameLayoutHeight;
+
+    private CurrentSessionPresenter mPresenter;
 
     private static String makeFragmentName(int viewId, int index) {
         return "android:switcher:" + viewId + ":" + index;
@@ -159,31 +161,15 @@ public class CurrentSessionActivity extends DrawerActivity implements
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.Theme_PlusTimer_WithNavDrawer);
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_current_session);
 
-        //TODO What to do on config changes?
-        PuzzleType.initialize(this)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<Object>() {
-            @Override
-            public void onCompleted() {
-                getCurrentSessionTimerFragment().getPresenter().setInitialized();
-                getSolveListFragment().setInitialized();
-                supportInvalidateOptionsMenu();
-            }
+        mPresenter = new CurrentSessionPresenter();
+        mPresenter.attachView(this);
 
-            @Override
-            public void onError(Throwable e) {
-                Toast.makeText(CurrentSessionActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-                e.printStackTrace();
-            }
-
-            @Override
-            public void onNext(Object o) {
-
-            }
-        });
+        mPresenter.onCreate();
 
         if (savedInstanceState != null) {
             mScrambleImageActionEnable = savedInstanceState.getBoolean(STATE_MENU_ITEMS_ENABLE_BOOLEAN);
@@ -254,16 +240,21 @@ public class CurrentSessionActivity extends DrawerActivity implements
         mViewPager.setPagingEnabled(!PrefUtils.isLockSwipingEnabled(this));
     }
 
-    private CurrentSessionTimerFragment getCurrentSessionTimerFragment() {
+    public CurrentSessionTimerFragment getCurrentSessionTimerFragment() {
         return (CurrentSessionTimerFragment) getFragmentManager()
                 .findFragmentByTag(makeFragmentName(R.id
                         .activity_current_session_viewpager, 0));
     }
 
-    private SolveListFragment getSolveListFragment() {
+    public SolveListFragment getSolveListFragment() {
         return (SolveListFragment) getFragmentManager()
                 .findFragmentByTag(makeFragmentName(R.id
                         .activity_current_session_viewpager, 1));
+    }
+
+    @Override
+    public Activity getContextCompat() {
+        return this;
     }
 
     void queueInvalidateOptionsMenu() {
@@ -274,6 +265,12 @@ public class CurrentSessionActivity extends DrawerActivity implements
             // while nav drawer is open doesn't call onCreateOptionsMenu()
             mInvalidateActionBarOnDrawerClosed = true;
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mPresenter.detachView();
     }
 
     @Override
@@ -378,7 +375,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
                 case 0:
                     return new CurrentSessionTimerFragment();
                 case 1:
-                    return new SolveListFragment();
+                    return SolveListPresenter.newInstance(true);
             }
             return null;
         }

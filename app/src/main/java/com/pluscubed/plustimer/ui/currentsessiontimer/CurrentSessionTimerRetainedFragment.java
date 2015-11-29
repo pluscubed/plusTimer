@@ -1,4 +1,4 @@
-package com.pluscubed.plustimer.ui.currentsession;
+package com.pluscubed.plustimer.ui.currentsessiontimer;
 
 import android.app.Fragment;
 import android.os.Bundle;

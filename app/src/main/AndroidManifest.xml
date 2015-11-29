@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest
-    package="com.pluscubed.plustimer"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.pluscubed.plustimer">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -16,7 +16,7 @@
         tools:replace="android:theme, android:icon, android:label">
         <activity
             android:name=".ui.currentsession.CurrentSessionActivity"
-            android:theme="@style/Theme.PlusTimer.WithNavDrawer">
+            android:theme="@style/Theme.PlusTimer.Launch">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

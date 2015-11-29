@@ -1,7 +1,8 @@
-package com.pluscubed.plustimer.ui.currentsession;
+package com.pluscubed.plustimer.ui.currentsessiontimer;
 
-import com.hannesdorfmann.mosby.mvp.MvpView;
-import com.pluscubed.plustimer.ui.TimeBarRecyclerAdapter;
+import android.app.Activity;
+
+import com.pluscubed.plustimer.MvpView;
 
 public interface CurrentSessionTimerView extends MvpView {
     void updateStatsAndTimerText();
@@ -11,4 +12,6 @@ public interface CurrentSessionTimerView extends MvpView {
     TimeBarRecyclerAdapter getTimeBarAdapter();
 
     void setInitialized();
+
+    Activity getContextCompat();
 }

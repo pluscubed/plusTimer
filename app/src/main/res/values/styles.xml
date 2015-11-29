@@ -1,17 +1,39 @@
 <resources>
 
+    <style name="Theme.PlusTimer.Launch" parent="Base.Theme.PlusTimer">
+        <item name="android:windowBackground">@drawable/launch_screen</item>
+
+        <item name="android:windowTitleSize">104dp</item>
+        <item name="android:windowTitleStyle">@style/CustomWindowTitle</item>
+        <item name="android:windowTitleBackgroundStyle">@style/CustomWindowTitleBackground</item>
+        <item name="android:windowNoTitle">false</item>
+    </style>
+
+    <!-- Changes the background color of the title bar -->
+    <style name="CustomWindowTitleBackground">
+        <item name="android:background">@color/primary</item>
+    </style>
+
+    <!-- Set the theme for the window title -->
+    <style name="CustomWindowTitle">
+        <item name="android:singleLine">true</item>
+        <item name="android:textAppearance">@style/CustomWindowTitleText</item>
+    </style>
+
+    <style name="CustomWindowTitleText">
+        <item name="android:textColor">@android:color/transparent</item>
+    </style>
+
+
     <style name="Theme.PlusTimer" parent="Base.Theme.PlusTimer">
-        <item name="android:windowContentOverlay">@null</item>
         <item name="toolbarShadow">@drawable/shadow</item>
     </style>
 
     <style name="Theme.PlusTimer.Dark" parent="Base.Theme.PlusTimer.Dark">
-        <item name="android:windowContentOverlay">@null</item>
         <item name="toolbarShadow">@drawable/shadow</item>
     </style>
 
     <style name="Theme.PlusTimer.Black" parent="Base.Theme.PlusTimer.Black">
-        <item name="android:windowContentOverlay">@null</item>
         <item name="toolbarShadow">@drawable/shadow</item>
     </style>
 
@@ -32,11 +54,11 @@
         <item name="android:textColor">?android:textColorPrimary</item>
 
         <item name="android:windowBackground">@color/background_material_light</item>
+        <item name="android:windowContentOverlay">@null</item>
 
         <item name="actionModeBackground">?colorPrimary</item>
 
-        <item name="android:buttonBarButtonStyle">@style/ButtonBarButtonStyle
-        </item>
+        <item name="android:buttonBarButtonStyle">@style/ButtonBarButtonStyle</item>
 
         <item name="windowActionModeOverlay">true</item>
 
@@ -56,6 +78,7 @@
         <item name="android:textColor">?android:textColorPrimary</item>
 
         <item name="android:windowBackground">@color/background_material_dark</item>
+        <item name="android:windowContentOverlay">@null</item>
 
         <item name="actionModeBackground">?colorPrimary</item>
 

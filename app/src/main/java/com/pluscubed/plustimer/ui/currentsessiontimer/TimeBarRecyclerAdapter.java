@@ -1,6 +1,5 @@
-package com.pluscubed.plustimer.ui;
+package com.pluscubed.plustimer.ui.currentsessiontimer;
 
-import android.app.Activity;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -9,8 +8,9 @@ import android.widget.TextView;
 import com.firebase.client.DataSnapshot;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
+import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
-import com.pluscubed.plustimer.ui.currentsession.CurrentSessionTimerView;
+import com.pluscubed.plustimer.ui.RecyclerViewUpdate;
 import com.pluscubed.plustimer.utils.PrefUtils;
 import com.pluscubed.plustimer.utils.SolveDialogUtils;
 import com.pluscubed.plustimer.utils.Utils;
@@ -25,13 +25,13 @@ import rx.android.schedulers.AndroidSchedulers;
 public class TimeBarRecyclerAdapter
         extends RecyclerView.Adapter<TimeBarRecyclerAdapter.ViewHolder> {
 
-    private final Activity mContext;
+    //TODO: WeakReference? Check for leaks
     private final CurrentSessionTimerView mView;
-    private final List<Solve> mSolves;
     private final Solve[] mBestAndWorstSolves;
+    private List<Solve> mSolves;
+    private boolean mMillisecondsEnabled;
 
-    public TimeBarRecyclerAdapter(Activity context, CurrentSessionTimerView view) {
-        mContext = context;
+    public TimeBarRecyclerAdapter(CurrentSessionTimerView view) {
         mView = view;
         mBestAndWorstSolves = new Solve[2];
         mSolves = new ArrayList<>();
@@ -47,11 +47,12 @@ public class TimeBarRecyclerAdapter
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         Solve s = mSolves.get(position);
-        String timeString = s.getTimeString(PrefUtils.isDisplayMillisecondsEnabled(mContext));
+        String timeString = s.getTimeString(mMillisecondsEnabled);
         holder.textView.setText(timeString);
         for (Solve a : mBestAndWorstSolves) {
             if (a == s) {
                 holder.textView.setText("(" + timeString + ")");
+                break;
             }
         }
     }
@@ -61,28 +62,38 @@ public class TimeBarRecyclerAdapter
         return mSolves.size();
     }
 
-    public void notifyChange(DataSnapshot solveDataSnapshot, Update mode) {
+    public void initialize(List<Solve> solves) {
+        mSolves = new ArrayList<>(solves);
+
+        notifyChange(null, RecyclerViewUpdate.DATA_RESET);
+    }
+
+    private Observable<Solve> getSolve(DataSnapshot snapshot) {
+        if (snapshot != null) {
+            return Session.getSolve(snapshot.getKey()).toObservable();
+        } else {
+            return Observable.empty();
+        }
+    }
+
+    public void notifyChange(DataSnapshot sessionSolveDataSnapshot, RecyclerViewUpdate mode) {
+        mMillisecondsEnabled = PrefUtils.isDisplayMillisecondsEnabled(mView.getContextCompat());
+
         int oldSize = mSolves.size();
 
-        PuzzleType.getCurrent().getCurrentSession()
-                .flatMap(session -> {
-                    if (mode != Update.REMOVE) {
-                        return session.getSolve(solveDataSnapshot.getKey()).toObservable();
-                    } else {
-                        return Observable.empty();
-                    }
-                })
+        getSolve(sessionSolveDataSnapshot)
                 .defaultIfEmpty(null)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(solve -> {
                     //Collections.reverse(mSolves);
 
                     int solvePosition = 0;
-                    if (mode == Update.REMOVE || mode == Update.SINGLE_CHANGE) {
+                    if (mode == RecyclerViewUpdate.REMOVE || mode == RecyclerViewUpdate.SINGLE_CHANGE) {
                         for (int i = 0; i < mSolves.size(); i++) {
                             Solve foundSolve = mSolves.get(i);
-                            if (foundSolve.getId().equals(solveDataSnapshot.getKey())) {
+                            if (foundSolve.getId().equals(sessionSolveDataSnapshot.getKey())) {
                                 solvePosition = i;
+                                break;
                             }
                         }
                     }
@@ -120,7 +131,7 @@ public class TimeBarRecyclerAdapter
                     mBestAndWorstSolves[0] = newBest;
                     mBestAndWorstSolves[1] = newWorst;
 
-                    if (mode != Update.DATA_RESET && mode != Update.REMOVE_ALL) {
+                    if (mode != RecyclerViewUpdate.DATA_RESET && mode != RecyclerViewUpdate.REMOVE_ALL) {
                         if (oldBest != null && !oldBest.equals(newBest)) {
                             notifyItemChanged(mSolves.indexOf(oldBest));
                             notifyItemChanged(mSolves.indexOf(newBest));
@@ -133,18 +144,14 @@ public class TimeBarRecyclerAdapter
                 });
     }
 
-    public enum Update {
-        INSERT, REMOVE, REMOVE_ALL, SINGLE_CHANGE, DATA_RESET
-    }
-
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder {
         public TextView textView;
 
         public ViewHolder(TextView v) {
             super(v);
             textView = v;
             textView.setOnClickListener(v1 -> SolveDialogUtils.createSolveDialog(
-                    mContext,
+                    mView.getContextCompat(),
                     false,
                     PuzzleType.getCurrent().getId(),
                     PuzzleType.getCurrent().getCurrentSessionId(),

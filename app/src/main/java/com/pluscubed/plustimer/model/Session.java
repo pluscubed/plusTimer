@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
@@ -54,11 +55,59 @@ public class Session {
         this(s.getPuzzleTypeId(), s.getId());
     }
 
+    public static void addSessionListener(String sessionId, ChildEventListener listener) {
+        App.getFirebaseUserRef().subscribe(userRef -> {
+            if (!PuzzleType.getPuzzleTypes().isEmpty()) {
+                Firebase sessionSolves = userRef.child("session-solves").child(sessionId);
+                sessionSolves.addChildEventListener(listener);
+
+                App.getChildEventListenerMap().put("session-solves/" + sessionId, listener);
+            }
+        });
+    }
+
+    public static void removeSessionListener(String sessionId, ChildEventListener listener) {
+        App.getFirebaseUserRef().subscribe(userRef -> {
+            Firebase sessionSolves = userRef.child("session-solves").child(sessionId);
+            sessionSolves.removeEventListener(listener);
+
+            for (String key : App.getChildEventListenerMap().keySet()) {
+                if (App.getChildEventListenerMap().get(key) == listener) {
+                    App.getChildEventListenerMap().remove(key);
+                }
+            }
+        });
+    }
+
+    public static Single<Solve> getSolve(String solveId) {
+        return App.getFirebaseUserRef().toSingle()
+                .flatMap(userRef -> Single.<Solve>create(subscriber -> {
+                    Firebase solve = userRef.child("solves").child(solveId);
+                    solve.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot solve) {
+                            if (solve.exists()) {
+                                Solve value = solve.getValue(Solve.class);
+                                value.setId(solveId);
+                                subscriber.onSuccess(value);
+                            } else {
+                                subscriber.onError(FirebaseError
+                                        .fromCode(FirebaseError.UNKNOWN_ERROR).toException());
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(FirebaseError firebaseError) {
+                            subscriber.onError(firebaseError.toException());
+                        }
+                    });
+                }));
+    }
+
     public String getPuzzleTypeId() {
         return mPuzzleTypeId;
     }
 
-    //TODO: Chronological order
     public Observable<List<Solve>> getSolves() {
         return App.getFirebaseUserRef()
                 .flatMap(userRef -> Observable.<Solve>create(subscriber -> {
@@ -145,31 +194,6 @@ public class Session {
 
     public Observable<Solve> getSolveByPosition(int position) {
         return getSolves().map(solves -> solves.get(position));
-    }
-
-    public Single<Solve> getSolve(String solveId) {
-        return App.getFirebaseUserRef().toSingle()
-                .flatMap(userRef -> Single.<Solve>create(subscriber -> {
-                    Firebase solves = userRef.child("solves").child(solveId);
-                    solves.orderByChild("timestamp").addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot solve) {
-                            if (solve.exists()) {
-                                Solve value = solve.getValue(Solve.class);
-                                value.setId(solveId);
-                                subscriber.onSuccess(value);
-                            } else {
-                                subscriber.onError(FirebaseError
-                                        .fromCode(FirebaseError.UNKNOWN_ERROR).toException());
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(FirebaseError firebaseError) {
-                            subscriber.onError(firebaseError.toException());
-                        }
-                    });
-                }));
     }
 
     //TODO

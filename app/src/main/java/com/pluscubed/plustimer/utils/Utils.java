@@ -473,9 +473,9 @@ public class Utils {
     //TODO fix
     public static String getUiScramble(String scramble,
                                        boolean signEnabled,
-                                       String puzzleTypeName) {
+                                       String puzzleTypeId) {
         /*try {*/
-        return signEnabled ? Utils.wcaToSignNotation(scramble, puzzleTypeName) : scramble;
+        return signEnabled ? Utils.wcaToSignNotation(scramble, puzzleTypeId) : scramble;
         /*} catch (NullPointerException e) {
             String positionString = String.valueOf(position);
             if (position == -1) {

@@ -1,10 +1,11 @@
-package com.pluscubed.plustimer.ui.currentsession;
+package com.pluscubed.plustimer.ui.currentsessiontimer;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -37,16 +38,13 @@ import android.widget.TextView;
 
 import com.caverock.androidsvg.SVG;
 import com.caverock.androidsvg.SVGParseException;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.BldSolve;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.ScrambleAndSvg;
 import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
-import com.pluscubed.plustimer.ui.TimeBarRecyclerAdapter;
+import com.pluscubed.plustimer.ui.RecyclerViewUpdate;
 import com.pluscubed.plustimer.utils.PrefUtils;
 import com.pluscubed.plustimer.utils.Utils;
 
@@ -206,42 +204,12 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
             mUiHandler.postDelayed(this, REFRESH_RATE);
         }
     };
-    private final ValueEventListener puzzleTypeObserver = new ValueEventListener() {
-        @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
-            //Update quick stats and hlistview
-            onPuzzleTypeChanged();
-
-            //Set timer text to ready, scramble text to scrambling
-            setScrambleText(getString(R.string.scrambling));
-
-            //Update options menu (disable)
-            enableMenuItems(false);
-            showScrambleImage(false);
-
-            mBldMode = PuzzleType.getCurrent().isBld();
-
-            resetGenerateScramble();
-
-            resetTimer();
-
-            //TODO
-/*
-            PuzzleType.getCurrentId().getCurrentSession()
-                    .registerObserver(sessionSolvesListener);*/
-        }
-
-        @Override
-        public void onCancelled(FirebaseError firebaseError) {
-
-        }
-    };
 
     //TODO
     public void onNewSession() {
         updateStatsAndTimerText();
         TimeBarRecyclerAdapter adapter = (TimeBarRecyclerAdapter) mTimeBarRecycler.getAdapter();
-        adapter.notifyChange(null, TimeBarRecyclerAdapter.Update.REMOVE_ALL);
+        adapter.notifyChange(null, RecyclerViewUpdate.REMOVE_ALL);
     }
 
     //TODO
@@ -379,7 +347,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
 
         //Update RecyclerView
         TimeBarRecyclerAdapter adapter = (TimeBarRecyclerAdapter) mTimeBarRecycler.getAdapter();
-        adapter.notifyChange(null, TimeBarRecyclerAdapter.Update.DATA_RESET);
+        adapter.notifyChange(null, RecyclerViewUpdate.DATA_RESET);
     }
 
     @Override
@@ -403,7 +371,6 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
                         mStatsText.setText(buildStatsWithAveragesOf(getActivity(), 5, 12, 100));
                     }
                 });
-
 
 
         if (!mTiming && !mInspecting) setTimerTextToLastSolveTime();
@@ -461,30 +428,20 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         View v = inflater.inflate(R.layout.fragment_current_session_timer,
                 container, false);
 
-        mTimerText = (TextView) v.findViewById(R.id.
-                fragment_current_session_timer_time_textview);
-        mTimerText2 = (TextView) v.findViewById(R.id.
-                fragment_current_session_timer_timeSecondary_textview);
-        mScrambleText = (TextView) v.findViewById(R.id.
-                fragment_current_session_timer_scramble_textview);
+        mTimerText = (TextView) v.findViewById(R.id.fragment_current_session_timer_time_textview);
+        mTimerText2 = (TextView) v.findViewById(R.id.fragment_current_session_timer_timeSecondary_textview);
+        mScrambleText = (TextView) v.findViewById(R.id.fragment_current_session_timer_scramble_textview);
         mScrambleTextShadow = v.findViewById(R.id.fragment_current_session_timer_scramble_shadow);
-        mScrambleImage = (ImageView) v.findViewById(R.id.
-                fragment_current_session_timer_scramble_imageview);
-        mTimeBarRecycler = (RecyclerView) v.findViewById(R.id.
-                fragment_current_session_timer_timebar_recycler);
+        mScrambleImage = (ImageView) v.findViewById(R.id.fragment_current_session_timer_scramble_imageview);
+        mTimeBarRecycler = (RecyclerView) v.findViewById(R.id.fragment_current_session_timer_timebar_recycler);
 
         mStatsText = (TextView) v.findViewById(R.id.fragment_current_session_timer_stats_textview);
-        mStatsSolvesText = (TextView) v.findViewById(R.id
-                .fragment_current_session_timer_stats_solves_number_textview);
+        mStatsSolvesText = (TextView) v.findViewById(R.id.fragment_current_session_timer_stats_solves_number_textview);
 
-        mLastBarLinearLayout = (LinearLayout) v.findViewById(R.id
-                .fragment_current_session_timer_last_linearlayout);
-        mLastDnfButton = (Button) v.findViewById(R.id
-                .fragment_current_session_timer_last_dnf_button);
-        mLastPlusTwoButton = (Button) v.findViewById(R.id
-                .fragment_current_session_timer_last_plustwo_button);
-        mLastDeleteButton = (Button) v.findViewById(R.id
-                .fragment_current_session_timer_last_delete_button);
+        mLastBarLinearLayout = (LinearLayout) v.findViewById(R.id.fragment_current_session_timer_last_linearlayout);
+        mLastDnfButton = (Button) v.findViewById(R.id.fragment_current_session_timer_last_dnf_button);
+        mLastPlusTwoButton = (Button) v.findViewById(R.id.fragment_current_session_timer_last_plustwo_button);
+        mLastDeleteButton = (Button) v.findViewById(R.id.fragment_current_session_timer_last_delete_button);
 
         mLastDnfButton.setOnClickListener(v1 -> {
             PuzzleType.getCurrent().getCurrentSession()
@@ -534,12 +491,10 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         };
         mTimeBarRecycler.setLayoutManager(timeBarLayoutManager);
         mTimeBarRecycler.setHasFixedSize(true);
-        mTimeBarRecycler.setAdapter(new TimeBarRecyclerAdapter(getActivity(), this));
+        mTimeBarRecycler.setAdapter(new TimeBarRecyclerAdapter(this));
 
-        mDynamicStatusBarFrame = (FrameLayout) v.findViewById(R.id
-                .fragment_current_session_timer_dynamic_status_frame);
-        mDynamicStatusBarText = (TextView) v.findViewById(R.id
-                .fragment_current_session_timer_dynamic_status_text);
+        mDynamicStatusBarFrame = (FrameLayout) v.findViewById(R.id.fragment_current_session_timer_dynamic_status_frame);
+        mDynamicStatusBarText = (TextView) v.findViewById(R.id.fragment_current_session_timer_dynamic_status_text);
 
         mRetainedFragment = getActivityCallback().getTimerRetainedFragment();
         mRetainedFragment.setTargetFragment(this, 0);
@@ -615,6 +570,11 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
     }
 
     @Override
+    public Activity getContextCompat() {
+        return getActivity();
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         initSharedPrefs();
@@ -646,7 +606,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         //PuzzleType.getCurrentId().saveCurrentSession(getActivity());
         stopHoldTimer();
 
-        mPresenter.onPause();
+        //mPresenter.onPause();
     }
 
     @Override
@@ -677,7 +637,8 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         mRetainedFragment.setTargetFragment(null, 0);
 
 
-        mPresenter.detachView(false);
+        mPresenter.onDestroy();
+        mPresenter.detachView();
 
         //TODO
         /*PuzzleType.getCurrentId().getCurrentSession()

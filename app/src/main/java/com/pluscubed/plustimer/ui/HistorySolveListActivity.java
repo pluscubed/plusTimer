@@ -9,6 +9,7 @@ import android.view.MenuItem;
 
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
+import com.pluscubed.plustimer.ui.solvelist.SolveListFragment;
 
 /**
  * History SolveList (started onListItemClick HistorySessionListFragment)

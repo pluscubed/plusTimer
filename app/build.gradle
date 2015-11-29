@@ -7,14 +7,12 @@ buildscript {
 
     dependencies {
         classpath 'io.fabric.tools:gradle:1.20.1'
-        classpath 'me.tatarka:gradle-retrolambda:3.3.0-beta2'
-        classpath 'com.github.ben-manes:gradle-versions-plugin:0.11.3'
+        classpath 'me.tatarka:gradle-retrolambda:3.3.0-SNAPSHOT'
     }
 }
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 apply plugin: 'me.tatarka.retrolambda'
-apply plugin: 'com.github.ben-manes.versions'
 
 repositories {
     maven { url 'https://maven.fabric.io/public' }
@@ -31,7 +29,7 @@ preBuild.dependsOn('syncTask')
 
 android {
     compileSdkVersion 23
-    buildToolsVersion '23.0.1'
+    buildToolsVersion '23.0.2'
 
     packagingOptions {
         exclude 'META-INF/LICENSE'
@@ -41,7 +39,7 @@ android {
 
     defaultConfig {
         applicationId "com.pluscubed.plustimer"
-        minSdkVersion 14
+        minSdkVersion 16
         targetSdkVersion 23
         versionCode 24
         versionName '0.3.0-beta'
@@ -96,25 +94,8 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
-    applicationVariants.all { variant ->
-        variant.assemble.doLast {
-            //If this is a 'release' build, reveal the compiled apk in finder/explorer
-            if (variant.buildType.name.contains('release')) {
-
-                def path;
-                variant.outputs.each { output ->
-                    path = output.outputFile
-                }
-
-                exec {
-                    if (System.properties['os.name'].toLowerCase().contains('mac os x')) {
-                        ['open', '-R', path].execute()
-                    } else if (System.properties['os.name'].toLowerCase().contains('windows')) {
-                        ['explorer', '/select,', path].execute()
-                    }
-                }
-            }
-        }
+    dexOptions {
+        dexInProcess true
     }
 }
 
@@ -123,24 +104,23 @@ retrolambda {
 }
 
 dependencies {
-    compile 'com.hannesdorfmann.mosby:mvp:2.0.0'
-    compile 'com.hannesdorfmann.mosby:viewstate:2.0.0'
+    compile 'com.firebase:firebase-client-android:2.4.1'
+    compile 'com.firebaseui:firebase-ui:0.3.0'
 
-    compile 'com.firebase:firebase-client-android:2.4.0'
-    compile 'com.firebaseui:firebase-ui:0.2.0'
     compile 'io.reactivex:rxandroid:1.0.1'
+    compile 'io.reactivex:rxjava:1.0.16'
 
     compile 'com.jjoe64:graphview:3.1.4'
 
-    compile 'com.android.support:appcompat-v7:23.0.1'
-    compile 'com.android.support:support-v13:23.0.1'
-    compile 'com.android.support:recyclerview-v7:23.0.1'
-    compile 'com.android.support:preference-v14:23.0.1'
+    compile 'com.android.support:appcompat-v7:23.1.1'
+    compile 'com.android.support:support-v13:23.1.1'
+    compile 'com.android.support:recyclerview-v7:23.1.1'
+    compile 'com.android.support:preference-v14:23.1.1'
 
-    androidTestCompile 'com.android.support:support-annotations:23.0.1'
-    androidTestCompile 'com.android.support.test:runner:0.4'
+    androidTestCompile 'com.android.support:support-annotations:23.1.1'
+    androidTestCompile 'com.android.support.test:runner:0.4.1'
     // Set this dependency to use JUnit 4 rules
-    androidTestCompile 'com.android.support.test:rules:0.4'
+    androidTestCompile 'com.android.support.test:rules:0.4.1'
     androidTestCompile 'org.hamcrest:hamcrest-library:1.4-atlassian-1'
 
     compile('com.github.cubing:tnoodle-android:0.8.9@aar') {
@@ -148,10 +128,10 @@ dependencies {
     }
     compile 'com.caverock:androidsvg:1.2.1'
 
-    compile 'com.google.code.gson:gson:2.3.1'
-    compile 'com.afollestad.material-dialogs:core:0.8.1.0'
+    compile 'com.google.code.gson:gson:2.4'
+    compile 'com.github.afollestad.material-dialogs:core:0.8.5.1'
     compile 'com.rengwuxian.materialedittext:library:2.1.4'
-    compile('com.crashlytics.sdk.android:crashlytics:2.5.2@aar') {
+    compile('com.crashlytics.sdk.android:crashlytics:2.5.3@aar') {
         transitive = true;
     }
 

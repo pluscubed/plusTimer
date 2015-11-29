@@ -126,14 +126,14 @@ public class PuzzleType {
         int savedVersionCode = PrefUtils.getVersionCode(context);
         //TODO: Nicer Rx structure
         return App.getFirebaseUserRef().flatMap(userRef -> {
-            Firebase puzzletypesRef = userRef.child("puzzletypes");
+            Firebase puzzleTypesRef = userRef.child("puzzletypes");
             Firebase currentPuzzleTypeRef = userRef.child("current-puzzle-type");
 
             Observable<?> stuff;
             if (savedVersionCode < 24) {
-                stuff = initializePuzzleTypesFirstRun(context, puzzletypesRef, currentPuzzleTypeRef);
+                stuff = initializePuzzleTypesFirstRun(context, puzzleTypesRef, currentPuzzleTypeRef);
             } else {
-                stuff = initializePuzzleTypes(puzzletypesRef, currentPuzzleTypeRef);
+                stuff = initializePuzzleTypes(puzzleTypesRef, currentPuzzleTypeRef);
             }
 
             return stuff;
@@ -329,7 +329,7 @@ public class PuzzleType {
         return mHistorySessionsLegacy;
     }*/
 
-    public void deleteSession(Session session) {
+    public void deleteSession(String sessionId) {
         /*App.getFirebaseUserRef().doOnNext(userRef -> {
             Firebase solve = userRef.child("solves").child(id);
             solve.removeValue();

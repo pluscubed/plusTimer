@@ -118,7 +118,7 @@ public class HistorySessionListFragment extends ListFragment {
                              i--) {
                             if (getListView().isItemChecked(i)) {
                                 PuzzleType.get(mPuzzleTypeId).deleteSession(
-                                        (Session) getListView().getItemAtPosition(i));
+                                        ((Session) getListView().getItemAtPosition(i)).getId());
                             }
                         }
                         mode.finish();

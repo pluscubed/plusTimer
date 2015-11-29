@@ -242,11 +242,12 @@ public abstract class DrawerActivity extends ThemableActivity {
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         setupNavDrawer();
-        View mainContent = findViewById(R.id
-                .activity_drawer_content_linearlayout);
-        mainContent.setAlpha(0);
-        mainContent.animate().alpha(1).setDuration
-                (MAIN_CONTENT_FADEIN_DURATION);
+
+        if (savedInstanceState != null) {
+            View mainContent = findViewById(R.id.activity_drawer_content_linearlayout);
+            mainContent.setAlpha(0);
+            mainContent.animate().alpha(1).setDuration(MAIN_CONTENT_FADEIN_DURATION);
+        }
     }
 
     private void onNavDrawerItemClicked(final int itemId) {
@@ -255,12 +256,7 @@ public abstract class DrawerActivity extends ThemableActivity {
             return;
         }
 
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                goToNavDrawerItem(itemId);
-            }
-        }, NAVDRAWER_LAUNCH_DELAY);
+        mHandler.postDelayed(() -> goToNavDrawerItem(itemId), NAVDRAWER_LAUNCH_DELAY);
         if (isNormalItem(itemId)) {
             View mainContent = findViewById(R.id
                     .activity_drawer_content_linearlayout);
