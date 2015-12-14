@@ -13,6 +13,7 @@ import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
 import com.pluscubed.plustimer.ui.RecyclerViewUpdate;
 import com.pluscubed.plustimer.utils.PrefUtils;
+import com.pluscubed.plustimer.utils.SolveDialogUtils;
 
 import rx.SingleSubscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -114,6 +115,11 @@ public class SolveListPresenter extends MvpPresenter<SolveListView> {
         }
     }
 
+    public void onToolbarAddSolvePressed() {
+        if (isViewAttached()) {
+            SolveDialogUtils.createSolveDialog(getView().getContextCompat(), true, mPuzzleTypeId, mSessionId, null);
+        }
+    }
 
     private void onSessionSolvesChanged() {
         /*mSession = getPuzzleType().getSession(mSessionId);*/

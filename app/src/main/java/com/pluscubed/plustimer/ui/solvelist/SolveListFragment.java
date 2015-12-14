@@ -174,8 +174,7 @@ public class SolveListFragment extends Fragment implements SolveListView {
                 getActivity().finish();
                 return true;
             case R.id.menu_solvelist_add_menuitem:
-                //TODO
-                /*SolveDialogUtils.createSolveDialog(getActivity(), true, mPuzzleTypeId, mSessionId, null);*/
+                mPresenter.onToolbarAddSolvePressed();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
