@@ -51,6 +51,7 @@ import com.pluscubed.plustimer.utils.Utils;
 import java.util.Arrays;
 import java.util.Collections;
 
+import rx.SingleSubscriber;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 
@@ -178,17 +179,14 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
                     playEnterAnimations();
 
                     Solve s = new Solve(mRetainedFragment.getCurrentScrambleAndSvg().getScramble(), 0);
-                    s.setPenalty(Solve.PENALTY_DNF);
+                    s.setPenalty(Solve.PENALTY_DNF, null, null);
 
                     //Add the solve to the current session with the current
-                    // scramble/scramble
-                    // image and DNF
-                    PuzzleType.getCurrent().getCurrentSession().subscribe(session -> {
-                        session.addSolve(s);
-                    });
+                    // scramble/scramble image and DNF
+                    mPresenter.onTimingFinished(s);
 
                     resetTimer();
-                    setTimerTextToLastSolveTime();
+                    invalidateTimerText();
 
 
                     if (mRetainedFragment.isScrambling()) {
@@ -207,7 +205,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
 
     //TODO
     public void onNewSession() {
-        updateStatsAndTimerText();
+        updateStatsAndTimerText(null, RecyclerViewUpdate.DATA_RESET);
         TimeBarRecyclerAdapter adapter = (TimeBarRecyclerAdapter) mTimeBarRecycler.getAdapter();
         adapter.notifyChange(null, RecyclerViewUpdate.REMOVE_ALL);
     }
@@ -343,7 +341,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
     }
 
     void onPuzzleTypeChanged() {
-        updateStatsAndTimerText();
+        updateStatsAndTimerText(null, RecyclerViewUpdate.DATA_RESET);
 
         //Update RecyclerView
         TimeBarRecyclerAdapter adapter = (TimeBarRecyclerAdapter) mTimeBarRecycler.getAdapter();
@@ -351,29 +349,32 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
     }
 
     @Override
-    public void updateStatsAndTimerText() {
+    public void updateStatsAndTimerText(Solve solve, RecyclerViewUpdate mode) {
         //Update stats
         PuzzleType.getCurrent().getCurrentSession()
                 .flatMap(Session::getNumberOfSolves)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<Integer>() {
-                    @Override
-                    public void onCompleted() {
-                    }
+                .subscribe(new SingleSubscriber<Integer>() {
 
                     @Override
                     public void onError(Throwable e) {
                     }
 
                     @Override
-                    public void onNext(Integer numberOfSolves) {
+                    public void onSuccess(Integer numberOfSolves) {
                         mStatsSolvesText.setText(getString(R.string.solves_colon) + numberOfSolves);
                         mStatsText.setText(buildStatsWithAveragesOf(getActivity(), 5, 12, 100));
                     }
                 });
 
 
-        if (!mTiming && !mInspecting) setTimerTextToLastSolveTime();
+        if (!mTiming && !mInspecting && solve != null) {
+            if (mode == RecyclerViewUpdate.INSERT) {
+                setTimerTextFromSolve(solve);
+            } else {
+                invalidateTimerText();
+            }
+        }
     }
 
     @Override
@@ -443,45 +444,59 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         mLastPlusTwoButton = (Button) v.findViewById(R.id.fragment_current_session_timer_last_plustwo_button);
         mLastDeleteButton = (Button) v.findViewById(R.id.fragment_current_session_timer_last_delete_button);
 
-        mLastDnfButton.setOnClickListener(v1 -> {
+        mLastDnfButton.setOnClickListener(view -> {
             PuzzleType.getCurrent().getCurrentSession()
-                    .flatMap(Session::getLastSolve)
+                    .flatMapObservable(Session::getLastSolve)
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(solve -> {
-                        solve.setPenalty(Solve.PENALTY_DNF);
-                        playLastBarExitAnimation();
+                    .subscribe(new Subscriber<Solve>() {
+                        @Override
+                        public void onCompleted() {
+                            playLastBarExitAnimation();
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                        }
+
+                        @Override
+                        public void onNext(Solve solve) {
+                            solve.setPenalty(Solve.PENALTY_DNF,
+                                    PuzzleType.getCurrentId(),
+                                    PuzzleType.getCurrent().getCurrentSessionId());
+                        }
                     });
-            //TODO
-            /*if (ErrorUtils.isSolveNonexistent(getActivity(), PuzzleType.getCurrentId().getId(),
-                    PuzzleType.getCurrentId().getCurrentSessionId(), currentSession.getNumberOfSolves() - 1)) {
-                return;
-            }*/
         });
 
-        mLastPlusTwoButton.setOnClickListener(v1 -> {
+        mLastPlusTwoButton.setOnClickListener(view -> {
             PuzzleType.getCurrent().getCurrentSession()
-                    .flatMap(Session::getLastSolve)
+                    .flatMapObservable(Session::getLastSolve)
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(solve -> {
-                        solve.setPenalty(Solve.PENALTY_PLUSTWO);
-                        playLastBarExitAnimation();
+                    .subscribe(new Subscriber<Solve>() {
+                        @Override
+                        public void onCompleted() {
+                            playLastBarExitAnimation();
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                        }
+
+                        @Override
+                        public void onNext(Solve solve) {
+                            solve.setPenalty(Solve.PENALTY_PLUSTWO,
+                                    PuzzleType.getCurrentId(),
+                                    PuzzleType.getCurrent().getCurrentSessionId());
+                        }
                     });
         });
 
         mLastDeleteButton.setOnClickListener(v1 -> {
             PuzzleType.getCurrent().getCurrentSession()
-                    .doOnNext(session -> session.getLastSolve().subscribe(solve -> {
-                        session.deleteSolve(solve.getId(), PuzzleType.getCurrent());
-                    }))
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(solve -> {
+                    .subscribe(session -> {
+                        session.deleteSolve(PuzzleType.getCurrentId());
                         playLastBarExitAnimation();
                     });
-            //TODO
-           /* if (ErrorUtils.isSolveNonexistent(getActivity(), PuzzleType.getCurrentId().getId(),
-                    PuzzleType.getCurrentId().getCurrentSessionId(), currentSession.getNumberOfSolves() - 1)) {
-                return;
-            }*/
         });
 
         LinearLayoutManager timeBarLayoutManager = new LinearLayoutManager(getActivity(),
@@ -489,6 +504,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
             //TODO: Smooth scroll so empty space for insertion opens up
             //Take a look at onLayoutChildren so insertion animation is nice.
         };
+        timeBarLayoutManager.setStackFromEnd(true);
         mTimeBarRecycler.setLayoutManager(timeBarLayoutManager);
         mTimeBarRecycler.setHasFixedSize(true);
         mTimeBarRecycler.setAdapter(new TimeBarRecyclerAdapter(this));
@@ -649,8 +665,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
     void initSharedPrefs() {
         mInspectionEnabled = PrefUtils.isInspectionEnabled(getActivity());
         mHoldToStartEnabled = PrefUtils.isHoldToStartEnabled(getActivity());
-        mTwoRowTimeEnabled =
-                getResources().getConfiguration().orientation == 1
+        mTwoRowTimeEnabled = getResources().getConfiguration().orientation == 1
                         && PrefUtils.isTwoRowTimeEnabled(getActivity());
         mUpdateTimePref = PrefUtils.getTimerUpdateMode(getActivity());
         mMillisecondsEnabled = PrefUtils.isDisplayMillisecondsEnabled(getActivity());
@@ -665,14 +680,11 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         if (mTimerText.getText() != getString(R.string.ready)) {
             if (mTimerText != null && mTimerText2 != null) {
                 if (mTwoRowTimeEnabled) {
-                    mTimerText.setTextSize(TypedValue.COMPLEX_UNIT_SP,
-                            mTimerTextSize);
+                    mTimerText.setTextSize(TypedValue.COMPLEX_UNIT_SP, mTimerTextSize);
                 } else {
-                    mTimerText.setTextSize(TypedValue.COMPLEX_UNIT_SP,
-                            mTimerTextSize * 0.7F);
+                    mTimerText.setTextSize(TypedValue.COMPLEX_UNIT_SP, mTimerTextSize * 0.7F);
                 }
-                mTimerText2.setTextSize(TypedValue.COMPLEX_UNIT_SP,
-                        mTimerTextSize / 2);
+                mTimerText2.setTextSize(TypedValue.COMPLEX_UNIT_SP, mTimerTextSize / 2);
             }
         }
     }
@@ -703,15 +715,39 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
      * Sets the timer text to last solve's time; if there are no solves,
      * set to ready. Updates the timer text's size.
      */
-    void setTimerTextToLastSolveTime() {
-        //TODO
-        /*if (PuzzleType.getCurrentId().getCurrentSession().getNumberOfSolves() != 0) {
-            setTimerText(PuzzleType.getCurrentId().getCurrentSession()
-                    .getLastSolve().getTimeStringArray(mMillisecondsEnabled));
-        } else {*/
-        setTimerText(new String[]{getString(R.string.ready), ""});
-        mTimerText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 100);
-        /*}*/
+    void invalidateTimerText() {
+
+        PuzzleType.getCurrent().getCurrentSession()
+                .flatMapObservable(Session::getLastSolve)
+                .observeOn(AndroidSchedulers.mainThread())
+                .defaultIfEmpty(null)
+                .subscribe(new Subscriber<Solve>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onNext(Solve solve) {
+                        if (solve != null) {
+                            setTimerTextFromSolve(solve);
+                        } else {
+                            setTimerText(new String[]{getString(R.string.ready), ""});
+                            mTimerText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 100);
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+                });
+
+        setTimerTextToPrefSize();
+    }
+
+    void setTimerTextFromSolve(Solve solve) {
+        setTimerText(solve.getTimeStringArray(mMillisecondsEnabled));
         setTimerTextToPrefSize();
     }
 
@@ -772,15 +808,13 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
             }
 
             if (mInspectionEnabled && mLateStartPenalty) {
-                s.setPenalty(Solve.PENALTY_PLUSTWO);
+                s.setPenalty(Solve.PENALTY_PLUSTWO, null, null);
             }
 
 
             //Add the solve to the current session with the
             // current scramble/scramble image and time
-            PuzzleType.getCurrent().getCurrentSession().subscribe(session -> {
-                session.addSolve(s);
-            });
+            mPresenter.onTimingFinished(s);
 
 
             playLastBarEnterAnimation();
@@ -789,7 +823,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
 
             resetTimer();
 
-            setTimerTextToLastSolveTime();
+            setTimerTextFromSolve(s);
 
 
             if (scrambling) {

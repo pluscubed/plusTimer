@@ -33,42 +33,36 @@ import net.gnehzr.tnoodle.scrambles.InvalidScrambleException;
 
 import java.math.BigDecimal;
 
+import rx.android.schedulers.AndroidSchedulers;
+
 /**
  * Solve modify dialog
  */
 public class SolveDialogFragment extends DialogFragment {
 
-    private static final String ARG_DIALOG_INIT_PUZZLETYPE_DISPLAY_NAME
-            = "com.pluscubed.plustimer.dialog.puzzleType";
-
-    private static final String ARG_DIALOG_INIT_SESSION_ID
-            = "com.pluscubed.plustimer.dialog.sessionIndex";
-
-    private static final String ARG_DIALOG_INIT_SOLVE_INDEX
-            = "com.pluscubed.plustimer.dialog.solveIndex";
-
-    private static final String ARG_DIALOG_INIT_ADD_MODE
-            = "com.pluscubed.plustimer.dialog.addMode";
+    private static final String ARG_DIALOG_INIT_PUZZLETYPE_ID = "com.pluscubed.plustimer.dialog.puzzleType";
+    private static final String ARG_DIALOG_INIT_SESSION_ID = "com.pluscubed.plustimer.dialog.sessionIndex";
+    private static final String ARG_DIALOG_INIT_SOLVE = "com.pluscubed.plustimer.dialog.solveIndex";
+    private static final String ARG_DIALOG_INIT_ADD_MODE = "com.pluscubed.plustimer.dialog.addMode";
 
     private String mPuzzleTypeId;
     private String mSessionId;
-    private String mSolveId;
 
     private boolean mAddMode;
 
     private MaterialEditText mScrambleEdit;
-    private Solve mSolve;
     private Solve mSolveCopy;
     private boolean mMillisecondsEnabled;
     private EditText mTimeEdit;
+    private Solve mSolve;
 
-    public static SolveDialogFragment newInstance(boolean addMode, String puzzleTypeName,
-                                                  String sessionId, String solveId) {
+    public static SolveDialogFragment newInstance(boolean addMode, String puzzleTypeId,
+                                                  String sessionId, Solve solve) {
         SolveDialogFragment d = new SolveDialogFragment();
         Bundle args = new Bundle();
         args.putString(ARG_DIALOG_INIT_SESSION_ID, sessionId);
-        args.putString(ARG_DIALOG_INIT_SOLVE_INDEX, solveId);
-        args.putString(ARG_DIALOG_INIT_PUZZLETYPE_DISPLAY_NAME, puzzleTypeName);
+        args.putParcelable(ARG_DIALOG_INIT_SOLVE, solve);
+        args.putString(ARG_DIALOG_INIT_PUZZLETYPE_ID, puzzleTypeId);
         args.putBoolean(ARG_DIALOG_INIT_ADD_MODE, addMode);
         d.setArguments(args);
         return d;
@@ -79,15 +73,11 @@ public class SolveDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         //SOLVE SETUP
         mAddMode = getArguments().getBoolean(ARG_DIALOG_INIT_ADD_MODE);
-        mPuzzleTypeId = getArguments().getString
-                (ARG_DIALOG_INIT_PUZZLETYPE_DISPLAY_NAME);
+        mPuzzleTypeId = getArguments().getString(ARG_DIALOG_INIT_PUZZLETYPE_ID);
         mSessionId = getArguments().getString(ARG_DIALOG_INIT_SESSION_ID);
-        mSolveId = getArguments().getString(ARG_DIALOG_INIT_SOLVE_INDEX);
 
         if (!mAddMode) {
-            //TODO
-            /*mSolve = PuzzleType.get(mPuzzleTypeId).getSession(mSessionId).getSolveByPosition(0);*/
-            mSolve = new Solve();
+            mSolve = getArguments().getParcelable(ARG_DIALOG_INIT_SOLVE);
             mSolveCopy = new Solve(mSolve);
         } else {
             mSolveCopy = new Solve("", 0);
@@ -102,10 +92,9 @@ public class SolveDialogFragment extends DialogFragment {
         int penalty = Solve.PENALTY_NONE;
 
         if (!mAddMode) {
-            timeString = mSolve.getDescriptiveTimeString
-                    (mMillisecondsEnabled);
-            scramble = mSolve.getScramble()/*.getUiScramble(signEnabled, mPuzzleTypeId)*/;
-            penalty = mSolve.getPenalty();
+            timeString = mSolveCopy.getDescriptiveTimeString(mMillisecondsEnabled);
+            scramble = Utils.getUiScramble(mSolveCopy.getScramble(), signEnabled, mPuzzleTypeId);
+            penalty = mSolveCopy.getPenalty();
         }
 
         LayoutInflater inflater = getActivity().getLayoutInflater();
@@ -115,17 +104,13 @@ public class SolveDialogFragment extends DialogFragment {
         View v = inflater.inflate(R.layout.fragment_dialog_solve, null);
 
         //TIMESTAMP TEXTVIEW SETUP
-        TextView timestampTextView = (TextView) v.findViewById(R.id
-                .dialog_solve_timestamp_textview);
-        timestampTextView.setText(Utils.timeDateStringFromTimestamp
-                (getActivity().getApplicationContext(), timestamp));
+        TextView timestampTextView = (TextView) v.findViewById(R.id.dialog_solve_timestamp_textview);
+        timestampTextView.setText(Utils.timeDateStringFromTimestamp(getActivity().getApplicationContext(), timestamp));
 
         //PENALTY SPINNER SETUP
-        Spinner penaltySpinner = (Spinner) v.findViewById(R.id
-                .dialog_solve_modify_penalty_spinner);
-        ArrayAdapter<CharSequence> adapter = new ArrayAdapter<CharSequence>
-                (getActivity(), 0, getResources().getStringArray(R.array
-                        .penalty_array)) {
+        Spinner penaltySpinner = (Spinner) v.findViewById(R.id.dialog_solve_modify_penalty_spinner);
+        ArrayAdapter<CharSequence> adapter =
+                new ArrayAdapter<CharSequence>(getActivity(), 0, getResources().getStringArray(R.array.penalty_array)) {
             @Override
             public View getView(int position, View convertView,
                                 ViewGroup parent) {
@@ -170,7 +155,7 @@ public class SolveDialogFragment extends DialogFragment {
             public void onItemSelected(AdapterView<?> parent, View view,
                                        int selectedPosition,
                                        long id) {
-                mSolveCopy.setPenalty(selectedPosition);
+                mSolveCopy.setPenalty(selectedPosition, null, null);
                 updateTitle();
             }
 
@@ -184,7 +169,7 @@ public class SolveDialogFragment extends DialogFragment {
         mTimeEdit = (EditText) v.findViewById(R.id
                 .dialog_solve_time_edittext);
         if (!mAddMode) {
-            mTimeEdit.setText(Utils.timeStringSecondsFromNs(mSolve.getRawTime(),
+            mTimeEdit.setText(Utils.timeStringSecondsFromNs(mSolveCopy.getRawTime(),
                     mMillisecondsEnabled));
         }
         mTimeEdit.addTextChangedListener(new TextWatcher() {
@@ -206,15 +191,15 @@ public class SolveDialogFragment extends DialogFragment {
                         if (s.length() != 0) {
                             BigDecimal timeEditTextDecimal = BigDecimal
                                     .valueOf(Double.parseDouble(s.toString()));
-                            mSolveCopy.setRawTime(((timeEditTextDecimal.multiply
-                                    (BigDecimal.valueOf(1000000000)))
-                                    .longValueExact()));
+                            mSolveCopy.setRawTime(
+                                    timeEditTextDecimal.multiply(BigDecimal.valueOf(1000000000)).longValueExact()
+                                    , null, null);
                             updateTitle();
                             break;
                         } else {
                             getDialog().setTitle(Utils.timeStringFromNs(0,
                                     mMillisecondsEnabled));
-                            mSolveCopy.setRawTime(0);
+                            mSolveCopy.setRawTime(0, null, null);
                             break;
                         }
                     } catch (NumberFormatException | ArithmeticException e) {
@@ -225,8 +210,7 @@ public class SolveDialogFragment extends DialogFragment {
         });
 
         //SCRAMBLE EDITTEXT SETUP
-        mScrambleEdit = (MaterialEditText) v.findViewById(R.id
-                .dialog_solve_scramble_edittext);
+        mScrambleEdit = (MaterialEditText) v.findViewById(R.id.dialog_solve_scramble_edittext);
         mScrambleEdit.setText(scramble);
         mScrambleEdit.addTextChangedListener(new TextWatcher() {
             @Override
@@ -253,35 +237,11 @@ public class SolveDialogFragment extends DialogFragment {
                 .autoDismiss(false)
                 .positiveText(android.R.string.ok)
                 .negativeText(android.R.string.cancel)
-                .callback(new MaterialDialog.ButtonCallback() {
-                    @Override
-                    public void onNegative(MaterialDialog materialDialog) {
-                        SolveDialogFragment.this.onNegative();
-                    }
-
-                    @Override
-                    public void onPositive(MaterialDialog materialDialog) {
-                        SolveDialogFragment.this.onPositive();
-                    }
-                });
+                .onPositive((dialog, which) -> onPositive())
+                .onNegative((dialog, which) -> onNegative());
         if (!mAddMode) {
             builder.neutralText(R.string.delete)
-                    .callback(new MaterialDialog.ButtonCallback() {
-                        @Override
-                        public void onPositive(MaterialDialog materialDialog) {
-                            SolveDialogFragment.this.onPositive();
-                        }
-
-                        @Override
-                        public void onNegative(MaterialDialog materialDialog) {
-                            SolveDialogFragment.this.onNegative();
-                        }
-
-                        @Override
-                        public void onNeutral(MaterialDialog materialDialog) {
-                            SolveDialogFragment.this.onNeutral();
-                        }
-                    });
+                    .onNeutral((dialog, which) -> onNeutral());
         }
 
         return builder.build();
@@ -303,8 +263,13 @@ public class SolveDialogFragment extends DialogFragment {
         /*if (ErrorUtils.isSolveNonexistent(getActivity(), mPuzzleTypeId, mSessionId, mSolveId)) {
             return;
         }*/
-        /*PuzzleType.get(mPuzzleTypeId).getSession(mSessionId).deleteSolve(*//*mSolveId*//*0, PuzzleType.get(mPuzzleTypeId));*/
-        dismiss();
+        PuzzleType.get(mPuzzleTypeId).getSession(mSessionId)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .subscribe(session -> {
+                    session.deleteSolve(mSolveCopy.getId());
+                    dismiss();
+                });
+
     }
 
     private void onNegative() {
@@ -327,11 +292,17 @@ public class SolveDialogFragment extends DialogFragment {
             mSolveCopy.setScramble(scrambleText);
             if (!mAddMode) {
                 mSolve.copy(mSolveCopy);
+                mSolve.update(mPuzzleTypeId, mSessionId);
+                dismiss();
             } else {
-                //TODO
-                /*PuzzleType.get(mPuzzleTypeId).getSession(mSessionId).addSolve(mSolveCopy);*/
+                PuzzleType.get(mPuzzleTypeId).getSession(mSessionId)
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(session -> {
+                            session.addSolve(mSolveCopy, mPuzzleTypeId);
+                            dismiss();
+                        });
             }
-            dismiss();
+
         } catch (InvalidScrambleException e) {
             mScrambleEdit.setError(getString(R.string.invalid_scramble));
         }

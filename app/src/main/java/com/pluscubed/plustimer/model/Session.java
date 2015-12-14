@@ -17,6 +17,8 @@ import java.util.List;
 
 import rx.Observable;
 import rx.Single;
+import rx.SingleSubscriber;
+import rx.Subscriber;
 
 /**
  * Session data
@@ -33,8 +35,6 @@ public class Session {
 
     private String mId;
 
-    @JsonProperty("puzzletype")
-    private String mPuzzleTypeId;
     @JsonProperty("timestamp")
     private long mTimestamp;
 
@@ -42,8 +42,7 @@ public class Session {
     }
 
 
-    public Session(String puzzleTypeId, String id) {
-        mPuzzleTypeId = puzzleTypeId;
+    public Session(String id) {
         mId = id;
         mTimestamp = TIMESTAMP_NO_SOLVES;
     }
@@ -52,24 +51,20 @@ public class Session {
      * ID stays the same.
      */
     public Session(Session s) {
-        this(s.getPuzzleTypeId(), s.getId());
+        this(s.getId());
     }
 
-    public static void addSessionListener(String sessionId, ChildEventListener listener) {
-        App.getFirebaseUserRef().subscribe(userRef -> {
-            if (!PuzzleType.getPuzzleTypes().isEmpty()) {
-                Firebase sessionSolves = userRef.child("session-solves").child(sessionId);
-                sessionSolves.addChildEventListener(listener);
+    public void addSessionListener(ChildEventListener listener, String puzzleTypeId) {
+        FirebaseDbUtil.getSolvesRef(mId).subscribe(solvesRef -> {
+            solvesRef.addChildEventListener(listener);
 
-                App.getChildEventListenerMap().put("session-solves/" + sessionId, listener);
-            }
+            App.getChildEventListenerMap().put("sessions/" + puzzleTypeId + "/" + mId, listener);
         });
     }
 
-    public static void removeSessionListener(String sessionId, ChildEventListener listener) {
-        App.getFirebaseUserRef().subscribe(userRef -> {
-            Firebase sessionSolves = userRef.child("session-solves").child(sessionId);
-            sessionSolves.removeEventListener(listener);
+    public void removeSessionListener(ChildEventListener listener) {
+        FirebaseDbUtil.getSolvesRef(mId).subscribe(solvesRef -> {
+            solvesRef.removeEventListener(listener);
 
             for (String key : App.getChildEventListenerMap().keySet()) {
                 if (App.getChildEventListenerMap().get(key) == listener) {
@@ -79,16 +74,14 @@ public class Session {
         });
     }
 
-    public static Single<Solve> getSolve(String solveId) {
-        return App.getFirebaseUserRef().toSingle()
-                .flatMap(userRef -> Single.<Solve>create(subscriber -> {
-                    Firebase solve = userRef.child("solves").child(solveId);
-                    solve.addListenerForSingleValueEvent(new ValueEventListener() {
+    public Single<Solve> getSolve(String solveId) {
+        return FirebaseDbUtil.getSolveRef(mId, solveId)
+                .flatMap(solveRef -> Single.<Solve>create(subscriber -> {
+                    solveRef.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot solve) {
                             if (solve.exists()) {
-                                Solve value = solve.getValue(Solve.class);
-                                value.setId(solveId);
+                                Solve value = Solve.fromSnapshot(solve);
                                 subscriber.onSuccess(value);
                             } else {
                                 subscriber.onError(FirebaseError
@@ -104,39 +97,19 @@ public class Session {
                 }));
     }
 
-    public String getPuzzleTypeId() {
-        return mPuzzleTypeId;
-    }
-
-    public Observable<List<Solve>> getSolves() {
-        return App.getFirebaseUserRef()
-                .flatMap(userRef -> Observable.<Solve>create(subscriber -> {
-                    Firebase solves = userRef.child("solves");
-                    Firebase sessionSolves = userRef.child("session-solves").child(getId());
-                    sessionSolves.addListenerForSingleValueEvent(new ValueEventListener() {
+    private Single<List<Solve>> getSolves() {
+        return FirebaseDbUtil.getSolvesRef(mId)
+                .flatMapObservable(solvesRef -> Observable.<Solve>create(subscriber -> {
+                    solvesRef.orderByChild("timestamp").addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
-                        public void onDataChange(DataSnapshot includedSolvesBool) {
-                            solves.orderByChild("timestamp").addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot allSolves) {
-                                    for (DataSnapshot solveSs : allSolves.getChildren()) {
-                                        for (DataSnapshot solveIncludedSs : includedSolvesBool.getChildren()) {
-                                            if (solveSs.getKey().equals(solveIncludedSs.getKey())) {
-                                                Solve solve = solveSs.getValue(Solve.class);
-                                                solve.setId(solveSs.getKey());
-                                                subscriber.onNext(solve);
-                                            }
-                                        }
-                                    }
+                        public void onDataChange(DataSnapshot solves) {
+                            for (DataSnapshot solveSs : solves.getChildren()) {
+                                Solve solve = solveSs.getValue(Solve.class);
+                                solve.setId(solveSs.getKey());
+                                subscriber.onNext(solve);
+                            }
 
-                                    subscriber.onCompleted();
-                                }
-
-                                @Override
-                                public void onCancelled(FirebaseError firebaseError) {
-                                    subscriber.onError(firebaseError.toException());
-                                }
-                            });
+                            subscriber.onCompleted();
                         }
 
                         @Override
@@ -144,7 +117,9 @@ public class Session {
                             subscriber.onError(firebaseError.toException());
                         }
                     });
-                })).toList();
+                }))
+                .toList()
+                .toSingle();
     }
 
     public String getId() {
@@ -155,29 +130,79 @@ public class Session {
         mId = id;
     }
 
-    public void addSolve(final Solve s) {
-        App.getFirebaseUserRef().subscribe(firebase -> {
-            Firebase solves = firebase.child("solves");
 
-            Firebase newSolve = solves.push();
-            newSolve.setValue(s);
-            s.setId(newSolve.getKey());
+    public void addSolve(final Solve s, String puzzleTypeId) {
+        FirebaseDbUtil.getSolvesRef(mId)
+                .doOnSuccess(solves -> {
+                    Firebase newSolve = solves.push();
+                    newSolve.setValue(s);
+                    s.setId(newSolve.getKey());
+                })
+                .flatMap(o -> FirebaseDbUtil.getSessionRef(puzzleTypeId, mId))
+                .subscribe(new SingleSubscriber<Firebase>() {
+                    @Override
+                    public void onSuccess(Firebase sessionRef) {
+                        mTimestamp = s.getTimestamp();
+                        sessionRef.setValue(Session.this);
+                        update(puzzleTypeId);
+                    }
 
-            Firebase sessionSolves = firebase.child("session-solves").child(getId()).child(s.getId());
-            sessionSolves.setValue(true);
-            mTimestamp = s.getTimestamp();
-        });
+                    @Override
+                    public void onError(Throwable error) {
+
+                    }
+                });
     }
 
-    public Observable<Integer> getNumberOfSolves() {
-        return App.getFirebaseUserRef()
-                .flatMap(firebase -> Observable.create(subscriber -> {
-                    Firebase sessionSolves = firebase.child("session-solves").child(getId());
-                    sessionSolves.addListenerForSingleValueEvent(new ValueEventListener() {
+    public void deleteSolve(String puzzleTypeId) {
+        FirebaseDbUtil.getSolvesRef(mId)
+                .subscribe(solvesRef -> {
+                    solvesRef.child(mId).removeValue();
+                    update(puzzleTypeId);
+                });
+    }
+
+    protected void update(String puzzleType) {
+        getLastSolve()
+                .doOnNext(solve -> mTimestamp = solve.getTimestamp())
+                .isEmpty()
+                .toSingle()
+                .flatMap(exists -> FirebaseDbUtil.getSessionRef(puzzleType, mId))
+                .subscribe(sessionRef -> {
+                    sessionRef.setValue(Session.this);
+                });
+    }
+
+    /**
+     * @return Whether there are solves.
+     */
+    public Single<Boolean> solvesExist() {
+        return FirebaseDbUtil.getSolvesRef(mId)
+                .flatMap(firebase -> Single.create(new Single.OnSubscribe<Boolean>() {
+                    @Override
+                    public void call(SingleSubscriber<? super Boolean> singleSubscriber) {
+                        firebase.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                singleSubscriber.onSuccess(dataSnapshot.exists());
+                            }
+
+                            @Override
+                            public void onCancelled(FirebaseError firebaseError) {
+
+                            }
+                        });
+                    }
+                }));
+    }
+
+    public Single<Integer> getNumberOfSolves() {
+        return FirebaseDbUtil.getSolvesRef(mId)
+                .flatMap(solves -> Single.create(subscriber -> {
+                    solves.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
-                            subscriber.onNext((int) dataSnapshot.getChildrenCount());
-                            subscriber.onCompleted();
+                            subscriber.onSuccess((int) dataSnapshot.getChildrenCount());
                         }
 
                         @Override
@@ -188,11 +213,39 @@ public class Session {
                 }));
     }
 
+    /**
+     * @return Empty if there are no solves
+     */
     public Observable<Solve> getLastSolve() {
-        return getSolves().map(solves -> solves.get(solves.size() - 1));
+        return FirebaseDbUtil.getSolvesRef(mId).toObservable()
+                .flatMap(solvesRef -> Observable.create(new Observable.OnSubscribe<Solve>() {
+                    @Override
+                    public void call(Subscriber<? super Solve> subscriber) {
+                        solvesRef
+                                .orderByChild("timestamp")
+                                .limitToLast(1).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot solves) {
+
+                                for (DataSnapshot solveSs : solves.getChildren()) {
+                                    Solve solve = solveSs.getValue(Solve.class);
+                                    solve.setId(solveSs.getKey());
+                                    subscriber.onNext(solve);
+                                }
+
+                                subscriber.onCompleted();
+                            }
+
+                            @Override
+                            public void onCancelled(FirebaseError firebaseError) {
+                                subscriber.onError(firebaseError.toException());
+                            }
+                        });
+                    }
+                }));
     }
 
-    public Observable<Solve> getSolveByPosition(int position) {
+    public Single<Solve> getSolveByPosition(int position) {
         return getSolves().map(solves -> solves.get(position));
     }
 
@@ -207,11 +260,11 @@ public class Session {
      * @param millisecondsEnabled whether to display milliseconds
      * @return the current average of some number of solves
      */
-    public Observable<String> getStringCurrentAverageOf(int number, boolean millisecondsEnabled) {
+    public Single<String> getStringCurrentAverageOf(int number, boolean millisecondsEnabled) {
         return getNumberOfSolves()
-                .flatMap(numberOfSolves -> {
+                .flatMapObservable(numberOfSolves -> {
                     if (number >= 3 && numberOfSolves >= number) {
-                        return getSolves();
+                        return getSolves().toObservable();
                     }
                     return Observable.empty();
                 }).map(solves -> {
@@ -230,7 +283,9 @@ public class Session {
                     } else {
                         return Utils.timeStringFromNs(result, millisecondsEnabled);
                     }
-                }).defaultIfEmpty("");
+                })
+                .defaultIfEmpty("")
+                .toSingle();
     }
 
     /**
@@ -241,7 +296,7 @@ public class Session {
      * @param millisecondsEnabled whether to display milliseconds
      * @return the best average of some number of solves
      */
-    public Observable<String> getStringBestAverageOf(int number, boolean millisecondsEnabled) {
+    public Single<String> getStringBestAverageOf(int number, boolean millisecondsEnabled) {
         return getBestAverageOf(number).map(bestAverage -> {
             if (bestAverage == GET_AVERAGE_INVALID_NOT_ENOUGH) {
                 return "";
@@ -264,11 +319,11 @@ public class Session {
      * @param number the number of solves to average
      * @return the best average of some number of solves
      */
-    public Observable<Long> getBestAverageOf(int number) {
+    public Single<Long> getBestAverageOf(int number) {
         return getNumberOfSolves()
-                .flatMap(numberOfSolves -> {
+                .flatMapObservable(numberOfSolves -> {
                     if (number >= 3 && numberOfSolves >= number) {
-                        return getSolves();
+                        return getSolves().toObservable();
                     }
                     return Observable.empty();
                 }).map(solves -> {
@@ -287,11 +342,13 @@ public class Session {
                         }
                     }
                     return bestAverage;
-                }).defaultIfEmpty((long) GET_AVERAGE_INVALID_NOT_ENOUGH);
+                })
+                .defaultIfEmpty((long) GET_AVERAGE_INVALID_NOT_ENOUGH)
+                .toSingle();
     }
 
 
-    public Observable<String> getStringMean(boolean milliseconds) {
+    public Single<String> getStringMean(boolean milliseconds) {
         return getSolves().map(solves -> {
             long sum = 0;
             for (Solve i : solves) {
@@ -313,19 +370,7 @@ public class Session {
         return mTimestamp;
     }
 
-    public void deleteSolve(String id, PuzzleType type) {
-        App.getFirebaseUserRef().doOnNext(userRef -> {
-            Firebase solve = userRef.child("solves").child(id);
-            solve.removeValue();
-            Firebase sessionSolves = userRef.child("session-solves").child(getId()).child(id);
-            sessionSolves.removeValue();
-        }).flatMap(firebase -> getNumberOfSolves())
-                .subscribe(numberOfSolves -> {
-                    if (numberOfSolves == 0) {
-                        //TODO: Emptied out session, self destruct needed
-                    }
-                });
-    }
+
 
     /*//TODO
     public void deleteSolve(Solve i, PuzzleType type) {

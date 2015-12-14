@@ -8,7 +8,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
-import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -29,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rx.Observable;
+import rx.Single;
 
 /**
  * Puzzle Type object
@@ -122,29 +122,35 @@ public class PuzzleType {
     }
 
     public synchronized static Observable<Object> initialize(Context context) {
-        sPuzzleTypes = new ArrayList<>();
-        int savedVersionCode = PrefUtils.getVersionCode(context);
-        //TODO: Nicer Rx structure
-        return App.getFirebaseUserRef().flatMap(userRef -> {
-            Firebase puzzleTypesRef = userRef.child("puzzletypes");
-            Firebase currentPuzzleTypeRef = userRef.child("current-puzzle-type");
+        if (sPuzzleTypes == null) {
+            sPuzzleTypes = new ArrayList<>();
+            int savedVersionCode = PrefUtils.getVersionCode(context);
+            //TODO: Nicer Rx structure
+            return App.getFirebaseUserRef()
+                    .flatMapObservable(userRef -> {
 
-            Observable<?> stuff;
-            if (savedVersionCode < 24) {
-                stuff = initializePuzzleTypesFirstRun(context, puzzleTypesRef, currentPuzzleTypeRef);
-            } else {
-                stuff = initializePuzzleTypes(puzzleTypesRef, currentPuzzleTypeRef);
-            }
+                        Firebase puzzleTypesRef = userRef.child("puzzletypes");
+                        Firebase currentPuzzleTypeRef = userRef.child("current-puzzle-type");
 
-            return stuff;
+                        Observable<?> stuff;
+                        if (savedVersionCode < 24) {
+                            stuff = initializePuzzleTypesFirstRun(context, puzzleTypesRef, currentPuzzleTypeRef);
+                        } else {
+                            stuff = initializePuzzleTypes(puzzleTypesRef, currentPuzzleTypeRef);
+                        }
 
-        }).doOnCompleted(() -> {
-            for (PuzzleType puzzleType : sPuzzleTypes) {
-                puzzleType.upgradeDatabase(context);
-            }
+                        return stuff;
 
-            PrefUtils.saveVersionCode(context);
-        });
+                    }).doOnCompleted(() -> {
+                        for (PuzzleType puzzleType : sPuzzleTypes) {
+                            puzzleType.upgradeDatabase(context);
+                        }
+
+                        PrefUtils.saveVersionCode(context);
+                    });
+        } else {
+            return Observable.empty();
+        }
     }
 
     @NonNull
@@ -257,17 +263,13 @@ public class PuzzleType {
         });
     }
 
-    public void addNewSession(Firebase userRef) {
-        Firebase sessions = userRef.child("sessions");
+    private void addNewSession(Firebase userRef) {
+        Firebase sessions = userRef.child("sessions").child(getId());
 
         Firebase newSessionRef = sessions.push();
 
-        Session session = new Session(getId(), newSessionRef.getKey());
+        Session session = new Session(newSessionRef.getKey());
         newSessionRef.setValue(session);
-
-        Firebase puzzleTypeSession = userRef
-                .child("puzzletype-sessions").child(getId()).child(session.getId());
-        puzzleTypeSession.setValue(true);
 
         mCurrentSessionId = session.getId();
     }
@@ -436,22 +438,18 @@ public class PuzzleType {
         return mPuzzle;
     }
 
-    public Observable<Session> getCurrentSession() {
+    public Single<Session> getCurrentSession() {
         return getSession(mCurrentSessionId);
     }
 
-    public Observable<Session> getSession(String id) {
-        return App.getFirebaseUserRef().<Session>flatMap(userRef -> Observable.create(subscriber -> {
-            Firebase sessions = userRef.child("sessions");
-            Query queryRef = sessions.orderByKey().equalTo(id);
-            queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
+    public Single<Session> getSession(String id) {
+        return FirebaseDbUtil.getSessionRef(mId, id).<Session>flatMap(sessionRef -> Single.create(subscriber -> {
+            sessionRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    DataSnapshot sessionSnapshot = dataSnapshot.getChildren().iterator().next();
-                    Session session = sessionSnapshot.getValue(Session.class);
-                    session.setId(sessionSnapshot.getKey());
-                    subscriber.onNext(session);
-                    subscriber.onCompleted();
+                    Session session = dataSnapshot.getValue(Session.class);
+                    session.setId(id);
+                    subscriber.onSuccess(session);
                 }
 
                 @Override

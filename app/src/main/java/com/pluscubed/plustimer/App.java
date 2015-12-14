@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.fabric.sdk.android.Fabric;
-import rx.Observable;
+import rx.Single;
 import rx.schedulers.Schedulers;
 
 public class App extends Application {
@@ -35,17 +35,15 @@ public class App extends Application {
         return sChildEventListenerMap;
     }
 
-    public static Observable<Firebase> getFirebaseUserRef() {
-        return Observable.<Firebase>create(subscriber -> {
-            //TODO: Make synchronized
+    public static Single<Firebase> getFirebaseUserRef() {
+        return Single.<Firebase>create(subscriber -> {
             if (sFirebaseUserRef == null) {
                 Firebase ref = new Firebase("https://plustimer.firebaseio.com/");
 
                 if (ref.getAuth() != null) {
                     sFirebaseUserRef = new Firebase(ref.toString() + "/users/" + ref.getAuth().getUid());
                     sFirebaseUserRef.keepSynced(true);
-                    subscriber.onNext(sFirebaseUserRef);
-                    subscriber.onCompleted();
+                    subscriber.onSuccess(sFirebaseUserRef);
                     return;
                 }
 
@@ -54,8 +52,7 @@ public class App extends Application {
                     public void onAuthenticated(AuthData authData) {
                         sFirebaseUserRef = new Firebase(ref.toString() + "/users/" + authData.getUid());
                         sFirebaseUserRef.keepSynced(true);
-                        subscriber.onNext(sFirebaseUserRef);
-                        subscriber.onCompleted();
+                        subscriber.onSuccess(sFirebaseUserRef);
                     }
 
                     @Override
@@ -64,8 +61,7 @@ public class App extends Application {
                     }
                 });
             } else {
-                subscriber.onNext(sFirebaseUserRef);
-                subscriber.onCompleted();
+                subscriber.onSuccess(sFirebaseUserRef);
             }
         }).subscribeOn(Schedulers.io());
     }

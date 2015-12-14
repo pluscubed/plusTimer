@@ -1,16 +1,22 @@
 package com.pluscubed.plustimer.ui.currentsessiontimer;
 
+import android.widget.Toast;
+
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.FirebaseError;
 import com.pluscubed.plustimer.MvpPresenter;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Session;
+import com.pluscubed.plustimer.model.Solve;
 import com.pluscubed.plustimer.ui.RecyclerViewUpdate;
+
+import rx.SingleSubscriber;
 
 public class CurrentSessionTimerPresenter extends MvpPresenter<CurrentSessionTimerView> {
 
     private final SessionSolvesListener mSessionSolvesListener;
+
     private boolean mInitialized;
 
     public CurrentSessionTimerPresenter() {
@@ -18,11 +24,36 @@ public class CurrentSessionTimerPresenter extends MvpPresenter<CurrentSessionTim
     }
 
     public void onDestroy() {
-        Session.removeSessionListener(PuzzleType.getCurrent().getCurrentSessionId(), mSessionSolvesListener);
+        PuzzleType.getCurrent().getCurrentSession()
+                .subscribe(new SingleSubscriber<Session>() {
+                    @Override
+                    public void onSuccess(Session session) {
+                        session.removeSessionListener(mSessionSolvesListener);
+                    }
+
+                    @Override
+                    public void onError(Throwable error) {
+                        Toast.makeText(getView().getContextCompat(), "Error" + error.getMessage(), Toast.LENGTH_SHORT);
+                    }
+                });
     }
 
     public void onResume() {
 
+    }
+
+    public void onTimingFinished(Solve s) {
+        PuzzleType.getCurrent().getCurrentSession().subscribe(new SingleSubscriber<Session>() {
+            @Override
+            public void onSuccess(Session session) {
+                session.addSolve(s, PuzzleType.getCurrentId());
+            }
+
+            @Override
+            public void onError(Throwable error) {
+                Toast.makeText(getView().getContextCompat(), "Error" + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
 
@@ -30,63 +61,55 @@ public class CurrentSessionTimerPresenter extends MvpPresenter<CurrentSessionTim
         mInitialized = true;
 
         if (isViewAttached()) {
-            PuzzleType.getCurrent()
-                    .getCurrentSession()
-                    .flatMap(Session::getSolves)
-                    .subscribe(solves -> {
-                        if (!isViewAttached()) {
-                            return;
+            getView().setInitialized();
+            //getView().getTimeBarAdapter().initialize(solves);
+            getView().updateStatsAndTimerText(null, RecyclerViewUpdate.DATA_RESET);
+
+            PuzzleType.getCurrent().getCurrentSession()
+                    .subscribe(new SingleSubscriber<Session>() {
+                        @Override
+                        public void onSuccess(Session session) {
+                            session.addSessionListener(mSessionSolvesListener, PuzzleType.getCurrentId());
                         }
 
-                        getView().setInitialized();
-                        getView().getTimeBarAdapter().initialize(solves);
-                        getView().updateStatsAndTimerText();
-
-                        mSessionSolvesListener.setInitialSize(solves.size());
-                        Session.addSessionListener(
-                                PuzzleType.getCurrent().getCurrentSessionId(), mSessionSolvesListener);
+                        @Override
+                        public void onError(Throwable error) {
+                            Toast.makeText(getView().getContextCompat(), "Error" + error.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
                     });
         }
     }
 
     private class SessionSolvesListener implements ChildEventListener {
 
-        private int mInitialSize;
-        private int mInitialCount;
-
-        public void setInitialSize(int initialSize) {
-            mInitialSize = initialSize;
-        }
-
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-            if (mInitialCount < mInitialSize) {
-                mInitialCount++;
-                return;
-            }
+            Solve solve = Solve.fromSnapshot(dataSnapshot);
 
             if (isViewAttached()) {
-                getView().updateStatsAndTimerText();
+                getView().updateStatsAndTimerText(solve, RecyclerViewUpdate.INSERT);
                 TimeBarRecyclerAdapter adapter = getView().getTimeBarAdapter();
-                adapter.notifyChange(dataSnapshot, RecyclerViewUpdate.INSERT);
+                adapter.notifyChange(solve, RecyclerViewUpdate.INSERT);
             }
         }
 
         @Override
         public void onChildChanged(DataSnapshot dataSnapshot, String previousChildKey) {
+            Solve solve = Solve.fromSnapshot(dataSnapshot);
             if (isViewAttached()) {
-                getView().updateStatsAndTimerText();
+                getView().updateStatsAndTimerText(solve, RecyclerViewUpdate.SINGLE_CHANGE);
                 TimeBarRecyclerAdapter adapter = getView().getTimeBarAdapter();
-                adapter.notifyChange(dataSnapshot, RecyclerViewUpdate.SINGLE_CHANGE);
+                adapter.notifyChange(solve, RecyclerViewUpdate.SINGLE_CHANGE);
             }
         }
 
         @Override
         public void onChildRemoved(DataSnapshot dataSnapshot) {
+            Solve solve = Solve.fromSnapshot(dataSnapshot);
             if (isViewAttached()) {
-                getView().updateStatsAndTimerText();
+                getView().updateStatsAndTimerText(solve, RecyclerViewUpdate.REMOVE);
                 TimeBarRecyclerAdapter adapter = getView().getTimeBarAdapter();
-                adapter.notifyChange(dataSnapshot, RecyclerViewUpdate.REMOVE);
+                adapter.notifyChange(solve, RecyclerViewUpdate.REMOVE);
             }
         }
 

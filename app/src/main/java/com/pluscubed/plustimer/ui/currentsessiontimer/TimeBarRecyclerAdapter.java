@@ -5,10 +5,8 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.firebase.client.DataSnapshot;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
-import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
 import com.pluscubed.plustimer.ui.RecyclerViewUpdate;
 import com.pluscubed.plustimer.utils.PrefUtils;
@@ -17,9 +15,6 @@ import com.pluscubed.plustimer.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
 
 
 public class TimeBarRecyclerAdapter
@@ -35,6 +30,8 @@ public class TimeBarRecyclerAdapter
         mView = view;
         mBestAndWorstSolves = new Solve[2];
         mSolves = new ArrayList<>();
+
+        setHasStableIds(true);
     }
 
     @Override
@@ -62,86 +59,66 @@ public class TimeBarRecyclerAdapter
         return mSolves.size();
     }
 
-    public void initialize(List<Solve> solves) {
-        mSolves = new ArrayList<>(solves);
-
-        notifyChange(null, RecyclerViewUpdate.DATA_RESET);
+    @Override
+    public long getItemId(int position) {
+        return mSolves.get(position).getId().hashCode();
     }
 
-    private Observable<Solve> getSolve(DataSnapshot snapshot) {
-        if (snapshot != null) {
-            return Session.getSolve(snapshot.getKey()).toObservable();
-        } else {
-            return Observable.empty();
-        }
-    }
-
-    public void notifyChange(DataSnapshot sessionSolveDataSnapshot, RecyclerViewUpdate mode) {
+    public void notifyChange(Solve solve, RecyclerViewUpdate mode) {
         mMillisecondsEnabled = PrefUtils.isDisplayMillisecondsEnabled(mView.getContextCompat());
 
         int oldSize = mSolves.size();
 
-        getSolve(sessionSolveDataSnapshot)
-                .defaultIfEmpty(null)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(solve -> {
-                    //Collections.reverse(mSolves);
+        //Collections.reverse(mSolves);
 
-                    int solvePosition = 0;
-                    if (mode == RecyclerViewUpdate.REMOVE || mode == RecyclerViewUpdate.SINGLE_CHANGE) {
-                        for (int i = 0; i < mSolves.size(); i++) {
-                            Solve foundSolve = mSolves.get(i);
-                            if (foundSolve.getId().equals(sessionSolveDataSnapshot.getKey())) {
-                                solvePosition = i;
-                                break;
-                            }
-                        }
+        switch (mode) {
+            case DATA_RESET:
+                notifyDataSetChanged();
+                if (mSolves.size() >= 1)
+                    mView.scrollRecyclerView(mSolves.size() - 1);
+                break;
+            case INSERT:
+                mSolves.add(solve);
+                notifyItemInserted(mSolves.size() - 1);
+                if (mSolves.size() >= 1)
+                    mView.scrollRecyclerView(mSolves.size() - 1);
+                break;
+            case REMOVE:
+                mSolves.remove(solve);
+                notifyDataSetChanged();
+                break;
+            case SINGLE_CHANGE:
+                for (int i = 0; i < mSolves.size(); i++) {
+                    Solve foundSolve = mSolves.get(i);
+                    if (foundSolve.getId().equals(solve.getId())) {
+                        mSolves.set(i, solve);
+                        notifyItemChanged(i);
+                        break;
                     }
+                }
+                break;
+            case REMOVE_ALL:
+                notifyItemRangeRemoved(0, oldSize);
+                break;
+        }
 
-                    switch (mode) {
-                        case DATA_RESET:
-                            notifyDataSetChanged();
-                            if (mSolves.size() >= 1)
-                                mView.scrollRecyclerView(mSolves.size() - 1);
-                            break;
-                        case INSERT:
-                            mSolves.add(solve);
-                            notifyItemInserted(mSolves.size() - 1);
-                            if (mSolves.size() >= 1)
-                                mView.scrollRecyclerView(mSolves.size() - 1);
-                            break;
-                        case REMOVE:
-                            //TODO
-                            mSolves.remove(solvePosition);
-                            notifyItemRemoved(solvePosition);
-                            break;
-                        case SINGLE_CHANGE:
-                            mSolves.set(solvePosition, solve);
-                            notifyItemChanged(solvePosition);
-                            break;
-                        case REMOVE_ALL:
-                            notifyItemRangeRemoved(0, oldSize);
-                            break;
-                    }
+        Solve oldBest = mBestAndWorstSolves[0];
+        Solve oldWorst = mBestAndWorstSolves[1];
+        Solve newBest = Utils.getBestSolveOfList(mSolves);
+        Solve newWorst = Utils.getWorstSolveOfList(mSolves);
+        mBestAndWorstSolves[0] = newBest;
+        mBestAndWorstSolves[1] = newWorst;
 
-                    Solve oldBest = mBestAndWorstSolves[0];
-                    Solve oldWorst = mBestAndWorstSolves[1];
-                    Solve newBest = Utils.getBestSolveOfList(mSolves);
-                    Solve newWorst = Utils.getWorstSolveOfList(mSolves);
-                    mBestAndWorstSolves[0] = newBest;
-                    mBestAndWorstSolves[1] = newWorst;
-
-                    if (mode != RecyclerViewUpdate.DATA_RESET && mode != RecyclerViewUpdate.REMOVE_ALL) {
-                        if (oldBest != null && !oldBest.equals(newBest)) {
-                            notifyItemChanged(mSolves.indexOf(oldBest));
-                            notifyItemChanged(mSolves.indexOf(newBest));
-                        }
-                        if (oldWorst != null && !oldWorst.equals(newWorst)) {
-                            notifyItemChanged(mSolves.indexOf(oldWorst));
-                            notifyItemChanged(mSolves.indexOf(newWorst));
-                        }
-                    }
-                });
+        if (mode != RecyclerViewUpdate.DATA_RESET && mode != RecyclerViewUpdate.REMOVE_ALL) {
+            if (oldBest != null && !oldBest.equals(newBest)) {
+                notifyItemChanged(mSolves.indexOf(oldBest));
+                notifyItemChanged(mSolves.indexOf(newBest));
+            }
+            if (oldWorst != null && !oldWorst.equals(newWorst)) {
+                notifyItemChanged(mSolves.indexOf(oldWorst));
+                notifyItemChanged(mSolves.indexOf(newWorst));
+            }
+        }
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
@@ -155,7 +132,7 @@ public class TimeBarRecyclerAdapter
                     false,
                     PuzzleType.getCurrent().getId(),
                     PuzzleType.getCurrent().getCurrentSessionId(),
-                    mSolves.get(getAdapterPosition()).getId()
+                    mSolves.get(getAdapterPosition())
             ));
         }
     }

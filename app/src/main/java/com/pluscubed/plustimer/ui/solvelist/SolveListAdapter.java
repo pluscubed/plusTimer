@@ -6,9 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.firebase.client.DataSnapshot;
 import com.pluscubed.plustimer.R;
-import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
 import com.pluscubed.plustimer.ui.RecyclerViewUpdate;
 import com.pluscubed.plustimer.utils.PrefUtils;
@@ -16,16 +14,13 @@ import com.pluscubed.plustimer.utils.SolveDialogUtils;
 import com.pluscubed.plustimer.utils.Utils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
 
 public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.ViewHolder> {
 
     private static final int HEADER_VIEWTYPE = 2;
-    //TODO: Index
+    private static final int HEADER_ID = -1;
+
     private final Solve[] mBestAndWorstSolves;
     private SolveListView mView;
     private List<Solve> mSolves;
@@ -38,6 +33,8 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
         mBestAndWorstSolves = new Solve[2];
         mSolves = new ArrayList<>();
         mView = view;
+
+        setHasStableIds(true);
     }
 
     @Override
@@ -98,23 +95,13 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
         return mSolves.size() + 1;
     }
 
-    public void initialize(String puzzleTypeId, String sessionId, List<Solve> solves) {
-        mSolves = new ArrayList<>(solves);
-        Collections.reverse(mSolves);
-
-        notifyChange(puzzleTypeId, sessionId, null, RecyclerViewUpdate.DATA_RESET);
-    }
-
-    private Observable<Solve> getSolve(DataSnapshot snapshot) {
-        if (snapshot != null) {
-            return Session.getSolve(snapshot.getKey()).toObservable();
-        } else {
-            return Observable.empty();
-        }
+    @Override
+    public long getItemId(int position) {
+        return position == 0 ? HEADER_ID : mSolves.get(position - 1).getId().hashCode();
     }
 
     public void notifyChange(String puzzleTypeId, String sessionId,
-                             DataSnapshot sessionSolveDataSnapshot, RecyclerViewUpdate mode) {
+                             Solve solve, RecyclerViewUpdate mode) {
 
         mSignEnabled = PrefUtils.isSignEnabled(mView.getContextCompat());
         mMillisecondsEnabled = PrefUtils.isDisplayMillisecondsEnabled(mView.getContextCompat());
@@ -123,68 +110,56 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
 
         int oldSize = mSolves.size();
 
-        getSolve(sessionSolveDataSnapshot)
-                .defaultIfEmpty(null)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(solve -> {
+        //Collections.reverse(mSolves);
 
-                    //Collections.reverse(mSolves);
-
-                    int solvePosition = 0;
-                    if (mode == RecyclerViewUpdate.REMOVE || mode == RecyclerViewUpdate.SINGLE_CHANGE) {
-                        for (int i = 0; i < mSolves.size(); i++) {
-                            Solve foundSolve = mSolves.get(i);
-                            if (foundSolve.getId().equals(sessionSolveDataSnapshot.getKey())) {
-                                solvePosition = i;
-                                break;
-                            }
-                        }
+        switch (mode) {
+            case DATA_RESET:
+                notifyDataSetChanged();
+                if (mSolves.size() >= 1)
+                    mView.scrollRecyclerView(0);
+                break;
+            case INSERT:
+                mSolves.add(0, solve);
+                notifyItemInserted(0);
+                if (mSolves.size() >= 1)
+                    mView.scrollRecyclerView(0);
+                break;
+            case REMOVE:
+                mSolves.remove(solve);
+                notifyDataSetChanged();
+                break;
+            case SINGLE_CHANGE:
+                for (int i = 0; i < mSolves.size(); i++) {
+                    Solve foundSolve = mSolves.get(i);
+                    if (foundSolve.getId().equals(solve.getId())) {
+                        mSolves.set(i, solve);
+                        notifyItemChanged(i + 1);
+                        break;
                     }
+                }
+                break;
+            case REMOVE_ALL:
+                notifyItemRangeRemoved(0, oldSize);
+                break;
+        }
 
-                    switch (mode) {
-                        case DATA_RESET:
-                            notifyDataSetChanged();
-                            if (mSolves.size() >= 1)
-                                mView.scrollRecyclerView(0);
-                            break;
-                        case INSERT:
-                            mSolves.add(0, solve);
-                            notifyItemInserted(0);
-                            if (mSolves.size() >= 1)
-                                mView.scrollRecyclerView(0);
-                            break;
-                        case REMOVE:
-                            //TODO
-                            mSolves.remove(solvePosition);
-                            notifyItemRemoved(solvePosition);
-                            break;
-                        case SINGLE_CHANGE:
-                            mSolves.set(solvePosition, solve);
-                            notifyItemChanged(solvePosition);
-                            break;
-                        case REMOVE_ALL:
-                            notifyItemRangeRemoved(0, oldSize);
-                            break;
-                    }
+        Solve oldBest = mBestAndWorstSolves[0];
+        Solve oldWorst = mBestAndWorstSolves[1];
+        Solve newBest = Utils.getBestSolveOfList(mSolves);
+        Solve newWorst = Utils.getWorstSolveOfList(mSolves);
+        mBestAndWorstSolves[0] = newBest;
+        mBestAndWorstSolves[1] = newWorst;
 
-                    Solve oldBest = mBestAndWorstSolves[0];
-                    Solve oldWorst = mBestAndWorstSolves[1];
-                    Solve newBest = Utils.getBestSolveOfList(mSolves);
-                    Solve newWorst = Utils.getWorstSolveOfList(mSolves);
-                    mBestAndWorstSolves[0] = newBest;
-                    mBestAndWorstSolves[1] = newWorst;
-
-                    if (mode != RecyclerViewUpdate.DATA_RESET && mode != RecyclerViewUpdate.REMOVE_ALL) {
-                        if (oldBest != null && !oldBest.equals(newBest)) {
-                            notifyItemChanged(mSolves.indexOf(oldBest));
-                            notifyItemChanged(mSolves.indexOf(newBest));
-                        }
-                        if (oldWorst != null && !oldWorst.equals(newWorst)) {
-                            notifyItemChanged(mSolves.indexOf(oldWorst));
-                            notifyItemChanged(mSolves.indexOf(newWorst));
-                        }
-                    }
-                });
+        if (mode != RecyclerViewUpdate.DATA_RESET && mode != RecyclerViewUpdate.REMOVE_ALL) {
+            if (oldBest != null && !oldBest.equals(newBest)) {
+                notifyItemChanged(mSolves.indexOf(oldBest));
+                notifyItemChanged(mSolves.indexOf(newBest));
+            }
+            if (oldWorst != null && !oldWorst.equals(newWorst)) {
+                notifyItemChanged(mSolves.indexOf(oldWorst));
+                notifyItemChanged(mSolves.indexOf(newWorst));
+            }
+        }
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -206,7 +181,7 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
                             false,
                             mPuzzleTypeId,
                             mSessionId,
-                            mSolves.get(getAdapterPosition() - 1).getId()
+                            mSolves.get(getAdapterPosition() - 1)
                     );
 
                 });

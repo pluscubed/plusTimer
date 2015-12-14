@@ -43,11 +43,9 @@ import com.pluscubed.plustimer.utils.PrefUtils;
 public class CurrentSessionActivity extends DrawerActivity implements
         CurrentSessionTimerFragment.ActivityCallback, CurrentSessionView {
 
-    private static final String STATE_MENU_ITEMS_ENABLE_BOOLEAN =
-            "menu_items_enable_boolean";
+    private static final String STATE_MENU_ITEMS_ENABLE_BOOLEAN =  "menu_items_enable_boolean";
 
-    private static final String CURRENT_SESSION_TIMER_RETAINED_TAG
-            = "CURRENT_SESSION_TIMER_RETAINED";
+    private static final String CURRENT_SESSION_TIMER_RETAINED_TAG = "CURRENT_SESSION_TIMER_RETAINED";
 
     private boolean mScrambleImageActionEnable;
 

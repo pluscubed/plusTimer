@@ -1,9 +1,12 @@
 package com.pluscubed.plustimer.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.IntDef;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.firebase.client.DataSnapshot;
 import com.pluscubed.plustimer.utils.Utils;
 
 import java.lang.annotation.Retention;
@@ -18,13 +21,20 @@ import java.lang.annotation.RetentionPolicy;
         isGetterVisibility = JsonAutoDetect.Visibility.NONE,
         setterVisibility = JsonAutoDetect.Visibility.NONE
 )
-public class Solve {
+public class Solve implements Parcelable {
     public static final int PENALTY_DNF = 2;
     public static final int PENALTY_PLUSTWO = 1;
     public static final int PENALTY_NONE = 0;
+    public static final Parcelable.Creator<Solve> CREATOR = new Parcelable.Creator<Solve>() {
+        public Solve createFromParcel(Parcel source) {
+            return new Solve(source);
+        }
 
+        public Solve[] newArray(int size) {
+            return new Solve[size];
+        }
+    };
     private String mId;
-
     @JsonProperty("scramble")
     private String mScramble;
     @JsonProperty("penalty")
@@ -48,6 +58,20 @@ public class Solve {
         this.mTimestamp = System.currentTimeMillis();
     }
 
+    protected Solve(Parcel in) {
+        this.mId = in.readString();
+        this.mScramble = in.readString();
+        this.mPenalty = in.readInt();
+        this.mTime = in.readLong();
+        this.mTimestamp = in.readLong();
+    }
+
+    public static Solve fromSnapshot(DataSnapshot snapshot) {
+        Solve solve = snapshot.getValue(Solve.class);
+        solve.setId(snapshot.getKey());
+        return solve;
+    }
+
     public String getId() {
         return mId;
     }
@@ -56,12 +80,14 @@ public class Solve {
         mId = id;
     }
 
+    /**
+     * Doesn't copy Firebase ID
+     */
     public void copy(Solve s) {
         mScramble = s.getScramble();
         mTime = s.getRawTime();
         mPenalty = s.getPenalty();
         mTimestamp = s.getTimestamp();
-        mId = s.getId();
     }
 
     public String getScramble() {
@@ -129,17 +155,31 @@ public class Solve {
         return mPenalty;
     }
 
-    public void setPenalty(@Penalty int penalty) {
+    public void setPenalty(@Penalty int penalty, String puzzleType, String session) {
         this.mPenalty = penalty;
+        update(puzzleType, session);
+    }
+
+    public void update(String puzzleTypeId, String sessionId) {
+        if (mId == null) {
+            return;
+        }
+        FirebaseDbUtil.getSolveRef(sessionId, mId)
+                .doOnSuccess(solve -> solve.setValue(Solve.this))
+                .flatMap(solve -> PuzzleType.get(puzzleTypeId).getSession(sessionId))
+                .subscribe(session -> {
+                    session.update(puzzleTypeId);
+                });
     }
 
     public long getRawTime() {
         return mTime;
     }
 
-    public void setRawTime(long time) {
+    public void setRawTime(long time, String puzzleType, String session) {
         if (this.mTime != time) {
             this.mTime = time;
+            update(puzzleType, session);
         }
     }
 
@@ -153,10 +193,22 @@ public class Solve {
                 mPenalty == ((Solve) o).getPenalty();
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.mId);
+        dest.writeString(this.mScramble);
+        dest.writeInt(this.mPenalty);
+        dest.writeLong(this.mTime);
+        dest.writeLong(this.mTimestamp);
+    }
+
     @IntDef({PENALTY_DNF, PENALTY_PLUSTWO, PENALTY_NONE})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Penalty {
     }
-
-
 }

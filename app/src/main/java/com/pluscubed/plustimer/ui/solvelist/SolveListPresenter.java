@@ -2,6 +2,7 @@ package com.pluscubed.plustimer.ui.solvelist;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
@@ -9,9 +10,11 @@ import com.firebase.client.FirebaseError;
 import com.pluscubed.plustimer.MvpPresenter;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Session;
+import com.pluscubed.plustimer.model.Solve;
 import com.pluscubed.plustimer.ui.RecyclerViewUpdate;
 import com.pluscubed.plustimer.utils.PrefUtils;
 
+import rx.SingleSubscriber;
 import rx.android.schedulers.AndroidSchedulers;
 
 public class SolveListPresenter extends MvpPresenter<SolveListView> {
@@ -44,24 +47,37 @@ public class SolveListPresenter extends MvpPresenter<SolveListView> {
         if (isViewAttached()) {
             PuzzleType.get(mPuzzleTypeId)
                     .getSession(mSessionId)
-                    .flatMap(Session::getSolves)
-                    .subscribe(solves -> {
-                        if (!isViewAttached()) {
-                            return;
+                    .subscribe(new SingleSubscriber<Session>() {
+                        @Override
+                        public void onSuccess(Session session) {
+                            if (!isViewAttached()) {
+                                return;
+                            }
+
+                            getView().setInitialized();
+                            //getView().getSolveListAdapter().initialize(mPuzzleTypeId, mSessionId, solves);
+                            onSessionSolvesChanged();
+
+                            session.addSessionListener(mSessionSolvesListener, mPuzzleTypeId);
                         }
 
-                        getView().setInitialized();
-                        getView().getSolveListAdapter().initialize(mPuzzleTypeId, mSessionId, solves);
-                        onSessionSolvesChanged();
-
-                        mSessionSolvesListener.setInitialSize(solves.size());
-                        Session.addSessionListener(mSessionId, mSessionSolvesListener);
+                        @Override
+                        public void onError(Throwable error) {
+                            Toast.makeText(getView().getContextCompat(), "Error", Toast.LENGTH_SHORT);
+                        }
                     });
         }
     }
 
     public void onDestroy() {
-        Session.removeSessionListener(mSessionId, mSessionSolvesListener);
+        PuzzleType.get(mPuzzleTypeId)
+                .getSession(mSessionId)
+                .subscribe(session -> {
+                    if (!isViewAttached()) {
+                        return;
+                    }
+                    session.removeSessionListener(mSessionSolvesListener);
+                });
     }
 
     public void onResume() {
@@ -105,7 +121,7 @@ public class SolveListPresenter extends MvpPresenter<SolveListView> {
         final Session[] session = {null};
 
         PuzzleType.get(mPuzzleTypeId).getSession(mSessionId)
-                .doOnNext(s -> session[0] = s)
+                .doOnSuccess(s -> session[0] = s)
                 .flatMap(Session::getNumberOfSolves)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(numberOfSolves -> {
@@ -151,45 +167,36 @@ public class SolveListPresenter extends MvpPresenter<SolveListView> {
 
     private class SessionSolvesListener implements ChildEventListener {
 
-        private int mInitialSize;
-        private int mInitialCount;
-
-        public void setInitialSize(int initialSize) {
-            mInitialSize = initialSize;
-        }
 
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-            if (mInitialCount < mInitialSize) {
-                mInitialCount++;
-                return;
-            }
-
+            Solve solve = Solve.fromSnapshot(dataSnapshot);
             if (isViewAttached()) {
                 //getView().updateStatsAndTimerText();
                 SolveListAdapter adapter = getView().getSolveListAdapter();
-                adapter.notifyChange(mPuzzleTypeId, mSessionId, dataSnapshot, RecyclerViewUpdate.INSERT);
+                adapter.notifyChange(mPuzzleTypeId, mSessionId, solve, RecyclerViewUpdate.INSERT);
                 onSessionSolvesChanged();
             }
         }
 
         @Override
         public void onChildChanged(DataSnapshot dataSnapshot, String previousChildKey) {
-
+            Solve solve = Solve.fromSnapshot(dataSnapshot);
             if (isViewAttached()) {
                 //getView().updateStatsAndTimerText();
                 SolveListAdapter adapter = getView().getSolveListAdapter();
-                adapter.notifyChange(mPuzzleTypeId, mSessionId, dataSnapshot, RecyclerViewUpdate.SINGLE_CHANGE);
+                adapter.notifyChange(mPuzzleTypeId, mSessionId, solve, RecyclerViewUpdate.SINGLE_CHANGE);
                 onSessionSolvesChanged();
             }
         }
 
         @Override
         public void onChildRemoved(DataSnapshot dataSnapshot) {
+            Solve solve = Solve.fromSnapshot(dataSnapshot);
             if (isViewAttached()) {
                 //getView().updateStatsAndTimerText();
                 SolveListAdapter adapter = getView().getSolveListAdapter();
-                adapter.notifyChange(mPuzzleTypeId, mSessionId, dataSnapshot, RecyclerViewUpdate.REMOVE);
+                adapter.notifyChange(mPuzzleTypeId, mSessionId, solve, RecyclerViewUpdate.REMOVE);
                 onSessionSolvesChanged();
             }
         }
