@@ -2,7 +2,6 @@ package com.pluscubed.plustimer.ui.solvelist;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -115,20 +114,6 @@ public class SolveListFragment extends Fragment implements SolveListView {
     private void initSharedPrefs() {
     }
 
-    //TODO: Share
-    private void share(String puzzleTypeId) {
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("text/plain");
-        /*intent.putExtra(
-                Intent.EXTRA_TEXT,
-                mSession.toString(getActivity(), mPuzzleTypeId,
-                        mCurrentToggle, true, mMillisecondsEnabled,
-                        mSignEnabled)
-        );*/
-        startActivity(Intent.createChooser(intent, getResources().getString(R
-                .string.share_dialog_title)));
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -156,8 +141,7 @@ public class SolveListFragment extends Fragment implements SolveListView {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_solvelist_share_menuitem:
-                //TODO
-                /*share();*/
+                mPresenter.share();
                 return true;
             case R.id.menu_history_solvelist_delete_menuitem:
                 //TODO
@@ -230,7 +214,7 @@ public class SolveListFragment extends Fragment implements SolveListView {
 
         mRecyclerView = (RecyclerView) v.findViewById(R.id.fragment_solvelist_recyclerview);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mSolveListAdapter = new SolveListAdapter(this);
+        mSolveListAdapter = mPresenter.newAdapter();
         mRecyclerView.setAdapter(mSolveListAdapter);
 
         mEmptyView = (TextView) v.findViewById(android.R.id.empty);
@@ -321,8 +305,7 @@ public class SolveListFragment extends Fragment implements SolveListView {
     }
 
     public void enableResetSubmitButtons(boolean enable) {
-        mResetSubmitLinearLayout.setVisibility(enable ? View.VISIBLE : View
-                .GONE);
+        mResetSubmitLinearLayout.setVisibility(enable ? View.VISIBLE : View.GONE);
     }
 
     @Override

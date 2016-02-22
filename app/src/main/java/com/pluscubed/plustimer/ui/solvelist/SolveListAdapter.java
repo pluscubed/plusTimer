@@ -26,15 +26,25 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
     private List<Solve> mSolves;
     private String mPuzzleTypeId;
     private String mSessionId;
+
+    private String mStats;
+
     private boolean mSignEnabled;
     private boolean mMillisecondsEnabled;
+    private boolean mHeaderEnabled;
 
-    public SolveListAdapter(SolveListView view) {
+    public SolveListAdapter(SolveListView view, boolean headerEnabled) {
         mBestAndWorstSolves = new Solve[2];
         mSolves = new ArrayList<>();
         mView = view;
+        mHeaderEnabled = headerEnabled;
 
         setHasStableIds(true);
+    }
+
+
+    public void initialize(List<Solve> solves) {
+        mSolves = solves;
     }
 
     @Override
@@ -50,8 +60,10 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        if (position > 0) {
-            position = position - 1;
+        if (!mHeaderEnabled || position > 0) {
+
+            if (mHeaderEnabled)
+                position = position - 1;
 
             Solve s = mSolves.get(position);
             String timeString = s.getTimeString(mMillisecondsEnabled);
@@ -69,16 +81,7 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
             holder.desc.setText(uiScramble);
 
         } else {
-            //TODO Header stats
-            holder.header.setText(
-                /*mSession.toString(
-                        getActivity(),
-                        getPuzzleType().toString(),
-                        mCurrentToggle,
-                        false,
-                        mMillisecondsEnabled,
-                        mSignEnabled)*/""
-            );
+            holder.header.setText(mStats);
         }
     }
 
@@ -92,16 +95,22 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
 
     @Override
     public int getItemCount() {
-        return mSolves.size() + 1;
+        return mSolves.size() + (mHeaderEnabled ? 0 : 1);
     }
 
     @Override
     public long getItemId(int position) {
-        return position == 0 ? HEADER_ID : mSolves.get(position - 1).getId().hashCode();
+        if (mHeaderEnabled)
+            if (position == 0)
+                return HEADER_ID;
+            else
+                return mSolves.get(position - 1).getId().hashCode();
+        else
+            return mSolves.get(position).getId().hashCode();
     }
 
     public void notifyChange(String puzzleTypeId, String sessionId,
-                             Solve solve, RecyclerViewUpdate mode) {
+                             Solve solve, RecyclerViewUpdate mode, String headerText) {
 
         mSignEnabled = PrefUtils.isSignEnabled(mView.getContextCompat());
         mMillisecondsEnabled = PrefUtils.isDisplayMillisecondsEnabled(mView.getContextCompat());
@@ -120,7 +129,7 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
                 break;
             case INSERT:
                 mSolves.add(0, solve);
-                notifyItemInserted(0);
+                notifyItemInserted(mHeaderEnabled ? 1 : 0);
                 if (mSolves.size() >= 1)
                     mView.scrollRecyclerView(0);
                 break;
@@ -133,7 +142,7 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
                     Solve foundSolve = mSolves.get(i);
                     if (foundSolve.getId().equals(solve.getId())) {
                         mSolves.set(i, solve);
-                        notifyItemChanged(i + 1);
+                        notifyItemChanged(i + (mHeaderEnabled ? 0 : 1));
                         break;
                     }
                 }
@@ -160,6 +169,9 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
                 notifyItemChanged(mSolves.indexOf(newWorst));
             }
         }
+
+        mStats = headerText;
+        notifyItemChanged(0);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -181,7 +193,7 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
                             false,
                             mPuzzleTypeId,
                             mSessionId,
-                            mSolves.get(getAdapterPosition() - 1)
+                            mSolves.get(getAdapterPosition() - (mHeaderEnabled ? 0 : 1))
                     );
 
                 });

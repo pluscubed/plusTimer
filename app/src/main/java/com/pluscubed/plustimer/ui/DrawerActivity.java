@@ -163,19 +163,12 @@ public abstract class DrawerActivity extends ThemableActivity {
         for (int i = 0; i < NAVDRAWER_ITEMS.length; i++) {
             final int itemId = NAVDRAWER_ITEMS[i];
             if (itemId == NAVDRAWER_ITEM_SEPARATOR) {
-                mDrawerListLinearLayout.addView(getLayoutInflater().inflate(R
-                                .layout.list_item_separator,
+                mDrawerListLinearLayout.addView(getLayoutInflater().inflate(R.layout.list_item_separator,
                         mDrawerListLinearLayout, false));
             } else {
-                TextView v = (TextView) getLayoutInflater().inflate(R.layout
-                        .list_item_drawer, mDrawerListLinearLayout, false);
+                TextView v = (TextView) getLayoutInflater().inflate(R.layout.list_item_drawer, mDrawerListLinearLayout, false);
                 v.setText(NAVDRAWER_TITLE_RES_ID[i]);
-                v.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        onNavDrawerItemClicked(itemId);
-                    }
-                });
+                v.setOnClickListener(v1 -> onNavDrawerItemClicked(itemId));
                 mDrawerListLinearLayout.addView(v);
             }
 

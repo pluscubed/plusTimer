@@ -1,16 +1,20 @@
 package com.pluscubed.plustimer.model;
 
+import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.IntDef;
 
+import com.couchbase.lite.CouchbaseLiteException;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.firebase.client.DataSnapshot;
 import com.pluscubed.plustimer.utils.Utils;
 
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+
+import rx.Completable;
 
 /**
  * Solve data object
@@ -21,7 +25,10 @@ import java.lang.annotation.RetentionPolicy;
         isGetterVisibility = JsonAutoDetect.Visibility.NONE,
         setterVisibility = JsonAutoDetect.Visibility.NONE
 )
-public class Solve implements Parcelable {
+public class Solve extends CbObject implements Parcelable {
+
+    public static final String TYPE_SOLVE = "solve";
+
     public static final int PENALTY_DNF = 2;
     public static final int PENALTY_PLUSTWO = 1;
     public static final int PENALTY_NONE = 0;
@@ -34,7 +41,7 @@ public class Solve implements Parcelable {
             return new Solve[size];
         }
     };
-    private String mId;
+
     @JsonProperty("scramble")
     private String mScramble;
     @JsonProperty("penalty")
@@ -44,18 +51,22 @@ public class Solve implements Parcelable {
     @JsonProperty("timestamp")
     private long mTimestamp;
 
-    public Solve() {
-    }
 
     public Solve(Solve s) {
         copy(s);
     }
 
-    public Solve(String scramble, long time) {
-        this.mScramble = scramble;
-        this.mTime = time;
-        this.mPenalty = PENALTY_NONE;
-        this.mTimestamp = System.currentTimeMillis();
+    protected Solve(Context context) throws CouchbaseLiteException, IOException {
+        super(context);
+
+        init();
+    }
+
+    /**
+     * Creates new disconnected solve
+     */
+    public Solve() {
+        init();
     }
 
     protected Solve(Parcel in) {
@@ -66,22 +77,23 @@ public class Solve implements Parcelable {
         this.mTimestamp = in.readLong();
     }
 
-    public static Solve fromSnapshot(DataSnapshot snapshot) {
-        Solve solve = snapshot.getValue(Solve.class);
-        solve.setId(snapshot.getKey());
-        return solve;
+    private void init() {
+        this.mScramble = "";
+        this.mTime = 0L;
+        this.mPenalty = PENALTY_NONE;
+        this.mTimestamp = System.currentTimeMillis();
     }
 
     public String getId() {
         return mId;
     }
 
-    public void setId(String id) {
+    protected void setId(String id) {
         mId = id;
     }
 
     /**
-     * Doesn't copy Firebase ID
+     * Doesn't copy ID
      */
     public void copy(Solve s) {
         mScramble = s.getScramble();
@@ -94,8 +106,9 @@ public class Solve implements Parcelable {
         return mScramble;
     }
 
-    public void setScramble(String scramble) {
+    public void setScramble(Context context, String scramble) throws CouchbaseLiteException, IOException {
         this.mScramble = scramble;
+        updateCb(context);
     }
 
     public long getTimestamp() {
@@ -155,31 +168,33 @@ public class Solve implements Parcelable {
         return mPenalty;
     }
 
-    public void setPenalty(@Penalty int penalty, String puzzleType, String session) {
+    public void setPenalty(Context context, @Penalty int penalty) throws CouchbaseLiteException, IOException {
         this.mPenalty = penalty;
-        update(puzzleType, session);
+        updateCb(context);
     }
 
-    public void update(String puzzleTypeId, String sessionId) {
-        if (mId == null) {
-            return;
-        }
-        FirebaseDbUtil.getSolveRef(sessionId, mId)
-                .doOnSuccess(solve -> solve.setValue(Solve.this))
-                .flatMap(solve -> PuzzleType.get(puzzleTypeId).getSession(sessionId))
-                .subscribe(session -> {
-                    session.update(puzzleTypeId);
-                });
+    public Completable setPenaltyDeferred(Context context, @Penalty int penalty) {
+        return Completable.fromCallable(() -> {
+            setPenaltyDeferred(context, penalty);
+            return null;
+        });
     }
 
     public long getRawTime() {
         return mTime;
     }
 
-    public void setRawTime(long time, String puzzleType, String session) {
+    public void setRawTime(Context context, long time) throws CouchbaseLiteException, IOException {
         if (this.mTime != time) {
             this.mTime = time;
-            update(puzzleType, session);
+            updateCb(context);
+        }
+    }
+
+    @Override
+    public void updateCb(Context context) throws CouchbaseLiteException, IOException {
+        if (mId != null) {
+            super.updateCb(context);
         }
     }
 
@@ -205,6 +220,11 @@ public class Solve implements Parcelable {
         dest.writeInt(this.mPenalty);
         dest.writeLong(this.mTime);
         dest.writeLong(this.mTimestamp);
+    }
+
+    @Override
+    protected String getType() {
+        return TYPE_SOLVE;
     }
 
     @IntDef({PENALTY_DNF, PENALTY_PLUSTWO, PENALTY_NONE})

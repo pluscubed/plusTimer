@@ -64,6 +64,10 @@ public class TimeBarRecyclerAdapter
         return mSolves.get(position).getId().hashCode();
     }
 
+    public void initialize(List<Solve> solves) {
+        mSolves = solves;
+    }
+
     public void notifyChange(Solve solve, RecyclerViewUpdate mode) {
         mMillisecondsEnabled = PrefUtils.isDisplayMillisecondsEnabled(mView.getContextCompat());
 

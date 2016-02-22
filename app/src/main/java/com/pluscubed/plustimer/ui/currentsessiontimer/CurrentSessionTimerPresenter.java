@@ -1,40 +1,38 @@
 package com.pluscubed.plustimer.ui.currentsessiontimer;
 
-import android.widget.Toast;
-
-import com.firebase.client.ChildEventListener;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.FirebaseError;
 import com.pluscubed.plustimer.MvpPresenter;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
 import com.pluscubed.plustimer.ui.RecyclerViewUpdate;
 
-import rx.SingleSubscriber;
-
 public class CurrentSessionTimerPresenter extends MvpPresenter<CurrentSessionTimerView> {
 
-    private final SessionSolvesListener mSessionSolvesListener;
+    private final Session.SolvesListener mSessionSolvesListener;
 
     private boolean mInitialized;
 
     public CurrentSessionTimerPresenter() {
-        mSessionSolvesListener = new SessionSolvesListener();
+        mSessionSolvesListener = (update, solve) -> {
+            updateView(update, solve);
+            updateAdapter(update, solve);
+        };
+    }
+
+    private void updateView(RecyclerViewUpdate update, Solve solve) {
+        getView().updateStatsAndTimerText(solve, update);
+    }
+
+    private void updateAdapter(RecyclerViewUpdate update, Solve solve) {
+        TimeBarRecyclerAdapter adapter = CurrentSessionTimerPresenter.this.getView().getTimeBarAdapter();
+        adapter.notifyChange(solve, update);
     }
 
     public void onDestroy() {
-        PuzzleType.getCurrent().getCurrentSession()
-                .subscribe(new SingleSubscriber<Session>() {
-                    @Override
-                    public void onSuccess(Session session) {
-                        session.removeSessionListener(mSessionSolvesListener);
-                    }
-
-                    @Override
-                    public void onError(Throwable error) {
-                        Toast.makeText(getView().getContextCompat(), "Error" + error.getMessage(), Toast.LENGTH_SHORT);
-                    }
+        //TODO: Re-register whenever current session changes
+        PuzzleType.getCurrent().getCurrentSessionDeferred(getView().getContextCompat())
+                .subscribe(session -> {
+                    session.removeListener(mSessionSolvesListener);
                 });
     }
 
@@ -43,17 +41,6 @@ public class CurrentSessionTimerPresenter extends MvpPresenter<CurrentSessionTim
     }
 
     public void onTimingFinished(Solve s) {
-        PuzzleType.getCurrent().getCurrentSession().subscribe(new SingleSubscriber<Session>() {
-            @Override
-            public void onSuccess(Session session) {
-                session.addSolve(s, PuzzleType.getCurrentId());
-            }
-
-            @Override
-            public void onError(Throwable error) {
-                Toast.makeText(getView().getContextCompat(), "Error" + error.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 
 
@@ -62,63 +49,18 @@ public class CurrentSessionTimerPresenter extends MvpPresenter<CurrentSessionTim
 
         if (isViewAttached()) {
             getView().setInitialized();
-            //getView().getTimeBarAdapter().initialize(solves);
-            getView().updateStatsAndTimerText(null, RecyclerViewUpdate.DATA_RESET);
+            updateView(RecyclerViewUpdate.DATA_RESET, null);
 
-            PuzzleType.getCurrent().getCurrentSession()
-                    .subscribe(new SingleSubscriber<Session>() {
-                        @Override
-                        public void onSuccess(Session session) {
-                            session.addSessionListener(mSessionSolvesListener, PuzzleType.getCurrentId());
-                        }
-
-                        @Override
-                        public void onError(Throwable error) {
-                            Toast.makeText(getView().getContextCompat(), "Error" + error.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
+            PuzzleType.getCurrent().getCurrentSessionDeferred(getView().getContextCompat())
+                    .doOnSuccess(session -> {
+                        session.addListener(mSessionSolvesListener);
+                    })
+                    .flatMapObservable(session ->
+                            session.getSortedSolves(getView().getContextCompat())).toList()
+                    .subscribe(solves -> {
+                        getView().getTimeBarAdapter().initialize(solves);
+                        getView().getTimeBarAdapter().notifyChange(null, RecyclerViewUpdate.DATA_RESET);
                     });
-        }
-    }
-
-    private class SessionSolvesListener implements ChildEventListener {
-
-        @Override
-        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-            Solve solve = Solve.fromSnapshot(dataSnapshot);
-
-            if (isViewAttached()) {
-                getView().updateStatsAndTimerText(solve, RecyclerViewUpdate.INSERT);
-                TimeBarRecyclerAdapter adapter = getView().getTimeBarAdapter();
-                adapter.notifyChange(solve, RecyclerViewUpdate.INSERT);
-            }
-        }
-
-        @Override
-        public void onChildChanged(DataSnapshot dataSnapshot, String previousChildKey) {
-            Solve solve = Solve.fromSnapshot(dataSnapshot);
-            if (isViewAttached()) {
-                getView().updateStatsAndTimerText(solve, RecyclerViewUpdate.SINGLE_CHANGE);
-                TimeBarRecyclerAdapter adapter = getView().getTimeBarAdapter();
-                adapter.notifyChange(solve, RecyclerViewUpdate.SINGLE_CHANGE);
-            }
-        }
-
-        @Override
-        public void onChildRemoved(DataSnapshot dataSnapshot) {
-            Solve solve = Solve.fromSnapshot(dataSnapshot);
-            if (isViewAttached()) {
-                getView().updateStatsAndTimerText(solve, RecyclerViewUpdate.REMOVE);
-                TimeBarRecyclerAdapter adapter = getView().getTimeBarAdapter();
-                adapter.notifyChange(solve, RecyclerViewUpdate.REMOVE);
-            }
-        }
-
-        @Override
-        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-        }
-
-        @Override
-        public void onCancelled(FirebaseError firebaseError) {
         }
     }
 

@@ -5,7 +5,8 @@ import android.widget.Toast;
 import com.pluscubed.plustimer.MvpPresenter;
 import com.pluscubed.plustimer.model.PuzzleType;
 
-import rx.Subscriber;
+import rx.Completable;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 
 public class CurrentSessionPresenter extends MvpPresenter<CurrentSessionView> {
@@ -13,7 +14,7 @@ public class CurrentSessionPresenter extends MvpPresenter<CurrentSessionView> {
     public void onCreate() {
         PuzzleType.initialize(getView().getContextCompat())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<Object>() {
+                .subscribe(new Completable.CompletableSubscriber() {
                     @Override
                     public void onCompleted() {
                         if (isViewAttached()) {
@@ -34,7 +35,7 @@ public class CurrentSessionPresenter extends MvpPresenter<CurrentSessionView> {
                     }
 
                     @Override
-                    public void onNext(Object o) {
+                    public void onSubscribe(Subscription d) {
 
                     }
                 });

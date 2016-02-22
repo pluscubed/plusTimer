@@ -3,12 +3,14 @@ package com.pluscubed.plustimer.model;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
+import com.couchbase.lite.CouchbaseLiteException;
+import com.couchbase.lite.Database;
+import com.couchbase.lite.Document;
+import com.couchbase.lite.Query;
+import com.couchbase.lite.QueryRow;
+import com.couchbase.lite.View;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
@@ -27,8 +29,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import rx.Completable;
 import rx.Observable;
 import rx.Single;
+import rx.schedulers.Schedulers;
 
 /**
  * Puzzle Type object
@@ -39,11 +43,13 @@ import rx.Single;
         isGetterVisibility = JsonAutoDetect.Visibility.NONE,
         setterVisibility = JsonAutoDetect.Visibility.NONE
 )
-public class PuzzleType {
+public class PuzzleType extends CbObject {
+    public static final String TYPE_PUZZLETYPE = "puzzletype";
+    public static final String VIEW_PUZZLETYPES = "puzzletypes";
+
     private static String sCurrentTypeId;
     private static List<PuzzleType> sPuzzleTypes;
 
-    private String mId;
     private Puzzle mPuzzle;
 
     @JsonProperty("scrambler")
@@ -58,6 +64,8 @@ public class PuzzleType {
     private String mName;
     @JsonProperty("bld")
     private boolean mIsBld;
+    @JsonProperty("sessions")
+    private List<String> mSessions;
 
     //Pre-SQL legacy code
     @Deprecated
@@ -69,11 +77,8 @@ public class PuzzleType {
     @Deprecated
     private String mLegacyName;
 
-    public PuzzleType() {
-    }
-
     public PuzzleType(String id, String scrambler, String name, String currentSessionId,
-                      boolean inspectionOn, boolean isBld, String legacyName) {
+                      boolean inspectionOn, boolean isBld) {
         mScrambler = scrambler;
         mName = name;
         mId = id;
@@ -81,8 +86,7 @@ public class PuzzleType {
         mCurrentSessionId = currentSessionId;
         mInspectionOn = inspectionOn;
         mIsBld = isBld;
-
-        mLegacyName = legacyName;
+        mSessions = new ArrayList<>();
     }
 
     public static List<PuzzleType> getPuzzleTypes() {
@@ -121,157 +125,148 @@ public class PuzzleType {
         return array;
     }
 
-    public synchronized static Observable<Object> initialize(Context context) {
-        if (sPuzzleTypes == null) {
-            sPuzzleTypes = new ArrayList<>();
-            int savedVersionCode = PrefUtils.getVersionCode(context);
-            //TODO: Nicer Rx structure
-            return App.getFirebaseUserRef()
-                    .flatMapObservable(userRef -> {
+    public synchronized static Completable initialize(Context context) {
+        try {
+            if (sPuzzleTypes == null) {
+                sPuzzleTypes = new ArrayList<>();
 
-                        Firebase puzzleTypesRef = userRef.child("puzzletypes");
-                        Firebase currentPuzzleTypeRef = userRef.child("current-puzzle-type");
 
-                        Observable<?> stuff;
-                        if (savedVersionCode < 24) {
-                            stuff = initializePuzzleTypesFirstRun(context, puzzleTypesRef, currentPuzzleTypeRef);
-                        } else {
-                            stuff = initializePuzzleTypes(puzzleTypesRef, currentPuzzleTypeRef);
-                        }
+                int savedVersionCode = PrefUtils.getVersionCode(context);
 
-                        return stuff;
+                Database database = App.getDatabase(context);
 
-                    }).doOnCompleted(() -> {
-                        for (PuzzleType puzzleType : sPuzzleTypes) {
-                            puzzleType.upgradeDatabase(context);
-                        }
+                Completable completable;
+                if (savedVersionCode < 24) {
+                    initializePuzzleTypesFirstRun(context, database);
+                    completable = Completable.complete();
+                } else {
+                    completable = initializePuzzleTypes(database);
+                }
 
-                        PrefUtils.saveVersionCode(context);
-                    });
-        } else {
-            return Observable.empty();
+                for (PuzzleType puzzleType : sPuzzleTypes) {
+                    //TODO: upgrade database
+                    //puzzleType.upgradeDatabase(context);
+                }
+
+                PrefUtils.saveVersionCode(context);
+
+                return completable;
+            } else {
+                return Completable.complete();
+            }
+        } catch (CouchbaseLiteException | IOException e) {
+            return Completable.error(e);
         }
     }
 
     @NonNull
-    private static Observable<?> initializePuzzleTypes(Firebase puzzletypes, Firebase currentPuzzleType) {
-        return Observable.combineLatest(
-                Observable.create(subscriber ->
-                        puzzletypes.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                for (DataSnapshot puzzleTypeSnapshot : dataSnapshot.getChildren()) {
-                                    PuzzleType type = puzzleTypeSnapshot.getValue(PuzzleType.class);
-                                    type.mId = puzzleTypeSnapshot.getKey();
+    private static Completable initializePuzzleTypes(Database database) {
+        return Completable.create(subscriber -> {
+            Query puzzleTypesQuery = database.getView(VIEW_PUZZLETYPES).createQuery();
+            puzzleTypesQuery.runAsync((rows, error) -> {
+                for (QueryRow row : rows) {
+                    PuzzleType type = PuzzleType.fromDoc(row.getDocument(), PuzzleType.class);
 
-                                    if (sPuzzleTypes != null) {
-                                        sPuzzleTypes.add(type);
-                                    }
-                                }
-                                subscriber.onCompleted();
-                            }
+                    if (sPuzzleTypes != null) {
+                        sPuzzleTypes.add(type);
+                    }
 
-                            @Override
-                            public void onCancelled(FirebaseError firebaseError) {
-                                subscriber.onError(firebaseError.toException());
-                            }
-                        })),
-                Observable.create(subscriber -> {
-                    currentPuzzleType.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            sCurrentTypeId = dataSnapshot.getValue(String.class);
-                            subscriber.onCompleted();
-                        }
+                    //TODO: Proper current type ID saving
+                    if (type.getName().equals("3x3")) {
+                        sCurrentTypeId = type.getId();
+                    }
+                }
 
-                        @Override
-                        public void onCancelled(FirebaseError firebaseError) {
-                            subscriber.onError(firebaseError.toException());
-                        }
-                    });
-                }),
-                (o, o2) -> null
-        );
+                subscriber.onCompleted();
+            });
+        }).subscribeOn(Schedulers.io());
     }
 
-    @NonNull
-    private static Observable<?> initializePuzzleTypesFirstRun(Context context, Firebase puzzletypes, Firebase currentPuzzleType) {
-        return Observable.create(subscriber -> {
-            //Generate default puzzle types from this...
-            String[] scramblers = context.getResources().getStringArray(R.array.scramblers);
-            //and this, with the appropriate UI names...
-            String[] defaultCustomPuzzleTypes = context.getResources()
-                    .getStringArray(R.array.default_custom_puzzletypes);
-            //from this
-            String[] puzzles = context.getResources().getStringArray(R.array.scrambler_names);
-            //and the legacy names from this
-            String[] legacyNames = context.getResources().getStringArray(R.array.legacy_names);
+    private static void initializePuzzleTypesFirstRun(Context context, Database database) throws CouchbaseLiteException, IOException {
 
 
-            for (int i = 0; i < scramblers.length + defaultCustomPuzzleTypes.length; i++) {
-                String scrambler;
-                String defaultCustomType = null;
-                String uiName;
-                boolean bld = false;
-
-                if (scramblers.length > i) {
-                    scrambler = scramblers[i];
-                } else {
-                    defaultCustomType = defaultCustomPuzzleTypes[i - scramblers.length];
-                    scrambler = defaultCustomType.substring(0, defaultCustomType.indexOf(","));
-                }
+        //Generate default puzzle types from this...
+        String[] scramblers = context.getResources().getStringArray(R.array.scramblers);
+        //and this, with the appropriate UI names...
+        String[] defaultCustomPuzzleTypes = context.getResources()
+                .getStringArray(R.array.default_custom_puzzletypes);
+        //from this
+        String[] puzzles = context.getResources().getStringArray(R.array.scrambler_names);
+        //and the legacy names from this
+        String[] legacyNames = context.getResources().getStringArray(R.array.legacy_names);
 
 
-                if (puzzles.length > i) {
-                    uiName = context.getResources().getStringArray(R.array.scrambler_names)[i];
-                } else {
-                    int order = Integer.parseInt(scrambler.substring(0, 1));
-                    String addon = null;
-                    if (scrambler.contains("ni")) {
-                        addon = context.getString(R.string.bld);
-                        bld = true;
-                    }
-                    if (defaultCustomType != null) {
-                        if (defaultCustomType.contains("feet")) {
-                            addon = context.getString(R.string.feet);
-                        } else if (defaultCustomType.contains("oh")) {
-                            addon = context.getString(R.string.oh);
-                        }
-                    }
-                    if (addon != null) {
-                        uiName = order + "x" + order + "-" + addon;
-                    } else {
-                        uiName = order + "x" + order;
-                    }
-                }
+        for (int i = 0; i < scramblers.length + defaultCustomPuzzleTypes.length; i++) {
+            String scrambler;
+            String defaultCustomType = null;
+            String uiName;
+            boolean bld = false;
 
-                Firebase newTypeRef = puzzletypes.push();
-                PuzzleType type = new PuzzleType(newTypeRef.getKey(), scrambler, uiName,
-                        null, true, bld, legacyNames[i]);
-
-                if (uiName.equals("3x3")) {
-                    //Default current puzzle type
-                    currentPuzzleType.setValue(type.getId());
-                    sCurrentTypeId = type.getId();
-                    type.addNewSession(puzzletypes.getParent());
-                }
-
-                newTypeRef.setValue(type);
-                sPuzzleTypes.add(type);
+            if (scramblers.length > i) {
+                scrambler = scramblers[i];
+            } else {
+                defaultCustomType = defaultCustomPuzzleTypes[i - scramblers.length];
+                scrambler = defaultCustomType.substring(0, defaultCustomType.indexOf(","));
             }
-            subscriber.onCompleted();
-        });
+
+
+            if (puzzles.length > i) {
+                uiName = context.getResources().getStringArray(R.array.scrambler_names)[i];
+            } else {
+                int order = Integer.parseInt(scrambler.substring(0, 1));
+                String addon = null;
+                if (scrambler.contains("ni")) {
+                    addon = context.getString(R.string.bld);
+                    bld = true;
+                }
+                if (defaultCustomType != null) {
+                    if (defaultCustomType.contains("feet")) {
+                        addon = context.getString(R.string.feet);
+                    } else if (defaultCustomType.contains("oh")) {
+                        addon = context.getString(R.string.oh);
+                    }
+                }
+                if (addon != null) {
+                    uiName = order + "x" + order + "-" + addon;
+                } else {
+                    uiName = order + "x" + order;
+                }
+            }
+
+            Document newDoc = database.createDocument();
+            PuzzleType newPuzzleType = new PuzzleType(newDoc.getId(), scrambler, uiName, null, true, bld/*, legacyNames[i]*/);
+
+            if (uiName.equals("3x3")) {
+                //Default current puzzle type
+                //currentPuzzleType.setValue(type.getId());
+                //TODO: Save current type ID
+                sCurrentTypeId = newPuzzleType.getId();
+                newPuzzleType.newSession(context, false);
+            }
+
+            newDoc.putProperties(newPuzzleType.toMap());
+            sPuzzleTypes.add(newPuzzleType);
+        }
+
+        View puzzletypesView = database.getView(VIEW_PUZZLETYPES);
+        puzzletypesView.setMap((document, emitter) -> {
+            if (document.get("type").equals(TYPE_PUZZLETYPE)) {
+                emitter.emit(document.get("_id"), null);
+            }
+        }, "1");
     }
 
-    private void addNewSession(Firebase userRef) {
-        Firebase sessions = userRef.child("sessions").child(getId());
-
-        Firebase newSessionRef = sessions.push();
-
-        Session session = new Session(newSessionRef.getKey());
-        newSessionRef.setValue(session);
+    private Session newSession(Context context, boolean update) throws IOException, CouchbaseLiteException {
+        Session session = new Session(context);
 
         mCurrentSessionId = session.getId();
+        mSessions.add(session.getId());
+
+        if (update) {
+            updateCb(context);
+        }
+
+        return session;
     }
 
     public String getCurrentSessionId() {
@@ -298,7 +293,7 @@ public class PuzzleType {
         return mEnabled;
     }
 
-    public void setEnabled(boolean enabled) {
+    public void setEnabled(Context context, boolean enabled) throws CouchbaseLiteException, IOException {
         //TODO
         this.mEnabled = enabled;
         if (mId.equals(sCurrentTypeId) && !this.mEnabled) {
@@ -309,6 +304,8 @@ public class PuzzleType {
                 }
             }
         }
+
+        updateCb(context);
     }
 
     public String getId() {
@@ -331,13 +328,14 @@ public class PuzzleType {
         return mHistorySessionsLegacy;
     }*/
 
-    public void deleteSession(String sessionId) {
-        /*App.getFirebaseUserRef().doOnNext(userRef -> {
-            Firebase solve = userRef.child("solves").child(id);
-            solve.removeValue();
-            Firebase sessionSolves = userRef.child("session-solves").child(getId()).child(id);
-            sessionSolves.removeValue();
-        })*/
+    public void deleteSession(Context context, String sessionId) throws CouchbaseLiteException, IOException {
+        getSession(context, sessionId)
+                .getDocument(context)
+                .delete();
+
+        mSessions.remove(sessionId);
+
+        updateCb(context);
     }
 
     public List<Session> getSortedHistorySessions() {
@@ -438,27 +436,33 @@ public class PuzzleType {
         return mPuzzle;
     }
 
-    public Single<Session> getCurrentSession() {
-        return getSession(mCurrentSessionId);
+    public Single<Session> getCurrentSessionDeferred(Context context) {
+        return getSessionDeferred(context, mCurrentSessionId);
     }
 
-    public Single<Session> getSession(String id) {
-        return FirebaseDbUtil.getSessionRef(mId, id).<Session>flatMap(sessionRef -> Single.create(subscriber -> {
-            sessionRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    Session session = dataSnapshot.getValue(Session.class);
-                    session.setId(id);
-                    subscriber.onSuccess(session);
-                }
+    public Session getCurrentSession(Context context) throws CouchbaseLiteException, IOException {
+        return getSession(context, mCurrentSessionId);
+    }
 
-                @Override
-                public void onCancelled(FirebaseError firebaseError) {
-                    subscriber.onError(firebaseError.toException());
-                }
-            });
-        }));
 
+    public Single<Session> getSessionDeferred(Context context, String id) {
+        return Single.defer(() -> Single.just(getSession(context, id)));
+    }
+
+    public Session getSession(Context context, String id) throws CouchbaseLiteException, IOException {
+        return fromDocId(context, id, Session.class);
+    }
+
+    public Observable<Session> getSessions(Context context) {
+        return Observable.from(new ArrayList<>(mSessions))
+                .subscribeOn(Schedulers.io())
+                .flatMap(id -> {
+                    try {
+                        return Observable.just(getSession(context, id));
+                    } catch (CouchbaseLiteException | IOException e) {
+                        return Observable.error(e);
+                    }
+                });
     }
 
     public void resetCurrentSession() {
@@ -469,5 +473,10 @@ public class PuzzleType {
     @Override
     public boolean equals(Object o) {
         return o instanceof PuzzleType && ((PuzzleType) o).getId().equals(mId);
+    }
+
+    @Override
+    protected String getType() {
+        return TYPE_PUZZLETYPE;
     }
 }

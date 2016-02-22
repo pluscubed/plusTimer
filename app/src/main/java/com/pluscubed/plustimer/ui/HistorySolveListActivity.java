@@ -8,7 +8,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.pluscubed.plustimer.R;
-import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.ui.solvelist.SolveListFragment;
 
 /**
@@ -57,9 +56,10 @@ public class HistorySolveListActivity extends ThemableActivity {
         }
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        PuzzleType.get(puzzleType).getSession(sessionId).subscribe(session -> {
+        //TODO
+        /*PuzzleType.get(puzzleType).getSession(sessionId).subscribe(session -> {
             setTitle(session.getTimestampString(HistorySolveListActivity.this));
-        });
+        });*/
 
     }
 

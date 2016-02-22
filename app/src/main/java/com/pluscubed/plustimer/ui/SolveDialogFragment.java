@@ -21,6 +21,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.couchbase.lite.CouchbaseLiteException;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Solve;
@@ -31,6 +32,7 @@ import com.rengwuxian.materialedittext.MaterialEditText;
 
 import net.gnehzr.tnoodle.scrambles.InvalidScrambleException;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 
 import rx.android.schedulers.AndroidSchedulers;
@@ -77,10 +79,11 @@ public class SolveDialogFragment extends DialogFragment {
         mSessionId = getArguments().getString(ARG_DIALOG_INIT_SESSION_ID);
 
         if (!mAddMode) {
+            //Original solve contains the ID - new info will be copied back from mSolveCopy
             mSolve = getArguments().getParcelable(ARG_DIALOG_INIT_SOLVE);
             mSolveCopy = new Solve(mSolve);
         } else {
-            mSolveCopy = new Solve("", 0);
+            mSolveCopy = new Solve();
         }
 
         mMillisecondsEnabled = PrefUtils.isDisplayMillisecondsEnabled(getActivity());
@@ -155,7 +158,11 @@ public class SolveDialogFragment extends DialogFragment {
             public void onItemSelected(AdapterView<?> parent, View view,
                                        int selectedPosition,
                                        long id) {
-                mSolveCopy.setPenalty(selectedPosition, null, null);
+                try {
+                    mSolveCopy.setPenalty(null, selectedPosition);
+                } catch (CouchbaseLiteException | IOException e) {
+                    e.printStackTrace();
+                }
                 updateTitle();
             }
 
@@ -192,18 +199,20 @@ public class SolveDialogFragment extends DialogFragment {
                             BigDecimal timeEditTextDecimal = BigDecimal
                                     .valueOf(Double.parseDouble(s.toString()));
                             mSolveCopy.setRawTime(
-                                    timeEditTextDecimal.multiply(BigDecimal.valueOf(1000000000)).longValueExact()
-                                    , null, null);
+                                    null,
+                                    timeEditTextDecimal.multiply(BigDecimal.valueOf(1000000000)).longValueExact());
                             updateTitle();
                             break;
                         } else {
                             getDialog().setTitle(Utils.timeStringFromNs(0,
                                     mMillisecondsEnabled));
-                            mSolveCopy.setRawTime(0, null, null);
+                            mSolveCopy.setRawTime(null, 0);
                             break;
                         }
                     } catch (NumberFormatException | ArithmeticException e) {
                         s.delete(s.length() - 1, s.length());
+                    } catch (CouchbaseLiteException | IOException e) {
+                        e.printStackTrace();
                     }
                 }
             }
@@ -237,11 +246,11 @@ public class SolveDialogFragment extends DialogFragment {
                 .autoDismiss(false)
                 .positiveText(android.R.string.ok)
                 .negativeText(android.R.string.cancel)
-                .onPositive((dialog, which) -> onPositive())
-                .onNegative((dialog, which) -> onNegative());
+                .onPositive((dialog, which) -> onOkPressed())
+                .onNegative((dialog, which) -> onCancelPressed());
         if (!mAddMode) {
             builder.neutralText(R.string.delete)
-                    .onNeutral((dialog, which) -> onNeutral());
+                    .onNeutral((dialog, which) -> onDeletePressed());
         }
 
         return builder.build();
@@ -258,25 +267,24 @@ public class SolveDialogFragment extends DialogFragment {
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 
-    private void onNeutral() {
+    private void onDeletePressed() {
         //TODO
         /*if (ErrorUtils.isSolveNonexistent(getActivity(), mPuzzleTypeId, mSessionId, mSolveId)) {
             return;
         }*/
-        PuzzleType.get(mPuzzleTypeId).getSession(mSessionId)
-                .subscribeOn(AndroidSchedulers.mainThread())
-                .subscribe(session -> {
-                    session.deleteSolve(mSolveCopy.getId());
-                    dismiss();
-                });
+        PuzzleType.get(mPuzzleTypeId).getSessionDeferred(getActivity(), mSessionId)
+                .flatMapObservable(session -> session.deleteSolveDeferred(getActivity(), mSolveCopy.getId()).toObservable())
+                .toCompletable()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::dismiss);
 
     }
 
-    private void onNegative() {
+    private void onCancelPressed() {
         dismiss();
     }
 
-    private void onPositive() {
+    private void onOkPressed() {
         try {
             if (mTimeEdit.getText().toString().equals("")) {
                 mTimeEdit.setText("0");
@@ -289,22 +297,21 @@ public class SolveDialogFragment extends DialogFragment {
                         .getSolvedState().applyAlgorithm
                         (scrambleText);
             }
-            mSolveCopy.setScramble(scrambleText);
+            mSolveCopy.setScramble(null, scrambleText);
             if (!mAddMode) {
                 mSolve.copy(mSolveCopy);
-                mSolve.update(mPuzzleTypeId, mSessionId);
+                mSolve.updateCb(getActivity());
                 dismiss();
             } else {
-                PuzzleType.get(mPuzzleTypeId).getSession(mSessionId)
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(session -> {
-                            session.addSolve(mSolveCopy, mPuzzleTypeId);
-                            dismiss();
-                        });
+                PuzzleType.get(mPuzzleTypeId).getSession(getActivity(), mSessionId)
+                        .addDisconnectedSolve(getActivity(), mSolveCopy);
+                dismiss();
             }
 
         } catch (InvalidScrambleException e) {
             mScrambleEdit.setError(getString(R.string.invalid_scramble));
+        } catch (CouchbaseLiteException | IOException e) {
+            e.printStackTrace();
         }
     }
 

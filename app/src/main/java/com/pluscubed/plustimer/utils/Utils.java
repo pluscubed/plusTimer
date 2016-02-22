@@ -485,4 +485,6 @@ public class Utils {
             ErrorUtils.showErrorDialog(c, "Solve #" + positionString + " UI scramble doesn't exist", e, false);
         }*/
     }
+
+
 }

@@ -12,10 +12,12 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.couchbase.lite.CouchbaseLiteException;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.utils.PrefUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -146,7 +148,11 @@ public class SettingsActivity extends ThemableActivity {
                     return false;
                 }
                 for (PuzzleType p : PuzzleType.getPuzzleTypes()) {
-                    p.setEnabled(selected.contains(p.getId()));
+                    try {
+                        p.setEnabled(getActivity(), selected.contains(p.getId()));
+                    } catch (CouchbaseLiteException | IOException e) {
+                        e.printStackTrace();
+                    }
                 }
                 return true;
             });
