@@ -45,6 +45,7 @@ android {
         versionName '0.3.0-beta'
         manifestPlaceholders = [appName: "@string/app_name"]
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true
     }
 
     if (project.hasProperty("RELEASE_STORE_FILE")) {
@@ -93,10 +94,6 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-
-    dexOptions {
-        dexInProcess true
-    }
 }
 
 retrolambda {
@@ -104,7 +101,7 @@ retrolambda {
 }
 
 dependencies {
-    debugCompile 'im.dino:dbinspector:3.2.2@aar'
+    //debugCompile 'im.dino:dbinspector:3.2.2@aar'
 
     /*compile 'com.firebase:firebase-client-android:2.5.0'
     compile 'com.firebaseui:firebase-ui:0.3.1'*/
@@ -116,14 +113,14 @@ dependencies {
 
     compile 'com.jjoe64:graphview:3.1.4'
 
-    compile 'com.android.support:appcompat-v7:23.1.1'
-    compile 'com.android.support:support-v13:23.1.1'
-    compile 'com.android.support:recyclerview-v7:23.1.1'
-    compile 'com.android.support:preference-v14:23.1.1'
+    compile 'com.android.support:appcompat-v7:23.2.0'
+    compile 'com.android.support:support-v13:23.2.0'
+    compile 'com.android.support:recyclerview-v7:23.2.0'
+    compile 'com.android.support:preference-v14:23.2.0'
 
-    androidTestCompile 'com.android.support:support-annotations:23.1.1'
-    androidTestCompile 'com.android.support.test:runner:0.4.1'
-    androidTestCompile 'com.android.support.test:rules:0.4.1'
+    androidTestCompile 'com.android.support:support-annotations:23.2.0'
+    androidTestCompile 'com.android.support.test:runner:0.5'
+    androidTestCompile 'com.android.support.test:rules:0.5'
 
     testCompile 'junit:junit:4.12'
     testCompile 'org.mockito:mockito-all:1.10.19'
@@ -134,8 +131,8 @@ dependencies {
     }
     compile 'com.caverock:androidsvg:1.2.1'
 
-    compile 'com.google.code.gson:gson:2.6.1'
-    compile 'com.github.afollestad.material-dialogs:core:0.8.5.4'
+    compile 'com.google.code.gson:gson:2.6.2'
+    compile 'com.github.afollestad.material-dialogs:core:0.8.5.6'
     compile 'com.rengwuxian.materialedittext:library:2.1.4'
     compile('com.crashlytics.sdk.android:crashlytics:2.5.5@aar') {
         transitive = true;
@@ -143,4 +140,7 @@ dependencies {
 
     debugCompile 'com.squareup.leakcanary:leakcanary-android:1.4-beta1'
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta1'
+
+    compile 'com.google.guava:guava:19.0'
+    testCompile 'com.google.guava:guava:19.0'
 }

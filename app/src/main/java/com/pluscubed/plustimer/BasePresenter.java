@@ -5,7 +5,7 @@ import android.support.annotation.Nullable;
 import java.lang.ref.WeakReference;
 
 //Taken from Mosby
-public class MvpPresenter<V extends MvpView> {
+public class BasePresenter<V extends MvpView> {
 
     private WeakReference<V> mViewRef;
 

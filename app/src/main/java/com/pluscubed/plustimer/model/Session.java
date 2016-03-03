@@ -42,6 +42,9 @@ public class Session extends CbObject {
     @JsonProperty("solves")
     private Set<String> mSolves;
 
+    public Session() {
+    }
+
     public Session(Context context) throws CouchbaseLiteException, IOException {
         super(context);
     }

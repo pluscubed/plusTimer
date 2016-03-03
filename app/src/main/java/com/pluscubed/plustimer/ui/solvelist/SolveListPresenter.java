@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.couchbase.lite.CouchbaseLiteException;
-import com.pluscubed.plustimer.MvpPresenter;
+import com.pluscubed.plustimer.BasePresenter;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Session;
@@ -20,7 +20,7 @@ import java.io.IOException;
 import rx.SingleSubscriber;
 import rx.android.schedulers.AndroidSchedulers;
 
-public class SolveListPresenter extends MvpPresenter<SolveListView> {
+public class SolveListPresenter extends BasePresenter<SolveListView> {
 
     //TODO: STATE
     private static final String INIT_CURRENT = "current";
@@ -79,7 +79,9 @@ public class SolveListPresenter extends MvpPresenter<SolveListView> {
     }
 
     public void onResume() {
-
+        if (PuzzleType.getPuzzleTypes() != null) {
+            setInitialized(PuzzleType.getCurrentId(), PuzzleType.getCurrent().getCurrentSessionId());
+        }
     }
 
     public void onCreate(Bundle arguments) {

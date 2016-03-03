@@ -2,14 +2,16 @@ package com.pluscubed.plustimer.ui.currentsession;
 
 import android.widget.Toast;
 
-import com.pluscubed.plustimer.MvpPresenter;
+import com.pluscubed.plustimer.BasePresenter;
 import com.pluscubed.plustimer.model.PuzzleType;
 
 import rx.Completable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 
-public class CurrentSessionPresenter extends MvpPresenter<CurrentSessionView> {
+public class CurrentSessionPresenter extends BasePresenter<CurrentSessionView> {
+
+    private boolean mInitialized;
 
     public void onCreate() {
         PuzzleType.initialize(getView().getContextCompat())
@@ -18,10 +20,14 @@ public class CurrentSessionPresenter extends MvpPresenter<CurrentSessionView> {
                     @Override
                     public void onCompleted() {
                         if (isViewAttached()) {
-                            getView().getCurrentSessionTimerFragment().getPresenter().setInitialized();
-                            getView().getSolveListFragment().getPresenter()
-                                    .setInitialized(PuzzleType.getCurrentId(),
-                                            PuzzleType.getCurrent().getCurrentSessionId());
+                            mInitialized = true;
+
+                            if (getView().getCurrentSessionTimerFragment() != null) {
+                                getView().getCurrentSessionTimerFragment().getPresenter().setInitialized();
+                                getView().getSolveListFragment().getPresenter()
+                                        .setInitialized(PuzzleType.getCurrentId(),
+                                                PuzzleType.getCurrent().getCurrentSessionId());
+                            }
                             getView().supportInvalidateOptionsMenu();
                         }
                     }

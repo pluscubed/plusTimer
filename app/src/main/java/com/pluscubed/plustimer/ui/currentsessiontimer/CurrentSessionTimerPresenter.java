@@ -1,12 +1,12 @@
 package com.pluscubed.plustimer.ui.currentsessiontimer;
 
-import com.pluscubed.plustimer.MvpPresenter;
+import com.pluscubed.plustimer.BasePresenter;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
 import com.pluscubed.plustimer.ui.RecyclerViewUpdate;
 
-public class CurrentSessionTimerPresenter extends MvpPresenter<CurrentSessionTimerView> {
+public class CurrentSessionTimerPresenter extends BasePresenter<CurrentSessionTimerView> {
 
     private final Session.SolvesListener mSessionSolvesListener;
 
@@ -37,7 +37,9 @@ public class CurrentSessionTimerPresenter extends MvpPresenter<CurrentSessionTim
     }
 
     public void onResume() {
-
+        if (PuzzleType.getPuzzleTypes() != null) {
+            setInitialized();
+        }
     }
 
     public void onTimingFinished(Solve s) {
@@ -45,9 +47,7 @@ public class CurrentSessionTimerPresenter extends MvpPresenter<CurrentSessionTim
 
 
     public void setInitialized() {
-        mInitialized = true;
-
-        if (isViewAttached()) {
+        if (!mInitialized && isViewAttached()) {
             getView().setInitialized();
             updateView(RecyclerViewUpdate.DATA_RESET, null);
 
@@ -62,6 +62,8 @@ public class CurrentSessionTimerPresenter extends MvpPresenter<CurrentSessionTim
                         getView().getTimeBarAdapter().notifyChange(null, RecyclerViewUpdate.DATA_RESET);
                     });
         }
+
+        mInitialized = true;
     }
 
     private class PuzzleTypeObserver {
