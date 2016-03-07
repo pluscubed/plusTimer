@@ -97,7 +97,6 @@ public abstract class DrawerActivity extends ThemableActivity {
     private void setupNavDrawer() {
         mDrawerLayout = (DrawerLayout) findViewById(R.id
                 .activity_drawer_drawerlayout);
-        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
         Resources resources = getResources();
         if (PrefUtils.getTheme(this) != PrefUtils.Theme.BLACK) {
             mDrawerLayout.setStatusBarBackgroundColor(resources.getColor(R.color.primary_dark));

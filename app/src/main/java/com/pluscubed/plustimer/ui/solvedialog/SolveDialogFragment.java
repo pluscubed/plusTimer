@@ -24,7 +24,9 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.couchbase.lite.CouchbaseLiteException;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
+import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
+import com.pluscubed.plustimer.ui.RecyclerViewUpdate;
 import com.pluscubed.plustimer.utils.PrefUtils;
 import com.pluscubed.plustimer.utils.ThemeUtils;
 import com.pluscubed.plustimer.utils.Utils;
@@ -301,6 +303,7 @@ public class SolveDialogFragment extends DialogFragment {
             if (!mAddMode) {
                 mSolve.copy(mSolveCopy);
                 mSolve.updateCb(getActivity());
+                Session.notifyListeners(mSessionId, mSolve, RecyclerViewUpdate.SINGLE_CHANGE);
                 dismiss();
             } else {
                 PuzzleType.get(mPuzzleTypeId).getSession(getActivity(), mSessionId)

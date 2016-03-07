@@ -54,6 +54,7 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import rx.Completable;
+import rx.Single;
 import rx.SingleSubscriber;
 import rx.Subscriber;
 import rx.Subscription;
@@ -222,31 +223,28 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         adapter.notifyChange(null, RecyclerViewUpdate.REMOVE_ALL);
     }
 
-    //TODO
-    //Generate string with specified current averages and mean of current
-    // session
-    private String buildStatsWithAveragesOf(Context context,
+    //Generate string with specified current averages and mean of current session
+    private Single<String> buildStatsWithAveragesOf(Context context,
                                             Integer... currentAverageSpecs) {
         Arrays.sort(currentAverageSpecs, Collections.reverseOrder());
-        String s = "";
 
-        /*PuzzleType.getCurrent().getCurrentSession()
-                .flatMap(new Func1<Session, Single<?>>() {
-                    @Override
-                    public Single<?> call(Session session) {
-                        return null;
+        return PuzzleType.getCurrent().getCurrentSessionDeferred(getActivity())
+                .flatMapObservable(session -> session.getSortedSolves(getActivity())).toList().toSingle()
+                .map(solves -> {
+                    String s = "";
+                    for (int i : currentAverageSpecs) {
+                        if (solves.size() >= i) {
+                            s += String.format(context.getString(R.string.cao), i) + ": " +
+                                    Session.getStringCurrentAverageOf(solves, i, mMillisecondsEnabled).toBlocking().value() + "\n";
+                        }
                     }
-                })
-        for (int i : currentAverageSpecs) {
-            if (PuzzleType.getCurrentId().getCurrentSession().getNumberOfSolves() >= i) {
-                s += String.format(context.getString(R.string.cao), i) + ": " + PuzzleType.getCurrentId().getCurrentSession()
-                        .getStringCurrentAverageOf(i, mMillisecondsEnabled) + "\n";
-            }
-        }
-        if (PuzzleType.getCurrentId().getCurrentSession().getNumberOfSolves() > 0) {
-            s += context.getString(R.string.mean) + PuzzleType.getCurrentId().getCurrentSession().getStringMean(mMillisecondsEnabled);
-        }*/
-        return s;
+
+                    if (solves.size() > 0) {
+                        s += context.getString(R.string.mean) + Session.getStringMean(solves, mMillisecondsEnabled);
+                    }
+
+                    return s;
+                });
     }
 
     /**
@@ -381,9 +379,18 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
                     }
                 });
 
+        buildStatsWithAveragesOf(getActivity(), 5, 12, 100)
+                .subscribe(new SingleSubscriber<String>() {
+                    @Override
+                    public void onSuccess(String stats) {
+                        mStatsText.setText(stats);
+                    }
 
-        mStatsText.setText(buildStatsWithAveragesOf(getActivity(), 5, 12, 100));
+                    @Override
+                    public void onError(Throwable error) {
 
+                    }
+                });
 
         if (!mTiming && !mInspecting && solve != null) {
             if (mode == RecyclerViewUpdate.INSERT) {

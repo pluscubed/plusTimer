@@ -62,6 +62,49 @@ public class Session extends CbObject {
         return sListenerMap;
     }
 
+    public static void notifyListeners(String sessionId, Solve solve, RecyclerViewUpdate update) {
+        if (sListenerMap.containsKey(sessionId)) {
+            for (SolvesListener listener : sListenerMap.get(sessionId)) {
+                listener.notifyChange(update, solve);
+            }
+        }
+    }
+
+    /**
+     * Returns a String of the current average of some number of solves.
+     * If the number less than 3 or if the number of solves is less than the
+     * number, it'll return a blank String.
+     *
+     * @param number              the number of solves to average
+     * @param millisecondsEnabled whether to display milliseconds
+     * @return the current average of some number of solves
+     */
+    public static Single<String> getStringCurrentAverageOf(List<Solve> sortedSolves, int number, boolean millisecondsEnabled) {
+        if (number >= 3 && sortedSolves.size() >= number) {
+            return Observable.from(sortedSolves)
+                    .takeLast(number)
+                    .toList()
+                    .toSingle()
+                    .map(Utils::getAverageOf)
+                    .map(average -> average == Long.MAX_VALUE ?
+                            "DNF" : Utils.timeStringFromNs(average, millisecondsEnabled));
+        } else {
+            return Single.just("");
+        }
+    }
+
+    public static String getStringMean(List<Solve> solves, boolean milliseconds) {
+        long sum = 0;
+        for (Solve i : solves) {
+            if (!(i.getPenalty() == Solve.PENALTY_DNF)) {
+                sum += i.getTimeTwo();
+            } else {
+                return "DNF";
+            }
+        }
+        return Utils.timeStringFromNs(sum / solves.size(), milliseconds);
+    }
+
     public void addListener(SolvesListener listener) {
         if (getListenerMap().containsKey(mId)) {
             Set<SolvesListener> set = sListenerMap.get(mId);
@@ -72,6 +115,8 @@ public class Session extends CbObject {
             sListenerMap.put(mId, set);
         }
     }
+
+    //TODO
 
     public void removeListener(SolvesListener listener) {
         Set<SolvesListener> solvesListeners = getListenerMap().get(mId);
@@ -96,8 +141,6 @@ public class Session extends CbObject {
     public Solve getSolve(Context context, String solveId) throws CouchbaseLiteException, IOException {
         return fromDocId(context, solveId, Solve.class);
     }
-
-    //TODO
 
     private Observable<Solve> getSolves(Context context) {
         return Observable.from(new ArrayList<>(mSolves))
@@ -152,12 +195,8 @@ public class Session extends CbObject {
         notifyListeners(getSolve(context, id), RecyclerViewUpdate.REMOVE);
     }
 
-    public void notifyListeners(Solve solve, RecyclerViewUpdate update) {
-        if (sListenerMap.containsKey(mId)) {
-            for (SolvesListener listener : sListenerMap.get(mId)) {
-                listener.notifyChange(update, solve);
-            }
-        }
+    private void notifyListeners(Solve solve, RecyclerViewUpdate update) {
+        notifyListeners(mId, solve, update);
     }
 
     /**
@@ -209,28 +248,7 @@ public class Session extends CbObject {
                 .toSingle();
     }
 
-    /**
-     * Returns a String of the current average of some number of solves.
-     * If the number less than 3 or if the number of solves is less than the
-     * number, it'll return a blank String.
-     *
-     * @param number              the number of solves to average
-     * @param millisecondsEnabled whether to display milliseconds
-     * @return the current average of some number of solves
-     */
-    public Single<String> getStringCurrentAverageOf(List<Solve> sortedSolves, int number, boolean millisecondsEnabled) {
-        if (number >= 3 && getNumberOfSolves() >= number) {
-            return Observable.from(sortedSolves)
-                    .takeLast(number)
-                    .toList()
-                    .toSingle()
-                    .map(Utils::getAverageOf)
-                    .map(average -> average == Long.MAX_VALUE ?
-                            "DNF" : Utils.timeStringFromNs(average, millisecondsEnabled));
-        } else {
-            return Single.just("");
-        }
-    }
+    //TODO
 
     /**
      * Returns a String of the best average of some number of solves.
@@ -251,8 +269,6 @@ public class Session extends CbObject {
             return Utils.timeStringFromNs(bestAverage, millisecondsEnabled);
         });
     }
-
-    //TODO
 
     /**
      * Returns the milliseconds value of the best average of some number of
@@ -286,18 +302,6 @@ public class Session extends CbObject {
         } else {
             return Single.just((long) GET_AVERAGE_INVALID_NOT_ENOUGH);
         }
-    }
-
-    public String getStringMean(List<Solve> solves, boolean milliseconds) {
-        long sum = 0;
-        for (Solve i : solves) {
-            if (!(i.getPenalty() == Solve.PENALTY_DNF)) {
-                sum += i.getTimeTwo();
-            } else {
-                return "DNF";
-            }
-        }
-        return Utils.timeStringFromNs(sum / solves.size(), milliseconds);
     }
 
     public Single<String> getTimestampString(Context context) {
