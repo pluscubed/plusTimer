@@ -95,7 +95,7 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
 
     @Override
     public int getItemCount() {
-        return mSolves.size() + (mHeaderEnabled ? 0 : 1);
+        return mSolves.size() + (mHeaderEnabled ? 1 : 0);
     }
 
     @Override
@@ -121,6 +121,7 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
 
         //Collections.reverse(mSolves);
 
+        int headerOffset = mHeaderEnabled ? 1 : 0;
         switch (mode) {
             case DATA_RESET:
                 notifyDataSetChanged();
@@ -129,7 +130,7 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
                 break;
             case INSERT:
                 mSolves.add(0, solve);
-                notifyItemInserted(mHeaderEnabled ? 1 : 0);
+                notifyItemInserted(headerOffset);
                 if (mSolves.size() >= 1)
                     mView.scrollRecyclerView(0);
                 break;
@@ -142,7 +143,7 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
                     Solve foundSolve = mSolves.get(i);
                     if (foundSolve.getId().equals(solve.getId())) {
                         mSolves.set(i, solve);
-                        notifyItemChanged(i + (mHeaderEnabled ? 0 : 1));
+                        notifyItemChanged(i + headerOffset);
                         break;
                     }
                 }
@@ -161,12 +162,12 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
 
         if (mode != RecyclerViewUpdate.DATA_RESET && mode != RecyclerViewUpdate.REMOVE_ALL) {
             if (oldBest != null && !oldBest.equals(newBest)) {
-                notifyItemChanged(mSolves.indexOf(oldBest));
-                notifyItemChanged(mSolves.indexOf(newBest));
+                notifyItemChanged(mSolves.indexOf(oldBest) + headerOffset);
+                notifyItemChanged(mSolves.indexOf(newBest) + headerOffset);
             }
             if (oldWorst != null && !oldWorst.equals(newWorst)) {
-                notifyItemChanged(mSolves.indexOf(oldWorst));
-                notifyItemChanged(mSolves.indexOf(newWorst));
+                notifyItemChanged(mSolves.indexOf(oldWorst) + headerOffset);
+                notifyItemChanged(mSolves.indexOf(newWorst) + headerOffset);
             }
         }
 
@@ -193,7 +194,7 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
                             false,
                             mPuzzleTypeId,
                             mSessionId,
-                            mSolves.get(getAdapterPosition() - (mHeaderEnabled ? 0 : 1))
+                            mSolves.get(getAdapterPosition() - (mHeaderEnabled ? 1 : 0))
                     );
 
                 });

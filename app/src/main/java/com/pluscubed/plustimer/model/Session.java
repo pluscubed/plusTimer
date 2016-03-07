@@ -2,6 +2,7 @@ package com.pluscubed.plustimer.model;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.WorkerThread;
 
 import com.couchbase.lite.CouchbaseLiteException;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -40,13 +41,18 @@ public class Session extends CbObject {
 
     private static Map<String, Set<SolvesListener>> sListenerMap;
     @JsonProperty("solves")
+    @NonNull
     private Set<String> mSolves;
 
     public Session() {
+        mSolves = new HashSet<>();
     }
 
     public Session(Context context) throws CouchbaseLiteException, IOException {
         super(context);
+        mSolves = new HashSet<>();
+
+        updateCb(context);
     }
 
     private static Map<String, Set<SolvesListener>> getListenerMap() {
@@ -86,6 +92,7 @@ public class Session extends CbObject {
     /*public Session(Context context, Session s) {
         this(s.getId());
     }*/
+    @WorkerThread
     public Solve getSolve(Context context, String solveId) throws CouchbaseLiteException, IOException {
         return fromDocId(context, solveId, Solve.class);
     }
@@ -112,15 +119,8 @@ public class Session extends CbObject {
         mId = id;
     }
 
-    public Solve newSolve(Context context) throws IOException, CouchbaseLiteException {
-        Solve solve = new Solve(context);
-
-        mSolves.add(solve.getId());
-
-        updateCb(context);
-        notifyListeners(solve, RecyclerViewUpdate.INSERT);
-
-        return solve;
+    public SolveBuilder newSolve(Context context) {
+        return new SolveBuilder(context);
     }
 
     /**
@@ -218,9 +218,9 @@ public class Session extends CbObject {
      * @param millisecondsEnabled whether to display milliseconds
      * @return the current average of some number of solves
      */
-    public Single<String> getStringCurrentAverageOf(Context context, int number, boolean millisecondsEnabled) {
+    public Single<String> getStringCurrentAverageOf(List<Solve> sortedSolves, int number, boolean millisecondsEnabled) {
         if (number >= 3 && getNumberOfSolves() >= number) {
-            return getSortedSolves(context)
+            return Observable.from(sortedSolves)
                     .takeLast(number)
                     .toList()
                     .toSingle()
@@ -232,8 +232,6 @@ public class Session extends CbObject {
         }
     }
 
-    //TODO
-
     /**
      * Returns a String of the best average of some number of solves.
      * Returns a blank String if the number is less than 3.
@@ -242,8 +240,8 @@ public class Session extends CbObject {
      * @param millisecondsEnabled whether to display milliseconds
      * @return the best average of some number of solves
      */
-    public Single<String> getStringBestAverageOf(Context context, int number, boolean millisecondsEnabled) {
-        return getBestAverageOf(context, number).map(bestAverage -> {
+    public Single<String> getStringBestAverageOf(List<Solve> solves, int number, boolean millisecondsEnabled) {
+        return getBestAverageOf(solves, number).map(bestAverage -> {
             if (bestAverage == GET_AVERAGE_INVALID_NOT_ENOUGH) {
                 return "";
             }
@@ -253,6 +251,8 @@ public class Session extends CbObject {
             return Utils.timeStringFromNs(bestAverage, millisecondsEnabled);
         });
     }
+
+    //TODO
 
     /**
      * Returns the milliseconds value of the best average of some number of
@@ -264,19 +264,17 @@ public class Session extends CbObject {
      * @param number the number of solves to average
      * @return the best average of some number of solves
      */
-    public Single<Long> getBestAverageOf(Context context, int number) {
+    public Single<Long> getBestAverageOf(List<Solve> solves, int number) {
         if (number >= 3 && getNumberOfSolves() >= number) {
-            return getSolves(context)
-                    .takeLast(number)
-                    .toList()
+            return Observable.just(solves)
                     .toSingle()
-                    .map(solves -> {
+                    .map(lastSolves -> {
                         long bestAverage = 0;
                         //Iterates through the list, starting with the [number] most recent solves
-                        for (int i = 0; solves.size() - (number + i) >= 0; i++) {
+                        for (int i = 0; lastSolves.size() - (number + i) >= 0; i++) {
                             //Sublist the [number] of solves, offset by i from the most
                             // recent. Gets the average.
-                            long average = Utils.getAverageOf(solves.subList(solves.size() - (number + i), solves.size() - i));
+                            long average = Utils.getAverageOf(lastSolves.subList(lastSolves.size() - (number + i), lastSolves.size() - i));
                             //If the average is less than the current best (or on the first loop),
                             // set the best average to the average
                             if (i == 0 || average < bestAverage) {
@@ -290,42 +288,39 @@ public class Session extends CbObject {
         }
     }
 
-    public String getStringMean(Context context, boolean milliseconds) {
-        return getSolves(context)
-                .toList()
-                .toSingle()
-                .map(solves -> {
-                    long sum = 0;
-                    for (Solve i : solves) {
-                        if (!(i.getPenalty() == Solve.PENALTY_DNF)) {
-                            sum += i.getTimeTwo();
-                        } else {
-                            return "DNF";
-                        }
-                    }
-                    return Utils.timeStringFromNs(sum / solves.size(), milliseconds);
-                })
-                .toBlocking()
-                .value();
+    public String getStringMean(List<Solve> solves, boolean milliseconds) {
+        long sum = 0;
+        for (Solve i : solves) {
+            if (!(i.getPenalty() == Solve.PENALTY_DNF)) {
+                sum += i.getTimeTwo();
+            } else {
+                return "DNF";
+            }
+        }
+        return Utils.timeStringFromNs(sum / solves.size(), milliseconds);
     }
 
-    public String getTimestampString(Context context) {
-        return Utils.timeDateStringFromTimestamp(context, getTimestamp(context));
+    public Single<String> getTimestampString(Context context) {
+        return getTimestamp(context)
+                .map(timestamp -> Utils.timeDateStringFromTimestamp(context, timestamp));
     }
 
-    public long getTimestamp(Context context) {
+    public Single<Long> getTimestamp(Context context) {
         return getLastSolve(context)
                 .map(Solve::getTimestamp)
                 .defaultIfEmpty(TIMESTAMP_NO_SOLVES)
-                .toSingle().toBlocking().value();
+                .toSingle();
     }
 
     public Single<String> getStatsDeferred(Context context, String puzzleTypeName,
                                            boolean current, boolean displaySolves,
                                            boolean milliseconds, boolean sign) {
-        return Single.defer(() -> Single.just(getStats(context, puzzleTypeName, current, displaySolves, milliseconds, sign)));
+        return Single.defer(() ->
+                Single.just(getStats(context, puzzleTypeName, current, displaySolves, milliseconds, sign)))
+                .subscribeOn(Schedulers.io());
     }
 
+    @WorkerThread
     public String getStats(Context context, String puzzleTypeName,
                            boolean current, boolean displaySolves,
                            boolean milliseconds, boolean sign) {
@@ -343,48 +338,56 @@ public class Session extends CbObject {
             return statsBuilder.toString();
         }
 
-        statsBuilder.append("\n").append(context.getString(R.string.mean)).append(getStringMean(context, milliseconds));
+        List<Solve> sortedSolves = getSortedSolves(context).toList().toBlocking().first();
 
-        List<Solve> solves = getSolves(context).toList().toBlocking().first();
+        statsBuilder.append("\n")
+                .append(context.getString(R.string.mean))
+                .append(getStringMean(sortedSolves, milliseconds));
 
-        Solve bestSolve = Utils.getBestSolveOfList(solves);
-        Solve worstSolve = Utils.getWorstSolveOfList(solves);
+        Solve bestSolve = Utils.getBestSolveOfList(sortedSolves);
+        Solve worstSolve = Utils.getWorstSolveOfList(sortedSolves);
 
         if (numberOfSolves >= 2) {
-            statsBuilder.append("\n").append(context.getString(R.string.best))
+            statsBuilder.append("\n")
+                    .append(context.getString(R.string.best))
                     .append(bestSolve.getTimeString(milliseconds));
-            statsBuilder.append("\n").append(context.getString(R.string.worst))
+            statsBuilder.append("\n")
+                    .append(context.getString(R.string.worst))
                     .append(worstSolve.getTimeString(milliseconds));
 
             if (numberOfSolves >= 3) {
-                long average = Utils.getAverageOf(solves);
+                long average = Utils.getAverageOf(sortedSolves);
                 if (average != Long.MAX_VALUE) {
-                    statsBuilder.append("\n").append(context.getString(R.string.average))
+                    statsBuilder.append("\n")
+                            .append(context.getString(R.string.average))
                             .append(Utils.timeStringFromNs(average, milliseconds));
                 } else {
-                    statsBuilder.append("\n").append(context.getString(R.string.average)).append("DNF");
+                    statsBuilder.append("\n")
+                            .append(context.getString(R.string.average))
+                            .append("DNF");
                 }
 
                 int[] averages = {1000, 100, 50, 12, 5};
                 for (int i : averages) {
                     if (numberOfSolves >= i) {
                         if (current) {
-                            statsBuilder.append("\n").append(String.format(context.getString(R.string.cao), i))
-                                    .append(": ").append(getStringCurrentAverageOf(context, i, milliseconds).toBlocking().value());
+                            statsBuilder.append("\n")
+                                    .append(String.format(context.getString(R.string.cao), i))
+                                    .append(": ").append(getStringCurrentAverageOf(sortedSolves, i, milliseconds).toBlocking().value());
                         } else {
                             statsBuilder.append("\n").append(String.format(context.getString(R.string.lao), i))
-                                    .append(": ").append(getStringCurrentAverageOf(context, i, milliseconds).toBlocking().value());
+                                    .append(": ").append(getStringCurrentAverageOf(sortedSolves, i, milliseconds).toBlocking().value());
                         }
                         statsBuilder.append("\n").append(String.format(context.getString(R.string.bao), i))
-                                .append(": ").append(getStringBestAverageOf(context, i, milliseconds).toBlocking().value());
+                                .append(": ").append(getStringBestAverageOf(sortedSolves, i, milliseconds).toBlocking().value());
                     }
                 }
             }
         }
         if (displaySolves) {
             statsBuilder.append("\n\n");
-            for (int i = 0; i < solves.size(); i++) {
-                Solve solve = solves.get(i);
+            for (int i = 0; i < sortedSolves.size(); i++) {
+                Solve solve = sortedSolves.get(i);
                 statsBuilder.append(i + 1).append(". ");
                 if (solve == bestSolve || solve == worstSolve) {
                     statsBuilder.append("(").append(solve.getDescriptiveTimeString(milliseconds)).append(")");
@@ -402,6 +405,48 @@ public class Session extends CbObject {
 
     public interface SolvesListener {
         void notifyChange(RecyclerViewUpdate update, Solve solve);
+    }
+
+    public class SolveBuilder extends Solve.Builder {
+        public SolveBuilder(Context context) {
+            super(context);
+        }
+
+        @Override
+        public SolveBuilder setRawTime(long time) {
+            super.setRawTime(time);
+            return this;
+        }
+
+        @Override
+        public SolveBuilder setTimestamp(long timestamp) {
+            super.setTimestamp(timestamp);
+            return this;
+        }
+
+        @Override
+        public SolveBuilder setPenalty(@Solve.Penalty int penalty) {
+            super.setPenalty(penalty);
+            return this;
+        }
+
+        @Override
+        public SolveBuilder setScramble(String scramble) {
+            super.setScramble(scramble);
+            return this;
+        }
+
+        @Override
+        public Solve build() throws CouchbaseLiteException, IOException {
+            super.build();
+
+            mSolves.add(solve.getId());
+            updateCb(context);
+
+            notifyListeners(solve, RecyclerViewUpdate.INSERT);
+
+            return solve;
+        }
     }
 
 }

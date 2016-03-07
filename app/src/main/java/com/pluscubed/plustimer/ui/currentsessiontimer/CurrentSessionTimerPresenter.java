@@ -1,12 +1,14 @@
 package com.pluscubed.plustimer.ui.currentsessiontimer;
 
-import com.pluscubed.plustimer.BasePresenter;
+import com.pluscubed.plustimer.base.Presenter;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
 import com.pluscubed.plustimer.ui.RecyclerViewUpdate;
 
-public class CurrentSessionTimerPresenter extends BasePresenter<CurrentSessionTimerView> {
+import rx.android.schedulers.AndroidSchedulers;
+
+public class CurrentSessionTimerPresenter extends Presenter<CurrentSessionTimerView> {
 
     private final Session.SolvesListener mSessionSolvesListener;
 
@@ -37,7 +39,7 @@ public class CurrentSessionTimerPresenter extends BasePresenter<CurrentSessionTi
     }
 
     public void onResume() {
-        if (PuzzleType.getPuzzleTypes() != null) {
+        if (PuzzleType.isInitialized()) {
             setInitialized();
         }
     }
@@ -57,6 +59,7 @@ public class CurrentSessionTimerPresenter extends BasePresenter<CurrentSessionTi
                     })
                     .flatMapObservable(session ->
                             session.getSortedSolves(getView().getContextCompat())).toList()
+                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(solves -> {
                         getView().getTimeBarAdapter().initialize(solves);
                         getView().getTimeBarAdapter().notifyChange(null, RecyclerViewUpdate.DATA_RESET);

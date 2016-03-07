@@ -2,9 +2,7 @@ package com.pluscubed.plustimer.ui.solvelist;
 
 import android.app.Activity;
 
-import com.pluscubed.plustimer.MvpView;
-
-public interface SolveListView extends MvpView {
+public interface SolveListView {
 
     Activity getContextCompat();
 
@@ -15,6 +13,10 @@ public interface SolveListView extends MvpView {
     void enableResetSubmitButtons(boolean enable);
 
     void showResetWarningDialog();
+
+    void setAdapter(SolveListAdapter adapter);
+
+    void addResetSubmitButtons();
 
     void showSessionSubmitted();
 

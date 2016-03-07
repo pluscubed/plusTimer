@@ -2,14 +2,14 @@ package com.pluscubed.plustimer.ui.currentsession;
 
 import android.widget.Toast;
 
-import com.pluscubed.plustimer.BasePresenter;
+import com.pluscubed.plustimer.base.Presenter;
 import com.pluscubed.plustimer.model.PuzzleType;
 
 import rx.Completable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 
-public class CurrentSessionPresenter extends BasePresenter<CurrentSessionView> {
+public class CurrentSessionPresenter extends Presenter<CurrentSessionView> {
 
     private boolean mInitialized;
 

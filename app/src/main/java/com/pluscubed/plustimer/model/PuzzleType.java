@@ -2,15 +2,16 @@ package com.pluscubed.plustimer.model;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.WorkerThread;
 
 import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;
-import com.couchbase.lite.Document;
 import com.couchbase.lite.Query;
 import com.couchbase.lite.QueryRow;
 import com.couchbase.lite.View;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fernandocejas.frodo.annotation.RxLogObservable;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
@@ -49,6 +50,7 @@ public class PuzzleType extends CbObject {
 
     private static String sCurrentTypeId;
     private static List<PuzzleType> sPuzzleTypes;
+    private static boolean sInitialized;
 
     private Puzzle mPuzzle;
 
@@ -65,6 +67,7 @@ public class PuzzleType extends CbObject {
     @JsonProperty("bld")
     private boolean mIsBld;
     @JsonProperty("sessions")
+    @NonNull
     private List<String> mSessions;
 
     //Pre-SQL legacy code
@@ -77,16 +80,24 @@ public class PuzzleType extends CbObject {
     @Deprecated
     private String mLegacyName;
 
-    public PuzzleType(String id, String scrambler, String name, String currentSessionId,
-                      boolean inspectionOn, boolean isBld) {
+    public PuzzleType() {
+        mSessions = new ArrayList<>();
+    }
+
+    @WorkerThread
+    public PuzzleType(Context context, String scrambler, String name, String currentSessionId,
+                      boolean inspectionOn, boolean isBld) throws CouchbaseLiteException, IOException {
+        super(context);
+
         mScrambler = scrambler;
         mName = name;
-        mId = id;
         mEnabled = true;
         mCurrentSessionId = currentSessionId;
         mInspectionOn = inspectionOn;
         mIsBld = isBld;
         mSessions = new ArrayList<>();
+
+        updateCb(context);
     }
 
     public static List<PuzzleType> getPuzzleTypes() {
@@ -125,32 +136,40 @@ public class PuzzleType extends CbObject {
         return array;
     }
 
+    public static boolean isInitialized() {
+        return sInitialized;
+    }
+
     public synchronized static Completable initialize(Context context) {
         try {
             if (sPuzzleTypes == null) {
                 sPuzzleTypes = new ArrayList<>();
 
-
                 int savedVersionCode = PrefUtils.getVersionCode(context);
 
                 Database database = App.getDatabase(context);
+                View puzzletypesView = database.getView(VIEW_PUZZLETYPES);
+                puzzletypesView.setMap((document, emitter) -> {
+                    if (document.get("type").equals(TYPE_PUZZLETYPE)) {
+                        emitter.emit(document.get("name"), document.get("scrambler"));
+                    }
+                }, "1");
 
-                Completable completable;
                 if (savedVersionCode < 24) {
-                    initializePuzzleTypesFirstRun(context, database);
-                    completable = Completable.complete();
-                } else {
-                    completable = initializePuzzleTypes(database);
+                    savePuzzleTypesFirstRun(context);
                 }
 
-                for (PuzzleType puzzleType : sPuzzleTypes) {
-                    //TODO: upgrade database
-                    //puzzleType.upgradeDatabase(context);
-                }
+                return initializePuzzleTypes(database)
+                        .doOnComplete(() -> {
+                            for (PuzzleType puzzleType : sPuzzleTypes) {
+                                //TODO: upgrade database
+                                //puzzleType.upgradeDatabase(context);
+                            }
 
-                PrefUtils.saveVersionCode(context);
+                            PrefUtils.saveVersionCode(context);
 
-                return completable;
+                            sInitialized = true;
+                        });
             } else {
                 return Completable.complete();
             }
@@ -182,8 +201,8 @@ public class PuzzleType extends CbObject {
         }).subscribeOn(Schedulers.io());
     }
 
-    private static void initializePuzzleTypesFirstRun(Context context, Database database) throws CouchbaseLiteException, IOException {
-
+    @WorkerThread
+    private static void savePuzzleTypesFirstRun(Context context) throws CouchbaseLiteException, IOException {
 
         //Generate default puzzle types from this...
         String[] scramblers = context.getResources().getStringArray(R.array.scramblers);
@@ -211,7 +230,7 @@ public class PuzzleType extends CbObject {
 
 
             if (puzzles.length > i) {
-                uiName = context.getResources().getStringArray(R.array.scrambler_names)[i];
+                uiName = puzzles[i];
             } else {
                 int order = Integer.parseInt(scrambler.substring(0, 1));
                 String addon = null;
@@ -233,38 +252,25 @@ public class PuzzleType extends CbObject {
                 }
             }
 
-            Document newDoc = database.createDocument();
-            PuzzleType newPuzzleType = new PuzzleType(newDoc.getId(), scrambler, uiName, null, true, bld/*, legacyNames[i]*/);
+            PuzzleType newPuzzleType = new PuzzleType(context, scrambler, uiName, null, true, bld/*, legacyNames[i]*/);
 
             if (uiName.equals("3x3")) {
                 //Default current puzzle type
                 //currentPuzzleType.setValue(type.getId());
                 //TODO: Save current type ID
                 sCurrentTypeId = newPuzzleType.getId();
-                newPuzzleType.newSession(context, false);
+                newPuzzleType.newSession(context);
             }
-
-            newDoc.putProperties(newPuzzleType.toMap());
-            sPuzzleTypes.add(newPuzzleType);
         }
-
-        View puzzletypesView = database.getView(VIEW_PUZZLETYPES);
-        puzzletypesView.setMap((document, emitter) -> {
-            if (document.get("type").equals(TYPE_PUZZLETYPE)) {
-                emitter.emit(document.get("_id"), null);
-            }
-        }, "1");
     }
 
-    private Session newSession(Context context, boolean update) throws IOException, CouchbaseLiteException {
+    private Session newSession(Context context) throws IOException, CouchbaseLiteException {
         Session session = new Session(context);
 
         mCurrentSessionId = session.getId();
         mSessions.add(session.getId());
 
-        if (update) {
-            updateCb(context);
-        }
+        updateCb(context);
 
         return session;
     }
@@ -429,13 +435,15 @@ public class PuzzleType extends CbObject {
                 mPuzzle = PuzzlePlugins.getScramblers().get(mScrambler)
                         .cachedInstance();
             } catch (LazyInstantiatorException |
-                    BadLazyClassDescriptionException | IOException e) {
+                    BadLazyClassDescriptionException |
+                    IOException e) {
                 e.printStackTrace();
             }
         }
         return mPuzzle;
     }
 
+    @RxLogObservable
     public Single<Session> getCurrentSessionDeferred(Context context) {
         return getSessionDeferred(context, mCurrentSessionId);
     }
@@ -444,9 +452,10 @@ public class PuzzleType extends CbObject {
         return getSession(context, mCurrentSessionId);
     }
 
-
+    @RxLogObservable
     public Single<Session> getSessionDeferred(Context context, String id) {
-        return Single.defer(() -> Single.just(getSession(context, id)));
+        return Single.defer(() -> Single.just(getSession(context, id)))
+                .subscribeOn(Schedulers.io());
     }
 
     public Session getSession(Context context, String id) throws CouchbaseLiteException, IOException {

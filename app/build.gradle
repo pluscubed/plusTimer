@@ -2,17 +2,22 @@ buildscript {
     repositories {
         maven { url 'https://maven.fabric.io/public' }
         maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+        maven { url "http://files.couchbase.com/maven2/" }
         jcenter()
     }
 
     dependencies {
         classpath 'io.fabric.tools:gradle:1.21.4'
-        classpath 'me.tatarka:gradle-retrolambda:3.3.0-beta4'
+        classpath 'me.tatarka:gradle-retrolambda:3.2.5'
+        classpath 'com.fernandocejas.frodo:frodo-plugin:0.8.2'
+        classpath 'com.jakewharton.hugo:hugo-plugin:1.2.1'
     }
 }
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 apply plugin: 'me.tatarka.retrolambda'
+apply plugin: 'com.fernandocejas.frodo'
+apply plugin: 'com.jakewharton.hugo'
 
 repositories {
     maven { url 'https://maven.fabric.io/public' }
@@ -101,10 +106,11 @@ retrolambda {
 }
 
 dependencies {
-    //debugCompile 'im.dino:dbinspector:3.2.2@aar'
 
-    /*compile 'com.firebase:firebase-client-android:2.5.0'
-    compile 'com.firebaseui:firebase-ui:0.3.1'*/
+    debugCompile 'im.dino:dbinspector:3.2.3@aar'
+
+    //compile 'com.firebase:firebase-client-android:2.5.2'
+    //compile 'com.firebaseui:firebase-ui:0.3.1'
 
     compile 'com.couchbase.lite:couchbase-lite-android:1.2.0'
 

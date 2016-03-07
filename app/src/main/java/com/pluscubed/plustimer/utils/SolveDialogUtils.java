@@ -5,7 +5,7 @@ import android.app.DialogFragment;
 import android.app.FragmentManager;
 
 import com.pluscubed.plustimer.model.Solve;
-import com.pluscubed.plustimer.ui.SolveDialogFragment;
+import com.pluscubed.plustimer.ui.solvedialog.SolveDialogFragment;
 
 /**
  * Creating solve dialogs

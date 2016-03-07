@@ -20,6 +20,7 @@ import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.util.Property;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -64,7 +65,7 @@ import rx.android.schedulers.AndroidSchedulers;
 
 public class CurrentSessionTimerFragment extends Fragment implements CurrentSessionTimerView {
 
-    public static final String TAG = "CURRENT_SESSION_TIMER_FRAGMENT";
+    public static final String TAG = "CS_TIMER_FRAGMENT";
     private static final long HOLD_TIME = 550000000L;
     private static final int REFRESH_RATE = 15;
     private static final String STATE_IMAGE_DISPLAYED = "scramble_image_displayed_boolean";
@@ -183,10 +184,11 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
 
                     Solve s = null;
                     try {
-                        s = PuzzleType.getCurrent().getCurrentSession(getActivity()).newSolve(getActivity());
-                        s.setScramble(getActivity(), mRetainedFragment.getCurrentScrambleAndSvg().getScramble());
-                        s.setRawTime(getActivity(), 0);
-                        s.setPenalty(getActivity(), Solve.PENALTY_DNF);
+                        s = PuzzleType.getCurrent().getCurrentSession(getActivity()).newSolve(getActivity())
+                                .setScramble(mRetainedFragment.getCurrentScrambleAndSvg().getScramble())
+                                .setRawTime(0)
+                                .setPenalty(Solve.PENALTY_DNF)
+                                .build();
                     } catch (IOException | CouchbaseLiteException e) {
                         e.printStackTrace();
                     }
@@ -366,6 +368,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         //Update stats
         PuzzleType.getCurrent().getCurrentSessionDeferred(getActivity())
                 .map(Session::getNumberOfSolves)
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new SingleSubscriber<Integer>() {
                     @Override
                     public void onSuccess(Integer numberOfSolves) {
@@ -409,7 +412,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         setHasOptionsMenu(true);
 
         mPresenter = new CurrentSessionTimerPresenter();
-        mPresenter.attachView(this);
+        mPresenter.onViewAttached(this);
 
         //TODO
         /*PuzzleType.getCurrentId().(puzzleTypeObserver);
@@ -461,7 +464,8 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         mLastDnfButton.setOnClickListener(view -> {
             PuzzleType.getCurrent().getCurrentSessionDeferred(getActivity()).toObservable()
                     .flatMap(session -> session.getLastSolve(getActivity()))
-                    .flatMap(solve -> solve.setPenaltyDeferred(getActivity(), Solve.PENALTY_DNF).toObservable()).toCompletable()
+                    .flatMap(solve -> solve.setPenaltyDeferred(getActivity(), Solve.PENALTY_DNF).toObservable())
+                    .toCompletable()
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Completable.CompletableSubscriber() {
                         @Override
@@ -484,7 +488,8 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         mLastPlusTwoButton.setOnClickListener(view -> {
             PuzzleType.getCurrent().getCurrentSessionDeferred(getActivity()).toObservable()
                     .flatMap(session -> session.getLastSolve(getActivity()))
-                    .flatMap(solve -> solve.setPenaltyDeferred(getActivity(), Solve.PENALTY_PLUSTWO).toObservable()).toCompletable()
+                    .flatMap(solve -> solve.setPenaltyDeferred(getActivity(), Solve.PENALTY_PLUSTWO).toObservable())
+                    .toCompletable()
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Completable.CompletableSubscriber() {
                         @Override
@@ -519,7 +524,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
             //TODO: Smooth scroll so empty space for insertion opens up
             //Take a look at onLayoutChildren so insertion animation is nice.
         };
-        timeBarLayoutManager.setStackFromEnd(true);
+        //timeBarLayoutManager.setStackFromEnd(true);
         mTimeBarRecycler.setLayoutManager(timeBarLayoutManager);
         mTimeBarRecycler.setHasFixedSize(true);
         mTimeBarRecycler.setAdapter(new TimeBarRecyclerAdapter(this));
@@ -669,7 +674,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
 
 
         mPresenter.onDestroy();
-        mPresenter.detachView();
+        mPresenter.onViewDetached();
 
         //TODO
         /*PuzzleType.getCurrentId().getCurrentSession()
@@ -811,9 +816,10 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         if (mTiming) {
             Solve s = null;
             try {
-                s = PuzzleType.getCurrent().getCurrentSession(getActivity()).newSolve(getActivity());
-                s.setScramble(getActivity(), mRetainedFragment.getCurrentScrambleAndSvg().getScramble());
-                s.setRawTime(getActivity(), System.nanoTime() - mTimingStartTimestamp);
+                Session.SolveBuilder builder = PuzzleType.getCurrent().getCurrentSession(getActivity())
+                        .newSolve(getActivity())
+                        .setScramble(mRetainedFragment.getCurrentScrambleAndSvg().getScramble())
+                        .setRawTime(System.nanoTime() - mTimingStartTimestamp);
 
                 //TODO: Blind mode
                 /*if (!mBldMode) {
@@ -824,11 +830,16 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
                 }*/
 
                 if (mInspectionEnabled && mLateStartPenalty) {
-                    s.setPenalty(getActivity(), Solve.PENALTY_PLUSTWO);
+                    builder.setPenalty(Solve.PENALTY_PLUSTWO);
                 }
+
+                s = builder.build();
 
             } catch (IOException | CouchbaseLiteException e) {
                 e.printStackTrace();
+                if (e instanceof CouchbaseLiteException) {
+                    Log.w(TAG, ((CouchbaseLiteException) e).getCBLStatus().toString());
+                }
             }
 
 

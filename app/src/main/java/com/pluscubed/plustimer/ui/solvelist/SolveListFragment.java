@@ -1,7 +1,6 @@
 package com.pluscubed.plustimer.ui.solvelist;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -17,69 +16,21 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.pluscubed.plustimer.R;
+import com.pluscubed.plustimer.base.BasePresenterFragment;
+import com.pluscubed.plustimer.base.PresenterFactory;
 
 
 /**
  * Session tab
  */
-public class SolveListFragment extends Fragment implements SolveListView {
+public class SolveListFragment extends BasePresenterFragment<SolveListPresenter, SolveListView> implements SolveListView {
 
     public static final String TAG = "SOLVE_LIST_FRAGMENT";
-
-    private SolveListPresenter mPresenter;
-
-    /*private Session mSession;*/
-
-    //private TextView mQuickStats;
 
     private RecyclerView mRecyclerView;
     private SolveListAdapter mSolveListAdapter;
     private TextView mEmptyView;
-    /*private final ChildEventListener sessionObserver = new ChildEventListener() {
-        @Override
-        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-            onSessionSolvesChanged();
-        }
 
-        @Override
-        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-            onSessionSolvesChanged();
-
-            //TODO
-            *//*PuzzleType.getDataSource().updateSolve(PuzzleType.valueOf(mPuzzleTypeId).getSession(mSessionId).getSolveByPosition(index),
-                    PuzzleType.valueOf(mPuzzleTypeId),
-                    mSessionId,
-                    index);*//*
-        }
-
-        @Override
-        public void onChildRemoved(DataSnapshot dataSnapshot) {
-            onSessionSolvesChanged();
-        }
-
-        @Override
-        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-        }
-
-        @Override
-        public void onCancelled(FirebaseError firebaseError) {
-
-        }
-    };*/
-    /*private final ValueEventListener puzzleTypeObserver = new ValueEventListener() {
-        @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
-            onSessionSolvesChanged();
-            //TODO
-            *//*mSession.registerObserver(sessionObserver);*//*
-        }
-
-        @Override
-        public void onCancelled(FirebaseError firebaseError) {
-
-        }
-    };*/
     private ActionMode mActionMode;
     private LinearLayout mResetSubmitLinearLayout;
 
@@ -87,24 +38,10 @@ public class SolveListFragment extends Fragment implements SolveListView {
         return mSolveListAdapter;
     }
 
-    /*public static SolveListFragment newInstance(boolean current,
-                                                String puzzleTypeId,
-                                                String sessionId) {
-        SolveListFragment f = new SolveListFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_SESSION_ID, sessionId);
-        args.putString(ARG_PUZZLETYPE_ID, puzzleTypeId);
-        args.putBoolean(ARG_CURRENT_BOOLEAN, current);
-        f.setArguments(args);
-        return f;
-    }*/
-
     @Override
     public void onResume() {
         super.onResume();
         initSharedPrefs();
-
-        mPresenter.onResume();
 
         //TODO
         //When Settings change
@@ -117,9 +54,6 @@ public class SolveListFragment extends Fragment implements SolveListView {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mPresenter = new SolveListPresenter();
-        mPresenter.attachView(this);
-        mPresenter.onCreate(getArguments());
 
         setHasOptionsMenu(true);
     }
@@ -187,35 +121,8 @@ public class SolveListFragment extends Fragment implements SolveListView {
         View v = inflater.inflate(R.layout.fragment_solvelist, container, false);
         initSharedPrefs();
 
-        if (getPresenter().isCreateResetSubmitViews()) {
-            mResetSubmitLinearLayout = (LinearLayout) v
-                    .findViewById(R.id
-                            .fragment_solvelist_submit_reset_linearlayout);
-
-            Button reset = (Button) v.findViewById(R.id
-                    .fragment_solvelist_reset_button);
-            reset.setOnClickListener(view -> {
-                getPresenter().onResetButtonClicked();
-            });
-            Button submit = (Button) v.findViewById(R.id
-                    .fragment_solvelist_submit_button);
-            submit.setOnClickListener(view -> {
-                MaterialDialog.Builder builder = new MaterialDialog.Builder(getActivity());
-                builder.content(getString(R.string.submit_warning_message))
-                        .positiveText(R.string.submit)
-                        .negativeText(android.R.string.cancel)
-                        .onPositive((dialog, which) -> {
-                            getPresenter().onSubmitButtonClicked();
-                        });
-                builder.show();
-            });
-
-        }
-
         mRecyclerView = (RecyclerView) v.findViewById(R.id.fragment_solvelist_recyclerview);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mSolveListAdapter = mPresenter.newAdapter();
-        mRecyclerView.setAdapter(mSolveListAdapter);
 
         mEmptyView = (TextView) v.findViewById(android.R.id.empty);
 
@@ -271,6 +178,36 @@ public class SolveListFragment extends Fragment implements SolveListView {
         return v;
     }
 
+    @Override
+    public void setAdapter(SolveListAdapter adapter) {
+        mSolveListAdapter = adapter;
+        mRecyclerView.setAdapter(mSolveListAdapter);
+    }
+
+    @Override
+    public void addResetSubmitButtons() {
+        if (getView() != null) {
+            mResetSubmitLinearLayout = (LinearLayout)
+                    getView().findViewById(R.id.fragment_solvelist_submit_reset_linearlayout);
+
+            Button reset = (Button) getView().findViewById(R.id.fragment_solvelist_reset_button);
+            reset.setOnClickListener(view -> {
+                getPresenter().onResetButtonClicked();
+            });
+            Button submit = (Button) getView().findViewById(R.id.fragment_solvelist_submit_button);
+            submit.setOnClickListener(view -> {
+                MaterialDialog.Builder builder = new MaterialDialog.Builder(getActivity());
+                builder.content(getString(R.string.submit_warning_message))
+                        .positiveText(R.string.submit)
+                        .negativeText(android.R.string.cancel)
+                        .onPositive((dialog, which) -> {
+                            getPresenter().onSubmitButtonClicked();
+                        });
+                builder.show();
+            });
+        }
+    }
+
     public void showSessionSubmitted() {
         Toast.makeText(getActivity().getApplicationContext(),
                 getResources().getText(R.string.session_submitted),
@@ -297,13 +234,6 @@ public class SolveListFragment extends Fragment implements SolveListView {
                 Toast.LENGTH_SHORT).show();
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mPresenter.onDestroy();
-        mPresenter.detachView();
-    }
-
     public void enableResetSubmitButtons(boolean enable) {
         mResetSubmitLinearLayout.setVisibility(enable ? View.VISIBLE : View.GONE);
     }
@@ -312,6 +242,16 @@ public class SolveListFragment extends Fragment implements SolveListView {
     public void onPause() {
         super.onPause();
         //mPresenter.onPause();
+    }
+
+    @Override
+    protected PresenterFactory<SolveListPresenter> getPresenterFactory() {
+        return new SolveListPresenterFactory(getArguments());
+    }
+
+    @Override
+    protected void onPresenterPrepared(SolveListPresenter presenter) {
+
     }
 
 

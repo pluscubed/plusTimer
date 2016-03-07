@@ -1,4 +1,4 @@
-package com.pluscubed.plustimer.ui;
+package com.pluscubed.plustimer.ui.solvedialog;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;

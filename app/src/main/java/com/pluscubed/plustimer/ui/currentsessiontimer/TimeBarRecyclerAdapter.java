@@ -48,7 +48,7 @@ public class TimeBarRecyclerAdapter
         holder.textView.setText(timeString);
         for (Solve a : mBestAndWorstSolves) {
             if (a == s) {
-                holder.textView.setText("(" + timeString + ")");
+                holder.textView.setText(String.format("(%s)", timeString));
                 break;
             }
         }

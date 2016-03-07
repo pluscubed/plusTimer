@@ -165,7 +165,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
         setContentView(R.layout.activity_current_session);
 
         mPresenter = new CurrentSessionPresenter();
-        mPresenter.attachView(this);
+        mPresenter.onViewAttached(this);
 
         mPresenter.onCreate();
 
@@ -268,7 +268,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mPresenter.detachView();
+        mPresenter.onViewDetached();
     }
 
     @Override

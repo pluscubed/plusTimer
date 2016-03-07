@@ -538,7 +538,8 @@ public class HistorySessionListFragment extends ListFragment {
             Session session = getItem(position);
             TextView text = (TextView) convertView.findViewById(android.R.id
                     .text1);
-            text.setText(session.getTimestampString(getActivity()));
+            //TODO: Proper state & background threading
+            text.setText(session.getTimestampString(getActivity()).toBlocking().value());
 
             return convertView;
         }

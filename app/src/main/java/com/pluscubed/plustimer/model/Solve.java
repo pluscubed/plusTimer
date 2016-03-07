@@ -60,6 +60,7 @@ public class Solve extends CbObject implements Parcelable {
         super(context);
 
         init();
+        updateCb(context);
     }
 
     /**
@@ -175,7 +176,7 @@ public class Solve extends CbObject implements Parcelable {
 
     public Completable setPenaltyDeferred(Context context, @Penalty int penalty) {
         return Completable.fromCallable(() -> {
-            setPenaltyDeferred(context, penalty);
+            setPenalty(context, penalty);
             return null;
         });
     }
@@ -184,6 +185,7 @@ public class Solve extends CbObject implements Parcelable {
         return mTime;
     }
 
+    //TODO: Update database
     public void setRawTime(Context context, long time) throws CouchbaseLiteException, IOException {
         if (this.mTime != time) {
             this.mTime = time;
@@ -192,7 +194,7 @@ public class Solve extends CbObject implements Parcelable {
     }
 
     @Override
-    public void updateCb(Context context) throws CouchbaseLiteException, IOException {
+    public void updateCb(Context context) {
         if (mId != null) {
             super.updateCb(context);
         }
@@ -227,8 +229,53 @@ public class Solve extends CbObject implements Parcelable {
         return TYPE_SOLVE;
     }
 
+    @Override
+    public String toString() {
+        return "Solve{" +
+                "time=" + mTime +
+                ", scramble='" + mScramble + '\'' +
+                ", penalty=" + mPenalty +
+                ", timestamp=" + mTimestamp +
+                '}';
+    }
+
     @IntDef({PENALTY_DNF, PENALTY_PLUSTWO, PENALTY_NONE})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Penalty {
+    }
+
+    protected static class Builder {
+        protected Context context;
+        protected Solve solve;
+
+        protected Builder(Context context) {
+            solve = new Solve();
+            this.context = context;
+        }
+
+        protected Builder setRawTime(long time) {
+            solve.mTime = time;
+            return this;
+        }
+
+        protected Builder setTimestamp(long timestamp) {
+            solve.mTime = timestamp;
+            return this;
+        }
+
+        protected Builder setPenalty(@Penalty int penalty) {
+            solve.mPenalty = penalty;
+            return this;
+        }
+
+        protected Builder setScramble(String scramble) {
+            solve.mScramble = scramble;
+            return this;
+        }
+
+        protected Solve build() throws CouchbaseLiteException, IOException {
+            solve.connectCb(context);
+            return solve;
+        }
     }
 }

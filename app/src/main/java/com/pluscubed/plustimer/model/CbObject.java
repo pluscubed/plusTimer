@@ -9,9 +9,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pluscubed.plustimer.App;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
+import hugo.weaving.DebugLog;
+import rx.Completable;
 import rx.Single;
+import rx.schedulers.Schedulers;
 
 @JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE,
         fieldVisibility = JsonAutoDetect.Visibility.NONE,
@@ -20,6 +24,8 @@ import rx.Single;
         setterVisibility = JsonAutoDetect.Visibility.NONE
 )
 public abstract class CbObject {
+    private static final ObjectMapper sMapper = new ObjectMapper();
+    private static final Map<String, CbObject> sUpdatingObjects = new HashMap<>();
     protected String mId;
 
     protected CbObject() {
@@ -36,14 +42,24 @@ public abstract class CbObject {
         connectCb(context);
     }
 
-    public static <T extends CbObject> T fromDocId(Context context, String docId, Class<T> type) throws CouchbaseLiteException, IOException {
+    static <T extends CbObject> T fromDocId(Context context, String docId, Class<T> type) throws CouchbaseLiteException, IOException {
+        if (sUpdatingObjects.containsKey(docId)) {
+            return (T) sUpdatingObjects.get(docId);
+        }
+
         Document doc = App.getDatabase(context).getDocument(docId);
         return fromDoc(doc, type);
     }
 
-    public static <T extends CbObject> T fromDoc(Document doc, Class<T> type) {
+    static <T extends CbObject> T fromDoc(Document doc, Class<T> type) {
+        if (sUpdatingObjects.containsKey(doc.getId())) {
+            return (T) sUpdatingObjects.get(doc.getId());
+        }
+
         ObjectMapper mapper = new ObjectMapper();
-        T cbObject = mapper.convertValue(doc.getUserProperties(), type);
+        Map<String, Object> userProperties = doc.getUserProperties();
+        userProperties.remove("type");
+        T cbObject = mapper.convertValue(userProperties, type);
 
         cbObject.mId = doc.getId();
 
@@ -57,10 +73,30 @@ public abstract class CbObject {
         updateCb(context);
     }
 
-    protected void updateCb(Context context) throws CouchbaseLiteException, IOException {
-        getDocument(context).putProperties(toMap());
+    @DebugLog
+    protected void updateCb(Context context) {
+        sUpdatingObjects.put(mId, this);
+
+        Completable.fromCallable(() -> {
+            Document document = getDocument(context);
+
+            document.update(newRevision -> {
+                Map<String, Object> userProperties = newRevision.getUserProperties();
+                userProperties.putAll(toMap());
+
+                newRevision.setUserProperties(userProperties);
+                return true;
+            });
+
+            sUpdatingObjects.remove(mId);
+
+            return null;
+        }).subscribeOn(Schedulers.io())
+                .subscribe();
+
     }
 
+    @DebugLog
     public Document getDocument(Context context) throws CouchbaseLiteException, IOException {
         return App.getDatabase(context).getDocument(mId);
     }
@@ -69,9 +105,9 @@ public abstract class CbObject {
         return Single.defer(() -> Single.just(getDocument(context)));
     }
 
-    public Map<String, Object> toMap() throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        Map<String, Object> objectMap = mapper.convertValue(this, Map.class);
+    @DebugLog
+    public Map<String, Object> toMap() {
+        Map<String, Object> objectMap = sMapper.convertValue(this, Map.class);
 
         objectMap.put("type", getType());
 
