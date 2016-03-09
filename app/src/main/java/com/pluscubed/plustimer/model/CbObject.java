@@ -1,6 +1,7 @@
 package com.pluscubed.plustimer.model;
 
 import android.content.Context;
+import android.support.annotation.WorkerThread;
 
 import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Document;
@@ -12,7 +13,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import hugo.weaving.DebugLog;
 import rx.Completable;
 import rx.Single;
 import rx.schedulers.Schedulers;
@@ -38,6 +38,7 @@ public abstract class CbObject {
      * @throws CouchbaseLiteException
      * @throws IOException
      */
+    @WorkerThread
     protected CbObject(Context context) throws CouchbaseLiteException, IOException {
         connectCb(context);
     }
@@ -73,7 +74,6 @@ public abstract class CbObject {
         updateCb(context);
     }
 
-    @DebugLog
     protected void updateCb(Context context) {
         sUpdatingObjects.put(mId, this);
 
@@ -96,7 +96,6 @@ public abstract class CbObject {
 
     }
 
-    @DebugLog
     public Document getDocument(Context context) throws CouchbaseLiteException, IOException {
         return App.getDatabase(context).getDocument(mId);
     }
@@ -105,7 +104,6 @@ public abstract class CbObject {
         return Single.defer(() -> Single.just(getDocument(context)));
     }
 
-    @DebugLog
     public Map<String, Object> toMap() {
         Map<String, Object> objectMap = sMapper.convertValue(this, Map.class);
 

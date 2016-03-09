@@ -50,10 +50,6 @@ public class SolveListPresenter extends Presenter<SolveListView> {
     public void onViewAttached(SolveListView view) {
         super.onViewAttached(view);
 
-        if (mIsCurrent) {
-            view.addResetSubmitButtons();
-        }
-
         mAdapterInitialized = false;
         if (PuzzleType.isInitialized()) {
             setInitialized(PuzzleType.getCurrentId(), PuzzleType.getCurrent().getCurrentSessionId());

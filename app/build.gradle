@@ -2,7 +2,6 @@ buildscript {
     repositories {
         maven { url 'https://maven.fabric.io/public' }
         maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
-        maven { url "http://files.couchbase.com/maven2/" }
         jcenter()
     }
 
@@ -113,6 +112,8 @@ dependencies {
     //compile 'com.firebaseui:firebase-ui:0.3.1'
 
     compile 'com.couchbase.lite:couchbase-lite-android:1.2.0'
+    compile 'com.couchbase.lite:couchbase-lite-android-forestdb:1.2.0'
+
 
     compile 'io.reactivex:rxandroid:1.1.0'
     compile 'io.reactivex:rxjava:1.1.1'

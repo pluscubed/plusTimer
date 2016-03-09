@@ -121,6 +121,25 @@ public class SolveListFragment extends BasePresenterFragment<SolveListPresenter,
         View v = inflater.inflate(R.layout.fragment_solvelist, container, false);
         initSharedPrefs();
 
+        mResetSubmitLinearLayout = (LinearLayout)
+                v.findViewById(R.id.fragment_solvelist_submit_reset_linearlayout);
+
+        Button reset = (Button) v.findViewById(R.id.fragment_solvelist_reset_button);
+        reset.setOnClickListener(view -> {
+            getPresenter().onResetButtonClicked();
+        });
+        Button submit = (Button) v.findViewById(R.id.fragment_solvelist_submit_button);
+        submit.setOnClickListener(view -> {
+            MaterialDialog.Builder builder = new MaterialDialog.Builder(getActivity());
+            builder.content(getString(R.string.submit_warning_message))
+                    .positiveText(R.string.submit)
+                    .negativeText(android.R.string.cancel)
+                    .onPositive((dialog, which) -> {
+                        getPresenter().onSubmitButtonClicked();
+                    });
+            builder.show();
+        });
+
         mRecyclerView = (RecyclerView) v.findViewById(R.id.fragment_solvelist_recyclerview);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
@@ -182,30 +201,6 @@ public class SolveListFragment extends BasePresenterFragment<SolveListPresenter,
     public void setAdapter(SolveListAdapter adapter) {
         mSolveListAdapter = adapter;
         mRecyclerView.setAdapter(mSolveListAdapter);
-    }
-
-    @Override
-    public void addResetSubmitButtons() {
-        if (getView() != null) {
-            mResetSubmitLinearLayout = (LinearLayout)
-                    getView().findViewById(R.id.fragment_solvelist_submit_reset_linearlayout);
-
-            Button reset = (Button) getView().findViewById(R.id.fragment_solvelist_reset_button);
-            reset.setOnClickListener(view -> {
-                getPresenter().onResetButtonClicked();
-            });
-            Button submit = (Button) getView().findViewById(R.id.fragment_solvelist_submit_button);
-            submit.setOnClickListener(view -> {
-                MaterialDialog.Builder builder = new MaterialDialog.Builder(getActivity());
-                builder.content(getString(R.string.submit_warning_message))
-                        .positiveText(R.string.submit)
-                        .negativeText(android.R.string.cancel)
-                        .onPositive((dialog, which) -> {
-                            getPresenter().onSubmitButtonClicked();
-                        });
-                builder.show();
-            });
-        }
     }
 
     public void showSessionSubmitted() {

@@ -27,7 +27,9 @@ import net.gnehzr.tnoodle.utils.LazyInstantiatorException;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import rx.Completable;
@@ -141,6 +143,10 @@ public class PuzzleType extends CbObject {
     }
 
     public synchronized static Completable initialize(Context context) {
+        if (sInitialized) {
+            return Completable.complete();
+        }
+
         try {
             if (sPuzzleTypes == null) {
                 sPuzzleTypes = new ArrayList<>();
@@ -155,21 +161,23 @@ public class PuzzleType extends CbObject {
                     }
                 }, "1");
 
+                Completable completable;
                 if (savedVersionCode < 24) {
-                    savePuzzleTypesFirstRun(context);
+                    completable = savePuzzleTypesFirstRunAsync(context);
+                } else {
+                    completable = initializePuzzleTypes(database);
                 }
 
-                return initializePuzzleTypes(database)
-                        .doOnComplete(() -> {
-                            for (PuzzleType puzzleType : sPuzzleTypes) {
-                                //TODO: upgrade database
-                                //puzzleType.upgradeDatabase(context);
-                            }
+                return completable.doOnComplete(() -> {
+                    for (PuzzleType puzzleType : sPuzzleTypes) {
+                        //TODO: upgrade database
+                        //puzzleType.upgradeDatabase(context);
+                    }
 
-                            PrefUtils.saveVersionCode(context);
+                    PrefUtils.saveVersionCode(context);
 
-                            sInitialized = true;
-                        });
+                    sInitialized = true;
+                });
             } else {
                 return Completable.complete();
             }
@@ -201,9 +209,14 @@ public class PuzzleType extends CbObject {
         }).subscribeOn(Schedulers.io());
     }
 
-    @WorkerThread
-    private static void savePuzzleTypesFirstRun(Context context) throws CouchbaseLiteException, IOException {
+    private static Completable savePuzzleTypesFirstRunAsync(Context context) {
+        return Completable.fromCallable(() -> {
+            savePuzzleTypesFirstRun(context);
+            return null;
+        }).subscribeOn(Schedulers.io());
+    }
 
+    private static void savePuzzleTypesFirstRun(Context context) throws CouchbaseLiteException, IOException {
         //Generate default puzzle types from this...
         String[] scramblers = context.getResources().getStringArray(R.array.scramblers);
         //and this, with the appropriate UI names...
@@ -261,7 +274,13 @@ public class PuzzleType extends CbObject {
                 sCurrentTypeId = newPuzzleType.getId();
                 newPuzzleType.newSession(context);
             }
+
+            sPuzzleTypes.add(newPuzzleType);
         }
+
+        Collections.sort(sPuzzleTypes,
+                (lhs, rhs) -> Collator.getInstance().compare(lhs.getName(), rhs.getName()));
+
     }
 
     private Session newSession(Context context) throws IOException, CouchbaseLiteException {

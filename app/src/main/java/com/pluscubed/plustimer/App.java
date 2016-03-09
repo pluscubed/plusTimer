@@ -5,6 +5,7 @@ import android.content.Context;
 
 import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;
+import com.couchbase.lite.DatabaseOptions;
 import com.couchbase.lite.Manager;
 import com.couchbase.lite.android.AndroidContext;
 import com.crashlytics.android.Crashlytics;
@@ -21,8 +22,11 @@ public class App extends Application {
 
     public static Database getDatabase(Context context) throws CouchbaseLiteException, IOException {
         if (sDatabase == null) {
+            DatabaseOptions options = new DatabaseOptions();
+            options.setCreate(true);
+            options.setStorageType(Manager.FORESTDB_STORAGE);
             Manager manager = new Manager(new AndroidContext(context.getApplicationContext()), Manager.DEFAULT_OPTIONS);
-            sDatabase = manager.getDatabase(DB_SOLVES);
+            sDatabase = manager.openDatabase(DB_SOLVES, options);
         }
         return sDatabase;
     }

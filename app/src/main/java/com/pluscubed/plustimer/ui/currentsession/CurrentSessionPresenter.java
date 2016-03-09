@@ -24,6 +24,8 @@ public class CurrentSessionPresenter extends Presenter<CurrentSessionView> {
 
                             if (getView().getCurrentSessionTimerFragment() != null) {
                                 getView().getCurrentSessionTimerFragment().getPresenter().setInitialized();
+                            }
+                            if(getView().getSolveListFragment()!=null){
                                 getView().getSolveListFragment().getPresenter()
                                         .setInitialized(PuzzleType.getCurrentId(),
                                                 PuzzleType.getCurrent().getCurrentSessionId());

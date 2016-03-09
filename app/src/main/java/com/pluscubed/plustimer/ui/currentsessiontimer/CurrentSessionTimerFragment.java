@@ -18,6 +18,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
+import android.support.v4.view.animation.FastOutLinearInInterpolator;
+import android.support.v4.view.animation.LinearOutSlowInInterpolator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -380,6 +382,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
                 });
 
         buildStatsWithAveragesOf(getActivity(), 5, 12, 100)
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new SingleSubscriber<String>() {
                     @Override
                     public void onSuccess(String stats) {
@@ -392,8 +395,8 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
                     }
                 });
 
-        if (!mTiming && !mInspecting && solve != null) {
-            if (mode == RecyclerViewUpdate.INSERT) {
+        if (!mTiming && !mInspecting) {
+            if (solve != null && mode == RecyclerViewUpdate.INSERT) {
                 setTimerTextFromSolve(solve);
             } else {
                 invalidateTimerText();
@@ -968,7 +971,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         ObjectAnimator enter = ObjectAnimator.ofFloat(mDynamicStatusBarFrame, View.TRANSLATION_Y,
                 0f);
         enter.setDuration(125);
-        enter.setInterpolator(new DecelerateInterpolator());
+        enter.setInterpolator(new LinearOutSlowInInterpolator());
         AnimatorSet dynamicStatusBarAnimatorSet = new AnimatorSet();
         dynamicStatusBarAnimatorSet.play(enter);
         dynamicStatusBarAnimatorSet.addListener(new Animator.AnimatorListener() {
@@ -1002,7 +1005,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         ObjectAnimator exit = ObjectAnimator.ofFloat(mDynamicStatusBarFrame, View.TRANSLATION_Y,
                 mDynamicStatusBarFrame.getHeight());
         exit.setDuration(125);
-        exit.setInterpolator(new AccelerateInterpolator());
+        exit.setInterpolator(new FastOutLinearInInterpolator());
         AnimatorSet dynamicStatusBarAnimatorSet = new AnimatorSet();
         dynamicStatusBarAnimatorSet.play(exit);
         dynamicStatusBarAnimatorSet.start();
@@ -1050,7 +1053,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         mLastPlusTwoButton.setEnabled(false);
         ObjectAnimator exit = ObjectAnimator.ofFloat(mLastBarLinearLayout, View.TRANSLATION_Y, 0f);
         exit.setDuration(125);
-        exit.setInterpolator(new AccelerateInterpolator());
+        exit.setInterpolator(new LinearOutSlowInInterpolator());
         AnimatorSet lastBarAnimationSet = new AnimatorSet();
         lastBarAnimationSet.addListener(new AnimatorListenerAdapter() {
             @Override
@@ -1072,7 +1075,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         mScrambleAnimator = ObjectAnimator.ofFloat(mScrambleText, View.TRANSLATION_Y,
                 -mScrambleText.getHeight());
         mScrambleAnimator.setDuration(300);
-        mScrambleAnimator.setInterpolator(new AccelerateInterpolator());
+        mScrambleAnimator.setInterpolator(new FastOutLinearInInterpolator());
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP) {
             mScrambleAnimator.addUpdateListener(animation -> mScrambleTextShadow.setTranslationY((int) (float) animation.getAnimatedValue()));
         }
@@ -1086,7 +1089,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         }
         mScrambleAnimator = ObjectAnimator.ofFloat(mScrambleText, View.TRANSLATION_Y, 0f);
         mScrambleAnimator.setDuration(300);
-        mScrambleAnimator.setInterpolator(new DecelerateInterpolator());
+        mScrambleAnimator.setInterpolator(new LinearOutSlowInInterpolator());
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP) {
             mScrambleAnimator.addUpdateListener(animation -> mScrambleTextShadow.setTranslationY((int) (float) animation.getAnimatedValue()));
         }

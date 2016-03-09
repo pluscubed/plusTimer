@@ -13,12 +13,12 @@ import android.support.annotation.NonNull;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v4.view.animation.FastOutLinearInInterpolator;
+import android.support.v4.view.animation.LinearOutSlowInInterpolator;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
@@ -83,7 +83,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
         ObjectAnimator exit = ObjectAnimator.ofFloat(toolbar, View.TRANSLATION_Y,
                 -toolbar.getHeight());
         exit.setDuration(300);
-        exit.setInterpolator(new AccelerateInterpolator());
+        exit.setInterpolator(new FastOutLinearInInterpolator());
         exit.addUpdateListener(animation -> {
             LinearLayout.LayoutParams params =
                     (LinearLayout.LayoutParams) layout.getLayoutParams();
@@ -108,7 +108,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
 
         ObjectAnimator exit = ObjectAnimator.ofFloat(toolbar, View.TRANSLATION_Y, 0f);
         exit.setDuration(300);
-        exit.setInterpolator(new DecelerateInterpolator());
+        exit.setInterpolator(new LinearOutSlowInInterpolator());
         exit.addUpdateListener(animation -> {
             LinearLayout.LayoutParams params =
                     (LinearLayout.LayoutParams) layout.getLayoutParams();
@@ -257,7 +257,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
 
     void queueInvalidateOptionsMenu() {
         if (!isNavDrawerOpen()) {
-            invalidateOptionsMenu();
+            supportInvalidateOptionsMenu();
         } else {
             // Workaround for weird bug where calling invalidateOptionsMenu()
             // while nav drawer is open doesn't call onCreateOptionsMenu()
@@ -305,7 +305,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
         }
         getMenuInflater().inflate(R.menu.menu_current_session, menu);
 
-        if (PuzzleType.getCurrentId() != null) {
+        if (PuzzleType.isInitialized()) {
             final Spinner menuPuzzleSpinner = (Spinner) MenuItemCompat
                     .getActionView(menu.findItem(R.id.menu_activity_current_session_puzzletype_spinner));
             //noinspection ConstantConditions

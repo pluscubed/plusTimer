@@ -16,8 +16,6 @@ public interface SolveListView {
 
     void setAdapter(SolveListAdapter adapter);
 
-    void addResetSubmitButtons();
-
     void showSessionSubmitted();
 
     void showSessionResetToast();
