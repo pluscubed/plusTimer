@@ -11,8 +11,6 @@ import rx.android.schedulers.AndroidSchedulers;
 
 public class CurrentSessionPresenter extends Presenter<CurrentSessionView> {
 
-    private boolean mInitialized;
-
     public void onCreate() {
         PuzzleType.initialize(getView().getContextCompat())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -20,8 +18,6 @@ public class CurrentSessionPresenter extends Presenter<CurrentSessionView> {
                     @Override
                     public void onCompleted() {
                         if (isViewAttached()) {
-                            mInitialized = true;
-
                             if (getView().getCurrentSessionTimerFragment() != null) {
                                 getView().getCurrentSessionTimerFragment().getPresenter().setInitialized();
                             }

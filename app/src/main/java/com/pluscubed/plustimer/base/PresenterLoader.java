@@ -2,25 +2,21 @@ package com.pluscubed.plustimer.base;
 
 import android.content.Context;
 import android.content.Loader;
-import android.util.Log;
 
 public final class PresenterLoader<T extends Presenter> extends Loader<T> {
 
     private final PresenterFactory<T> factory;
-    private final String tag;
     private T presenter;
 
-    public PresenterLoader(Context context, PresenterFactory<T> factory, String tag) {
+    public PresenterLoader(Context context, PresenterFactory<T> factory) {
         super(context);
         this.factory = factory;
-        this.tag = tag;
     }
 
     @Override
     protected void onStartLoading() {
-        Log.i("loader", "onStartLoading-" + tag);
 
-        // if we already own a mPresenter instance, simply deliver it.
+        // if we already own a presenter instance, simply deliver it.
         if (presenter != null) {
             deliverResult(presenter);
             return;
@@ -32,7 +28,6 @@ public final class PresenterLoader<T extends Presenter> extends Loader<T> {
 
     @Override
     protected void onForceLoad() {
-        Log.i("loader", "onForceLoad-" + tag);
 
         // Create the Presenter using the Factory
         presenter = factory.create();
@@ -44,17 +39,14 @@ public final class PresenterLoader<T extends Presenter> extends Loader<T> {
     @Override
     public void deliverResult(T data) {
         super.deliverResult(data);
-        Log.i("loader", "deliverResult-" + tag);
     }
 
     @Override
     protected void onStopLoading() {
-        Log.i("loader", "onStopLoading-" + tag);
     }
 
     @Override
     protected void onReset() {
-        Log.i("loader", "onReset-" + tag);
         if (presenter != null) {
             presenter.onDestroyed();
             presenter = null;

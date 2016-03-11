@@ -6,7 +6,6 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
@@ -43,11 +42,13 @@ import com.caverock.androidsvg.SVG;
 import com.caverock.androidsvg.SVGParseException;
 import com.couchbase.lite.CouchbaseLiteException;
 import com.pluscubed.plustimer.R;
+import com.pluscubed.plustimer.base.BasePresenterFragment;
+import com.pluscubed.plustimer.base.PresenterFactory;
+import com.pluscubed.plustimer.base.RecyclerViewUpdate;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.ScrambleAndSvg;
 import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
-import com.pluscubed.plustimer.ui.RecyclerViewUpdate;
 import com.pluscubed.plustimer.utils.PrefUtils;
 import com.pluscubed.plustimer.utils.Utils;
 
@@ -66,7 +67,8 @@ import rx.android.schedulers.AndroidSchedulers;
  * TimerFragment
  */
 
-public class CurrentSessionTimerFragment extends Fragment implements CurrentSessionTimerView {
+public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSessionTimerPresenter, CurrentSessionTimerView>
+        implements CurrentSessionTimerView {
 
     public static final String TAG = "CS_TIMER_FRAGMENT";
     private static final long HOLD_TIME = 550000000L;
@@ -76,8 +78,6 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
     private static final String STATE_RUNNING = "running_boolean";
     private static final String STATE_INSPECTING = "inspecting_boolean";
     private static final String STATE_INSPECTION_START_TIME = "inspection_start_time_long";
-
-    private CurrentSessionTimerPresenter mPresenter;
 
     //Preferences
     private boolean mHoldToStartEnabled;
@@ -163,18 +163,16 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
     private final Runnable inspectionRunnable = new Runnable() {
         @Override
         public void run() {
-            String[] array = Utils.timeStringsFromNsSplitByDecimal
-                    (16000000000L - (System.nanoTime() -
-                            mInspectionStartTimestamp), mMillisecondsEnabled);
+            String[] array = Utils.timeStringsFromNsSplitByDecimal(
+                    16000000000L - (System.nanoTime() - mInspectionStartTimestamp),
+                    mMillisecondsEnabled);
             array[1] = "";
 
-            if (15000000000L - (System.nanoTime() -
-                    mInspectionStartTimestamp) > 0) {
+            if (15000000000L - (System.nanoTime() - mInspectionStartTimestamp) > 0) {
                 //If inspection proceeding normally
                 setTimerText(array);
             } else {
-                if (17000000000L - (System.nanoTime() -
-                        mInspectionStartTimestamp) > 0) {
+                if (17000000000L - (System.nanoTime() - mInspectionStartTimestamp) > 0) {
                     //If late start
                     mLateStartPenalty = true;
                     setTimerText(new String[]{"+2", ""});
@@ -198,7 +196,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
 
                     //Add the solve to the current session with the current
                     // scramble/scramble image and DNF
-                    mPresenter.onTimingFinished(s);
+                    //mPresenter.onTimingFinished(s);
 
                     resetTimer();
                     invalidateTimerText();
@@ -217,12 +215,13 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
             mUiHandler.postDelayed(this, REFRESH_RATE);
         }
     };
+    private TimeBarRecyclerAdapter mTimeBarAdapter;
 
     //TODO
     public void onNewSession() {
-        updateStatsAndTimerText(null, RecyclerViewUpdate.DATA_RESET);
+        updateStatsAndTimerText(RecyclerViewUpdate.DATA_RESET, null);
         TimeBarRecyclerAdapter adapter = (TimeBarRecyclerAdapter) mTimeBarRecycler.getAdapter();
-        adapter.notifyChange(null, RecyclerViewUpdate.REMOVE_ALL);
+        adapter.notifyChange(RecyclerViewUpdate.REMOVE_ALL, null);
     }
 
     //Generate string with specified current averages and mean of current session
@@ -247,6 +246,10 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
 
                     return s;
                 });
+    }
+
+    public CurrentSessionTimerPresenter getPresenter() {
+        return presenter;
     }
 
     /**
@@ -356,15 +359,15 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
     }
 
     void onPuzzleTypeChanged() {
-        updateStatsAndTimerText(null, RecyclerViewUpdate.DATA_RESET);
+        updateStatsAndTimerText(RecyclerViewUpdate.DATA_RESET, null);
 
         //Update RecyclerView
         TimeBarRecyclerAdapter adapter = (TimeBarRecyclerAdapter) mTimeBarRecycler.getAdapter();
-        adapter.notifyChange(null, RecyclerViewUpdate.DATA_RESET);
+        adapter.notifyChange(RecyclerViewUpdate.DATA_RESET, null);
     }
 
     @Override
-    public void updateStatsAndTimerText(Solve solve, RecyclerViewUpdate mode) {
+    public void updateStatsAndTimerText(RecyclerViewUpdate mode, Solve solve) {
         //Update stats
         PuzzleType.getCurrent().getCurrentSessionDeferred(getActivity())
                 .map(Session::getNumberOfSolves)
@@ -420,9 +423,6 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-
-        mPresenter = new CurrentSessionTimerPresenter();
-        mPresenter.onViewAttached(this);
 
         //TODO
         /*PuzzleType.getCurrentId().(puzzleTypeObserver);
@@ -537,7 +537,8 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         //timeBarLayoutManager.setStackFromEnd(true);
         mTimeBarRecycler.setLayoutManager(timeBarLayoutManager);
         mTimeBarRecycler.setHasFixedSize(true);
-        mTimeBarRecycler.setAdapter(new TimeBarRecyclerAdapter(this));
+        mTimeBarAdapter = new TimeBarRecyclerAdapter(getActivity(), savedInstanceState);
+        mTimeBarRecycler.setAdapter(mTimeBarAdapter);
 
         mDynamicStatusBarFrame = (FrameLayout) v.findViewById(R.id.fragment_current_session_timer_dynamic_status_frame);
         mDynamicStatusBarText = (TextView) v.findViewById(R.id.fragment_current_session_timer_dynamic_status_text);
@@ -580,8 +581,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
             }
             if (mInspecting || mTiming || !mRetainedFragment.isScrambling()) {
                 // If timer is timing/inspecting, then update text/image to
-                // current. If timer is
-                // not timing/inspecting and not scrambling,
+                // current. If timer is not timing/inspecting and not scrambling,
                 // then update scramble views to current.
                 setScrambleTextAndImageToCurrent();
             } else {
@@ -600,10 +600,6 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         //onPuzzleTypeChanged();
 
         return v;
-    }
-
-    public CurrentSessionTimerPresenter getPresenter() {
-        return mPresenter;
     }
 
     @Override
@@ -638,11 +634,24 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
 
         mScrambleText.setTextSize(mScrambleTextSize);
 
-        mPresenter.onResume();
-
         //TODO
         //When Settings change
         //onPuzzleTypeChanged();
+    }
+
+    @Override
+    protected PresenterFactory<CurrentSessionTimerPresenter> getPresenterFactory() {
+        return new CurrentSessionTimerPresenter.Factory();
+    }
+
+    @Override
+    protected void onPresenterPrepared(CurrentSessionTimerPresenter presenter) {
+        mTimeBarAdapter.onPresenterPrepared(presenter);
+    }
+
+    @Override
+    protected void onPresenterDestroyed() {
+        mTimeBarAdapter.onPresenterDestroyed();
     }
 
     @Override
@@ -652,18 +661,21 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         //PuzzleType.getCurrentId().saveCurrentSession(getActivity());
         stopHoldTimer();
 
-        //mPresenter.onPause();
+        //presenter.onPause();
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
+
+        mTimeBarAdapter.onSaveInstanceState(outState);
+
         outState.putBoolean(STATE_IMAGE_DISPLAYED, mScrambleImageDisplay);
         outState.putLong(STATE_START_TIME, mTimingStartTimestamp);
         outState.putBoolean(STATE_RUNNING, mTiming);
         outState.putBoolean(STATE_INSPECTING, mInspecting);
-        outState.putLong(STATE_INSPECTION_START_TIME,
-                mInspectionStartTimestamp);
+        outState.putLong(STATE_INSPECTION_START_TIME, mInspectionStartTimestamp);
+
+        super.onSaveInstanceState(outState);
     }
 
     public void scrollRecyclerView(int position) {
@@ -681,10 +693,6 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
         //When destroyed, stop timer runnable
         mUiHandler.removeCallbacksAndMessages(null);
         mRetainedFragment.setTargetFragment(null, 0);
-
-
-        mPresenter.onDestroy();
-        mPresenter.onViewDetached();
 
         //TODO
         /*PuzzleType.getCurrentId().getCurrentSession()
@@ -855,7 +863,7 @@ public class CurrentSessionTimerFragment extends Fragment implements CurrentSess
 
             //Add the solve to the current session with the
             // current scramble/scramble image and time
-            mPresenter.onTimingFinished(s);
+            //g.onTimingFinished(s);
 
 
             playLastBarEnterAnimation();

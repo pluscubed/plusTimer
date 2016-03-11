@@ -23,10 +23,10 @@ import android.widget.TextView;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.couchbase.lite.CouchbaseLiteException;
 import com.pluscubed.plustimer.R;
+import com.pluscubed.plustimer.base.RecyclerViewUpdate;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
-import com.pluscubed.plustimer.ui.RecyclerViewUpdate;
 import com.pluscubed.plustimer.utils.PrefUtils;
 import com.pluscubed.plustimer.utils.ThemeUtils;
 import com.pluscubed.plustimer.utils.Utils;
@@ -175,8 +175,7 @@ public class SolveDialogFragment extends DialogFragment {
         });
 
         //TIME EDITTEXT SETUP
-        mTimeEdit = (EditText) v.findViewById(R.id
-                .dialog_solve_time_edittext);
+        mTimeEdit = (EditText) v.findViewById(R.id.dialog_solve_time_edittext);
         if (!mAddMode) {
             mTimeEdit.setText(Utils.timeStringSecondsFromNs(mSolveCopy.getRawTime(),
                     mMillisecondsEnabled));

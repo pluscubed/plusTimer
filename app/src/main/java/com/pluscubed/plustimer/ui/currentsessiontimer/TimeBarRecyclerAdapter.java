@@ -1,37 +1,58 @@
 package com.pluscubed.plustimer.ui.currentsessiontimer;
 
+import android.content.Context;
+import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.pluscubed.plustimer.R;
-import com.pluscubed.plustimer.model.PuzzleType;
+import com.pluscubed.plustimer.base.RecyclerViewUpdate;
 import com.pluscubed.plustimer.model.Solve;
-import com.pluscubed.plustimer.ui.RecyclerViewUpdate;
 import com.pluscubed.plustimer.utils.PrefUtils;
-import com.pluscubed.plustimer.utils.SolveDialogUtils;
 import com.pluscubed.plustimer.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class TimeBarRecyclerAdapter
-        extends RecyclerView.Adapter<TimeBarRecyclerAdapter.ViewHolder> {
+public class TimeBarRecyclerAdapter extends RecyclerView.Adapter<TimeBarRecyclerAdapter.ViewHolder>
+        implements TimeBarRecyclerAdapterView {
 
-    //TODO: WeakReference? Check for leaks
-    private final CurrentSessionTimerView mView;
+    private static final String STATE_SOLVES = "state_solves";
+    private static final String STATE_BESTWORST = "state_bestandworstsolves";
+    private static final String STATE_INITIALIZED = "state_initialized";
     private final Solve[] mBestAndWorstSolves;
+    private Context mContext;
     private List<Solve> mSolves;
     private boolean mMillisecondsEnabled;
 
-    public TimeBarRecyclerAdapter(CurrentSessionTimerView view) {
-        mView = view;
-        mBestAndWorstSolves = new Solve[2];
-        mSolves = new ArrayList<>();
+    private CurrentSessionTimerPresenter mPresenter;
+
+    private boolean mInitialized;
+
+    public TimeBarRecyclerAdapter(Context view, Bundle savedInstanceState) {
+        mContext = view;
+
+        if (savedInstanceState != null) {
+            mBestAndWorstSolves = (Solve[]) savedInstanceState.getParcelableArray(STATE_BESTWORST);
+            mSolves = savedInstanceState.getParcelableArrayList(STATE_SOLVES);
+            mInitialized = savedInstanceState.getBoolean(STATE_INITIALIZED);
+        } else {
+            mBestAndWorstSolves = new Solve[2];
+            mSolves = new ArrayList<>();
+            mInitialized = false;
+        }
+
+        updateMillisecondsMode();
 
         setHasStableIds(true);
+    }
+
+    @Override
+    public boolean isInitialized() {
+        return mInitialized;
     }
 
     @Override
@@ -64,12 +85,7 @@ public class TimeBarRecyclerAdapter
         return mSolves.get(position).getId().hashCode();
     }
 
-    public void initialize(List<Solve> solves) {
-        mSolves = solves;
-    }
-
-    public void notifyChange(Solve solve, RecyclerViewUpdate mode) {
-        mMillisecondsEnabled = PrefUtils.isDisplayMillisecondsEnabled(mView.getContextCompat());
+    public void notifyChange(RecyclerViewUpdate mode, Solve solve) {
 
         int oldSize = mSolves.size();
 
@@ -78,14 +94,10 @@ public class TimeBarRecyclerAdapter
         switch (mode) {
             case DATA_RESET:
                 notifyDataSetChanged();
-                if (mSolves.size() >= 1)
-                    mView.scrollRecyclerView(mSolves.size() - 1);
                 break;
             case INSERT:
                 mSolves.add(solve);
                 notifyItemInserted(mSolves.size() - 1);
-                if (mSolves.size() >= 1)
-                    mView.scrollRecyclerView(mSolves.size() - 1);
                 break;
             case REMOVE:
                 mSolves.remove(solve);
@@ -125,19 +137,53 @@ public class TimeBarRecyclerAdapter
         }
     }
 
+    @Override
+    public void scrollRecyclerViewToLast(CurrentSessionTimerView view) {
+        if (mSolves.size() >= 1)
+            view.scrollRecyclerView(mSolves.size() - 1);
+    }
+
+    @Override
+    public void updateMillisecondsMode() {
+        boolean millisecondsWasEnabled = mMillisecondsEnabled;
+
+        mMillisecondsEnabled = PrefUtils.isDisplayMillisecondsEnabled(mContext);
+
+        if (mMillisecondsEnabled != millisecondsWasEnabled) {
+            notifyItemRangeChanged(0, mSolves.size());
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArray(STATE_BESTWORST, mBestAndWorstSolves);
+        outState.putParcelableArrayList(STATE_SOLVES, (ArrayList<Solve>) mSolves);
+        outState.putBoolean(STATE_INITIALIZED, mInitialized);
+    }
+
+    public void onPresenterPrepared(CurrentSessionTimerPresenter presenter) {
+        mPresenter = presenter;
+    }
+
+    public void onPresenterDestroyed() {
+        mPresenter = null;
+    }
+
+    @Override
+    public void setSolves(List<Solve> solves) {
+        mSolves = solves;
+        mInitialized = true;
+    }
+
     class ViewHolder extends RecyclerView.ViewHolder {
         public TextView textView;
 
         public ViewHolder(TextView v) {
             super(v);
             textView = v;
-            textView.setOnClickListener(v1 -> SolveDialogUtils.createSolveDialog(
-                    mView.getContextCompat(),
-                    false,
-                    PuzzleType.getCurrent().getId(),
-                    PuzzleType.getCurrent().getCurrentSessionId(),
-                    mSolves.get(getAdapterPosition())
-            ));
+            textView.setOnClickListener(v1 ->
+                    mPresenter.onSolveClicked(mSolves.get(getAdapterPosition()))
+            );
         }
     }
 

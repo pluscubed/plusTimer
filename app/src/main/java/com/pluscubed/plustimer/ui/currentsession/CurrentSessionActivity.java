@@ -36,6 +36,7 @@ import com.pluscubed.plustimer.ui.solvelist.SolveListPresenter;
 import com.pluscubed.plustimer.ui.widget.LockingViewPager;
 import com.pluscubed.plustimer.ui.widget.SlidingTabLayout;
 import com.pluscubed.plustimer.utils.PrefUtils;
+import com.pluscubed.plustimer.utils.Utils;
 
 /**
  * Current Session Activity
@@ -46,16 +47,13 @@ public class CurrentSessionActivity extends DrawerActivity implements
     private static final String STATE_MENU_ITEMS_ENABLE_BOOLEAN =  "menu_items_enable_boolean";
 
     private static final String CURRENT_SESSION_TIMER_RETAINED_TAG = "CURRENT_SESSION_TIMER_RETAINED";
-
+    private static final String TAG = "CurrentSessionActivity";
     private boolean mScrambleImageActionEnable;
-
     private int mSelectedPage;
-
     private boolean mInvalidateActionBarOnDrawerClosed;
     private SlidingTabLayout mSlidingTabLayout;
     private LockingViewPager mViewPager;
     private int mContentFrameLayoutHeight;
-
     private CurrentSessionPresenter mPresenter;
 
     private static String makeFragmentName(int viewId, int index) {
@@ -81,7 +79,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
         mContentFrameLayoutHeight = layout.getHeight();
 
         ObjectAnimator exit = ObjectAnimator.ofFloat(toolbar, View.TRANSLATION_Y,
-                -toolbar.getHeight());
+                -toolbar.getHeight() - Utils.convertDpToPx(this, 8));
         exit.setDuration(300);
         exit.setInterpolator(new FastOutLinearInInterpolator());
         exit.addUpdateListener(animation -> {

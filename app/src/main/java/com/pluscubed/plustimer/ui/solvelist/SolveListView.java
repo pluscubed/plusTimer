@@ -8,13 +8,11 @@ public interface SolveListView {
 
     void setInitialized();
 
-    SolveListAdapter getSolveListAdapter();
+    SolveListAdapterView getSolveListAdapter();
 
     void enableResetSubmitButtons(boolean enable);
 
     void showResetWarningDialog();
-
-    void setAdapter(SolveListAdapter adapter);
 
     void showSessionSubmitted();
 

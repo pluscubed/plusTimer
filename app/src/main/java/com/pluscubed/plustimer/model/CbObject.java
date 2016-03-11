@@ -57,10 +57,9 @@ public abstract class CbObject {
             return (T) sUpdatingObjects.get(doc.getId());
         }
 
-        ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> userProperties = doc.getUserProperties();
         userProperties.remove("type");
-        T cbObject = mapper.convertValue(userProperties, type);
+        T cbObject = sMapper.convertValue(userProperties, type);
 
         cbObject.mId = doc.getId();
 

@@ -1,5 +1,7 @@
 package com.pluscubed.plustimer.base;
 
+import android.support.annotation.Nullable;
+
 public abstract class Presenter<V> {
 
     private V mView;
@@ -8,6 +10,7 @@ public abstract class Presenter<V> {
         mView = view;
     }
 
+    @Nullable
     public V getView() {
         return mView;
     }

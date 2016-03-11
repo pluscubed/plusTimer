@@ -8,7 +8,7 @@ import com.couchbase.lite.CouchbaseLiteException;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.pluscubed.plustimer.R;
-import com.pluscubed.plustimer.ui.RecyclerViewUpdate;
+import com.pluscubed.plustimer.base.RecyclerViewUpdate;
 import com.pluscubed.plustimer.utils.Utils;
 
 import java.io.IOException;

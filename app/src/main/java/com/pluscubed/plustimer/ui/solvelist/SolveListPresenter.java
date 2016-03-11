@@ -8,10 +8,11 @@ import android.os.Bundle;
 import com.couchbase.lite.CouchbaseLiteException;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.base.Presenter;
+import com.pluscubed.plustimer.base.PresenterFactory;
+import com.pluscubed.plustimer.base.RecyclerViewUpdate;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
-import com.pluscubed.plustimer.ui.RecyclerViewUpdate;
 import com.pluscubed.plustimer.utils.PrefUtils;
 import com.pluscubed.plustimer.utils.SolveDialogUtils;
 
@@ -28,13 +29,13 @@ public class SolveListPresenter extends Presenter<SolveListView> {
     private String mPuzzleTypeId;
     private String mSessionId;
     private boolean mIsCurrent;
-    private boolean mAdapterInitialized;
+    private boolean mViewInitialized;
 
     public SolveListPresenter(Bundle arguments) {
         mIsCurrent = arguments.getBoolean(INIT_CURRENT);
         mSessionSolvesListener = (update, solve) -> {
             updateView();
-            updateAdapter(solve, update);
+            updateAdapter(update, solve);
         };
     }
 
@@ -50,22 +51,27 @@ public class SolveListPresenter extends Presenter<SolveListView> {
     public void onViewAttached(SolveListView view) {
         super.onViewAttached(view);
 
-        mAdapterInitialized = false;
         if (PuzzleType.isInitialized()) {
             setInitialized(PuzzleType.getCurrentId(), PuzzleType.getCurrent().getCurrentSessionId());
         }
 
-        view.setAdapter(new SolveListAdapter(getView(), mIsCurrent));
+        view.getSolveListAdapter().setHeaderEnabled(mIsCurrent);
+        view.getSolveListAdapter().updateSignAndMillisecondsMode();
+    }
+
+    @Override
+    public void onViewDetached() {
+        super.onViewDetached();
+
+        mViewInitialized = false;
     }
 
     public void setInitialized(String puzzleTypeId, String sessionId) {
         mPuzzleTypeId = puzzleTypeId;
         mSessionId = sessionId;
 
-        if (!mAdapterInitialized && isViewAttached()) {
-            getView().setInitialized();
-            updateView();
-
+        //noinspection ConstantConditions
+        if (isViewAttached() && !getView().getSolveListAdapter().isInitialized()) {
             PuzzleType.get(mPuzzleTypeId).getSessionDeferred(getView().getContextCompat(), mSessionId)
                     .doOnSuccess(session -> {
                         session.addListener(mSessionSolvesListener);
@@ -75,19 +81,28 @@ public class SolveListPresenter extends Presenter<SolveListView> {
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(solves -> {
                         Collections.reverse(solves);
-                        getView().getSolveListAdapter().initialize(solves);
-                        updateAdapter(null, RecyclerViewUpdate.DATA_RESET);
+                        getView().getSolveListAdapter().setSolves(mPuzzleTypeId, solves);
+                        updateAdapter(RecyclerViewUpdate.DATA_RESET, null);
                     });
         }
 
-        mAdapterInitialized = true;
+        if (!mViewInitialized && isViewAttached()) {
+            //noinspection ConstantConditions
+            getView().setInitialized();
+            updateView();
+
+            mViewInitialized = true;
+        }
     }
 
     public void onDestroyed() {
-        PuzzleType.get(mPuzzleTypeId).getSessionDeferred(getView().getContextCompat(), mSessionId)
-                .subscribe(session -> {
-                    session.removeListener(mSessionSolvesListener);
-                });
+        if (isViewAttached()) {
+            //noinspection ConstantConditions
+            PuzzleType.get(mPuzzleTypeId).getSessionDeferred(getView().getContextCompat(), mSessionId)
+                    .subscribe(session -> {
+                        session.removeListener(mSessionSolvesListener);
+                    });
+        }
     }
 
     public void onResetButtonClicked() {
@@ -118,14 +133,15 @@ public class SolveListPresenter extends Presenter<SolveListView> {
         }
     }
 
+    @SuppressWarnings("ConstantConditions")
     private void updateView() {
+        if (!isViewAttached()) {
+            return;
+        }
+
         try {
             Session session = PuzzleType.get(mPuzzleTypeId).getSession(getView().getContextCompat(), mSessionId);
             int numberOfSolves = session.getNumberOfSolves();
-
-            if (!isViewAttached()) {
-                return;
-            }
 
             if (numberOfSolves <= 0) {
                 if (mIsCurrent) {
@@ -168,6 +184,7 @@ public class SolveListPresenter extends Presenter<SolveListView> {
             return;
         }
 
+        //noinspection ConstantConditions
         Context context = getView().getContextCompat();
         PuzzleType.get(mPuzzleTypeId).getSessionDeferred(getView().getContextCompat(), mSessionId)
                 .flatMap(session ->
@@ -198,36 +215,62 @@ public class SolveListPresenter extends Presenter<SolveListView> {
 
     }
 
-    private void updateAdapter(Solve solve, RecyclerViewUpdate change) {
-        if (isViewAttached()) {
+    public void onSolveClicked(Solve solve) {
+        if (!isViewAttached()) {
+            return;
+        }
 
-            Activity context = getView().getContextCompat();
-            try {
-                Session session = PuzzleType.get(mPuzzleTypeId).getSession(context, mSessionId);
+        //noinspection ConstantConditions
+        SolveDialogUtils.createSolveDialog(
+                getView().getContextCompat(),
+                false,
+                mPuzzleTypeId,
+                mSessionId,
+                solve
+        );
+    }
 
-                session.getStatsDeferred(context,
+    @SuppressWarnings("ConstantConditions")
+    private void updateAdapter(RecyclerViewUpdate change, Solve solve) {
+        if (!isViewAttached()) {
+            return;
+        }
+
+        Activity context = getView().getContextCompat();
+
+        PuzzleType.get(mPuzzleTypeId).getSessionDeferred(context, mSessionId)
+                .flatMap(session -> session.getStatsDeferred(context,
                         mPuzzleTypeId,
                         mIsCurrent,
                         false,
                         PrefUtils.isDisplayMillisecondsEnabled(context),
-                        PrefUtils.isSignEnabled(context))
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new SingleSubscriber<String>() {
-                            @Override
-                            public void onSuccess(String stats) {
-                                getView().getSolveListAdapter().notifyChange(mPuzzleTypeId, mSessionId, solve, change, stats);
-                            }
+                        PrefUtils.isSignEnabled(context)
+                ))
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new SingleSubscriber<String>() {
+                    @Override
+                    public void onSuccess(String stats) {
+                        getView().getSolveListAdapter().notifyChange(change, solve, stats);
+                    }
 
-                            @Override
-                            public void onError(Throwable error) {
+                    @Override
+                    public void onError(Throwable error) {
 
-                            }
-                        });
+                    }
+                });
+    }
 
+    public static class Factory implements PresenterFactory<SolveListPresenter> {
 
-            } catch (CouchbaseLiteException | IOException e) {
-                e.printStackTrace();
-            }
+        private Bundle arguments;
+
+        public Factory(Bundle bundle) {
+            arguments = bundle;
+        }
+
+        @Override
+        public SolveListPresenter create() {
+            return new SolveListPresenter(arguments);
         }
     }
 }

@@ -28,27 +28,23 @@ public class SolveListFragment extends BasePresenterFragment<SolveListPresenter,
     public static final String TAG = "SOLVE_LIST_FRAGMENT";
 
     private RecyclerView mRecyclerView;
-    private SolveListAdapter mSolveListAdapter;
+    private SolveListAdapterView mSolveListAdapter;
     private TextView mEmptyView;
 
     private ActionMode mActionMode;
     private LinearLayout mResetSubmitLinearLayout;
 
-    public SolveListAdapter getSolveListAdapter() {
+    public SolveListAdapterView getSolveListAdapter() {
         return mSolveListAdapter;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        initSharedPrefs();
 
         //TODO
         //When Settings change
         //onPuzzleTypeChanged();
-    }
-
-    private void initSharedPrefs() {
     }
 
     @Override
@@ -59,7 +55,7 @@ public class SolveListFragment extends BasePresenterFragment<SolveListPresenter,
     }
 
     public SolveListPresenter getPresenter() {
-        return mPresenter;
+        return presenter;
     }
 
 
@@ -72,10 +68,17 @@ public class SolveListFragment extends BasePresenterFragment<SolveListPresenter,
     }*/
 
     @Override
+    public void onSaveInstanceState(Bundle outState) {
+        mSolveListAdapter.onSaveInstanceState(outState);
+
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_solvelist_share_menuitem:
-                mPresenter.share();
+                presenter.share();
                 return true;
             case R.id.menu_history_solvelist_delete_menuitem:
                 //TODO
@@ -92,7 +95,7 @@ public class SolveListFragment extends BasePresenterFragment<SolveListPresenter,
                 getActivity().finish();
                 return true;
             case R.id.menu_solvelist_add_menuitem:
-                mPresenter.onToolbarAddSolvePressed();
+                presenter.onToolbarAddSolvePressed();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -119,7 +122,6 @@ public class SolveListFragment extends BasePresenterFragment<SolveListPresenter,
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_solvelist, container, false);
-        initSharedPrefs();
 
         mResetSubmitLinearLayout = (LinearLayout)
                 v.findViewById(R.id.fragment_solvelist_submit_reset_linearlayout);
@@ -144,6 +146,9 @@ public class SolveListFragment extends BasePresenterFragment<SolveListPresenter,
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         mEmptyView = (TextView) v.findViewById(android.R.id.empty);
+
+        mSolveListAdapter = new SolveListAdapter(getActivity(), savedInstanceState);
+        mRecyclerView.setAdapter((RecyclerView.Adapter) mSolveListAdapter);
 
         /*mListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
 
@@ -197,12 +202,6 @@ public class SolveListFragment extends BasePresenterFragment<SolveListPresenter,
         return v;
     }
 
-    @Override
-    public void setAdapter(SolveListAdapter adapter) {
-        mSolveListAdapter = adapter;
-        mRecyclerView.setAdapter(mSolveListAdapter);
-    }
-
     public void showSessionSubmitted() {
         Toast.makeText(getActivity().getApplicationContext(),
                 getResources().getText(R.string.session_submitted),
@@ -236,19 +235,23 @@ public class SolveListFragment extends BasePresenterFragment<SolveListPresenter,
     @Override
     public void onPause() {
         super.onPause();
-        //mPresenter.onPause();
+        //presenter.onPause();
     }
 
     @Override
     protected PresenterFactory<SolveListPresenter> getPresenterFactory() {
-        return new SolveListPresenterFactory(getArguments());
+        return new SolveListPresenter.Factory(getArguments());
     }
 
     @Override
     protected void onPresenterPrepared(SolveListPresenter presenter) {
-
+        getSolveListAdapter().onPresenterPrepared(presenter);
     }
 
+    @Override
+    protected void onPresenterDestroyed() {
+        getSolveListAdapter().onPresenterDestroyed();
+    }
 
     public void showList(boolean show) {
         mRecyclerView.setVisibility(show ? View.VISIBLE : View.GONE);
