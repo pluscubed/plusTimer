@@ -411,6 +411,13 @@ public class Session extends CbObject {
         return statsBuilder.toString();
     }
 
+    public void reset(Context context){
+        mSolves.clear();
+        updateCb(context);
+
+        notifyListeners(null, RecyclerViewUpdate.REMOVE_ALL);
+    }
+
     public interface SolvesListener {
         void notifyChange(RecyclerViewUpdate update, Solve solve);
     }

@@ -511,11 +511,6 @@ public class PuzzleType extends CbObject {
                 });
     }
 
-    public void resetCurrentSession() {
-        //TODO
-        /*mCurrentSession.newSession();*/
-    }
-
     @Override
     public boolean equals(Object o) {
         return o instanceof PuzzleType && ((PuzzleType) o).getId().equals(mId);

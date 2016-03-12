@@ -87,17 +87,13 @@ public class TimeBarRecyclerAdapter extends RecyclerView.Adapter<TimeBarRecycler
 
     public void notifyChange(RecyclerViewUpdate mode, Solve solve) {
 
-        int oldSize = mSolves.size();
-
-        //Collections.reverse(mSolves);
-
         switch (mode) {
             case DATA_RESET:
                 notifyDataSetChanged();
                 break;
             case INSERT:
                 mSolves.add(solve);
-                notifyItemInserted(mSolves.size() - 1);
+                notifyDataSetChanged();
                 break;
             case REMOVE:
                 mSolves.remove(solve);
@@ -114,16 +110,17 @@ public class TimeBarRecyclerAdapter extends RecyclerView.Adapter<TimeBarRecycler
                 }
                 break;
             case REMOVE_ALL:
-                notifyItemRangeRemoved(0, oldSize);
+                mSolves.clear();
+                notifyDataSetChanged();
                 break;
         }
 
-        Solve oldBest = mBest;
-        Solve oldWorst = mWorst;
-        mBest = Utils.getBestSolveOfList(mSolves);
-        mWorst = Utils.getWorstSolveOfList(mSolves);
-
         if (mode != RecyclerViewUpdate.DATA_RESET && mode != RecyclerViewUpdate.REMOVE_ALL) {
+            Solve oldBest = mBest;
+            Solve oldWorst = mWorst;
+            mBest = Utils.getBestSolveOfList(mSolves);
+            mWorst = Utils.getWorstSolveOfList(mSolves);
+
             if (oldBest != null && !oldBest.equals(mBest)) {
                 notifyItemChanged(mSolves.indexOf(oldBest));
                 notifyItemChanged(mSolves.indexOf(mBest));

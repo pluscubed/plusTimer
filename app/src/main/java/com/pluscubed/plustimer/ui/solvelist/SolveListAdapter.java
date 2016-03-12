@@ -164,7 +164,6 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
 
     @Override
     public void notifyChange(RecyclerViewUpdate mode, Solve solve, String stats) {
-        int oldSize = mSolves.size();
 
         switch (mode) {
             case DATA_RESET:
@@ -172,7 +171,7 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
                 break;
             case INSERT:
                 mSolves.add(0, solve);
-                notifyItemInserted(getHeaderOffset());
+                notifyDataSetChanged();
                 break;
             case REMOVE:
                 mSolves.remove(solve);
@@ -192,16 +191,16 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
             case REMOVE_ALL:
                 mSolves.clear();
 
-                notifyItemRangeRemoved(getHeaderOffset(), oldSize);
+                notifyDataSetChanged();
                 break;
         }
 
-        Solve oldBest = mBest;
-        Solve oldWorst =  mWorst;
-        mBest = Utils.getBestSolveOfList(mSolves);
-        mWorst = Utils.getWorstSolveOfList(mSolves);
+        if (mode != RecyclerViewUpdate.DATA_RESET && mode != RecyclerViewUpdate.REMOVE_ALL) {
+            Solve oldBest = mBest;
+            Solve oldWorst = mWorst;
+            mBest = Utils.getBestSolveOfList(mSolves);
+            mWorst = Utils.getWorstSolveOfList(mSolves);
 
-        if (mode == RecyclerViewUpdate.INSERT || mode == RecyclerViewUpdate.SINGLE_CHANGE) {
             if (oldBest != null && !oldBest.equals(mBest)) {
                 //indexOf old solve will only work for insert b/c it uses .equals of Solve,
                 // but that's fine since in single change the old solve is updated already

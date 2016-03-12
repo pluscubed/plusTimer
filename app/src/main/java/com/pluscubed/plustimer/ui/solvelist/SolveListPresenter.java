@@ -142,9 +142,17 @@ public class SolveListPresenter extends Presenter<SolveListView> {
         }
     }
 
+    @SuppressWarnings("ConstantConditions")
     public void onResetDialogConfirmed() {
-        PuzzleType.get(mPuzzleTypeId).resetCurrentSession();
         if (isViewAttached()) {
+            try {
+                PuzzleType.get(mPuzzleTypeId)
+                        .getCurrentSession(getView().getContextCompat())
+                        .reset(getView().getContextCompat());
+            } catch (CouchbaseLiteException | IOException e) {
+                e.printStackTrace();
+            }
+
             //noinspection ConstantConditions
             getView().showSessionResetSnackbar();
         }
