@@ -70,8 +70,6 @@ public class PuzzleType extends CbObject {
     private boolean mInspectionOn;
     @JsonProperty("name")
     private String mName;
-    @JsonProperty("bld")
-    private boolean mIsBld;
     @JsonProperty("sessions")
     @NonNull
     private List<String> mSessions;
@@ -91,8 +89,8 @@ public class PuzzleType extends CbObject {
     }
 
     @WorkerThread
-    public PuzzleType(Context context, String scrambler, String name, String currentSessionId,
-                      boolean inspectionOn, boolean isBld) throws CouchbaseLiteException, IOException {
+    public PuzzleType(Context context, String scrambler, String name,
+                      String currentSessionId, boolean inspectionOn) throws CouchbaseLiteException, IOException {
         super(context);
 
         mScrambler = scrambler;
@@ -100,7 +98,6 @@ public class PuzzleType extends CbObject {
         mEnabled = true;
         mCurrentSessionId = currentSessionId;
         mInspectionOn = inspectionOn;
-        mIsBld = isBld;
         mSessions = new ArrayList<>();
 
         updateCb(context);
@@ -249,7 +246,6 @@ public class PuzzleType extends CbObject {
             String scrambler;
             String defaultCustomType = null;
             String uiName;
-            boolean bld = false;
 
             if (scramblers.length > i) {
                 scrambler = scramblers[i];
@@ -266,7 +262,6 @@ public class PuzzleType extends CbObject {
                 String addon = null;
                 if (scrambler.contains("ni")) {
                     addon = context.getString(R.string.bld);
-                    bld = true;
                 }
                 if (defaultCustomType != null) {
                     if (defaultCustomType.contains("feet")) {
@@ -282,7 +277,7 @@ public class PuzzleType extends CbObject {
                 }
             }
 
-            PuzzleType newPuzzleType = new PuzzleType(context, scrambler, uiName, null, true, bld/*, legacyNames[i]*/);
+            PuzzleType newPuzzleType = new PuzzleType(context, scrambler, uiName, null, true/*, legacyNames[i]*/);
 
             if (uiName.equals("3x3")) {
                 //Default current puzzle type
@@ -327,7 +322,7 @@ public class PuzzleType extends CbObject {
     }
 
     public boolean isBld() {
-        return mIsBld;
+        return mScrambler.contains("ni");
     }
 
     public boolean isScramblerOfficial() {
@@ -465,15 +460,10 @@ public class PuzzleType extends CbObject {
         ////////////////////////////
     }
 
-    public void submitCurrentSession(Context context) {
-        //TODO
-        //Insert a copy of the current session in the second to last position. The "new" current session
-        //will be at the last position.
-        /*if (mAllSessions != null)
-            mAllSessions.add(new Session(mCurrentSession));
-        mCurrentSession.newSession();
-        mCurrentSessionId = mCurrentSession.getId();
-        PrefUtils.saveCurrentSessionIndex(this, context, mCurrentSessionId);*/
+    public void submitCurrentSession(Context context) throws IOException, CouchbaseLiteException {
+        newSession(context);
+
+        notifyChangeCurrentListeners();
     }
 
     public Puzzle getPuzzle() {

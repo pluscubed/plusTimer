@@ -2,6 +2,7 @@ package com.pluscubed.plustimer.ui.solvelist;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.ActionMode;
@@ -12,7 +13,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.pluscubed.plustimer.R;
@@ -128,7 +128,7 @@ public class SolveListFragment extends BasePresenterFragment<SolveListPresenter,
                     .positiveText(R.string.submit)
                     .negativeText(android.R.string.cancel)
                     .onPositive((dialog, which) -> {
-                        getPresenter().onSubmitButtonClicked();
+                        getPresenter().onSubmitClicked();
                     });
             builder.show();
         });
@@ -193,13 +193,16 @@ public class SolveListFragment extends BasePresenterFragment<SolveListPresenter,
         return v;
     }
 
-    public void showSessionSubmitted() {
-        Toast.makeText(getActivity().getApplicationContext(),
+    @Override
+    public void showSessionSubmittedSnackbar() {
+        Snackbar.make(getView(),
                 getResources().getText(R.string.session_submitted),
-                Toast.LENGTH_SHORT
+                Snackbar.LENGTH_SHORT
         ).show();
     }
 
+    //TODO: Use Snackbar with "Undo" action instead
+    @Override
     public void showResetWarningDialog() {
         MaterialDialog.Builder builder = new MaterialDialog.Builder(getActivity());
         builder.content(getString(R.string.reset_warning_message))
@@ -208,15 +211,16 @@ public class SolveListFragment extends BasePresenterFragment<SolveListPresenter,
                 .negativeText(android.R.string.cancel)
                 .onPositive((dialog, which) -> {
                     getPresenter().onResetDialogConfirmed();
-                    showSessionResetToast();
+                    showSessionResetSnackbar();
                 });
         builder.show();
     }
 
-    public void showSessionResetToast() {
-        Toast.makeText(getActivity(),
+    @Override
+    public void showSessionResetSnackbar() {
+        Snackbar.make(getView(),
                 getResources().getText(R.string.session_reset),
-                Toast.LENGTH_SHORT).show();
+                Snackbar.LENGTH_SHORT).show();
     }
 
     public void enableResetSubmitButtons(boolean enable) {

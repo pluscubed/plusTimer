@@ -140,5 +140,6 @@
     <string name="share_dialog_title">Share times via…</string>
     <string name="send_email">Send email to the developer using…</string>
     <string name="email_developer_history_data">Email History Data to Developer</string>
+    <string name="undo">Undo</string>
 
 </resources>

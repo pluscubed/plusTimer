@@ -14,9 +14,9 @@ public interface SolveListView {
 
     void showResetWarningDialog();
 
-    void showSessionSubmitted();
+    void showSessionSubmittedSnackbar();
 
-    void showSessionResetToast();
+    void showSessionResetSnackbar();
 
     void showList(boolean show);
 

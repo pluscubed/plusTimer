@@ -9,6 +9,7 @@ import com.couchbase.lite.DatabaseOptions;
 import com.couchbase.lite.Manager;
 import com.couchbase.lite.android.AndroidContext;
 import com.crashlytics.android.Crashlytics;
+import com.squareup.leakcanary.LeakCanary;
 
 import java.io.IOException;
 
@@ -38,5 +39,7 @@ public class App extends Application {
         if (BuildConfig.USE_CRASHLYTICS) {
             Fabric.with(this, new Crashlytics());
         }
+
+        LeakCanary.install(this);
     }
 }

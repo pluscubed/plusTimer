@@ -146,14 +146,18 @@ public class SolveListPresenter extends Presenter<SolveListView> {
         PuzzleType.get(mPuzzleTypeId).resetCurrentSession();
         if (isViewAttached()) {
             //noinspection ConstantConditions
-            getView().showSessionResetToast();
+            getView().showSessionResetSnackbar();
         }
     }
 
-    public void onSubmitButtonClicked() {
+    public void onSubmitClicked() {
         if (isViewAttached()) {
-            PuzzleType.get(mPuzzleTypeId).submitCurrentSession(getView().getContextCompat());
-            getView().showSessionSubmitted();
+            try {
+                PuzzleType.get(mPuzzleTypeId).submitCurrentSession(getView().getContextCompat());
+            } catch (IOException | CouchbaseLiteException e) {
+                e.printStackTrace();
+            }
+            getView().showSessionSubmittedSnackbar();
         }
     }
 

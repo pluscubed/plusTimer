@@ -437,8 +437,7 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_current_session_timer,
-                container, false);
+        View v = inflater.inflate(R.layout.fragment_current_session_timer, container, false);
 
         mTimerText = (TextView) v.findViewById(R.id.fragment_current_session_timer_time_textview);
         mTimerText2 = (TextView) v.findViewById(R.id.fragment_current_session_timer_timeSecondary_textview);
@@ -586,14 +585,12 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
 
         mScrambleImage.setOnClickListener(v1 -> toggleScrambleImage());
 
-        //TODO
-        //onPuzzleTypeChanged();
-
         return v;
     }
 
     @Override
     public void setPuzzleTypeInitialized() {
+        //TODO: Update bld mode when puzzle type changes
         mBldMode = PuzzleType.getCurrent().isBld();
         if (!mFromSavedInstanceState) {
             mRetainedFragment.postSetScrambleViewsToCurrent();
@@ -966,8 +963,7 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
 
     private void playDynamicStatusBarEnterAnimation() {
         mDynamicStatusBarVisible = true;
-        ObjectAnimator enter = ObjectAnimator.ofFloat(mDynamicStatusBarFrame, View.TRANSLATION_Y,
-                0f);
+        ObjectAnimator enter = ObjectAnimator.ofFloat(mDynamicStatusBarFrame, View.TRANSLATION_Y, 0f);
         enter.setDuration(125);
         enter.setInterpolator(new LinearOutSlowInInterpolator());
         AnimatorSet dynamicStatusBarAnimatorSet = new AnimatorSet();
