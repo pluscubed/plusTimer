@@ -186,6 +186,8 @@ public class PuzzleType extends CbObject {
                     completable = initializeFirstRunAsync(context);
                 } else {
                     completable = initializePuzzleTypes(database);
+
+                    sCurrentTypeId = PrefUtils.getCurrentPuzzleType(context);
                 }
 
                 return completable.doOnComplete(() -> {
@@ -216,11 +218,6 @@ public class PuzzleType extends CbObject {
 
                     if (sPuzzleTypes != null) {
                         sPuzzleTypes.add(type);
-                    }
-
-                    //TODO: Proper current type ID saving
-                    if (type.getName().equals("3x3")) {
-                        sCurrentTypeId = type.getId();
                     }
                 }
 
