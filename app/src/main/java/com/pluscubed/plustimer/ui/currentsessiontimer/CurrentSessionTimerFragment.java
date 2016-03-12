@@ -18,6 +18,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.v4.view.animation.FastOutLinearInInterpolator;
+import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.support.v4.view.animation.LinearOutSlowInInterpolator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -30,8 +31,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -56,11 +55,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 
-import rx.Completable;
 import rx.Single;
 import rx.SingleSubscriber;
 import rx.Subscriber;
-import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 
 /**
@@ -416,11 +413,6 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-        //TODO
-        /*PuzzleType.getCurrentId().(puzzleTypeObserver);
-        PuzzleType.getCurrentId().getCurrentSession()
-                .registerObserver(sessionSolvesListener);*/
-
         //Set up UIHandler
         mUiHandler = new Handler(Looper.getMainLooper());
 
@@ -464,61 +456,67 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
         mLastDeleteButton = (Button) v.findViewById(R.id.fragment_current_session_timer_last_delete_button);
 
         mLastDnfButton.setOnClickListener(view -> {
-            PuzzleType.getCurrent().getCurrentSessionDeferred(getActivity()).toObservable()
-                    .flatMap(session -> session.getLastSolve(getActivity()))
-                    .flatMap(solve -> solve.setPenaltyDeferred(getActivity(), Solve.PENALTY_DNF).toObservable())
-                    .toCompletable()
+            PuzzleType.getCurrent().getCurrentSessionDeferred(getActivity())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Completable.CompletableSubscriber() {
+                    .subscribe(new SingleSubscriber<Session>() {
                         @Override
-                        public void onCompleted() {
-                            playLastBarExitAnimation();
+                        public void onSuccess(Session session) {
+                            try {
+                                Solve solve = session.getLastSolve(getActivity()).toBlocking().first();
+                                solve.setPenalty(getActivity(), Solve.PENALTY_DNF);
+                                Session.notifyListeners(session.getId(), solve, RecyclerViewUpdate.SINGLE_CHANGE);
+                            } catch (CouchbaseLiteException | IOException e) {
+                                e.printStackTrace();
+                            }
                         }
 
                         @Override
-                        public void onError(Throwable e) {
-
-                        }
-
-                        @Override
-                        public void onSubscribe(Subscription d) {
+                        public void onError(Throwable error) {
 
                         }
                     });
         });
 
         mLastPlusTwoButton.setOnClickListener(view -> {
-            PuzzleType.getCurrent().getCurrentSessionDeferred(getActivity()).toObservable()
-                    .flatMap(session -> session.getLastSolve(getActivity()))
-                    .flatMap(solve -> solve.setPenaltyDeferred(getActivity(), Solve.PENALTY_PLUSTWO).toObservable())
-                    .toCompletable()
+            PuzzleType.getCurrent().getCurrentSessionDeferred(getActivity())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Completable.CompletableSubscriber() {
+                    .subscribe(new SingleSubscriber<Session>() {
                         @Override
-                        public void onCompleted() {
-                            playLastBarExitAnimation();
+                        public void onSuccess(Session session) {
+                            try {
+                                Solve solve = session.getLastSolve(getActivity()).toBlocking().first();
+                                solve.setPenalty(getActivity(), Solve.PENALTY_PLUSTWO);
+                                Session.notifyListeners(session.getId(), solve, RecyclerViewUpdate.SINGLE_CHANGE);
+                            } catch (CouchbaseLiteException | IOException e) {
+                                e.printStackTrace();
+                            }
                         }
 
                         @Override
-                        public void onError(Throwable e) {
-
-                        }
-
-                        @Override
-                        public void onSubscribe(Subscription d) {
+                        public void onError(Throwable error) {
 
                         }
                     });
+            playLastBarExitAnimation();
         });
 
         mLastDeleteButton.setOnClickListener(v1 -> {
-            PuzzleType.getCurrent().getCurrentSessionDeferred(getActivity())
-                    .flatMapObservable(session ->
-                            session.deleteSolveDeferred(getActivity(), PuzzleType.getCurrentId())
-                                    .toObservable())
-                    .toCompletable()
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::playLastBarExitAnimation);
+            PuzzleType.getCurrent().getCurrentSessionDeferred(getActivity()).subscribe(new SingleSubscriber<Session>() {
+                @Override
+                public void onSuccess(Session session) {
+                    try {
+                        session.deleteSolve(getActivity(), session.getLastSolve(getActivity()).toBlocking().first().getId());
+                    } catch (CouchbaseLiteException | IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                @Override
+                public void onError(Throwable error) {
+
+                }
+            });
+            playLastBarExitAnimation();
         });
 
         LinearLayoutManager timeBarLayoutManager = new LinearLayoutManager(getActivity(),
@@ -559,7 +557,6 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
             mRetainedFragment.resetScramblerThread();
             enableMenuItems(false);
             setScrambleText(getString(R.string.scrambling));
-            mRetainedFragment.generateNextScramble();
         } else {
             if (mInspecting) {
                 mUiHandler.post(inspectionRunnable);
@@ -600,6 +597,7 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
         mBldMode = PuzzleType.getCurrent().isBld();
         if (!mFromSavedInstanceState) {
             mRetainedFragment.postSetScrambleViewsToCurrent();
+            mRetainedFragment.generateNextScramble();
         }
     }
 
@@ -1024,9 +1022,9 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
         ObjectAnimator exit = ObjectAnimator.ofFloat(mLastBarLinearLayout, View.TRANSLATION_Y, 0f);
         enter.setDuration(125);
         exit.setDuration(125);
-        exit.setStartDelay(1500);
-        enter.setInterpolator(new DecelerateInterpolator());
-        exit.setInterpolator(new AccelerateInterpolator());
+        exit.setStartDelay(2000);
+        enter.setInterpolator(new LinearOutSlowInInterpolator());
+        exit.setInterpolator(new FastOutLinearInInterpolator());
         mLastBarAnimationSet = new AnimatorSet();
         mLastBarAnimationSet.addListener(new AnimatorListenerAdapter() {
             @Override
@@ -1048,14 +1046,18 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
     }
 
     void playLastBarExitAnimation() {
+        if (mLastBarAnimationSet != null) {
+            mLastBarAnimationSet.cancel();
+        }
+
         mLastDeleteButton.setEnabled(false);
         mLastDnfButton.setEnabled(false);
         mLastPlusTwoButton.setEnabled(false);
         ObjectAnimator exit = ObjectAnimator.ofFloat(mLastBarLinearLayout, View.TRANSLATION_Y, 0f);
         exit.setDuration(125);
-        exit.setInterpolator(new LinearOutSlowInInterpolator());
-        AnimatorSet lastBarAnimationSet = new AnimatorSet();
-        lastBarAnimationSet.addListener(new AnimatorListenerAdapter() {
+        exit.setInterpolator(new FastOutLinearInInterpolator());
+        mLastBarAnimationSet = new AnimatorSet();
+        mLastBarAnimationSet.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
@@ -1064,8 +1066,8 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
                 }
             }
         });
-        lastBarAnimationSet.play(exit);
-        lastBarAnimationSet.start();
+        mLastBarAnimationSet.play(exit);
+        mLastBarAnimationSet.start();
     }
 
     void playScrambleExitAnimation() {
@@ -1075,7 +1077,7 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
         mScrambleAnimator = ObjectAnimator.ofFloat(mScrambleText, View.TRANSLATION_Y,
                 -mScrambleText.getHeight());
         mScrambleAnimator.setDuration(300);
-        mScrambleAnimator.setInterpolator(new FastOutLinearInInterpolator());
+        mScrambleAnimator.setInterpolator(new FastOutSlowInInterpolator());
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP) {
             mScrambleAnimator.addUpdateListener(animation -> mScrambleTextShadow.setTranslationY((int) (float) animation.getAnimatedValue()));
         }
@@ -1089,7 +1091,7 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
         }
         mScrambleAnimator = ObjectAnimator.ofFloat(mScrambleText, View.TRANSLATION_Y, 0f);
         mScrambleAnimator.setDuration(300);
-        mScrambleAnimator.setInterpolator(new LinearOutSlowInInterpolator());
+        mScrambleAnimator.setInterpolator(new FastOutSlowInInterpolator());
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP) {
             mScrambleAnimator.addUpdateListener(animation -> mScrambleTextShadow.setTranslationY((int) (float) animation.getAnimatedValue()));
         }
@@ -1106,6 +1108,7 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
     void playStatsExitAnimation() {
         ObjectAnimator exit = ObjectAnimator.ofFloat(mStatsText, View.ALPHA, 0f);
         exit.setDuration(300);
+        exit.setInterpolator(new FastOutLinearInInterpolator());
         ObjectAnimator exit3 = ObjectAnimator.ofFloat(mStatsSolvesText, View.ALPHA, 0f);
         exit3.setDuration(300);
         AnimatorSet scrambleAnimatorSet = new AnimatorSet();
@@ -1116,6 +1119,7 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
     void playStatsEnterAnimation() {
         ObjectAnimator enter = ObjectAnimator.ofFloat(mStatsText, View.ALPHA, 1f);
         enter.setDuration(300);
+        enter.setInterpolator(new LinearOutSlowInInterpolator());
         ObjectAnimator enter3 = ObjectAnimator.ofFloat(mStatsSolvesText, View.ALPHA, 1f);
         enter3.setDuration(300);
         AnimatorSet scrambleAnimatorSet = new AnimatorSet();

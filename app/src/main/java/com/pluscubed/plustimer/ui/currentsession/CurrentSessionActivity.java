@@ -13,8 +13,7 @@ import android.support.annotation.NonNull;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
-import android.support.v4.view.animation.FastOutLinearInInterpolator;
-import android.support.v4.view.animation.LinearOutSlowInInterpolator;
+import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -84,7 +83,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
         ObjectAnimator exit = ObjectAnimator.ofFloat(toolbar, View.TRANSLATION_Y,
                 -toolbar.getHeight() - Utils.convertDpToPx(this, 8));
         exit.setDuration(300);
-        exit.setInterpolator(new FastOutLinearInInterpolator());
+        exit.setInterpolator(new FastOutSlowInInterpolator());
         exit.addUpdateListener(animation -> {
             LinearLayout.LayoutParams params =
                     (LinearLayout.LayoutParams) layout.getLayoutParams();
@@ -109,7 +108,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
 
         ObjectAnimator exit = ObjectAnimator.ofFloat(toolbar, View.TRANSLATION_Y, 0f);
         exit.setDuration(300);
-        exit.setInterpolator(new LinearOutSlowInInterpolator());
+        exit.setInterpolator(new FastOutSlowInInterpolator());
         exit.addUpdateListener(animation -> {
             LinearLayout.LayoutParams params =
                     (LinearLayout.LayoutParams) layout.getLayoutParams();

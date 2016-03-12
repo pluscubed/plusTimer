@@ -126,9 +126,9 @@ public class TimeBarRecyclerAdapter extends RecyclerView.Adapter<TimeBarRecycler
         if (mode != RecyclerViewUpdate.DATA_RESET && mode != RecyclerViewUpdate.REMOVE_ALL) {
             if (oldBest != null && !oldBest.equals(mBest)) {
                 notifyItemChanged(mSolves.indexOf(oldBest));
-                notifyItemChanged(mSolves.indexOf(mWorst));
+                notifyItemChanged(mSolves.indexOf(mBest));
             }
-            if (oldWorst != null && !oldWorst.equals(mBest)) {
+            if (oldWorst != null && !oldWorst.equals(mWorst)) {
                 notifyItemChanged(mSolves.indexOf(oldWorst));
                 notifyItemChanged(mSolves.indexOf(mWorst));
             }

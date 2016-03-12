@@ -22,6 +22,7 @@ import java.util.Set;
 import rx.Completable;
 import rx.Observable;
 import rx.Single;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 /**
@@ -63,11 +64,15 @@ public class Session extends CbObject {
     }
 
     public static void notifyListeners(String sessionId, Solve solve, RecyclerViewUpdate update) {
-        if (sListenerMap.containsKey(sessionId)) {
-            for (SolvesListener listener : sListenerMap.get(sessionId)) {
-                listener.notifyChange(update, solve);
+        Completable.fromCallable(() -> {
+            if (sListenerMap.containsKey(sessionId)) {
+                for (SolvesListener listener : sListenerMap.get(sessionId)) {
+                    listener.notifyChange(update, solve);
+                }
             }
-        }
+            return null;
+        }).subscribeOn(AndroidSchedulers.mainThread())
+                .subscribe();
     }
 
     /**
@@ -177,7 +182,7 @@ public class Session extends CbObject {
         notifyListeners(solve, RecyclerViewUpdate.INSERT);
     }
 
-    public Completable deleteSolveDeferred(Context context, String id) {
+    public Completable deleteSolveAsync(Context context, String id) {
         return Completable.fromCallable(() -> {
             deleteSolve(context, id);
             return null;
@@ -185,14 +190,13 @@ public class Session extends CbObject {
     }
 
     public void deleteSolve(Context context, String id) throws CouchbaseLiteException, IOException {
-        getSolve(context, id)
-                .getDocument(context)
-                .delete();
+        Solve solve = getSolve(context, id);
+        solve.getDocument(context).delete();
 
         mSolves.remove(id);
 
         updateCb(context);
-        notifyListeners(getSolve(context, id), RecyclerViewUpdate.REMOVE);
+        notifyListeners(solve, RecyclerViewUpdate.REMOVE);
     }
 
     private void notifyListeners(Solve solve, RecyclerViewUpdate update) {

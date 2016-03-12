@@ -30,7 +30,6 @@ import com.pluscubed.plustimer.model.Solve;
 import com.pluscubed.plustimer.utils.PrefUtils;
 import com.pluscubed.plustimer.utils.ThemeUtils;
 import com.pluscubed.plustimer.utils.Utils;
-import com.rengwuxian.materialedittext.MaterialEditText;
 
 import net.gnehzr.tnoodle.scrambles.InvalidScrambleException;
 
@@ -54,7 +53,7 @@ public class SolveDialogFragment extends DialogFragment {
 
     private boolean mAddMode;
 
-    private MaterialEditText mScrambleEdit;
+    private EditText mScrambleEdit;
     private Solve mSolveCopy;
     private boolean mMillisecondsEnabled;
     private EditText mTimeEdit;
@@ -197,16 +196,13 @@ public class SolveDialogFragment extends DialogFragment {
                 while (true) {
                     try {
                         if (s.length() != 0) {
-                            BigDecimal timeEditTextDecimal = BigDecimal
-                                    .valueOf(Double.parseDouble(s.toString()));
-                            mSolveCopy.setRawTime(
-                                    null,
+                            BigDecimal timeEditTextDecimal = BigDecimal.valueOf(Double.parseDouble(s.toString()));
+                            mSolveCopy.setRawTime(null,
                                     timeEditTextDecimal.multiply(BigDecimal.valueOf(1000000000)).longValueExact());
                             updateTitle();
                             break;
                         } else {
-                            getDialog().setTitle(Utils.timeStringFromNs(0,
-                                    mMillisecondsEnabled));
+                            getDialog().setTitle(Utils.timeStringFromNs(0, mMillisecondsEnabled));
                             mSolveCopy.setRawTime(null, 0);
                             break;
                         }
@@ -220,7 +216,7 @@ public class SolveDialogFragment extends DialogFragment {
         });
 
         //SCRAMBLE EDITTEXT SETUP
-        mScrambleEdit = (MaterialEditText) v.findViewById(R.id.dialog_solve_scramble_edittext);
+        mScrambleEdit = (EditText) v.findViewById(R.id.dialog_solve_scramble_edittext);
         mScrambleEdit.setText(scramble);
         mScrambleEdit.addTextChangedListener(new TextWatcher() {
             @Override
@@ -251,7 +247,10 @@ public class SolveDialogFragment extends DialogFragment {
                 .onNegative((dialog, which) -> onCancelPressed());
         if (!mAddMode) {
             builder.neutralText(R.string.delete)
-                    .onNeutral((dialog, which) -> onDeletePressed());
+                    .onNeutral((dialog, which) -> {
+                        onDeletePressed();
+                        dialog.dismiss();
+                    });
         }
 
         return builder.build();
@@ -274,11 +273,10 @@ public class SolveDialogFragment extends DialogFragment {
             return;
         }*/
         PuzzleType.get(mPuzzleTypeId).getSessionDeferred(getActivity(), mSessionId)
-                .flatMapObservable(session -> session.deleteSolveDeferred(getActivity(), mSolveCopy.getId()).toObservable())
+                .flatMapObservable(session -> session.deleteSolveAsync(getActivity(), mSolve.getId()).toObservable())
                 .toCompletable()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::dismiss);
-
     }
 
     private void onCancelPressed() {
@@ -295,8 +293,7 @@ public class SolveDialogFragment extends DialogFragment {
                             mPuzzleTypeId);
             if (!scrambleText.equals(mSolveCopy.getScramble())) {
                 PuzzleType.get(mPuzzleTypeId).getPuzzle()
-                        .getSolvedState().applyAlgorithm
-                        (scrambleText);
+                        .getSolvedState().applyAlgorithm(scrambleText);
             }
             mSolveCopy.setScramble(null, scrambleText);
             if (!mAddMode) {

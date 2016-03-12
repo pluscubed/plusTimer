@@ -58,15 +58,6 @@ public class SolveListFragment extends BasePresenterFragment<SolveListPresenter,
         return presenter;
     }
 
-
-    /*private PuzzleType getPuzzleType() {
-        if (mCurrentToggle) {
-            return PuzzleType.getCurrent();
-        } else {
-            return PuzzleType.get(mPuzzleTypeId);
-        }
-    }*/
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
         mSolveListAdapter.onSaveInstanceState(outState);
