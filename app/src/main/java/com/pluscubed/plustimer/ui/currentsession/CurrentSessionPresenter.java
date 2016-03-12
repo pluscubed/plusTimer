@@ -18,12 +18,14 @@ public class CurrentSessionPresenter extends Presenter<CurrentSessionView> {
                     @Override
                     public void onCompleted() {
                         if (isViewAttached()) {
-                            if (getView().getCurrentSessionTimerFragment() != null) {
-                                getView().getCurrentSessionTimerFragment().getPresenter().setInitialized();
+                            if (getView().getCurrentSessionTimerFragment() != null &&
+                                    getView().getCurrentSessionTimerFragment().getPresenter() != null) {
+                                getView().getCurrentSessionTimerFragment().getPresenter().setPuzzleTypeInitialized();
                             }
-                            if(getView().getSolveListFragment()!=null){
+                            if (getView().getSolveListFragment() != null &&
+                                    getView().getSolveListFragment().getPresenter() != null) {
                                 getView().getSolveListFragment().getPresenter()
-                                        .setInitialized(PuzzleType.getCurrentId(),
+                                        .setPuzzleTypeInitialized(PuzzleType.getCurrentId(),
                                                 PuzzleType.getCurrent().getCurrentSessionId());
                             }
                             getView().supportInvalidateOptionsMenu();

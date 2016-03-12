@@ -52,8 +52,15 @@ public abstract class BasePresenterFragment<P extends Presenter<V>, V> extends F
 
     @Override
     public void onStop() {
-        presenter.onViewDetached();
+
         super.onStop();
+    }
+
+    @Override
+    public void onDestroy() {
+        presenter.onViewDetached();
+
+        super.onDestroy();
     }
 
     protected abstract PresenterFactory<P> getPresenterFactory();

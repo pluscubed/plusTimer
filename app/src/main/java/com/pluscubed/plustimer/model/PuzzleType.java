@@ -30,7 +30,9 @@ import java.io.IOException;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import rx.Completable;
 import rx.Observable;
@@ -53,6 +55,8 @@ public class PuzzleType extends CbObject {
     private static String sCurrentTypeId;
     private static List<PuzzleType> sPuzzleTypes;
     private static boolean sInitialized;
+
+    private static Set<CurrentChangeListener> sCurrentChangeListeners;
 
     private Puzzle mPuzzle;
 
@@ -102,6 +106,27 @@ public class PuzzleType extends CbObject {
         updateCb(context);
     }
 
+    public static void addCurrentChangeListener(CurrentChangeListener listener) {
+        getListeners().add(listener);
+    }
+
+    public static void removeCurrentChangeListener(CurrentChangeListener listener) {
+        getListeners().remove(listener);
+    }
+
+    private static Set<CurrentChangeListener> getListeners() {
+        if (sCurrentChangeListeners == null) {
+            sCurrentChangeListeners = new HashSet<>();
+        }
+        return sCurrentChangeListeners;
+    }
+
+    private static void notifyChangeCurrentListeners() {
+        for (CurrentChangeListener listener : getListeners()) {
+            listener.notifyChange();
+        }
+    }
+
     public static List<PuzzleType> getPuzzleTypes() {
         return sPuzzleTypes;
     }
@@ -117,11 +142,6 @@ public class PuzzleType extends CbObject {
 
     public static PuzzleType getCurrent() {
         return get(sCurrentTypeId);
-    }
-
-    public static void setCurrent(String currentId) {
-        //TODO
-        sCurrentTypeId = currentId;
     }
 
     public static String getCurrentId() {
@@ -163,7 +183,7 @@ public class PuzzleType extends CbObject {
 
                 Completable completable;
                 if (savedVersionCode < 24) {
-                    completable = savePuzzleTypesFirstRunAsync(context);
+                    completable = initializeFirstRunAsync(context);
                 } else {
                     completable = initializePuzzleTypes(database);
                 }
@@ -209,14 +229,14 @@ public class PuzzleType extends CbObject {
         }).subscribeOn(Schedulers.io());
     }
 
-    private static Completable savePuzzleTypesFirstRunAsync(Context context) {
+    private static Completable initializeFirstRunAsync(Context context) {
         return Completable.fromCallable(() -> {
-            savePuzzleTypesFirstRun(context);
+            initializeFirstRun(context);
             return null;
         }).subscribeOn(Schedulers.io());
     }
 
-    private static void savePuzzleTypesFirstRun(Context context) throws CouchbaseLiteException, IOException {
+    private static void initializeFirstRun(Context context) throws CouchbaseLiteException, IOException {
         //Generate default puzzle types from this...
         String[] scramblers = context.getResources().getStringArray(R.array.scramblers);
         //and this, with the appropriate UI names...
@@ -269,10 +289,10 @@ public class PuzzleType extends CbObject {
 
             if (uiName.equals("3x3")) {
                 //Default current puzzle type
-                //currentPuzzleType.setValue(type.getId());
-                //TODO: Save current type ID
                 sCurrentTypeId = newPuzzleType.getId();
                 newPuzzleType.newSession(context);
+
+                PrefUtils.setCurrentPuzzleType(context, sCurrentTypeId);
             }
 
             sPuzzleTypes.add(newPuzzleType);
@@ -281,6 +301,17 @@ public class PuzzleType extends CbObject {
         Collections.sort(sPuzzleTypes,
                 (lhs, rhs) -> Collator.getInstance().compare(lhs.getName(), rhs.getName()));
 
+    }
+
+    public static void setCurrent(Context context, String puzzleType) throws IOException, CouchbaseLiteException {
+        sCurrentTypeId = puzzleType;
+        PrefUtils.setCurrentPuzzleType(context, sCurrentTypeId);
+
+        if (get(sCurrentTypeId).getCurrentSessionId() == null) {
+            get(sCurrentTypeId).newSession(context);
+        }
+
+        notifyChangeCurrentListeners();
     }
 
     private Session newSession(Context context) throws IOException, CouchbaseLiteException {
@@ -506,5 +537,9 @@ public class PuzzleType extends CbObject {
     @Override
     protected String getType() {
         return TYPE_PUZZLETYPE;
+    }
+
+    public interface CurrentChangeListener {
+        void notifyChange();
     }
 }

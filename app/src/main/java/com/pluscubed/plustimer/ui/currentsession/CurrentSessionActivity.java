@@ -25,6 +25,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 
+import com.couchbase.lite.CouchbaseLiteException;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.ui.DrawerActivity;
@@ -37,6 +38,8 @@ import com.pluscubed.plustimer.ui.widget.LockingViewPager;
 import com.pluscubed.plustimer.ui.widget.SlidingTabLayout;
 import com.pluscubed.plustimer.utils.PrefUtils;
 import com.pluscubed.plustimer.utils.Utils;
+
+import java.io.IOException;
 
 /**
  * Current Session Activity
@@ -181,28 +184,24 @@ public class CurrentSessionActivity extends DrawerActivity implements
         }
 
         //Set up ViewPager with CurrentSessionAdapter
-        mViewPager = (LockingViewPager) findViewById(R.id
-                .activity_current_session_viewpager);
-        mViewPager.setAdapter(new CurrentSessionPagerAdapter
-                (getFragmentManager(),
-                        getResources().getStringArray(R.array
-                                .current_session_page_titles)));
+        mViewPager = (LockingViewPager) findViewById(R.id.activity_current_session_viewpager);
+        mViewPager.setAdapter(
+                new CurrentSessionPagerAdapter(
+                        getFragmentManager(),
+                        getResources().getStringArray(R.array.current_session_page_titles)
+                )
+        );
 
         //Set up SlidingTabLayout
-        mSlidingTabLayout = (SlidingTabLayout) findViewById(R
-                .id.activity_current_session_slidingtablayout);
+        mSlidingTabLayout = (SlidingTabLayout) findViewById(R.id.activity_current_session_slidingtablayout);
         int[] attrs = {R.attr.colorAccent};
-        mSlidingTabLayout.setSelectedIndicatorColors(obtainStyledAttributes
-                (attrs).getColor(0, Color.BLACK));
+        mSlidingTabLayout.setSelectedIndicatorColors(obtainStyledAttributes(attrs).getColor(0, Color.BLACK));
         mSlidingTabLayout.setDistributeEvenly(true);
-        mSlidingTabLayout.setCustomTabView(R.layout.sliding_tab_textview,
-                android.R.id.text1);
+        mSlidingTabLayout.setCustomTabView(R.layout.sliding_tab_textview, android.R.id.text1);
         mSlidingTabLayout.setViewPager(mViewPager);
-        mSlidingTabLayout.setOnPageChangeListener(new ViewPager
-                .OnPageChangeListener() {
+        mSlidingTabLayout.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
-            public void onPageScrolled(int position, float positionOffset,
-                                       int positionOffsetPixels) {
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
             }
 
             @Override
@@ -212,8 +211,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
 
             @Override
             public void onPageScrollStateChanged(int state) {
-                if (state == ViewPager.SCROLL_STATE_DRAGGING || state ==
-                        ViewPager.SCROLL_STATE_SETTLING) {
+                if (state == ViewPager.SCROLL_STATE_DRAGGING || state == ViewPager.SCROLL_STATE_SETTLING) {
                     getCurrentSessionTimerFragment().stopHoldTimer();
                     getSolveListFragment().finishActionMode();
                 }
@@ -319,7 +317,11 @@ public class CurrentSessionActivity extends DrawerActivity implements
                                            int position, long id) {
                     PuzzleType newPuzzleType = (PuzzleType) parent.getItemAtPosition(position);
                     if (!newPuzzleType.equals(PuzzleType.getCurrent())) {
-                        PuzzleType.setCurrent(newPuzzleType.getId());
+                        try {
+                            PuzzleType.setCurrent(CurrentSessionActivity.this, newPuzzleType.getId());
+                        } catch (IOException | CouchbaseLiteException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
 

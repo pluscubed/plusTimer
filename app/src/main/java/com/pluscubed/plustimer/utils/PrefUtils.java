@@ -3,6 +3,7 @@ package com.pluscubed.plustimer.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 
 import com.pluscubed.plustimer.BuildConfig;
 
@@ -38,7 +39,20 @@ public class PrefUtils {
     private static final String PREF_VERSION_CODE =
             "pref_version_code";
     private static final String PREF_WELCOME_DONE =
-            "welcome_done";
+            "pref_welcome_done";
+    private static final String PREF_CURRENT_PUZZLETYPE =
+            "pref_current_puzzle_type";
+
+    public static void setCurrentPuzzleType(final Context context, String puzzletype) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        sp.edit().putString(PREF_CURRENT_PUZZLETYPE, puzzletype).apply();
+    }
+
+    @Nullable
+    public static String getCurrentPuzzleType(final Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        return sp.getString(PREF_CURRENT_PUZZLETYPE, null);
+    }
 
     public static boolean isInspectionEnabled(final Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);

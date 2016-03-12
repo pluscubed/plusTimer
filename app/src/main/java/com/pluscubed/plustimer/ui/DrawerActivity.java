@@ -143,8 +143,7 @@ public abstract class DrawerActivity extends ThemableActivity {
         if (navDrawerWidth > navDrawerWidthLimit) {
             navDrawerWidth = navDrawerWidthLimit;
         }
-        DrawerLayout.LayoutParams params = (DrawerLayout.LayoutParams) mDrawerScrollView
-                .getLayoutParams();
+        DrawerLayout.LayoutParams params = (DrawerLayout.LayoutParams) mDrawerScrollView.getLayoutParams();
         params.width = navDrawerWidth;
         mDrawerScrollView.setLayoutParams(params);
 
@@ -235,11 +234,12 @@ public abstract class DrawerActivity extends ThemableActivity {
         super.onPostCreate(savedInstanceState);
         setupNavDrawer();
 
-        if (savedInstanceState != null) {
+        //TODO: Fade in only if selected in Drawer
+        /*if (savedInstanceState != null) {
             View mainContent = findViewById(R.id.activity_drawer_content_linearlayout);
             mainContent.setAlpha(0);
             mainContent.animate().alpha(1).setDuration(MAIN_CONTENT_FADEIN_DURATION);
-        }
+        }*/
     }
 
     private void onNavDrawerItemClicked(final int itemId) {

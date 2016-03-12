@@ -13,7 +13,18 @@ public interface CurrentSessionTimerView {
 
     void updateStatsAndTimerText(RecyclerViewUpdate mode, Solve solve);
 
-    void setInitialized();
+    void setPuzzleTypeInitialized();
 
     Activity getContextCompat();
+
+    void setScrambleText(String string);
+
+    void enableMenuItems(boolean b);
+
+    void showScrambleImage(boolean b);
+
+    //REMOVE WHEN MVP FULLY IMPLEMENTED
+    void resetGenerateScramble();
+
+    void resetTimer();
 }

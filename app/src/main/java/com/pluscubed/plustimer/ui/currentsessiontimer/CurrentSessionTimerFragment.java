@@ -278,7 +278,7 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
         }
     }
 
-    void setScrambleText(String text) {
+    public void setScrambleText(String text) {
         mScrambleText.setText(text);
         invalidateScrambleShadow(false);
     }
@@ -356,14 +356,6 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
             mRetainedFragment.generateNextScramble();
             mRetainedFragment.postSetScrambleViewsToCurrent();
         }
-    }
-
-    void onPuzzleTypeChanged() {
-        updateStatsAndTimerText(RecyclerViewUpdate.DATA_RESET, null);
-
-        //Update RecyclerView
-        TimeBarRecyclerAdapter adapter = (TimeBarRecyclerAdapter) mTimeBarRecycler.getAdapter();
-        adapter.notifyChange(RecyclerViewUpdate.DATA_RESET, null);
     }
 
     @Override
@@ -567,6 +559,7 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
             mRetainedFragment.resetScramblerThread();
             enableMenuItems(false);
             setScrambleText(getString(R.string.scrambling));
+            mRetainedFragment.generateNextScramble();
         } else {
             if (mInspecting) {
                 mUiHandler.post(inspectionRunnable);
@@ -603,10 +596,9 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
     }
 
     @Override
-    public void setInitialized() {
+    public void setPuzzleTypeInitialized() {
         mBldMode = PuzzleType.getCurrent().isBld();
         if (!mFromSavedInstanceState) {
-            mRetainedFragment.generateNextScramble();
             mRetainedFragment.postSetScrambleViewsToCurrent();
         }
     }
@@ -715,7 +707,7 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
     }
 
     void setTimerTextToPrefSize() {
-        if (mTimerText.getText() != getString(R.string.ready)) {
+        if (!mTimerText.getText().equals(getString(R.string.ready))) {
             if (mTimerText != null && mTimerText2 != null) {
                 if (mTwoRowTimeEnabled) {
                     mTimerText.setTextSize(TypedValue.COMPLEX_UNIT_SP, mTimerTextSize);
@@ -727,7 +719,7 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
         }
     }
 
-    void showScrambleImage(boolean enable) {
+    public void showScrambleImage(boolean enable) {
         if (enable) {
             mScrambleImage.setVisibility(View.VISIBLE);
         } else {
@@ -1190,13 +1182,13 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
         setTextColorPrimary();
     }
 
-    void resetGenerateScramble() {
+    public void resetGenerateScramble() {
         mRetainedFragment.resetScramblerThread();
         mRetainedFragment.generateNextScramble();
         mRetainedFragment.postSetScrambleViewsToCurrent();
     }
 
-    void resetTimer() {
+    public void resetTimer() {
         mUiHandler.removeCallbacksAndMessages(null);
         mHoldTiming = false;
         mTiming = false;

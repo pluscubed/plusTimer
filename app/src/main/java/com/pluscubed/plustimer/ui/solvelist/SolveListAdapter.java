@@ -24,13 +24,16 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
         implements SolveListAdapterView {
 
     private static final String STATE_SOLVES = "state_solves";
-    private static final String STATE_BESTWORST = "state_bestandworstsolves";
     private static final String STATE_STATS = "state_stats";
     private static final String STATE_INITIALIZED = "state_initialized";
+    private static final String STATE_BEST = "state_best";
+    private static final String STATE_WORST = "state_worst";
 
     private static final int HEADER_VIEWTYPE = 2;
     private static final int HEADER_ID = -1;
-    private final Solve[] mBestAndWorstSolves;
+
+    private Solve mBest;
+    private Solve mWorst;
     private Context mContext;
     private String mPuzzleTypeId;
     private List<Solve> mSolves;
@@ -48,12 +51,12 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
         mContext = context;
 
         if (savedInstanceState != null) {
-            mBestAndWorstSolves = (Solve[]) savedInstanceState.getParcelableArray(STATE_BESTWORST);
+            mBest = savedInstanceState.getParcelable(STATE_BEST);
+            mWorst = savedInstanceState.getParcelable(STATE_WORST);
             mSolves = savedInstanceState.getParcelableArrayList(STATE_SOLVES);
             mStats = savedInstanceState.getString(STATE_STATS);
             mInitialized = savedInstanceState.getBoolean(STATE_INITIALIZED);
         } else {
-            mBestAndWorstSolves = new Solve[2];
             mSolves = new ArrayList<>();
             mStats = "";
             mInitialized = false;
@@ -90,7 +93,8 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
         //TODO: TransactionTooLargeException is possible, but this is linked to the more serious problem of how much data is stored in memory in general
         outState.putParcelableArrayList(STATE_SOLVES, (ArrayList<Solve>) mSolves);
         outState.putString(STATE_STATS, mStats);
-        outState.putParcelableArray(STATE_BESTWORST, mBestAndWorstSolves);
+        outState.putParcelable(STATE_BEST, mBest);
+        outState.putParcelable(STATE_WORST, mBest);
         outState.putBoolean(STATE_INITIALIZED, mInitialized);
     }
 
@@ -114,13 +118,11 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
 
             Solve s = mSolves.get(position);
             String timeString = s.getTimeString(mMillisecondsEnabled);
-            holder.textView.setText(timeString);
 
-            for (Solve solve : mBestAndWorstSolves) {
-                if (s == solve) {
-                    holder.textView.setText("(" + timeString + ")");
-                    break;
-                }
+            if (s == mBest || s == mWorst) {
+                holder.textView.setText(String.format("(%s)", timeString));
+            }else{
+                holder.textView.setText(timeString);
             }
 
             String uiScramble = Utils.getUiScramble(s.getScramble(), mSignEnabled, mPuzzleTypeId);
@@ -194,23 +196,21 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
                 break;
         }
 
-        Solve oldBest = mBestAndWorstSolves[0];
-        Solve oldWorst = mBestAndWorstSolves[1];
-        Solve newBest = Utils.getBestSolveOfList(mSolves);
-        Solve newWorst = Utils.getWorstSolveOfList(mSolves);
-        mBestAndWorstSolves[0] = newBest;
-        mBestAndWorstSolves[1] = newWorst;
+        Solve oldBest = mBest;
+        Solve oldWorst =  mWorst;
+        mBest = Utils.getBestSolveOfList(mSolves);
+        mWorst = Utils.getWorstSolveOfList(mSolves);
 
         if (mode == RecyclerViewUpdate.INSERT || mode == RecyclerViewUpdate.SINGLE_CHANGE) {
-            if (oldBest != null && !oldBest.equals(newBest)) {
+            if (oldBest != null && !oldBest.equals(mBest)) {
                 //indexOf old solve will only work for insert b/c it uses .equals of Solve,
                 // but that's fine since in single change the old solve is updated already
                 notifyItemChanged(mSolves.indexOf(oldBest) + getHeaderOffset());
-                notifyItemChanged(mSolves.indexOf(newBest) + getHeaderOffset());
+                notifyItemChanged(mSolves.indexOf(mBest) + getHeaderOffset());
             }
-            if (oldWorst != null && !oldWorst.equals(newWorst)) {
+            if (oldWorst != null && !oldWorst.equals(mWorst)) {
                 notifyItemChanged(mSolves.indexOf(oldWorst) + getHeaderOffset());
-                notifyItemChanged(mSolves.indexOf(newWorst) + getHeaderOffset());
+                notifyItemChanged(mSolves.indexOf(mWorst) + getHeaderOffset());
             }
         }
 

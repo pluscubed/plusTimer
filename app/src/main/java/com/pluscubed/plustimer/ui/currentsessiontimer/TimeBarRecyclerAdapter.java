@@ -21,9 +21,11 @@ public class TimeBarRecyclerAdapter extends RecyclerView.Adapter<TimeBarRecycler
         implements TimeBarRecyclerAdapterView {
 
     private static final String STATE_SOLVES = "state_solves";
-    private static final String STATE_BESTWORST = "state_bestandworstsolves";
+    private static final String STATE_BEST = "state_best";
+    private static final String STATE_WORST = "state_worst";
     private static final String STATE_INITIALIZED = "state_initialized";
-    private final Solve[] mBestAndWorstSolves;
+    private Solve mBest;
+    private Solve mWorst;
     private Context mContext;
     private List<Solve> mSolves;
     private boolean mMillisecondsEnabled;
@@ -36,11 +38,11 @@ public class TimeBarRecyclerAdapter extends RecyclerView.Adapter<TimeBarRecycler
         mContext = view;
 
         if (savedInstanceState != null) {
-            mBestAndWorstSolves = (Solve[]) savedInstanceState.getParcelableArray(STATE_BESTWORST);
+            mBest = savedInstanceState.getParcelable(STATE_BEST);
+            mWorst = savedInstanceState.getParcelable(STATE_WORST);
             mSolves = savedInstanceState.getParcelableArrayList(STATE_SOLVES);
             mInitialized = savedInstanceState.getBoolean(STATE_INITIALIZED);
         } else {
-            mBestAndWorstSolves = new Solve[2];
             mSolves = new ArrayList<>();
             mInitialized = false;
         }
@@ -66,12 +68,10 @@ public class TimeBarRecyclerAdapter extends RecyclerView.Adapter<TimeBarRecycler
     public void onBindViewHolder(ViewHolder holder, int position) {
         Solve s = mSolves.get(position);
         String timeString = s.getTimeString(mMillisecondsEnabled);
-        holder.textView.setText(timeString);
-        for (Solve a : mBestAndWorstSolves) {
-            if (a == s) {
-                holder.textView.setText(String.format("(%s)", timeString));
-                break;
-            }
+        if (s == mBest || s == mWorst) {
+            holder.textView.setText(String.format("(%s)", timeString));
+        } else {
+            holder.textView.setText(timeString);
         }
     }
 
@@ -118,21 +118,19 @@ public class TimeBarRecyclerAdapter extends RecyclerView.Adapter<TimeBarRecycler
                 break;
         }
 
-        Solve oldBest = mBestAndWorstSolves[0];
-        Solve oldWorst = mBestAndWorstSolves[1];
-        Solve newBest = Utils.getBestSolveOfList(mSolves);
-        Solve newWorst = Utils.getWorstSolveOfList(mSolves);
-        mBestAndWorstSolves[0] = newBest;
-        mBestAndWorstSolves[1] = newWorst;
+        Solve oldBest = mBest;
+        Solve oldWorst = mWorst;
+        mBest = Utils.getBestSolveOfList(mSolves);
+        mWorst = Utils.getWorstSolveOfList(mSolves);
 
         if (mode != RecyclerViewUpdate.DATA_RESET && mode != RecyclerViewUpdate.REMOVE_ALL) {
-            if (oldBest != null && !oldBest.equals(newBest)) {
+            if (oldBest != null && !oldBest.equals(mBest)) {
                 notifyItemChanged(mSolves.indexOf(oldBest));
-                notifyItemChanged(mSolves.indexOf(newBest));
+                notifyItemChanged(mSolves.indexOf(mWorst));
             }
-            if (oldWorst != null && !oldWorst.equals(newWorst)) {
+            if (oldWorst != null && !oldWorst.equals(mBest)) {
                 notifyItemChanged(mSolves.indexOf(oldWorst));
-                notifyItemChanged(mSolves.indexOf(newWorst));
+                notifyItemChanged(mSolves.indexOf(mWorst));
             }
         }
     }
@@ -156,7 +154,8 @@ public class TimeBarRecyclerAdapter extends RecyclerView.Adapter<TimeBarRecycler
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putParcelableArray(STATE_BESTWORST, mBestAndWorstSolves);
+        outState.putParcelable(STATE_BEST, mBest);
+        outState.putParcelable(STATE_WORST, mBest);
         outState.putParcelableArrayList(STATE_SOLVES, (ArrayList<Solve>) mSolves);
         outState.putBoolean(STATE_INITIALIZED, mInitialized);
     }

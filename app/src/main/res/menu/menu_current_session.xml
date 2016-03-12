@@ -20,7 +20,7 @@
         android:id="@id/menu_activity_current_session_scramble_image_menuitem"
         android:icon="@drawable/ic_image_white"
         android:title="@string/scramble_image"
-        app:showAsAction="ifRoom|withText" />
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@id/menu_solvelist_share_menuitem"

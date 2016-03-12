@@ -16,6 +16,7 @@
         tools:replace="android:theme, android:icon, android:label">
         <activity
             android:name=".ui.currentsession.CurrentSessionActivity"
+            android:launchMode="singleTop"
             android:theme="@style/Theme.PlusTimer.Launch">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

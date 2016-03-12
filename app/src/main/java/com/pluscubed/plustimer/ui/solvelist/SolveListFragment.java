@@ -258,30 +258,6 @@ public class SolveListFragment extends BasePresenterFragment<SolveListPresenter,
         mEmptyView.setVisibility(show ? View.GONE : View.VISIBLE);
     }
 
-    /*void onSessionSolvesChanged() {
-        *//*mSession = getPuzzleType().getSession(mSessionId);*//*
-        if (!mCurrentToggle *//*&& mSession.getNumberOfSolves() <= 0*//*) {
-            getPuzzleType().deleteSession(mSession);
-            getActivity().finish();
-            return;
-        }
-        mSolveListAdapter.onSolveListChanged();
-        if (mSolveListAdapter.getCount() == 0) {
-            mListView.setVisibility(View.GONE);
-            mEmptyView.setVisibility(View.VISIBLE);
-        } else {
-            mListView.setVisibility(View.VISIBLE);
-            mEmptyView.setVisibility(View.GONE);
-        }
-        updateStats();
-        if (mCurrentToggle) {
-            *//*enableResetSubmitButtons(getPuzzleType().getCurrentSession().getNumberOfSolves() > 0);*//*
-        } else {
-            *//*getActivity().setTitle(PuzzleType.get(mPuzzleTypeId).getSession(mSessionId)
-                    .getTimestampString(getActivity()));*//*
-        }
-    }*/
-
     public void scrollRecyclerView(int position) {
         mRecyclerView.scrollToPosition(position);
     }

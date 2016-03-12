@@ -26,6 +26,7 @@ public class SolveListPresenter extends Presenter<SolveListView> {
 
     private static final String INIT_CURRENT = "current";
     private final Session.SolvesListener mSessionSolvesListener;
+    private final PuzzleType.CurrentChangeListener mPuzzleTypeCurrentChangeListener;
     private String mPuzzleTypeId;
     private String mSessionId;
     private boolean mIsCurrent;
@@ -37,6 +38,21 @@ public class SolveListPresenter extends Presenter<SolveListView> {
             updateView();
             updateAdapter(update, solve);
         };
+
+        mPuzzleTypeCurrentChangeListener = () -> {
+            if (!isViewAttached()) {
+                return;
+            }
+
+            mPuzzleTypeId = PuzzleType.getCurrentId();
+            mSessionId = PuzzleType.getCurrent().getCurrentSessionId();
+
+            reloadSolveList();
+            updateView();
+        };
+
+        if (mIsCurrent)
+            PuzzleType.addCurrentChangeListener(mPuzzleTypeCurrentChangeListener);
     }
 
     public static SolveListFragment newInstance(boolean current) {
@@ -51,8 +67,8 @@ public class SolveListPresenter extends Presenter<SolveListView> {
     public void onViewAttached(SolveListView view) {
         super.onViewAttached(view);
 
-        if (PuzzleType.isInitialized()) {
-            setInitialized(PuzzleType.getCurrentId(), PuzzleType.getCurrent().getCurrentSessionId());
+        if (PuzzleType.isInitialized() && mIsCurrent) {
+            setPuzzleTypeInitialized(PuzzleType.getCurrentId(), PuzzleType.getCurrent().getCurrentSessionId());
         }
 
         view.getSolveListAdapter().setHeaderEnabled(mIsCurrent);
@@ -66,24 +82,25 @@ public class SolveListPresenter extends Presenter<SolveListView> {
         mViewInitialized = false;
     }
 
-    public void setInitialized(String puzzleTypeId, String sessionId) {
+    @SuppressWarnings("ConstantConditions")
+    private void removeSessionSolvesListener() {
+        if (!isViewAttached()) {
+            return;
+        }
+
+        PuzzleType.getCurrent().getCurrentSessionDeferred(getView().getContextCompat())
+                .subscribe(session -> {
+                    session.removeListener(mSessionSolvesListener);
+                });
+    }
+
+    public void setPuzzleTypeInitialized(String puzzleTypeId, String sessionId) {
         mPuzzleTypeId = puzzleTypeId;
         mSessionId = sessionId;
 
         //noinspection ConstantConditions
         if (isViewAttached() && !getView().getSolveListAdapter().isInitialized()) {
-            PuzzleType.get(mPuzzleTypeId).getSessionDeferred(getView().getContextCompat(), mSessionId)
-                    .doOnSuccess(session -> {
-                        session.addListener(mSessionSolvesListener);
-                    })
-                    .flatMapObservable(session ->
-                            session.getSortedSolves(getView().getContextCompat())).toList()
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(solves -> {
-                        Collections.reverse(solves);
-                        getView().getSolveListAdapter().setSolves(mPuzzleTypeId, solves);
-                        updateAdapter(RecyclerViewUpdate.DATA_RESET, null);
-                    });
+            reloadSolveList();
         }
 
         if (!mViewInitialized && isViewAttached()) {
@@ -95,14 +112,27 @@ public class SolveListPresenter extends Presenter<SolveListView> {
         }
     }
 
+    private void reloadSolveList() {
+        PuzzleType.get(mPuzzleTypeId).getSessionDeferred(getView().getContextCompat(), mSessionId)
+                .doOnSuccess(session -> {
+                    session.addListener(mSessionSolvesListener);
+                })
+                .flatMapObservable(session ->
+                        session.getSortedSolves(getView().getContextCompat())).toList()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(solves -> {
+                    Collections.reverse(solves);
+                    getView().getSolveListAdapter().setSolves(mPuzzleTypeId, solves);
+                    updateAdapter(RecyclerViewUpdate.DATA_RESET, null);
+                });
+    }
+
+    @Override
     public void onDestroyed() {
-        if (isViewAttached()) {
-            //noinspection ConstantConditions
-            PuzzleType.get(mPuzzleTypeId).getSessionDeferred(getView().getContextCompat(), mSessionId)
-                    .subscribe(session -> {
-                        session.removeListener(mSessionSolvesListener);
-                    });
-        }
+        removeSessionSolvesListener();
+
+        if (mIsCurrent)
+            PuzzleType.removeCurrentChangeListener(mPuzzleTypeCurrentChangeListener);
     }
 
     public void onResetButtonClicked() {

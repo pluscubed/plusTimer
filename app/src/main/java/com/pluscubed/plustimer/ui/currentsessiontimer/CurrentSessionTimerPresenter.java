@@ -1,5 +1,6 @@
 package com.pluscubed.plustimer.ui.currentsessiontimer;
 
+import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.base.Presenter;
 import com.pluscubed.plustimer.base.PresenterFactory;
 import com.pluscubed.plustimer.base.RecyclerViewUpdate;
@@ -13,14 +14,41 @@ import rx.android.schedulers.AndroidSchedulers;
 public class CurrentSessionTimerPresenter extends Presenter<CurrentSessionTimerView> {
 
     private final Session.SolvesListener mSessionSolvesListener;
+    private final PuzzleType.CurrentChangeListener mPuzzleTypeCurrentChangeListener;
 
     private boolean mViewInitialized;
 
+    @SuppressWarnings("ConstantConditions")
     public CurrentSessionTimerPresenter() {
         mSessionSolvesListener = (update, solve) -> {
             updateView(update, solve);
             updateAdapter(update, solve);
         };
+
+        mPuzzleTypeCurrentChangeListener = () -> {
+            if (!isViewAttached()) {
+                return;
+            }
+
+            reloadSolveList();
+            updateView(RecyclerViewUpdate.DATA_RESET, null);
+
+
+            //Set timer text to ready, scramble text to scrambling
+            getView().setScrambleText(getView().getContextCompat().getString(R.string.scrambling));
+
+            //Update options menu (disable)
+            getView().enableMenuItems(false);
+            getView().showScrambleImage(false);
+
+            //mBldMode = PuzzleType.getCurrent().isBld();
+
+            getView().resetGenerateScramble();
+
+            getView().resetTimer();
+
+        };
+        PuzzleType.addCurrentChangeListener(mPuzzleTypeCurrentChangeListener);
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -70,13 +98,21 @@ public class CurrentSessionTimerPresenter extends Presenter<CurrentSessionTimerV
 
     @Override
     public void onDestroyed() {
-        if (isViewAttached()) {
-            //noinspection ConstantConditions
-            PuzzleType.getCurrent().getCurrentSessionDeferred(getView().getContextCompat())
-                    .subscribe(session -> {
-                        session.removeListener(mSessionSolvesListener);
-                    });
+        removeSessionSolvesListener();
+
+        PuzzleType.removeCurrentChangeListener(mPuzzleTypeCurrentChangeListener);
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    private void removeSessionSolvesListener() {
+        if(!isViewAttached()){
+            return;
         }
+
+        PuzzleType.getCurrent().getCurrentSessionDeferred(getView().getContextCompat())
+                .subscribe(session -> {
+                    session.removeListener(mSessionSolvesListener);
+                });
     }
 
     @Override
@@ -84,7 +120,7 @@ public class CurrentSessionTimerPresenter extends Presenter<CurrentSessionTimerV
         super.onViewAttached(view);
 
         if (PuzzleType.isInitialized()) {
-            setInitialized();
+            setPuzzleTypeInitialized();
         }
 
         view.getTimeBarAdapter().updateMillisecondsMode();
@@ -101,29 +137,37 @@ public class CurrentSessionTimerPresenter extends Presenter<CurrentSessionTimerV
     }
 
 
-    public void setInitialized() {
-        //noinspection ConstantConditions
-        if (isViewAttached() && !getView().getTimeBarAdapter().isInitialized()) {
-            PuzzleType.getCurrent().getCurrentSessionDeferred(getView().getContextCompat())
-                    .doOnSuccess(session -> {
-                        session.addListener(mSessionSolvesListener);
-                    })
-                    .flatMapObservable(session ->
-                            session.getSortedSolves(getView().getContextCompat())).toList()
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(solves -> {
-                        getView().getTimeBarAdapter().setSolves(solves);
-                        updateAdapter(RecyclerViewUpdate.DATA_RESET, null);
-                    });
+    public void setPuzzleTypeInitialized() {
+        if(!isViewAttached()){
+            return;
         }
 
-        if (!mViewInitialized && isViewAttached()) {
+        //noinspection ConstantConditions
+        if (isViewAttached() && !getView().getTimeBarAdapter().isInitialized()) {
+            reloadSolveList();
+        }
+
+        if (!mViewInitialized) {
             //noinspection ConstantConditions
-            getView().setInitialized();
+            getView().setPuzzleTypeInitialized();
             updateView(RecyclerViewUpdate.DATA_RESET, null);
 
             mViewInitialized = true;
         }
+    }
+
+    private void reloadSolveList() {
+        PuzzleType.getCurrent().getCurrentSessionDeferred(getView().getContextCompat())
+                .doOnSuccess(session -> {
+                    session.addListener(mSessionSolvesListener);
+                })
+                .flatMapObservable(session ->
+                        session.getSortedSolves(getView().getContextCompat())).toList()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(solves -> {
+                    getView().getTimeBarAdapter().setSolves(solves);
+                    updateAdapter(RecyclerViewUpdate.DATA_RESET, null);
+                });
     }
 
     public static class Factory implements PresenterFactory<CurrentSessionTimerPresenter> {
@@ -132,38 +176,5 @@ public class CurrentSessionTimerPresenter extends Presenter<CurrentSessionTimerV
         public CurrentSessionTimerPresenter create() {
             return new CurrentSessionTimerPresenter();
         }
-    }
-
-    private class PuzzleTypeObserver {
-
-        /*@Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
-            //Update quick stats and hlistview
-            onPuzzleTypeChanged();
-
-            //Set timer text to ready, scramble text to scrambling
-            setScrambleText(getString(R.string.scrambling));
-
-            //Update options menu (disable)
-            enableMenuItems(false);
-            showScrambleImage(false);
-
-            mBldMode = PuzzleType.getCurrent().isBld();
-
-            resetGenerateScramble();
-
-            resetTimer();
-
-            //TODO
-*//*
-            PuzzleType.getCurrentId().getCurrentSession()
-                    .registerObserver(sessionSolvesListener);*//*
-        }
-
-        @Override
-
-        public void onCancelled(FirebaseError firebaseError) {
-
-        }*/
     }
 }
