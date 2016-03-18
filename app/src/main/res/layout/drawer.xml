@@ -1,19 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@id/activity_drawer_drawer_scrollview"
+
+<android.support.design.widget.NavigationView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@id/activity_drawer_drawer_navview"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="start"
-    android:background="?colorPrimaryDark"
-    android:fillViewport="true"
-    android:fitsSystemWindows="true">
-
-    <LinearLayout
-        android:id="@id/activity_drawer_drawer_linearlayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?android:windowBackground"
-        android:orientation="vertical"
-        android:paddingBottom="8dp"
-        android:paddingTop="8dp" />
-</ScrollView>
+    android:fitsSystemWindows="true"
+    app:menu="@menu/nav_drawer" />

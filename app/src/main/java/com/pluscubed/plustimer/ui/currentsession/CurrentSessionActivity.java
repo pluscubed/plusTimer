@@ -153,7 +153,7 @@ public class CurrentSessionActivity extends DrawerActivity implements
 
     @Override
     public int getSelfNavDrawerItem() {
-        return NAVDRAWER_ITEM_CURRENT_SESSION;
+        return R.id.nav_current;
     }
 
 

@@ -28,7 +28,7 @@ public class HistorySessionsActivity extends DrawerActivity {
 
     @Override
     protected int getSelfNavDrawerItem() {
-        return NAVDRAWER_ITEM_HISTORY;
+        return R.id.nav_history;
     }
 
     @Override

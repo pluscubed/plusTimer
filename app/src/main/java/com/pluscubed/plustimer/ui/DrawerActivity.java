@@ -5,6 +5,8 @@ import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.IdRes;
+import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.Toolbar;
@@ -12,9 +14,6 @@ import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.pluscubed.plustimer.R;
@@ -27,33 +26,13 @@ import com.pluscubed.plustimer.utils.PrefUtils;
  */
 public abstract class DrawerActivity extends ThemableActivity {
 
-    protected static final int NAVDRAWER_ITEM_CURRENT_SESSION = 0;
-    protected static final int NAVDRAWER_ITEM_HISTORY = 1;
-    private static final int NAVDRAWER_ITEM_SETTINGS = -3;
-    private static final int NAVDRAWER_ITEM_HELP = -4;
-    private static final int NAVDRAWER_ITEM_ABOUT = -5;
-    private static final int NAVDRAWER_ITEM_INVALID = -1;
-    private static final int NAVDRAWER_ITEM_SEPARATOR = -2;
-    private static final int[] NAVDRAWER_ITEMS = new int[]{
-            NAVDRAWER_ITEM_CURRENT_SESSION,
-            NAVDRAWER_ITEM_HISTORY,
-            NAVDRAWER_ITEM_SEPARATOR,
-            NAVDRAWER_ITEM_SETTINGS,
-            NAVDRAWER_ITEM_HELP,
-            NAVDRAWER_ITEM_ABOUT
-    };
+    private static final String EXTRA_FADEIN = "com.pluscubed.plustimer.EXTRA_FADEIN";
+
+
     private static final int NAVDRAWER_LAUNCH_DELAY = 250;
     private static final int MAIN_CONTENT_FADEOUT_DURATION = 150;
     private static final int MAIN_CONTENT_FADEIN_DURATION = 250;
-    private static final int[] NAVDRAWER_TITLE_RES_ID = new int[]{
-            R.string.current_session,
-            R.string.history,
-            0,
-            R.string.settings,
-            R.string.help,
-            R.string.about
-    };
-    private static final int[] NAVDRAWER_ACTIONBAR_TITLE_RES_ID = new int[]{
+    private static final int[] NAVDRAWER_TOOLBAR_TITLE_RES_ID = new int[]{
             R.string.current,
             R.string.history
     };
@@ -62,14 +41,7 @@ public abstract class DrawerActivity extends ThemableActivity {
     private Handler mHandler;
     private Toolbar mActionBarToolbar;
 
-    /**
-     * Returns the navigation drawer item that corresponds to this Activity.
-     * Subclasses of BaseActivity override this to indicate what nav drawer item
-     * corresponds to them.
-     */
-    protected int getSelfNavDrawerItem() {
-        return NAVDRAWER_ITEM_INVALID;
-    }
+    protected abstract int getSelfNavDrawerItem();
 
     protected void onNavDrawerSlide(float offset) {
     }
@@ -104,38 +76,29 @@ public abstract class DrawerActivity extends ThemableActivity {
         }
 
         mActionBarToolbar.setNavigationIcon(R.drawable.ic_drawer);
-        mActionBarToolbar.setNavigationOnClickListener(new View
-                .OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mDrawerLayout.openDrawer(GravityCompat.START);
-            }
-        });
+        mActionBarToolbar.setNavigationOnClickListener(view ->
+                mDrawerLayout.openDrawer(GravityCompat.START));
 
-        mDrawerLayout.setDrawerListener(new DrawerLayout.DrawerListener() {
+        mDrawerLayout.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
             @Override
             public void onDrawerSlide(View drawerView, float slideOffset) {
                 onNavDrawerSlide(slideOffset);
             }
 
             @Override
-            public void onDrawerOpened(View drawerView) {
-
-            }
-
-            @Override
             public void onDrawerClosed(View drawerView) {
                 onNavDrawerClosed();
             }
-
-            @Override
-            public void onDrawerStateChanged(int newState) {
-
-            }
         });
 
-        ScrollView mDrawerScrollView = (ScrollView) findViewById(R.id
-                .activity_drawer_drawer_scrollview);
+        NavigationView view = (NavigationView) findViewById(R.id.activity_drawer_drawer_navview);
+        view.setCheckedItem(getSelfNavDrawerItem());
+        view.setNavigationItemSelectedListener(item -> {
+            onNavDrawerItemClicked(item.getItemId(), item.getGroupId());
+
+            return isNormalItem(item.getItemId());
+        });
+
         int actionBarSize = resources.getDimensionPixelSize(R.dimen
                 .navigation_drawer_margin);
         DisplayMetrics displayMetrics = resources.getDisplayMetrics();
@@ -144,12 +107,9 @@ public abstract class DrawerActivity extends ThemableActivity {
         if (navDrawerWidth > navDrawerWidthLimit) {
             navDrawerWidth = navDrawerWidthLimit;
         }
-        DrawerLayout.LayoutParams params = (DrawerLayout.LayoutParams) mDrawerScrollView.getLayoutParams();
+        DrawerLayout.LayoutParams params = (DrawerLayout.LayoutParams) view.getLayoutParams();
         params.width = navDrawerWidth;
-        mDrawerScrollView.setLayoutParams(params);
-
-        LinearLayout mDrawerListLinearLayout = (LinearLayout) findViewById(R.id
-                .activity_drawer_drawer_linearlayout);
+        view.setLayoutParams(params);
 
         resetTitle();
 
@@ -157,26 +117,12 @@ public abstract class DrawerActivity extends ThemableActivity {
             PrefUtils.markWelcomeDone(this);
             mDrawerLayout.openDrawer(GravityCompat.START);
         }
-
-        //INFLATE LAYOUTS AND SET CLICK LISTENERS
-        for (int i = 0; i < NAVDRAWER_ITEMS.length; i++) {
-            final int itemId = NAVDRAWER_ITEMS[i];
-            if (itemId == NAVDRAWER_ITEM_SEPARATOR) {
-                mDrawerListLinearLayout.addView(getLayoutInflater().inflate(R.layout.list_item_separator,
-                        mDrawerListLinearLayout, false));
-            } else {
-                TextView v = (TextView) getLayoutInflater().inflate(R.layout.list_item_drawer, mDrawerListLinearLayout, false);
-                v.setText(NAVDRAWER_TITLE_RES_ID[i]);
-                v.setOnClickListener(v1 -> onNavDrawerItemClicked(itemId));
-                mDrawerListLinearLayout.addView(v);
-            }
-
-        }
     }
 
     void resetTitle() {
-        setTitle(NAVDRAWER_ACTIONBAR_TITLE_RES_ID[getSelfNavDrawerItem()]);
-        ViewTreeObserver vto = findViewById(android.R.id.content).getViewTreeObserver();
+        setTitle(NAVDRAWER_TOOLBAR_TITLE_RES_ID[getSelfNavDrawerItem() == R.id.nav_current ? 0 : 1]);
+        final View root = findViewById(android.R.id.content);
+        ViewTreeObserver vto = root.getViewTreeObserver();
         vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @SuppressWarnings("deprecation")
             @Override
@@ -185,10 +131,10 @@ public abstract class DrawerActivity extends ThemableActivity {
                     setTitle(null);
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    findViewById(android.R.id.content).getViewTreeObserver()
+                    root.getViewTreeObserver()
                             .removeOnGlobalLayoutListener(this);
                 } else {
-                    findViewById(android.R.id.content).getViewTreeObserver()
+                    root.getViewTreeObserver()
                             .removeGlobalOnLayoutListener(this);
                 }
             }
@@ -235,15 +181,14 @@ public abstract class DrawerActivity extends ThemableActivity {
         super.onPostCreate(savedInstanceState);
         setupNavDrawer();
 
-        //TODO: Fade in only if selected in Drawer
-        /*if (savedInstanceState != null) {
+        if (getIntent().getBooleanExtra(EXTRA_FADEIN, false)) {
             View mainContent = findViewById(R.id.activity_drawer_content_linearlayout);
             mainContent.setAlpha(0);
             mainContent.animate().alpha(1).setDuration(MAIN_CONTENT_FADEIN_DURATION);
-        }*/
+        }
     }
 
-    private void onNavDrawerItemClicked(final int itemId) {
+    private void onNavDrawerItemClicked(@IdRes int itemId, @IdRes int groupId) {
         if (itemId == getSelfNavDrawerItem()) {
             mDrawerLayout.closeDrawer(GravityCompat.START);
             return;
@@ -262,9 +207,8 @@ public abstract class DrawerActivity extends ThemableActivity {
         mDrawerLayout.closeDrawer(GravityCompat.START);
     }
 
-    private boolean isNormalItem(int itemId) {
-        return itemId != NAVDRAWER_ITEM_SETTINGS && itemId !=
-                NAVDRAWER_ITEM_HELP && itemId != NAVDRAWER_ITEM_ABOUT;
+    private boolean isNormalItem(@IdRes int itemId) {
+        return itemId != R.id.nav_settings && itemId != R.id.nav_about;
     }
 
     protected boolean isNavDrawerOpen() {
@@ -277,19 +221,21 @@ public abstract class DrawerActivity extends ThemableActivity {
         }
     }
 
-    private void goToNavDrawerItem(int itemId) {
+    private void goToNavDrawerItem(@IdRes int itemId) {
         Intent i;
         switch (itemId) {
-            case NAVDRAWER_ITEM_CURRENT_SESSION:
+            case R.id.nav_current:
                 i = new Intent(this, CurrentSessionActivity.class);
+                i.putExtra(EXTRA_FADEIN, true);
                 break;
-            case NAVDRAWER_ITEM_HISTORY:
+            case R.id.nav_history:
                 i = new Intent(this, HistorySessionsActivity.class);
+                i.putExtra(EXTRA_FADEIN, true);
                 break;
-            case NAVDRAWER_ITEM_SETTINGS:
+            case R.id.nav_settings:
                 i = new Intent(this, SettingsActivity.class);
                 break;
-            case NAVDRAWER_ITEM_ABOUT:
+            case R.id.nav_about:
                 i = new Intent(this, AboutActivity.class);
                 break;
             default:
