@@ -186,7 +186,7 @@ public class SolveListPresenter extends Presenter<SolveListView> {
     }
 
     @SuppressWarnings("ConstantConditions")
-    public void onToolbarAddSolvePressed() {
+    public void onAddSolvePressed() {
         if (isViewAttached()) {
             SolveDialogUtils.createSolveDialog(getView().getContextCompat(), true, mPuzzleTypeId, mSessionId, null);
         }
@@ -206,9 +206,7 @@ public class SolveListPresenter extends Presenter<SolveListView> {
                 if (mIsCurrent) {
                     getView().enableResetSubmitButtons(false);
                 } else {
-                    PuzzleType.get(mPuzzleTypeId).deleteSession(getView().getContextCompat(), mSessionId);
-                    if (isViewAttached())
-                        getView().getContextCompat().finish();
+                    deleteSession();
                     return;
                 }
                 getView().showList(false);
@@ -223,7 +221,13 @@ public class SolveListPresenter extends Presenter<SolveListView> {
         }
     }
 
-    public void share() {
+    private void deleteSession() throws CouchbaseLiteException, IOException {
+        PuzzleType.get(mPuzzleTypeId).deleteSession(getView().getContextCompat(), mSessionId);
+        if (isViewAttached())
+            getView().getContextCompat().finish();
+    }
+
+    public void onSharePressed() {
         if (!isViewAttached()) {
             return;
         }
@@ -302,6 +306,14 @@ public class SolveListPresenter extends Presenter<SolveListView> {
 
                     }
                 });
+    }
+
+    public void onDeletePressed() {
+        try {
+            deleteSession();
+        } catch (CouchbaseLiteException | IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static class Factory implements PresenterFactory<SolveListPresenter> {

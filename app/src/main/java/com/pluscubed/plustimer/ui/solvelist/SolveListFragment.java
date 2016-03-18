@@ -68,24 +68,13 @@ public class SolveListFragment extends BasePresenterFragment<SolveListPresenter,
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_solvelist_share_menuitem:
-                presenter.share();
+                presenter.onSharePressed();
                 return true;
             case R.id.menu_history_solvelist_delete_menuitem:
-                //TODO
-               /* if (getPuzzleType().getHistorySessionsSorted().size() >= mSessionId) {*/
-                /*getPuzzleType().deleteSession(getPuzzleType().getSession(mSessionId));*/
-                /*} else {
-                    NullPointerException e = new NullPointerException(
-                            "SolveListFragment onOptionsItemSelected: " +
-                                    "delete failed for history session #"
-                                    + mSessionId + ", is null");
-                    ErrorUtils.showErrorDialog(getActivity(), "Error: ", e, true);
-                    ErrorUtils.logCrashlytics(e);
-                }*/
-                getActivity().finish();
+                presenter.onDeletePressed();
                 return true;
             case R.id.menu_solvelist_add_menuitem:
-                presenter.onToolbarAddSolvePressed();
+                presenter.onAddSolvePressed();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
