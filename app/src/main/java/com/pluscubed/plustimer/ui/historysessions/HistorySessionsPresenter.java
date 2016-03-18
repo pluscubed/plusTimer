@@ -16,7 +16,7 @@ import com.pluscubed.plustimer.base.PresenterFactory;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.model.Session;
 import com.pluscubed.plustimer.model.Solve;
-import com.pluscubed.plustimer.ui.HistorySolveListActivity;
+import com.pluscubed.plustimer.ui.historysolvelist.HistorySolveListActivity;
 import com.pluscubed.plustimer.utils.PrefUtils;
 import com.pluscubed.plustimer.utils.Utils;
 
@@ -44,6 +44,7 @@ public class HistorySessionsPresenter extends Presenter<HistorySessionsView> {
         updateAdapter();
     }
 
+    @SuppressWarnings("ConstantConditions")
     public void onSessionClicked(Session session) {
         if (!isViewAttached()) {
             return;
@@ -86,12 +87,18 @@ public class HistorySessionsPresenter extends Presenter<HistorySessionsView> {
                 });
     }*/
 
+    @SuppressWarnings("ConstantConditions")
     public void updateAdapter() {
+        if (!isViewAttached()) {
+            return;
+        }
+
+        getView().getHistorySessionsAdapter().setMillisecondsEnabled(mMillisecondsEnabled);
+
         PuzzleType.get(mPuzzleTypeId).getHistorySessionsSorted(getView().getContextCompat())
                 .toList()
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnNext(sessions -> {
-                    getView().getHistorySessionsAdapter().setMillisecondsEnabled(mMillisecondsEnabled);
                     getView().getHistorySessionsAdapter().setSessions(sessions);
                     getView().getHistorySessionsAdapter().notifyDataSetChanged();
                     getView().showList(true);
@@ -162,7 +169,7 @@ public class HistorySessionsPresenter extends Presenter<HistorySessionsView> {
                     xVals.add("");
                 }
                 xVals.add(Utils.dateTimeStringFromTimestamp(context, lastViewportSecondsTimestamp * 1000L));
-                
+
                 /*int lastAdded = 0;
                 for (int i = 0; i < sessionSecondsTimestamps.size(); i++) {
                     int timestamp = sessionSecondsTimestamps.get(i);
@@ -202,8 +209,6 @@ public class HistorySessionsPresenter extends Presenter<HistorySessionsView> {
                         if (lineData != null)
                             //noinspection ConstantConditions
                             getView().getHistorySessionsAdapter().setLineData(lineData);
-                        //noinspection ConstantConditions
-                        getView().getHistorySessionsAdapter().showLineChart(lineData != null);
                     }
                 }).toObservable().toCompletable();
 

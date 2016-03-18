@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.ShareCompat;
 
 import com.couchbase.lite.CouchbaseLiteException;
 import com.pluscubed.plustimer.R;
@@ -24,6 +25,8 @@ import rx.android.schedulers.AndroidSchedulers;
 
 public class SolveListPresenter extends Presenter<SolveListView> {
 
+    public static final String INIT_SESSION_ID = "history_session";
+    public static final String INIT_PUZZLETYPE_ID = "history_puzzletype";
     private static final String INIT_CURRENT = "current";
     private final Session.SolvesListener mSessionSolvesListener;
     private final PuzzleType.CurrentChangeListener mPuzzleTypeCurrentChangeListener;
@@ -34,6 +37,9 @@ public class SolveListPresenter extends Presenter<SolveListView> {
 
     public SolveListPresenter(Bundle arguments) {
         mIsCurrent = arguments.getBoolean(INIT_CURRENT);
+        mPuzzleTypeId = arguments.getString(INIT_PUZZLETYPE_ID);
+        mSessionId = arguments.getString(INIT_SESSION_ID);
+
         mSessionSolvesListener = (update, solve) -> {
             updateView();
             updateAdapter(update, solve);
@@ -56,8 +62,14 @@ public class SolveListPresenter extends Presenter<SolveListView> {
     }
 
     public static SolveListFragment newInstance(boolean current) {
+        return newInstance(current, "", "");
+    }
+
+    public static SolveListFragment newInstance(boolean current, String puzzleTypeId, String sessionId) {
         Bundle args = new Bundle();
         args.putBoolean(INIT_CURRENT, current);
+        args.putString(INIT_PUZZLETYPE_ID, puzzleTypeId);
+        args.putString(INIT_SESSION_ID, sessionId);
         SolveListFragment fragment = new SolveListFragment();
         fragment.setArguments(args);
         return fragment;
@@ -67,11 +79,14 @@ public class SolveListPresenter extends Presenter<SolveListView> {
     public void onViewAttached(SolveListView view) {
         super.onViewAttached(view);
 
-        if (PuzzleType.isInitialized() && mIsCurrent) {
-            setPuzzleTypeInitialized(PuzzleType.getCurrentId(), PuzzleType.getCurrent().getCurrentSessionId());
+        if (PuzzleType.isInitialized()) {
+            if (mIsCurrent) {
+                setPuzzleTypeInitialized(PuzzleType.getCurrentId(), PuzzleType.getCurrent().getCurrentSessionId());
+            } else if (mPuzzleTypeId != null && mSessionId != null) {
+                setPuzzleTypeInitialized(mPuzzleTypeId, mSessionId);
+            }
         }
 
-        view.getSolveListAdapter().setHeaderEnabled(mIsCurrent);
         view.getSolveListAdapter().updateSignAndMillisecondsMode();
     }
 
@@ -88,7 +103,7 @@ public class SolveListPresenter extends Presenter<SolveListView> {
             return;
         }
 
-        PuzzleType.getCurrent().getCurrentSessionDeferred(getView().getContextCompat())
+        PuzzleType.get(mPuzzleTypeId).getCurrentSessionDeferred(getView().getContextCompat())
                 .subscribe(session -> {
                     session.removeListener(mSessionSolvesListener);
                 });
@@ -158,6 +173,7 @@ public class SolveListPresenter extends Presenter<SolveListView> {
         }
     }
 
+    @SuppressWarnings("ConstantConditions")
     public void onSubmitClicked() {
         if (isViewAttached()) {
             try {
@@ -169,6 +185,7 @@ public class SolveListPresenter extends Presenter<SolveListView> {
         }
     }
 
+    @SuppressWarnings("ConstantConditions")
     public void onToolbarAddSolvePressed() {
         if (isViewAttached()) {
             SolveDialogUtils.createSolveDialog(getView().getContextCompat(), true, mPuzzleTypeId, mSessionId, null);
@@ -187,33 +204,18 @@ public class SolveListPresenter extends Presenter<SolveListView> {
 
             if (numberOfSolves <= 0) {
                 if (mIsCurrent) {
-                    //noinspection ConstantConditions
                     getView().enableResetSubmitButtons(false);
                 } else {
                     PuzzleType.get(mPuzzleTypeId).deleteSession(getView().getContextCompat(), mSessionId);
                     if (isViewAttached())
-                        //noinspection ConstantConditions
                         getView().getContextCompat().finish();
                     return;
                 }
-
-                //noinspection ConstantConditions
                 getView().showList(false);
             } else {
                 if (mIsCurrent) {
-                    //noinspection ConstantConditions
                     getView().enableResetSubmitButtons(true);
-                } else {
-                    session.getLastSolve(getView().getContextCompat()).subscribe(solve -> {
-                        //noinspection ConstantConditions
-                        Activity act = getView().getContextCompat();
-                        boolean displayMillisecondsEnabled =
-                                PrefUtils.isDisplayMillisecondsEnabled(getView().getContextCompat());
-                        act.setTitle(solve.getTimeString(displayMillisecondsEnabled));
-                    });
                 }
-
-                //noinspection ConstantConditions
                 getView().showList(true);
             }
         } catch (CouchbaseLiteException | IOException e) {
@@ -241,12 +243,12 @@ public class SolveListPresenter extends Presenter<SolveListView> {
                 .subscribe(new SingleSubscriber<String>() {
                     @Override
                     public void onSuccess(String statsString) {
-                        Intent intent = new Intent(Intent.ACTION_SEND);
-                        intent.setType("text/plain");
-                        intent.putExtra(Intent.EXTRA_TEXT, statsString);
-                        Activity context = getView().getContextCompat();
-                        Intent chooser = Intent.createChooser(intent, context.getString(R.string.share_dialog_title));
-                        context.startActivity(chooser);
+                        Intent intent = ShareCompat.IntentBuilder.from(getView().getContextCompat())
+                                .setType("text/plain")
+                                .setText(statsString)
+                                .setChooserTitle(R.string.share_dialog_title)
+                                .createChooserIntent();
+                        context.startActivity(intent);
                     }
 
                     @Override

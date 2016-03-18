@@ -9,8 +9,6 @@ import java.util.List;
 
 public interface SolveListAdapterView {
 
-    void setHeaderEnabled(boolean isCurrent);
-
     boolean isInitialized();
 
     void setSolves(String puzzleTypeId, List<Solve> solves);

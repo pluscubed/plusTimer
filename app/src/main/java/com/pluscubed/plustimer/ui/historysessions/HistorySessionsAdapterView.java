@@ -15,8 +15,6 @@ public interface HistorySessionsAdapterView {
 
     void setStats(String string);
 
-    void showLineChart(boolean show);
-
     void setLineData(LineData data);
 
     void notifyHeaderChanged();

@@ -195,6 +195,8 @@ public class Session extends CbObject implements Parcelable {
             throws CouchbaseLiteException, IOException {
         solve.connectCb(context);
 
+        mSolves.add(solve.getId());
+
         updateCb(context);
         notifyListeners(solve, RecyclerViewUpdate.INSERT);
     }

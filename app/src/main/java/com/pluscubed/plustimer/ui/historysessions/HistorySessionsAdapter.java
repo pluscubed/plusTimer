@@ -31,7 +31,6 @@ public class HistorySessionsAdapter extends RecyclerView.Adapter<HistorySessions
     private boolean mMillisecondsEnabled;
     private String mStats;
     private LineData mLineChartData;
-    private boolean mLineChartShown;
 
     private HistorySessionsPresenter mPresenter;
 
@@ -48,7 +47,6 @@ public class HistorySessionsAdapter extends RecyclerView.Adapter<HistorySessions
         }
 
         mLineChartData = new LineData();
-        mLineChartShown = false;
 
         setHasStableIds(true);
     }
@@ -61,11 +59,6 @@ public class HistorySessionsAdapter extends RecyclerView.Adapter<HistorySessions
     @Override
     public void setStats(String string) {
         mStats = string;
-    }
-
-    @Override
-    public void showLineChart(boolean show) {
-        mLineChartShown = show;
     }
 
     @Override
@@ -125,9 +118,6 @@ public class HistorySessionsAdapter extends RecyclerView.Adapter<HistorySessions
         if (position == 0) {
             holder.textView.setText(mStats);
 
-            holder.graph.setData(mLineChartData);
-            holder.graph.getXAxis().setLabelsToSkip(mLineChartData.getXValCount() - 2);
-
             holder.graph.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM_INSIDE);
             holder.graph.getXAxis().setAvoidFirstLastClipping(true);
             holder.graph.getAxisLeft().setAxisMinValue(0);
@@ -136,8 +126,11 @@ public class HistorySessionsAdapter extends RecyclerView.Adapter<HistorySessions
                     (value, yAxis) -> Utils.timeStringFromNs((long) value, mMillisecondsEnabled));
             holder.graph.getAxisRight().setEnabled(false);
 
-
             holder.graph.invalidate();
+
+            holder.graph.setData(mLineChartData);
+            holder.graph.getXAxis().setLabelsToSkip(mLineChartData.getXValCount() - 2);
+
         } else {
             String timestamp = mSessions.get(position - 1).getTimestampString(mContext).toBlocking().value();
             holder.textView.setText(timestamp);

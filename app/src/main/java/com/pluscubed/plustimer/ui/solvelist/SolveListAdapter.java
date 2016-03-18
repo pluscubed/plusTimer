@@ -40,7 +40,6 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
 
     private boolean mSignEnabled;
     private boolean mMillisecondsEnabled;
-    private boolean mHeaderEnabled;
 
     private SolveListPresenter mPresenter;
 
@@ -76,10 +75,6 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
         mSolves = solves;
     }
 
-    public void setHeaderEnabled(boolean headerEnabled) {
-        mHeaderEnabled = headerEnabled;
-    }
-
     public void onPresenterPrepared(SolveListPresenter presenter) {
         mPresenter = presenter;
     }
@@ -110,10 +105,9 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        if (!mHeaderEnabled || position > 0) {
+        if (position > 0) {
 
-            if (mHeaderEnabled)
-                position = position - 1;
+            position = position - 1;
 
             Solve s = mSolves.get(position);
             String timeString = s.getTimeString(mMillisecondsEnabled);
@@ -135,30 +129,20 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
 
     @Override
     public int getItemViewType(int position) {
-        if (mHeaderEnabled)
-            return position == 0 ? HEADER_VIEWTYPE : 0;
-        else
-            return 0;
+        return position == 0 ? HEADER_VIEWTYPE : 0;
     }
 
     @Override
     public int getItemCount() {
-        return mSolves.size() + getHeaderOffset();
+        return mSolves.size() + 1;
     }
 
     @Override
     public long getItemId(int position) {
-        if (mHeaderEnabled)
-            if (position == 0)
-                return HEADER_ID;
-            else
-                return mSolves.get(position - 1).getId().hashCode();
+        if (position == 0)
+            return HEADER_ID;
         else
-            return mSolves.get(position).getId().hashCode();
-    }
-
-    private int getHeaderOffset() {
-        return mHeaderEnabled ? 1 : 0;
+            return mSolves.get(position - 1).getId().hashCode();
     }
 
     @Override
@@ -182,7 +166,7 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
                     Solve foundSolve = mSolves.get(i);
                     if (foundSolve.getId().equals(solve.getId())) {
                         mSolves.set(i, solve);
-                        notifyItemChanged(i + getHeaderOffset());
+                        notifyItemChanged(i + 1);
                         break;
                     }
                 }
@@ -203,12 +187,12 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
             if (oldBest != null && !oldBest.equals(mBest)) {
                 //indexOf old solve will only work for insert b/c it uses .equals of Solve,
                 // but that's fine since in single change the old solve is updated already
-                notifyItemChanged(mSolves.indexOf(oldBest) + getHeaderOffset());
-                notifyItemChanged(mSolves.indexOf(mBest) + getHeaderOffset());
+                notifyItemChanged(mSolves.indexOf(oldBest) + 1);
+                notifyItemChanged(mSolves.indexOf(mBest) + 1);
             }
             if (oldWorst != null && !oldWorst.equals(mWorst)) {
-                notifyItemChanged(mSolves.indexOf(oldWorst) + getHeaderOffset());
-                notifyItemChanged(mSolves.indexOf(mWorst) + getHeaderOffset());
+                notifyItemChanged(mSolves.indexOf(oldWorst) + 1);
+                notifyItemChanged(mSolves.indexOf(mWorst) + 1);
             }
         }
 
@@ -225,7 +209,7 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
         mMillisecondsEnabled = PrefUtils.isDisplayMillisecondsEnabled(mContext);
 
         if (signWasEnabled != mSignEnabled || mMillisecondsEnabled != millisecondsWasEnabled) {
-            notifyItemRangeChanged(getHeaderOffset(), mSolves.size());
+            notifyItemRangeChanged(1, mSolves.size());
         }
     }
 
@@ -243,7 +227,7 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
                 desc = (TextView) v.findViewById(R.id.list_item_solvelist_desc_textview);
 
                 v.setOnClickListener(view -> {
-                    mPresenter.onSolveClicked(mSolves.get(getAdapterPosition() - getHeaderOffset()));
+                    mPresenter.onSolveClicked(mSolves.get(getAdapterPosition() - 1));
                 });
             }
         }

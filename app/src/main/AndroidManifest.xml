@@ -27,7 +27,7 @@
             android:name=".ui.historysessions.HistorySessionsActivity"
             android:theme="@style/Theme.PlusTimer.WithNavDrawer" />
 
-        <activity android:name="com.pluscubed.plustimer.ui.HistorySolveListActivity" />
+        <activity android:name=".ui.historysolvelist.HistorySolveListActivity" />
 
         <activity android:name="com.pluscubed.plustimer.ui.SettingsActivity" />
         <activity
