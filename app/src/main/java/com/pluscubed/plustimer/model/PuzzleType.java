@@ -342,12 +342,12 @@ public class PuzzleType extends CbObject {
     }
 
     public void setEnabled(Context context, boolean enabled) throws CouchbaseLiteException, IOException {
-        //TODO
+
         this.mEnabled = enabled;
         if (mId.equals(sCurrentTypeId) && !this.mEnabled) {
-            for (PuzzleType i : sPuzzleTypes) {
-                if (i.mEnabled) {
-                    sCurrentTypeId = i.getId();
+            for (PuzzleType puzzleType : sPuzzleTypes) {
+                if (puzzleType.mEnabled) {
+                    setCurrent(context, puzzleType.getId());
                     break;
                 }
             }
