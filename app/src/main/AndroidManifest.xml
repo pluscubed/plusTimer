@@ -24,7 +24,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.pluscubed.plustimer.ui.HistorySessionListActivity"
+            android:name=".ui.historysessions.HistorySessionsActivity"
             android:theme="@style/Theme.PlusTimer.WithNavDrawer" />
 
         <activity android:name="com.pluscubed.plustimer.ui.HistorySolveListActivity" />

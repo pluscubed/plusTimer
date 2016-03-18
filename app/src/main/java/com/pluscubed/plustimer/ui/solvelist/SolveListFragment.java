@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,7 +30,7 @@ public class SolveListFragment extends BasePresenterFragment<SolveListPresenter,
     private SolveListAdapterView mSolveListAdapter;
     private TextView mEmptyView;
 
-    private ActionMode mActionMode;
+    //private ActionMode mActionMode;
     private LinearLayout mResetSubmitLinearLayout;
 
     public SolveListAdapterView getSolveListAdapter() {
@@ -73,7 +72,7 @@ public class SolveListFragment extends BasePresenterFragment<SolveListPresenter,
                 return true;
             case R.id.menu_history_solvelist_delete_menuitem:
                 //TODO
-               /* if (getPuzzleType().getSortedHistorySessions().size() >= mSessionId) {*/
+               /* if (getPuzzleType().getHistorySessionsSorted().size() >= mSessionId) {*/
                 /*getPuzzleType().deleteSession(getPuzzleType().getSession(mSessionId));*/
                 /*} else {
                     NullPointerException e = new NullPointerException(
@@ -94,9 +93,9 @@ public class SolveListFragment extends BasePresenterFragment<SolveListPresenter,
     }
 
     public void finishActionMode() {
-        if (mActionMode != null) {
+        /*if (mActionMode != null) {
             mActionMode.finish();
-        }
+        }*/
     }
 
     @Override
@@ -225,12 +224,6 @@ public class SolveListFragment extends BasePresenterFragment<SolveListPresenter,
 
     public void enableResetSubmitButtons(boolean enable) {
         mResetSubmitLinearLayout.setVisibility(enable ? View.VISIBLE : View.GONE);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        //presenter.onPause();
     }
 
     @Override

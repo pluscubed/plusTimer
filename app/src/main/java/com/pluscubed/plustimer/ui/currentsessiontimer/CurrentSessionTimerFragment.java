@@ -223,7 +223,7 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
 
     //Generate string with specified current averages and mean of current session
     private Single<String> buildStatsWithAveragesOf(Context context,
-                                            Integer... currentAverageSpecs) {
+                                                    Integer... currentAverageSpecs) {
         Arrays.sort(currentAverageSpecs, Collections.reverseOrder());
 
         return PuzzleType.getCurrent().getCurrentSessionDeferred(getActivity())
@@ -691,7 +691,7 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
         mInspectionEnabled = PrefUtils.isInspectionEnabled(getActivity());
         mHoldToStartEnabled = PrefUtils.isHoldToStartEnabled(getActivity());
         mTwoRowTimeEnabled = getResources().getConfiguration().orientation == 1
-                        && PrefUtils.isTwoRowTimeEnabled(getActivity());
+                && PrefUtils.isTwoRowTimeEnabled(getActivity());
         mUpdateTimePref = PrefUtils.getTimerUpdateMode(getActivity());
         mMillisecondsEnabled = PrefUtils.isDisplayMillisecondsEnabled(getActivity());
         mTimerTextSize = PrefUtils.getTimerTextSize(getActivity());

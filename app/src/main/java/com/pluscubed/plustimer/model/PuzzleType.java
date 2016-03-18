@@ -372,7 +372,7 @@ public class PuzzleType extends CbObject {
 
     //TODO
     /*@Deprecated
-    public HistorySessions getHistorySessions() {
+    public HistorySessions getHistorySessionsSorted() {
         return mHistorySessionsLegacy;
     }*/
 
@@ -384,27 +384,6 @@ public class PuzzleType extends CbObject {
         mSessions.remove(sessionId);
 
         updateCb(context);
-    }
-
-    public List<Session> getSortedHistorySessions() {
-        //TODO
-        /*if (sessions.size() > 0) {
-            sessions.remove(getSession(mCurrentSessionId));
-            Collections.sort(sessions, new Comparator<Session>() {
-                @Override
-                public int compare(Session lhs, Session rhs) {
-                    if (lhs.getTimestamp() > rhs.getTimestamp()) {
-                        return 1;
-                    } else if (lhs.getTimestamp() < rhs.getTimestamp()) {
-                        return -1;
-                    } else {
-                        return 0;
-                    }
-                }
-            });
-        }
-        return sessions;*/
-        return null;
     }
 
     private void upgradeDatabase(Context context) {
@@ -499,8 +478,17 @@ public class PuzzleType extends CbObject {
         return fromDocId(context, id, Session.class);
     }
 
-    public Observable<Session> getSessions(Context context) {
+    public Observable<Session> getHistorySessionsSorted(Context context) {
+        return getHistorySessions(context)
+                .toSortedList((session, session2) -> {
+                    return Utils.compare(session.getLastSolve(context).toBlocking().first().getTimestamp(),
+                            session2.getLastSolve(context).toBlocking().first().getTimestamp());
+                }).flatMap(Observable::from);
+    }
+
+    public Observable<Session> getHistorySessions(Context context) {
         return Observable.from(new ArrayList<>(mSessions))
+                .filter(id -> !id.equals(mCurrentSessionId))
                 .subscribeOn(Schedulers.io())
                 .flatMap(id -> {
                     try {

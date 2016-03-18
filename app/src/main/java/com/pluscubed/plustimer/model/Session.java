@@ -1,6 +1,8 @@
 package com.pluscubed.plustimer.model;
 
 import android.content.Context;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 
@@ -34,12 +36,20 @@ import rx.schedulers.Schedulers;
         isGetterVisibility = JsonAutoDetect.Visibility.NONE,
         setterVisibility = JsonAutoDetect.Visibility.NONE
 )
-public class Session extends CbObject {
+public class Session extends CbObject implements Parcelable {
     public static final String TYPE_SESSION = "session";
 
     public static final int GET_AVERAGE_INVALID_NOT_ENOUGH = -1;
     public static final long TIMESTAMP_NO_SOLVES = Long.MIN_VALUE;
+    public static final Parcelable.Creator<Session> CREATOR = new Parcelable.Creator<Session>() {
+        public Session createFromParcel(Parcel source) {
+            return new Session(source);
+        }
 
+        public Session[] newArray(int size) {
+            return new Session[size];
+        }
+    };
     private static Map<String, Set<SolvesListener>> sListenerMap;
     @JsonProperty("solves")
     @NonNull
@@ -54,6 +64,13 @@ public class Session extends CbObject {
         mSolves = new HashSet<>();
 
         updateCb(context);
+    }
+
+    protected Session(Parcel in) {
+        List<String> list = new ArrayList<>();
+        in.readStringList(list);
+        mSolves = new HashSet<>();
+        mSolves.addAll(list);
     }
 
     private static Map<String, Set<SolvesListener>> getListenerMap() {
@@ -98,6 +115,8 @@ public class Session extends CbObject {
         }
     }
 
+    //TODO
+
     public static String getStringMean(List<Solve> solves, boolean milliseconds) {
         long sum = 0;
         for (Solve i : solves) {
@@ -120,8 +139,6 @@ public class Session extends CbObject {
             sListenerMap.put(mId, set);
         }
     }
-
-    //TODO
 
     public void removeListener(SolvesListener listener) {
         Set<SolvesListener> solvesListeners = getListenerMap().get(mId);
@@ -147,7 +164,7 @@ public class Session extends CbObject {
         return fromDocId(context, solveId, Solve.class);
     }
 
-    private Observable<Solve> getSolves(Context context) {
+    public Observable<Solve> getSolves(Context context) {
         return Observable.from(new ArrayList<>(mSolves))
                 .subscribeOn(Schedulers.io())
                 .flatMap(id -> {
@@ -234,6 +251,8 @@ public class Session extends CbObject {
                 .takeLast(1);
     }
 
+    //TODO
+
     @NonNull
     public Observable<Solve> getSortedSolves(Context context) {
         return getSolves(context)
@@ -251,8 +270,6 @@ public class Session extends CbObject {
                 .elementAt(position)
                 .toSingle();
     }
-
-    //TODO
 
     /**
      * Returns a String of the best average of some number of solves.
@@ -310,7 +327,7 @@ public class Session extends CbObject {
 
     public Single<String> getTimestampString(Context context) {
         return getTimestamp(context)
-                .map(timestamp -> Utils.timeDateStringFromTimestamp(context, timestamp));
+                .map(timestamp -> Utils.dateTimeSecondsStringFromTimestamp(context, timestamp));
     }
 
     public Single<Long> getTimestamp(Context context) {
@@ -402,7 +419,7 @@ public class Session extends CbObject {
                 } else {
                     statsBuilder.append(solve.getDescriptiveTimeString(milliseconds));
                 }
-                statsBuilder.append("\n     ").append(Utils.timeDateStringFromTimestamp(context, solve.getTimestamp()))
+                statsBuilder.append("\n     ").append(Utils.dateTimeSecondsStringFromTimestamp(context, solve.getTimestamp()))
                         .append("\n     ").append(Utils.getUiScramble(solve.getScramble(), sign, puzzleTypeName))
                         .append("\n\n");
             }
@@ -411,11 +428,21 @@ public class Session extends CbObject {
         return statsBuilder.toString();
     }
 
-    public void reset(Context context){
+    public void reset(Context context) {
         mSolves.clear();
         updateCb(context);
 
         notifyListeners(null, RecyclerViewUpdate.REMOVE_ALL);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeStringList(new ArrayList<>(mSolves));
     }
 
     public interface SolvesListener {
@@ -463,5 +490,4 @@ public class Session extends CbObject {
             return solve;
         }
     }
-
 }

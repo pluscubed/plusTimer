@@ -47,8 +47,9 @@
     <string name="best">"Best: "</string>
     <string name="worst">"Worst: "</string>
     <string name="average">"Average: "</string>
-    <string name="pb">PB</string>
+    <string name="pb">PB: %1$s</string>
     <string name="ao">Ao%1$d</string>
+    <string name="pb_ao">PB Ao%1$d: %2$s</string>
     <string name="best_times">Best Times</string>
 
     <!--Dialog-->

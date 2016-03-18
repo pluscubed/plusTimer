@@ -105,7 +105,7 @@ public class CurrentSessionTimerPresenter extends Presenter<CurrentSessionTimerV
 
     @SuppressWarnings("ConstantConditions")
     private void removeSessionSolvesListener() {
-        if(!isViewAttached()){
+        if (!isViewAttached()) {
             return;
         }
 
@@ -138,7 +138,7 @@ public class CurrentSessionTimerPresenter extends Presenter<CurrentSessionTimerV
 
 
     public void setPuzzleTypeInitialized() {
-        if(!isViewAttached()){
+        if (!isViewAttached()) {
             return;
         }
 

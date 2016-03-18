@@ -78,6 +78,9 @@
     <item name="activity_current_session_framelayout" type="id" />
     <item name="fragment_current_session_timer_scramble_shadow" type="id" />
     <item name="fragment_solvelist_recyclerview" type="id" />
+    <item name="history_sessions_stats" type="id" />
+    <item name="history_sessions_linechart" type="id" />
+    <item name="history_sessions_recycler" type="id" />
 
 
 </resources>

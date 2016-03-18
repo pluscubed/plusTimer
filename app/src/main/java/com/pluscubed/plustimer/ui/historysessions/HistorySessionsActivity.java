@@ -1,28 +1,29 @@
-package com.pluscubed.plustimer.ui;
+package com.pluscubed.plustimer.ui.historysessions;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.os.Bundle;
 
 import com.pluscubed.plustimer.R;
+import com.pluscubed.plustimer.ui.DrawerActivity;
 
 /**
  * History session list activity
  */
 
-public class HistorySessionListActivity extends DrawerActivity {
+public class HistorySessionsActivity extends DrawerActivity {
 
     @Override
     protected void onNavDrawerSlide(float offset) {
-        if (getFragmentManager()
+        /*if (getFragmentManager()
                 .findFragmentById(R.id
                         .activity_history_sessionlist_main_framelayout)
                 != null) {
-            ((HistorySessionListFragment) getFragmentManager()
+            ((HistorySessionsFragment) getFragmentManager()
                     .findFragmentById(R.id
                             .activity_history_sessionlist_main_framelayout))
                     .finishActionMode();
-        }
+        }*/
     }
 
     @Override
@@ -36,12 +37,10 @@ public class HistorySessionListActivity extends DrawerActivity {
         setContentView(R.layout.activity_history_sessionlist);
 
         FragmentManager fm = getFragmentManager();
-        Fragment fragment = fm.findFragmentById(R.id
-                .activity_history_sessionlist_main_framelayout);
+        Fragment fragment = fm.findFragmentById(R.id.activity_history_sessionlist_main_framelayout);
         if (fragment == null) {
-            fragment = new HistorySessionListFragment();
-            fm.beginTransaction().add(R.id
-                    .activity_history_sessionlist_main_framelayout, fragment)
+            fragment = new HistorySessionsFragment();
+            fm.beginTransaction().add(R.id.activity_history_sessionlist_main_framelayout, fragment)
                     .commit();
         }
 

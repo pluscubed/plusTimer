@@ -5,7 +5,7 @@ import android.app.LoaderManager;
 import android.content.Loader;
 import android.os.Bundle;
 
-public abstract class BasePresenterFragment<P extends Presenter<V>, V> extends Fragment{
+public abstract class BasePresenterFragment<P extends Presenter<V>, V> extends Fragment {
 
     private static final String TAG = "base-fragment";
     private static final int LOADER_ID = 101;
@@ -41,7 +41,6 @@ public abstract class BasePresenterFragment<P extends Presenter<V>, V> extends F
             }
         });
     }
-
 
 
     @Override

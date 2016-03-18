@@ -48,6 +48,10 @@ public class Solve extends CbObject implements Parcelable {
     private int mPenalty;
     @JsonProperty("time")
     private long mTime;
+
+    /**
+     * Timestamp in milliseconds
+     */
     @JsonProperty("timestamp")
     private long mTimestamp;
 

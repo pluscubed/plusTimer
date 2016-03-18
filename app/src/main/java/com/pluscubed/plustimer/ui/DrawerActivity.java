@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.ui.currentsession.CurrentSessionActivity;
+import com.pluscubed.plustimer.ui.historysessions.HistorySessionsActivity;
 import com.pluscubed.plustimer.utils.PrefUtils;
 
 /**
@@ -283,7 +284,7 @@ public abstract class DrawerActivity extends ThemableActivity {
                 i = new Intent(this, CurrentSessionActivity.class);
                 break;
             case NAVDRAWER_ITEM_HISTORY:
-                i = new Intent(this, HistorySessionListActivity.class);
+                i = new Intent(this, HistorySessionsActivity.class);
                 break;
             case NAVDRAWER_ITEM_SETTINGS:
                 i = new Intent(this, SettingsActivity.class);

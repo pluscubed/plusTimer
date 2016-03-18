@@ -31,10 +31,9 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
 
     private static final int HEADER_VIEWTYPE = 2;
     private static final int HEADER_ID = -1;
-
+    private final Context mContext;
     private Solve mBest;
     private Solve mWorst;
-    private Context mContext;
     private String mPuzzleTypeId;
     private List<Solve> mSolves;
     private String mStats;
@@ -121,7 +120,7 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
 
             if (s == mBest || s == mWorst) {
                 holder.textView.setText(String.format("(%s)", timeString));
-            }else{
+            } else {
                 holder.textView.setText(timeString);
             }
 
@@ -136,10 +135,10 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
 
     @Override
     public int getItemViewType(int position) {
-        if (position == 0) {
-            return HEADER_VIEWTYPE;
-        }
-        return 0;
+        if (mHeaderEnabled)
+            return position == 0 ? HEADER_VIEWTYPE : 0;
+        else
+            return 0;
     }
 
     @Override

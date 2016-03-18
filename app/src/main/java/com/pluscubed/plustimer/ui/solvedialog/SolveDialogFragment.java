@@ -109,47 +109,47 @@ public class SolveDialogFragment extends DialogFragment {
 
         //TIMESTAMP TEXTVIEW SETUP
         TextView timestampTextView = (TextView) v.findViewById(R.id.dialog_solve_timestamp_textview);
-        timestampTextView.setText(Utils.timeDateStringFromTimestamp(getActivity().getApplicationContext(), timestamp));
+        timestampTextView.setText(Utils.dateTimeSecondsStringFromTimestamp(getActivity().getApplicationContext(), timestamp));
 
         //PENALTY SPINNER SETUP
         Spinner penaltySpinner = (Spinner) v.findViewById(R.id.dialog_solve_modify_penalty_spinner);
         ArrayAdapter<CharSequence> adapter =
                 new ArrayAdapter<CharSequence>(getActivity(), 0, getResources().getStringArray(R.array.penalty_array)) {
-            @Override
-            public View getView(int position, View convertView,
-                                ViewGroup parent) {
-                if (convertView == null) {
-                    convertView = getActivity().getLayoutInflater()
-                            .inflate(R.layout.spinner_item, parent, false);
-                }
-                TextView textView = (TextView) convertView.findViewById
-                        (android.R.id.text1);
-                textView.setText(getItem(position));
-                if (PrefUtils.getTheme(getActivity()) != PrefUtils.Theme.DARK
-                        && PrefUtils.getTheme(getActivity()) != PrefUtils.Theme.BLACK) {
-                    ImageView triangle = (ImageView) convertView.findViewById(R.id
-                            .spinner_item_imageview);
-                    triangle.setColorFilter(Color.BLACK);
-                }
-                return convertView;
-            }
-
-            @Override
-            public View getDropDownView(int position, View convertView,
+                    @Override
+                    public View getView(int position, View convertView,
                                         ViewGroup parent) {
-                View v = super.getDropDownView(position, convertView, parent);
-                int textColor;
-                if (PrefUtils.getTheme(getActivity()) == PrefUtils.Theme.DARK
-                        || PrefUtils.getTheme(getActivity()) == PrefUtils.Theme.BLACK) {
-                    textColor = R.color.list_dropdown_color_dark;
-                } else {
-                    textColor = R.color.list_dropdown_color_light;
-                }
-                ((TextView) v.findViewById(android.R.id.text1)).setTextColor
-                        (getResources().getColorStateList(textColor));
-                return v;
-            }
-        };
+                        if (convertView == null) {
+                            convertView = getActivity().getLayoutInflater()
+                                    .inflate(R.layout.spinner_item, parent, false);
+                        }
+                        TextView textView = (TextView) convertView.findViewById
+                                (android.R.id.text1);
+                        textView.setText(getItem(position));
+                        if (PrefUtils.getTheme(getActivity()) != PrefUtils.Theme.DARK
+                                && PrefUtils.getTheme(getActivity()) != PrefUtils.Theme.BLACK) {
+                            ImageView triangle = (ImageView) convertView.findViewById(R.id
+                                    .spinner_item_imageview);
+                            triangle.setColorFilter(Color.BLACK);
+                        }
+                        return convertView;
+                    }
+
+                    @Override
+                    public View getDropDownView(int position, View convertView,
+                                                ViewGroup parent) {
+                        View v = super.getDropDownView(position, convertView, parent);
+                        int textColor;
+                        if (PrefUtils.getTheme(getActivity()) == PrefUtils.Theme.DARK
+                                || PrefUtils.getTheme(getActivity()) == PrefUtils.Theme.BLACK) {
+                            textColor = R.color.list_dropdown_color_dark;
+                        } else {
+                            textColor = R.color.list_dropdown_color_light;
+                        }
+                        ((TextView) v.findViewById(android.R.id.text1)).setTextColor
+                                (getResources().getColorStateList(textColor));
+                        return v;
+                    }
+                };
         adapter.setDropDownViewResource(R.layout.spinner_item_dropdown);
         penaltySpinner.setAdapter(adapter);
         penaltySpinner.setSelection(penalty);

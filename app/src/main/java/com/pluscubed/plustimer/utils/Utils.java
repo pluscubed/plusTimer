@@ -6,6 +6,7 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.view.Display;
 import android.view.Surface;
 import android.view.View;
@@ -64,6 +65,10 @@ public class Utils {
     public static int convertDpToPx(Context context, float dp) {
         return (int) (dp * context.getResources().getDisplayMetrics().density
                 + 0.5f);
+    }
+
+    public static int compare(long lhs, long rhs) {
+        return lhs < rhs ? -1 : (lhs == rhs ? 0 : 1);
     }
 
     public static void lockOrientation(Activity activity) {
@@ -180,20 +185,16 @@ public class Utils {
      * settings and locale from
      * the timestamp
      *
-     * @param applicationContext the application context
-     * @param timestamp          the timestamp to convert into a date & time
-     *                           String
+     * @param context   the context
+     * @param timestamp the timestamp to convert into a date & time
+     *                  String
      * @return the String converted from the timestamp
      * @see android.text.format.DateFormat
      * @see java.text.DateFormat
      */
-    public static String timeDateStringFromTimestamp(Context applicationContext, long timestamp) {
+    public static String dateTimeSecondsStringFromTimestamp(Context context, long timestamp) {
         String timeDate;
-        String androidDateTime = android.text.format.DateFormat.getDateFormat
-                (applicationContext)
-                .format(new Date(timestamp)) + " " +
-                android.text.format.DateFormat.getTimeFormat(applicationContext)
-                        .format(new Date(timestamp));
+        String androidDateTime = dateTimeStringFromTimestamp(context, timestamp);
         String javaDateTime = DateFormat.getDateTimeInstance().format(new
                 Date(timestamp));
         String AmPm = "";
@@ -222,6 +223,13 @@ public class Utils {
         javaDateTime = javaDateTime.substring(javaDateTime.length() - 3);
         timeDate = androidDateTime.concat(javaDateTime);
         return timeDate.concat(AmPm);
+    }
+
+    @NonNull
+    public static String dateTimeStringFromTimestamp(Context context, long timestamp) {
+        return android.text.format.DateFormat.getDateFormat(context).format(new Date(timestamp))
+                + " " +
+                android.text.format.DateFormat.getTimeFormat(context).format(new Date(timestamp));
     }
 
     /**
