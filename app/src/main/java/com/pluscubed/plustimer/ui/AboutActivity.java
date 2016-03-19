@@ -17,7 +17,6 @@ import android.widget.TextView;
 
 import com.pluscubed.plustimer.BuildConfig;
 import com.pluscubed.plustimer.R;
-import com.pluscubed.plustimer.utils.ErrorUtils;
 
 /**
  * About Page
@@ -81,44 +80,31 @@ public class AboutActivity extends ThemableActivity {
 
             Button github = (Button) view.findViewById(R.id
                     .fragment_about_github_button);
-            github.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Uri uriUrl = Uri.parse("https://github" +
-                            ".com/plusCubed/plusTimer");
-                    startActivity(new Intent(Intent.ACTION_VIEW, uriUrl));
-                }
+            github.setOnClickListener(v -> {
+                Uri uriUrl = Uri.parse("https://github.com/plusCubed/plusTimer");
+                startActivity(new Intent(Intent.ACTION_VIEW, uriUrl));
             });
 
             Button email = (Button) view.findViewById(R.id
                     .fragment_about_email_button);
-            email.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(Intent.ACTION_SENDTO,
-                            Uri.fromParts(
-                                    "mailto", "plusCubed@gmail.com", null));
-                    startActivity(
-                            Intent.createChooser(intent,
-                                    getString(R.string.send_email)));
-                }
+            email.setOnClickListener(v -> {
+                Intent intent = new Intent(Intent.ACTION_SENDTO,
+                        Uri.fromParts(
+                                "mailto", "plusCubed@gmail.com", null));
+                startActivity(
+                        Intent.createChooser(intent,
+                                getString(R.string.send_email)));
             });
 
             Button rate = (Button) view.findViewById(R.id
                     .fragment_about_rate_button);
-            rate.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    try {
-                        Uri uri = Uri.parse("market://details?id=com" +
-                                ".pluscubed.plustimer");
-                        startActivity(new Intent(Intent.ACTION_VIEW, uri));
-                    } catch (ActivityNotFoundException e) {
-                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(
-                                "http://play.google" +
-                                        ".com/store/apps/details?id=com" +
-                                        ".pluscubed.plustimer")));
-                    }
+            rate.setOnClickListener(v -> {
+                try {
+                    Uri uri = Uri.parse("market://details?id=com.pluscubed.plustimer");
+                    startActivity(new Intent(Intent.ACTION_VIEW, uri));
+                } catch (ActivityNotFoundException e) {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(
+                            "http://play.google.com/store/apps/details?id=com.pluscubed.plustimer")));
                 }
             });
 
@@ -126,8 +112,7 @@ public class AboutActivity extends ThemableActivity {
             send.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    ErrorUtils.sendFileDataEmail(getActivity());
-
+                    //ErrorUtils.sendFileDataEmail(getActivity());
                 }
             });
 

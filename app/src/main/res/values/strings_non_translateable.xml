@@ -42,4 +42,6 @@
         <item>THREE_OH</item>
         <item>THREE_FEET</item>
     </string-array>
+
+    <string name="toolbar_shared_element">shared_toolbar</string>
 </resources>

@@ -60,6 +60,8 @@ public class CurrentSessionTimerPresenter extends Presenter<CurrentSessionTimerV
 
         TimeBarRecyclerAdapter adapter = getView().getTimeBarAdapter();
         adapter.scrollRecyclerViewToLast(getView());
+
+        getView().updateBld();
     }
 
     @SuppressWarnings("ConstantConditions")

@@ -26,12 +26,8 @@ import com.pluscubed.plustimer.utils.PrefUtils;
  */
 public abstract class DrawerActivity extends ThemableActivity {
 
-    private static final String EXTRA_FADEIN = "com.pluscubed.plustimer.EXTRA_FADEIN";
+    private static final String EXTRA_CLOSE_DRAWER = "com.pluscubed.plustimer.EXTRA_CLOSE_DRAWER";
 
-
-    private static final int NAVDRAWER_LAUNCH_DELAY = 250;
-    private static final int MAIN_CONTENT_FADEOUT_DURATION = 150;
-    private static final int MAIN_CONTENT_FADEIN_DURATION = 250;
     private static final int[] NAVDRAWER_TOOLBAR_TITLE_RES_ID = new int[]{
             R.string.current,
             R.string.history
@@ -176,12 +172,15 @@ public abstract class DrawerActivity extends ThemableActivity {
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
+
         setupNavDrawer();
 
-        if (getIntent().getBooleanExtra(EXTRA_FADEIN, false)) {
-            View mainContent = findViewById(R.id.activity_drawer_content_linearlayout);
-            mainContent.setAlpha(0);
-            mainContent.animate().alpha(1).setDuration(MAIN_CONTENT_FADEIN_DURATION);
+        if (savedInstanceState == null && getIntent().getBooleanExtra(EXTRA_CLOSE_DRAWER, false)) {
+            mDrawerLayout.openDrawer(GravityCompat.START);
+
+            mDrawerLayout.post(() -> {
+                mDrawerLayout.closeDrawer(GravityCompat.START);
+            });
         }
     }
 
@@ -191,17 +190,7 @@ public abstract class DrawerActivity extends ThemableActivity {
             return;
         }
 
-        mHandler.postDelayed(() -> goToNavDrawerItem(itemId), NAVDRAWER_LAUNCH_DELAY);
-        if (isNormalItem(itemId)) {
-            View mainContent = findViewById(R.id
-                    .activity_drawer_content_linearlayout);
-            if (mainContent != null) {
-                mainContent.animate().alpha(0).setDuration
-                        (MAIN_CONTENT_FADEOUT_DURATION);
-            }
-        }
-
-        mDrawerLayout.closeDrawer(GravityCompat.START);
+        goToNavDrawerItem(itemId);
     }
 
     private boolean isNormalItem(@IdRes int itemId) {
@@ -223,11 +212,11 @@ public abstract class DrawerActivity extends ThemableActivity {
         switch (itemId) {
             case R.id.nav_current:
                 i = new Intent(this, CurrentSessionActivity.class);
-                i.putExtra(EXTRA_FADEIN, true);
+                i.putExtra(EXTRA_CLOSE_DRAWER, true);
                 break;
             case R.id.nav_history:
                 i = new Intent(this, HistorySessionsActivity.class);
-                i.putExtra(EXTRA_FADEIN, true);
+                i.putExtra(EXTRA_CLOSE_DRAWER, true);
                 break;
             case R.id.nav_settings:
                 i = new Intent(this, SettingsActivity.class);
@@ -241,8 +230,13 @@ public abstract class DrawerActivity extends ThemableActivity {
                 return;
         }
 
-        startActivity(i);
-        //If it is not a special item, finish this activity
-        if (isNormalItem(itemId)) finish();
+        if (isNormalItem(itemId)) {
+            startActivity(i);
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+            finish();
+        } else {
+            mHandler.postDelayed(() -> startActivity(i), 250);
+            mDrawerLayout.closeDrawer(GravityCompat.START);
+        }
     }
 }

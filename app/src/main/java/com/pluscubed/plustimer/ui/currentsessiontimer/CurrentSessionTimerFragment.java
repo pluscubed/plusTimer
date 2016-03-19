@@ -8,7 +8,6 @@ import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PictureDrawable;
@@ -17,6 +16,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.animation.FastOutLinearInInterpolator;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.support.v4.view.animation.LinearOutSlowInInterpolator;
@@ -145,18 +145,6 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
     private AnimatorSet mLastBarAnimationSet;
     private ValueAnimator mScrambleAnimator;
     private ObjectAnimator mScrambleElevationAnimator;
-    //Runnables
-    private final Runnable holdTimerRunnable = new Runnable() {
-        @Override
-        public void run() {
-            setTextColor(Color.GREEN);
-            setTimerTextToPrefSize();
-            if (!mInspecting) {
-                playExitAnimations();
-                getActivityCallback().lockDrawerAndViewPager(true);
-            }
-        }
-    };
     private final Runnable inspectionRunnable = new Runnable() {
         @Override
         public void run() {
@@ -212,7 +200,21 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
             mUiHandler.postDelayed(this, REFRESH_RATE);
         }
     };
+    private int mGreen500;
+    //Runnables
+    private final Runnable holdTimerRunnable = new Runnable() {
+        @Override
+        public void run() {
+            setTextColor(mGreen500);
+            setTimerTextToPrefSize();
+            if (!mInspecting) {
+                playExitAnimations();
+                getActivityCallback().lockDrawerAndViewPager(true);
+            }
+        }
+    };
     private TimeBarRecyclerAdapter mTimeBarAdapter;
+    private int mRed500;
 
     //TODO
     public void onNewSession() {
@@ -439,6 +441,9 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_current_session_timer, container, false);
 
+        mRed500 = ContextCompat.getColor(getActivity(), R.color.red_500);
+        mGreen500 = ContextCompat.getColor(getActivity(), R.color.green);
+
         mTimerText = (TextView) v.findViewById(R.id.fragment_current_session_timer_time_textview);
         mTimerText2 = (TextView) v.findViewById(R.id.fragment_current_session_timer_timeSecondary_textview);
         mScrambleText = (TextView) v.findViewById(R.id.fragment_current_session_timer_scramble_textview);
@@ -591,11 +596,16 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
     @Override
     public void setPuzzleTypeInitialized() {
         //TODO: Update bld mode when puzzle type changes
-        mBldMode = PuzzleType.getCurrent().isBld();
+        updateBld();
         if (!mFromSavedInstanceState) {
             mRetainedFragment.postSetScrambleViewsToCurrent();
             mRetainedFragment.generateNextScramble();
         }
+    }
+
+    @Override
+    public void updateBld() {
+        mBldMode = PuzzleType.getCurrent().isBld();
     }
 
     @Override
@@ -680,11 +690,6 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
         //When destroyed, stop timer runnable
         mUiHandler.removeCallbacksAndMessages(null);
         mRetainedFragment.setTargetFragment(null, 0);
-
-        //TODO
-        /*PuzzleType.getCurrentId().getCurrentSession()
-                .unregisterObserver(sessionSolvesListener);
-        PuzzleType.unregisterObserver(puzzleTypeObserver);*/
     }
 
     void initSharedPrefs() {
@@ -884,14 +889,14 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
         } else if (mInspecting) {
             //If inspecting and hold to start is off, start regular timer
             //Go to section 3
-            setTextColor(Color.GREEN);
+            setTextColor(mGreen500);
             return true;
         }
 
         //If inspection is on and haven't started yet: section 1
         //If hold to start and inspection are both off: section 3
         if (!scrambling) {
-            setTextColor(Color.GREEN);
+            setTextColor(mGreen500);
             return true;
         }
         return false;
@@ -900,7 +905,7 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
     private synchronized boolean onTimerBldTouchDown(boolean scrambling) {
         //If inspecting: section 3
         //If not inspecting yet and not scrambling: section 1
-        setTextColor(Color.GREEN);
+        setTextColor(mGreen500);
         return mInspecting || !scrambling;
     }
 
@@ -1127,7 +1132,7 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
         playLastBarExitAnimation();
         mHoldTiming = true;
         mHoldTimerStartTimestamp = System.nanoTime();
-        setTextColor(Color.RED);
+        setTextColor(mRed500);
         mUiHandler.postDelayed(holdTimerRunnable, 550);
     }
 

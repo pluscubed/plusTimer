@@ -218,8 +218,6 @@ public class CurrentSessionActivity extends DrawerActivity implements
 
         //noinspection ConstantConditions
         getSupportActionBar().setElevation(0);
-
-        overridePendingTransition(0, 0);
     }
 
     @Override

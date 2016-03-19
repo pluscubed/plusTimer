@@ -26,5 +26,7 @@ public interface CurrentSessionTimerView {
     //REMOVE WHEN MVP FULLY IMPLEMENTED
     void resetGenerateScramble();
 
+    void updateBld();
+
     void resetTimer();
 }

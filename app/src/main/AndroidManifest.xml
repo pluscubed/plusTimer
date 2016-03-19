@@ -25,6 +25,7 @@
         </activity>
         <activity
             android:name=".ui.historysessions.HistorySessionsActivity"
+            android:launchMode="singleTop"
             android:theme="@style/Theme.PlusTimer.WithNavDrawer" />
 
         <activity android:name=".ui.historysolvelist.HistorySolveListActivity" />

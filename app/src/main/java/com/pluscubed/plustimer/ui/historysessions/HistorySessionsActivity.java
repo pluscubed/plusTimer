@@ -43,7 +43,5 @@ public class HistorySessionsActivity extends DrawerActivity {
             fm.beginTransaction().add(R.id.activity_history_sessionlist_main_framelayout, fragment)
                     .commit();
         }
-
-        overridePendingTransition(0, 0);
     }
 }
