@@ -62,8 +62,8 @@ public class CurrentSessionActivity extends DrawerActivity implements
         return "android:switcher:" + viewId + ":" + index;
     }
 
-    public Toolbar getActionBarToolbar() {
-        return super.getActionBarToolbar();
+    public Toolbar getToolbar() {
+        return super.getToolbar();
     }
 
     @Override
@@ -74,10 +74,8 @@ public class CurrentSessionActivity extends DrawerActivity implements
 
     @Override
     public void playToolbarExitAnimation() {
-        final LinearLayout toolbar = (LinearLayout) findViewById(R.id
-                .activity_current_session_headerbar);
-        final FrameLayout layout = (FrameLayout) findViewById(R.id
-                .activity_current_session_framelayout);
+        final LinearLayout toolbar = (LinearLayout) findViewById(R.id.activity_current_session_headerbar);
+        final FrameLayout layout = (FrameLayout) findViewById(R.id.activity_current_session_framelayout);
         mContentFrameLayoutHeight = layout.getHeight();
 
         ObjectAnimator exit = ObjectAnimator.ofFloat(toolbar, View.TRANSLATION_Y,

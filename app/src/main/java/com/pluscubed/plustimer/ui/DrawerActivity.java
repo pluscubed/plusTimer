@@ -39,7 +39,7 @@ public abstract class DrawerActivity extends ThemableActivity {
     private DrawerLayout mDrawerLayout;
 
     private Handler mHandler;
-    private Toolbar mActionBarToolbar;
+    private Toolbar mToolbar;
 
     protected abstract int getSelfNavDrawerItem();
 
@@ -54,14 +54,14 @@ public abstract class DrawerActivity extends ThemableActivity {
         return true;
     }
 
-    protected Toolbar getActionBarToolbar() {
-        if (mActionBarToolbar == null) {
-            mActionBarToolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
-            if (mActionBarToolbar != null) {
-                setSupportActionBar(mActionBarToolbar);
+    protected Toolbar getToolbar() {
+        if (mToolbar == null) {
+            mToolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
+            if (mToolbar != null) {
+                setSupportActionBar(mToolbar);
             }
         }
-        return mActionBarToolbar;
+        return mToolbar;
     }
 
     /**
@@ -71,12 +71,9 @@ public abstract class DrawerActivity extends ThemableActivity {
         mDrawerLayout = (DrawerLayout) findViewById(R.id
                 .activity_drawer_drawerlayout);
         Resources resources = getResources();
-        if (PrefUtils.getTheme(this) != PrefUtils.Theme.BLACK) {
-            mDrawerLayout.setStatusBarBackgroundColor(resources.getColor(R.color.primary_dark));
-        }
 
-        mActionBarToolbar.setNavigationIcon(R.drawable.ic_drawer);
-        mActionBarToolbar.setNavigationOnClickListener(view ->
+        mToolbar.setNavigationIcon(R.drawable.ic_drawer);
+        mToolbar.setNavigationOnClickListener(view ->
                 mDrawerLayout.openDrawer(GravityCompat.START));
 
         mDrawerLayout.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
@@ -127,7 +124,7 @@ public abstract class DrawerActivity extends ThemableActivity {
             @SuppressWarnings("deprecation")
             @Override
             public void onGlobalLayout() {
-                if (getActionBarToolbar().isTitleTruncated()) {
+                if (getToolbar().isTitleTruncated()) {
                     setTitle(null);
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
@@ -152,7 +149,7 @@ public abstract class DrawerActivity extends ThemableActivity {
     @Override
     public void setContentView(int layoutResID) {
         super.setContentView(layoutResID);
-        getActionBarToolbar();
+        getToolbar();
     }
 
     @Override

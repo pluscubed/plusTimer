@@ -12,6 +12,8 @@ import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.ui.ThemableActivity;
 import com.pluscubed.plustimer.ui.solvelist.SolveListPresenter;
 
+import rx.android.schedulers.AndroidSchedulers;
+
 /**
  * History SolveList (started onListItemClick HistorySessionListFragment)
  * activity
@@ -54,6 +56,7 @@ public class HistorySolveListActivity extends ThemableActivity {
 
         PuzzleType.get(puzzleType).getSessionDeferred(this, sessionId)
                 .flatMap(session -> session.getTimestampString(this))
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::setTitle);
     }
 
