@@ -54,7 +54,7 @@ public class PuzzleType extends CbObject {
 
     private static String sCurrentTypeId;
     private static List<PuzzleType> sPuzzleTypes;
-    private static boolean sInitialized;
+    private static boolean sInitialized = false;
 
     private static Set<CurrentChangeListener> sCurrentChangeListeners;
 

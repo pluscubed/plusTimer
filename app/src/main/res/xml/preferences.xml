@@ -5,7 +5,7 @@
         android:key="pref_puzzletypes_multiselectlist"
         android:title="@string/puzzle_types_setup" />
 
-    <CheckBoxPreference
+    <SwitchPreference
         android:defaultValue="true"
         android:key="pref_milliseconds_checkbox"
         android:title="@string/pref_milliseconds_title" />
@@ -17,30 +17,30 @@
         android:summary="%s"
         android:title="@string/pref_theme_title" />
 
-    <CheckBoxPreference
+    <SwitchPreference
         android:defaultValue="true"
         android:key="pref_keepscreenon_checkbox"
         android:summary="@string/pref_keepscreenon_summary"
         android:title="@string/pref_keepscreenon_title" />
 
-    <CheckBoxPreference
+    <SwitchPreference
         android:defaultValue="false"
         android:key="pref_lock_swiping_checkbox"
         android:summary="@string/pref_lock_swiping_summary"
         android:title="@string/pref_lock_swiping_title" />
 
     <PreferenceCategory android:title="@string/pref_timer_category_title">
-        <CheckBoxPreference
+        <SwitchPreference
             android:defaultValue="true"
             android:key="pref_inspection_checkbox"
             android:summary="@string/pref_inspection_summary"
             android:title="@string/pref_inspection_title" />
-        <CheckBoxPreference
+        <SwitchPreference
             android:defaultValue="true"
             android:key="pref_holdtostart_checkbox"
             android:summary="@string/pref_holdtostart_summary"
             android:title="@string/pref_holdtostart_title" />
-        <CheckBoxPreference
+        <SwitchPreference
             android:defaultValue="true"
             android:key="pref_two_row_time_checkbox"
             android:summary="@string/pref_two_row_time_summary"
@@ -66,11 +66,11 @@
             android:inputType="number"
             android:key="pref_scramble_display_size_edittext"
             android:title="@string/pref_text_size_title" />
-        <CheckBoxPreference
+        <SwitchPreference
             android:defaultValue="false"
             android:key="pref_sign_checkbox"
             android:title="@string/pref_sign_title" />
-        <CheckBoxPreference
+        <SwitchPreference
             android:defaultValue="true"
             android:key="pref_monospace_scrambles_checkbox"
             android:title="@string/pref_monospace_scrambles_title" />

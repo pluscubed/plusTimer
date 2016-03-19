@@ -65,6 +65,8 @@
         <item name="listDividerColor">@color/list_divider_light</item>
         <item name="activatedBackground">@drawable/activated_background_light</item>
         <item name="editTextLabelColor">@color/hint_light</item>
+
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
     </style>
 
     <style name="Base.Theme.PlusTimer.Dark" parent="@style/Theme.AppCompat.NoActionBar">
@@ -89,6 +91,8 @@
         <item name="listDividerColor">@color/list_divider_dark</item>
         <item name="activatedBackground">@drawable/activated_background_dark</item>
         <item name="editTextLabelColor">@color/hint_dark</item>
+
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
     </style>
 
     <style name="Base.Theme.PlusTimer.Black" parent="@style/Base.Theme.PlusTimer.Dark">

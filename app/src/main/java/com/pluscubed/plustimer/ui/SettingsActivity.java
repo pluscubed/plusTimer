@@ -3,19 +3,30 @@ package com.pluscubed.plustimer.ui;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.graphics.Canvas;
+import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.preference.EditTextPreference;
-import android.preference.ListPreference;
-import android.preference.MultiSelectListPreference;
-import android.preference.PreferenceFragment;
+import android.support.v14.preference.MultiSelectListPreference;
+import android.support.v14.preference.PreferenceFragment;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewCompat;
+import android.support.v7.preference.EditTextPreference;
+import android.support.v7.preference.ListPreference;
+import android.support.v7.preference.PreferenceViewHolder;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.couchbase.lite.CouchbaseLiteException;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.utils.PrefUtils;
+import com.pluscubed.plustimer.utils.Utils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -62,16 +73,13 @@ public class SettingsActivity extends ThemableActivity {
     public static class SettingsFragment extends PreferenceFragment {
 
         @Override
-        public void onCreate(Bundle paramBundle) {
-            super.onCreate(paramBundle);
+        public void onCreatePreferences(Bundle bundle, String s) {
             addPreferencesFromResource(R.xml.preferences);
 
-            EditTextPreference size = (EditTextPreference)
-                    findPreference(PrefUtils.PREF_TIME_TEXT_SIZE_EDITTEXT);
+            EditTextPreference size = (EditTextPreference) findPreference(PrefUtils.PREF_TIME_TEXT_SIZE_EDITTEXT);
             size.setOnPreferenceChangeListener((preference, newValue) -> {
                 if (Integer.valueOf(newValue.toString()) > 500) {
-                    Toast.makeText(getActivity(), getString(R.string.text_size_warning),
-                            Toast.LENGTH_SHORT)
+                    Toast.makeText(getActivity(), getString(R.string.text_size_warning), Toast.LENGTH_SHORT)
                             .show();
                     return false;
                 }
@@ -156,6 +164,104 @@ public class SettingsActivity extends ThemableActivity {
                 }
                 return true;
             });
+        }
+
+        @Override
+        public RecyclerView onCreateRecyclerView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
+            RecyclerView recyclerView = super.onCreateRecyclerView(inflater, parent, savedInstanceState);
+            recyclerView.addItemDecoration(new DividerDecoration());
+
+            return recyclerView;
+        }
+
+        @Override
+        public void onViewCreated(View view, Bundle savedInstanceState) {
+            super.onViewCreated(view, savedInstanceState);
+
+            setDivider(null);
+        }
+
+        //From PreferenceFragment in v14 library - modified to not draw on first or last item
+        private class DividerDecoration extends RecyclerView.ItemDecoration {
+            private Drawable mDivider;
+            private int mDividerHeight;
+
+            private DividerDecoration() {
+                mDivider = ContextCompat.getDrawable(getActivity(), R.drawable.preference_list_divider_material);
+                mDividerHeight = Utils.convertDpToPx(getActivity(), 1);
+            }
+
+            public void onDrawOver(Canvas c, RecyclerView parent, RecyclerView.State state) {
+                if (this.mDivider != null) {
+                    int childCount = parent.getChildCount();
+                    int width = parent.getWidth();
+
+                    for (int childViewIndex = 0; childViewIndex < childCount; ++childViewIndex) {
+                        View view = parent.getChildAt(childViewIndex);
+                        int top;
+                        if (this.shouldDrawDividerAbove(view, parent)) {
+                            top = (int) ViewCompat.getY(view);
+                            this.mDivider.setBounds(0, top, width, top + this.mDividerHeight);
+                            this.mDivider.draw(c);
+                        }
+
+                        if (this.shouldDrawDividerBelow(view, parent)) {
+                            top = (int) ViewCompat.getY(view) + view.getHeight();
+                            this.mDivider.setBounds(0, top, width, top + this.mDividerHeight);
+                            this.mDivider.draw(c);
+                        }
+                    }
+
+                }
+            }
+
+            public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+                if (this.shouldDrawDividerAbove(view, parent)) {
+                    outRect.top = this.mDividerHeight;
+                }
+
+                if (this.shouldDrawDividerBelow(view, parent)) {
+                    outRect.bottom = this.mDividerHeight;
+                }
+
+            }
+
+            private boolean shouldDrawDividerAbove(View view, RecyclerView parent) {
+                /*RecyclerView.ViewHolder holder = parent.getChildViewHolder(view);
+                return holder.getAdapterPosition() == 0 && ((PreferenceViewHolder)holder).isDividerAllowedAbove();*/
+                return false;
+            }
+
+            private boolean shouldDrawDividerBelow(View view, RecyclerView parent) {
+                PreferenceViewHolder holder = (PreferenceViewHolder) parent.getChildViewHolder(view);
+                boolean nextAllowed = true;
+                int index = parent.indexOfChild(view);
+                if (index < parent.getChildCount() - 1) {
+                    View nextView = parent.getChildAt(index + 1);
+                    PreferenceViewHolder nextHolder = (PreferenceViewHolder) parent.getChildViewHolder(nextView);
+                    nextAllowed = nextHolder.isDividerAllowedAbove();
+                }
+
+                return holder.getAdapterPosition() != parent.getAdapter().getItemCount() - 1
+                        && nextAllowed
+                        && holder.isDividerAllowedBelow();
+            }
+
+            public void setDivider(Drawable divider) {
+                if (divider != null) {
+                    this.mDividerHeight = divider.getIntrinsicHeight();
+                } else {
+                    this.mDividerHeight = 0;
+                }
+
+                this.mDivider = divider;
+                getListView().invalidateItemDecorations();
+            }
+
+            public void setDividerHeight(int dividerHeight) {
+                this.mDividerHeight = dividerHeight;
+                getListView().invalidateItemDecorations();
+            }
         }
     }
 }
