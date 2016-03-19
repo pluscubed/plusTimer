@@ -2,24 +2,30 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
-
-    <TextView
-        android:id="@id/history_sessions_stats"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="8dp"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp" />
+    android:orientation="vertical"
+    android:paddingBottom="8dp">
 
     <com.github.mikephil.charting.charts.LineChart
         android:id="@id/history_sessions_linechart"
         android:layout_width="match_parent"
         android:layout_height="240dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="16dp"
         android:layout_marginLeft="12dp"
         android:layout_marginRight="12dp" />
 
-    <include layout="@layout/list_item_separator" />
+    <TextView
+        android:id="@id/history_sessions_stats"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp" />
+
+    <include
+        layout="@layout/list_item_separator"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp" />
 
 </LinearLayout>

@@ -35,13 +35,15 @@ public class HistorySessionsPresenter extends Presenter<HistorySessionsView> {
     private String mPuzzleTypeId;
     private boolean mMillisecondsEnabled;
 
+    public HistorySessionsPresenter() {
+        mPuzzleTypeId = PuzzleType.getCurrentId();
+    }
+
     @Override
     public void onViewAttached(HistorySessionsView view) {
         super.onViewAttached(view);
 
-        mPuzzleTypeId = PuzzleType.getCurrentId();
-
-        updateAdapter();
+        updateSessionsAdapter();
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -56,39 +58,8 @@ public class HistorySessionsPresenter extends Presenter<HistorySessionsView> {
         getView().getContextCompat().startActivity(i);
     }
 
-    /*private void updateAdapter(RecyclerViewUpdate change, Solve solve) {
-        if (!isViewAttached()) {
-            return;
-        }
-
-        Activity context = getView().getContextCompat();
-
-
-
-        PuzzleType.get(mPuzzleTypeId).getHistorySessionsSorted(context)
-                .flatMap(session -> session.getStatsDeferred(context,
-                        mPuzzleTypeId,
-                        mIsCurrent,
-                        false,
-                        PrefUtils.isDisplayMillisecondsEnabled(context),
-                        PrefUtils.isSignEnabled(context)
-                ))
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new SingleSubscriber<String>() {
-                    @Override
-                    public void onSuccess(String stats) {
-                        getView().getSolveListAdapter().notifyChange(change, solve, stats);
-                    }
-
-                    @Override
-                    public void onError(Throwable error) {
-
-                    }
-                });
-    }*/
-
     @SuppressWarnings("ConstantConditions")
-    public void updateAdapter() {
+    public void updateSessionsAdapter() {
         if (!isViewAttached()) {
             return;
         }
@@ -101,11 +72,12 @@ public class HistorySessionsPresenter extends Presenter<HistorySessionsView> {
                 .doOnNext(sessions -> {
                     getView().getHistorySessionsAdapter().setSessions(sessions);
                     getView().getHistorySessionsAdapter().notifyDataSetChanged();
-                    getView().showList(true);
+
+                    getView().showList(!sessions.isEmpty());
                 })
                 .flatMap(sessions ->
-                        updateAdapter(getView().getContextCompat(), sessions)
-                                .mergeWith(updateAdapterStatsText(getView().getContextCompat(), sessions))
+                        updateGraph(getView().getContextCompat(), sessions)
+                                .mergeWith(updateStatsText(getView().getContextCompat(), sessions))
                                 .andThen(Observable.just(sessions))
                 )
                 .observeOn(AndroidSchedulers.mainThread())
@@ -114,7 +86,7 @@ public class HistorySessionsPresenter extends Presenter<HistorySessionsView> {
                 });
     }
 
-    public Completable updateAdapter(Context context, List<Session> historySessions) {
+    private Completable updateGraph(Context context, List<Session> historySessions) {
 
         return Single.<LineData>create(singleSubscriber -> {
             mMillisecondsEnabled = PrefUtils.isDisplayMillisecondsEnabled(context);
@@ -206,9 +178,8 @@ public class HistorySessionsPresenter extends Presenter<HistorySessionsView> {
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSuccess(lineData -> {
                     if (isViewAttached()) {
-                        if (lineData != null)
-                            //noinspection ConstantConditions
-                            getView().getHistorySessionsAdapter().setLineData(lineData);
+                        //noinspection ConstantConditions
+                        getView().getHistorySessionsAdapter().setLineData(lineData);
                     }
                 }).toObservable().toCompletable();
 
@@ -327,7 +298,7 @@ public class HistorySessionsPresenter extends Presenter<HistorySessionsView> {
         return bestAveragePerSessionPerNumber;
     }
 
-    public Completable updateAdapterStatsText(Context context, List<Session> historySessions) {
+    private Completable updateStatsText(Context context, List<Session> historySessions) {
         return Single.<String>create(singleSubscriber -> {
             if (historySessions.isEmpty()) {
                 singleSubscriber.onSuccess(null);
@@ -396,6 +367,27 @@ public class HistorySessionsPresenter extends Presenter<HistorySessionsView> {
             }
         }
         return builder.toString();
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    public void onPuzzleSelected(PuzzleType puzzleType) {
+        if (!isViewAttached()) {
+            return;
+        }
+
+        mPuzzleTypeId = puzzleType.getId();
+
+        updateSessionsAdapter();
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    public void onCreateOptionsMenu() {
+        if (!isViewAttached()) {
+            return;
+        }
+
+        getView().getPuzzleTypeSpinnerAdapter().update();
+        getView().initPuzzleSpinnerSelection(PuzzleType.get(mPuzzleTypeId));
     }
 
     public static class Factory implements PresenterFactory<HistorySessionsPresenter> {

@@ -26,11 +26,14 @@ public class HistorySessionsAdapter extends RecyclerView.Adapter<HistorySessions
     private static final String STATE_SESSIONS = "state_sessions";
     private static final String STATE_STATS = "state_stats";
 
+    private static final String TAG_GRAPH_INITIALIZED = "graph_initialized";
+
     private final Context mContext;
 
     private boolean mMillisecondsEnabled;
     private String mStats;
     private LineData mLineChartData;
+    //private boolean mAnimatingChart;
 
     private HistorySessionsPresenter mPresenter;
 
@@ -46,7 +49,7 @@ public class HistorySessionsAdapter extends RecyclerView.Adapter<HistorySessions
             mStats = savedInstanceState.getString(STATE_STATS);
         }
 
-        mLineChartData = new LineData();
+        mLineChartData = null;
 
         setHasStableIds(true);
     }
@@ -118,18 +121,36 @@ public class HistorySessionsAdapter extends RecyclerView.Adapter<HistorySessions
         if (position == 0) {
             holder.textView.setText(mStats);
 
-            holder.graph.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM_INSIDE);
-            holder.graph.getXAxis().setAvoidFirstLastClipping(true);
-            holder.graph.getAxisLeft().setAxisMinValue(0);
-            holder.graph.setDescription("");
-            holder.graph.getAxisLeft().setValueFormatter(
-                    (value, yAxis) -> Utils.timeStringFromNs((long) value, mMillisecondsEnabled));
-            holder.graph.getAxisRight().setEnabled(false);
+            if (holder.graph.getTag() == null || !holder.graph.getTag().equals(TAG_GRAPH_INITIALIZED)) {
+                holder.graph.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
+                holder.graph.getXAxis().setAvoidFirstLastClipping(true);
+                holder.graph.getAxisLeft().setAxisMinValue(0);
+                holder.graph.setDescription("");
+                holder.graph.getAxisLeft().setValueFormatter(
+                        (value, yAxis) -> Utils.timeStringFromNs((long) value, mMillisecondsEnabled));
+                holder.graph.getAxisRight().setEnabled(false);
+                holder.graph.setNoDataText("Not enough solves to generate graph");
 
-            holder.graph.invalidate();
+                holder.graph.invalidate();
 
-            holder.graph.setData(mLineChartData);
-            holder.graph.getXAxis().setLabelsToSkip(mLineChartData.getXValCount() - 2);
+                holder.graph.setTag(TAG_GRAPH_INITIALIZED);
+            }
+
+            if (mLineChartData != null) {
+                holder.graph.setData(mLineChartData);
+                holder.graph.getXAxis().setLabelsToSkip(mLineChartData.getXValCount() - 2);
+
+                holder.graph.invalidate();
+                /*if(!mAnimatingChart) {
+                    mAnimatingChart = true;
+                    FastOutSlowInInterpolator fastOutSlowInInterpolator = new FastOutSlowInInterpolator();
+                    holder.graph.animateY(300, fastOutSlowInInterpolator::getInterpolation);
+                    holder.graph.postDelayed(() -> mAnimatingChart = false, 300);
+                }*/
+
+            } else {
+                holder.graph.clear();
+            }
 
         } else {
             String timestamp = mSessions.get(position - 1).getTimestampString(mContext).toBlocking().value();

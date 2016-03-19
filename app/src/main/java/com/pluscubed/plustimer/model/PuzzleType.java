@@ -207,7 +207,7 @@ public class PuzzleType extends CbObject {
 
     @NonNull
     private static Completable initializePuzzleTypes(Database database) {
-        return Completable.create(subscriber -> {
+        return Completable.fromAction(() -> {
             Query puzzleTypesQuery = database.getView(VIEW_PUZZLETYPES).createQuery();
             puzzleTypesQuery.runAsync((rows, error) -> {
                 for (QueryRow row : rows) {
@@ -217,8 +217,6 @@ public class PuzzleType extends CbObject {
                         sPuzzleTypes.add(type);
                     }
                 }
-
-                subscriber.onCompleted();
             });
         }).subscribeOn(Schedulers.io());
     }
