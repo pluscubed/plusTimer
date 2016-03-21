@@ -106,6 +106,8 @@ retrolambda {
 
 dependencies {
 
+    compile 'com.auth0.android:identity-core:1.14.0'
+
     debugCompile 'im.dino:dbinspector:3.2.3@aar'
 
     //compile 'com.firebase:firebase-client-android:2.5.2'

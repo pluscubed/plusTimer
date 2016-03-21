@@ -2,17 +2,21 @@ package com.pluscubed.plustimer.ui.currentsession;
 
 import android.widget.Toast;
 
-import com.pluscubed.plustimer.base.Presenter;
+import com.pluscubed.plustimer.base.PresenterFactory;
 import com.pluscubed.plustimer.model.PuzzleType;
+import com.pluscubed.plustimer.ui.basedrawer.DrawerPresenter;
 
 import rx.Completable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 
-public class CurrentSessionPresenter extends Presenter<CurrentSessionView> {
+public class CurrentSessionPresenter extends DrawerPresenter<CurrentSessionView> {
 
-    public void onCreate() {
-        PuzzleType.initialize(getView().getContextCompat())
+    @Override
+    public void onViewAttached(CurrentSessionView view) {
+        super.onViewAttached(view);
+
+        PuzzleType.initialize(view.getContextCompat())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Completable.CompletableSubscriber() {
                     @Override
@@ -45,5 +49,13 @@ public class CurrentSessionPresenter extends Presenter<CurrentSessionView> {
 
                     }
                 });
+    }
+
+    public static class Factory implements PresenterFactory<CurrentSessionPresenter> {
+
+        @Override
+        public CurrentSessionPresenter create() {
+            return new CurrentSessionPresenter();
+        }
     }
 }

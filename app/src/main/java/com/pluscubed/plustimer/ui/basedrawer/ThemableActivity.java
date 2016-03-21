@@ -1,20 +1,21 @@
-package com.pluscubed.plustimer.ui;
+package com.pluscubed.plustimer.ui.basedrawer;
 
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 
+import com.pluscubed.plustimer.base.BasePresenterActivity;
+import com.pluscubed.plustimer.base.Presenter;
 import com.pluscubed.plustimer.utils.ThemeUtils;
 
 
-public abstract class ThemableActivity extends AppCompatActivity {
+public abstract class ThemableActivity<P extends Presenter<V>, V> extends BasePresenterActivity<P, V> {
 
     private ThemeUtils mThemeUtils;
 
-    boolean hasNavDrawer() {
+    protected boolean hasNavDrawer() {
         return false;
     }
 

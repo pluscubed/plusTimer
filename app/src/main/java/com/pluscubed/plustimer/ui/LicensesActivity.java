@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.pluscubed.plustimer.R;
+import com.pluscubed.plustimer.ui.basedrawer.ThemableActivity;
 
 import java.io.BufferedReader;
 import java.io.IOException;

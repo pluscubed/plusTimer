@@ -5,7 +5,7 @@ import android.app.FragmentManager;
 import android.os.Bundle;
 
 import com.pluscubed.plustimer.R;
-import com.pluscubed.plustimer.ui.DrawerActivity;
+import com.pluscubed.plustimer.ui.basedrawer.DrawerActivity;
 
 /**
  * History session list activity

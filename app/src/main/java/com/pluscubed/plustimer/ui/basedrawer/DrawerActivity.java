@@ -1,4 +1,4 @@
-package com.pluscubed.plustimer.ui;
+package com.pluscubed.plustimer.ui.basedrawer;
 
 import android.content.Intent;
 import android.content.res.Resources;
@@ -17,6 +17,8 @@ import android.view.ViewTreeObserver;
 import android.widget.Toast;
 
 import com.pluscubed.plustimer.R;
+import com.pluscubed.plustimer.ui.SettingsActivity;
+import com.pluscubed.plustimer.ui.about.AboutActivity;
 import com.pluscubed.plustimer.ui.currentsession.CurrentSessionActivity;
 import com.pluscubed.plustimer.ui.historysessions.HistorySessionsActivity;
 import com.pluscubed.plustimer.utils.PrefUtils;
@@ -24,7 +26,7 @@ import com.pluscubed.plustimer.utils.PrefUtils;
 /**
  * Base Activity with the Navigation Drawer
  */
-public abstract class DrawerActivity extends ThemableActivity {
+public abstract class DrawerActivity<P extends DrawerPresenter<V>, V extends DrawerView> extends ThemableActivity<P, V> {
 
     private static final String EXTRA_CLOSE_DRAWER = "com.pluscubed.plustimer.EXTRA_CLOSE_DRAWER";
 
@@ -48,6 +50,18 @@ public abstract class DrawerActivity extends ThemableActivity {
     @Override
     protected boolean hasNavDrawer() {
         return true;
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        presenter.onNewIntent(intent);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        presenter.onActivityResult(requestCode, resultCode, data);
     }
 
     protected Toolbar getToolbar() {

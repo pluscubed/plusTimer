@@ -1,4 +1,4 @@
-package com.pluscubed.plustimer.ui;
+package com.pluscubed.plustimer.ui.about;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -17,6 +17,8 @@ import android.widget.TextView;
 
 import com.pluscubed.plustimer.BuildConfig;
 import com.pluscubed.plustimer.R;
+import com.pluscubed.plustimer.ui.LicensesActivity;
+import com.pluscubed.plustimer.ui.basedrawer.ThemableActivity;
 
 /**
  * About Page

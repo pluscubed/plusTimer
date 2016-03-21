@@ -26,9 +26,10 @@ import android.widget.Spinner;
 
 import com.couchbase.lite.CouchbaseLiteException;
 import com.pluscubed.plustimer.R;
+import com.pluscubed.plustimer.base.PresenterFactory;
 import com.pluscubed.plustimer.model.PuzzleType;
-import com.pluscubed.plustimer.ui.DrawerActivity;
 import com.pluscubed.plustimer.ui.SpinnerPuzzleTypeAdapter;
+import com.pluscubed.plustimer.ui.basedrawer.DrawerActivity;
 import com.pluscubed.plustimer.ui.currentsessiontimer.CurrentSessionTimerFragment;
 import com.pluscubed.plustimer.ui.currentsessiontimer.CurrentSessionTimerRetainedFragment;
 import com.pluscubed.plustimer.ui.solvelist.SolveListFragment;
@@ -43,7 +44,7 @@ import java.io.IOException;
 /**
  * Current Session Activity
  */
-public class CurrentSessionActivity extends DrawerActivity implements
+public class CurrentSessionActivity extends DrawerActivity<CurrentSessionPresenter, CurrentSessionView> implements
         CurrentSessionTimerFragment.ActivityCallback, CurrentSessionView {
 
     private static final String STATE_MENU_ITEMS_ENABLE_BOOLEAN = "menu_items_enable_boolean";
@@ -56,7 +57,6 @@ public class CurrentSessionActivity extends DrawerActivity implements
     private SlidingTabLayout mSlidingTabLayout;
     private LockingViewPager mViewPager;
     private int mContentFrameLayoutHeight;
-    private CurrentSessionPresenter mPresenter;
 
     private static String makeFragmentName(int viewId, int index) {
         return "android:switcher:" + viewId + ":" + index;
@@ -154,18 +154,12 @@ public class CurrentSessionActivity extends DrawerActivity implements
         return R.id.nav_current;
     }
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.Theme_PlusTimer_WithNavDrawer);
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_current_session);
-
-        mPresenter = new CurrentSessionPresenter();
-        mPresenter.onViewAttached(this);
-
-        mPresenter.onCreate();
 
         if (savedInstanceState != null) {
             mScrambleImageActionEnable = savedInstanceState.getBoolean(STATE_MENU_ITEMS_ENABLE_BOOLEAN);
@@ -221,6 +215,16 @@ public class CurrentSessionActivity extends DrawerActivity implements
     }
 
     @Override
+    protected PresenterFactory<CurrentSessionPresenter> getPresenterFactory() {
+        return new CurrentSessionPresenter.Factory();
+    }
+
+    @Override
+    protected void onPresenterPrepared(CurrentSessionPresenter presenter) {
+
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         // TODO: Only update Spinner, not invalidate whole action bar
@@ -254,12 +258,6 @@ public class CurrentSessionActivity extends DrawerActivity implements
             // while nav drawer is open doesn't call onCreateOptionsMenu()
             mInvalidateActionBarOnDrawerClosed = true;
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mPresenter.onViewDetached();
     }
 
     @Override

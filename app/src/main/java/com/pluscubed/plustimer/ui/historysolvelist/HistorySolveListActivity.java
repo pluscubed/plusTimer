@@ -9,7 +9,7 @@ import android.view.MenuItem;
 
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
-import com.pluscubed.plustimer.ui.ThemableActivity;
+import com.pluscubed.plustimer.ui.basedrawer.ThemableActivity;
 import com.pluscubed.plustimer.ui.solvelist.SolveListPresenter;
 
 import rx.android.schedulers.AndroidSchedulers;

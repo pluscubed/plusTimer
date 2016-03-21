@@ -10,54 +10,68 @@ public abstract class BasePresenterActivity<P extends Presenter<V>, V> extends A
 
     private static final String TAG = "base-activity";
     private static final int LOADER_ID = 101;
-    private Presenter<V> presenter;
+    protected P presenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        getLoaderManager().initLoader(LOADER_ID, null, new LoaderManager.LoaderCallbacks<P>() {
-            @Override
-            public final Loader<P> onCreateLoader(int id, Bundle args) {
-                Log.i(TAG, "onCreateLoader");
-                return new PresenterLoader<>(BasePresenterActivity.this, getPresenterFactory());
-            }
+        PresenterFactory<P> presenterFactory = getPresenterFactory();
 
-            @Override
-            public final void onLoadFinished(Loader<P> loader, P presenter) {
-                Log.i(TAG, "onLoadFinished");
-                BasePresenterActivity.this.presenter = presenter;
-                onPresenterPrepared(presenter);
-            }
+        if(presenterFactory!=null) {
+            getLoaderManager().initLoader(LOADER_ID, null, new LoaderManager.LoaderCallbacks<P>() {
+                @Override
+                public final Loader<P> onCreateLoader(int id, Bundle args) {
+                    Log.i(TAG, "onCreateLoader");
+                    return new PresenterLoader<>(BasePresenterActivity.this, presenterFactory);
+                }
 
-            @Override
-            public final void onLoaderReset(Loader<P> loader) {
-                Log.i(TAG, "onLoaderReset");
-                BasePresenterActivity.this.presenter = null;
-                onPresenterDestroyed();
-            }
-        });
+                @Override
+                public final void onLoadFinished(Loader<P> loader, P presenter) {
+                    Log.i(TAG, "onLoadFinished");
+                    BasePresenterActivity.this.presenter = presenter;
+                    onPresenterPrepared(presenter);
+                }
+
+                @Override
+                public final void onLoaderReset(Loader<P> loader) {
+                    Log.i(TAG, "onLoaderReset");
+                    BasePresenterActivity.this.presenter = null;
+                    onPresenterDestroyed();
+                }
+            });
+        }
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        Log.i(TAG, "onStart-" + tag());
-        presenter.onViewAttached(getPresenterView());
+        if(presenter!=null)
+            presenter.onViewAttached(getPresenterView());
     }
 
     @Override
     protected void onStop() {
-        presenter.onViewDetached();
         super.onStop();
-        Log.i(TAG, "onStop-" + tag());
     }
 
-    protected abstract String tag();
+    @Override
+    protected void onDestroy() {
+        if(presenter!=null)
+            presenter.onViewDetached();
+        super.onDestroy();
+    }
 
-    protected abstract PresenterFactory<P> getPresenterFactory();
+    /**
+     * Default: returns null, disables MVP loader
+     */
+    protected PresenterFactory<P> getPresenterFactory(){
+        return null;
+    }
 
-    protected abstract void onPresenterPrepared(P presenter);
+    protected void onPresenterPrepared(P presenter){
+
+    }
 
     protected void onPresenterDestroyed() {
         // hook for subclasses

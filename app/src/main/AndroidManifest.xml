@@ -22,7 +22,15 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:host="@string/auth0_domain_name" android:scheme="@string/auth0_scheme"/>
+            </intent-filter>
         </activity>
+
         <activity
             android:name=".ui.historysessions.HistorySessionsActivity"
             android:launchMode="singleTop"
@@ -32,7 +40,7 @@
 
         <activity android:name="com.pluscubed.plustimer.ui.SettingsActivity" />
         <activity
-            android:name="com.pluscubed.plustimer.ui.AboutActivity"
+            android:name=".ui.about.AboutActivity"
             android:launchMode="singleTop" />
         <activity android:name="com.pluscubed.plustimer.ui.LicensesActivity" />
     </application>
