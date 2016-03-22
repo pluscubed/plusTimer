@@ -23,6 +23,7 @@ import com.pluscubed.plustimer.base.Presenter;
 
 import java.io.IOException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.HashMap;
 
 public class DrawerPresenter<V extends DrawerView> extends Presenter<V> {
@@ -35,6 +36,8 @@ public class DrawerPresenter<V extends DrawerView> extends Presenter<V> {
     @Override
     public void onViewAttached(V view) {
         super.onViewAttached(view);
+
+        //signIn();
     }
 
     private void signIn() {
@@ -74,6 +77,21 @@ public class DrawerPresenter<V extends DrawerView> extends Presenter<V> {
                             .start(new BaseCallback<UserProfile>() {
                                 @Override
                                 public void onSuccess(UserProfile payload) {
+                                    try {
+                                        URL url = new URL("http://192.168.1.4:5984/" + URLEncoder.encode(payload.getId(), "UTF-8"));
+                                        Replication push = App.getDatabase(getView().getContextCompat()).createPushReplication(url);
+                                        Replication pull = App.getDatabase(getView().getContextCompat()).createPullReplication(url);
+                                        pull.setContinuous(true);
+                                        push.setContinuous(true);
+                                        HashMap<String, Object> requestHeadersParam = new HashMap<>();
+                                        requestHeadersParam.put("Authorization", "Bearer " + token.getIdToken());
+                                        push.setHeaders(requestHeadersParam);
+                                        push.start();
+                                        pull.start();
+                                    } catch (CouchbaseLiteException | IOException e) {
+                                        e.printStackTrace();
+                                    }
+
                                     Toast.makeText(getView().getContextCompat(), "profile acquired: " + payload.getName(), Toast.LENGTH_LONG).show();
                                 }
 
@@ -83,20 +101,7 @@ public class DrawerPresenter<V extends DrawerView> extends Presenter<V> {
                                 }
                             });
 
-                    try {
-                        URL url = new URL("http://192.168.1.4:5984/test");
-                        Replication push = App.getDatabase(getView().getContextCompat()).createPushReplication(url);
-                        Replication pull = App.getDatabase(getView().getContextCompat()).createPullReplication(url);
-                        pull.setContinuous(true);
-                        push.setContinuous(true);
-                        HashMap<String, Object> requestHeadersParam = new HashMap<>();
-                        requestHeadersParam.put("Authorization", "Bearer " + token.getIdToken());
-                        push.setHeaders(requestHeadersParam);
-                        push.start();
-                        pull.start();
-                    } catch (CouchbaseLiteException | IOException e) {
-                        e.printStackTrace();
-                    }
+
                 }
             });
             mProvider.start(getView().getContextCompat(), "WCA");
