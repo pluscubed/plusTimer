@@ -60,7 +60,7 @@ Temporary Items
 .mtj.tmp/
 
 # Package Files #
-*.jar
+#*.jar
 *.war
 *.ear
 
@@ -142,3 +142,6 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+
+apis.xml

@@ -28,6 +28,7 @@ import java.util.HashMap;
 
 public class DrawerPresenter<V extends DrawerView> extends Presenter<V> {
 
+    public static final String DATABASE_URL = "http://192.168.1.4:5984/";
     private WebIdentityProvider mProvider;
 
     public DrawerPresenter() {
@@ -36,84 +37,82 @@ public class DrawerPresenter<V extends DrawerView> extends Presenter<V> {
     @Override
     public void onViewAttached(V view) {
         super.onViewAttached(view);
-
-        //signIn();
     }
 
     private void signIn() {
-        if (mProvider == null) {
-            //getView().getContextCompat().startActivity(new Intent(getView().getContextCompat(), LockActivity.class));
+        //getView().getContextCompat().startActivity(new Intent(getView().getContextCompat(), LockActivity.class));
 
-            String clientId = getView().getContextCompat().getString(R.string.auth0_client_id);
-            String domain = getView().getContextCompat().getString(R.string.auth0_domain_name);
-            Auth0 auth0 = new Auth0(clientId, domain);
-            AuthenticationAPIClient client = auth0.newAuthenticationAPIClient();
-            mProvider = new WebIdentityProvider(
-                    new CallbackParser(),
-                    auth0.getClientId(),
-                    auth0.getAuthorizeUrl()
-            );
+        String clientId = getView().getContextCompat().getString(R.string.auth0_client_id);
+        String domain = getView().getContextCompat().getString(R.string.auth0_domain_name);
+        Auth0 auth0 = new Auth0(clientId, domain);
+        AuthenticationAPIClient client = auth0.newAuthenticationAPIClient();
+        mProvider = new WebIdentityProvider(
+                new CallbackParser(),
+                auth0.getClientId(),
+                auth0.getAuthorizeUrl()
+        );
 
-            HashMap<String, Object> parameters = new HashMap<>();
-            parameters.put("scope", "openid offline_access");
-            parameters.put("device", Build.MODEL);
-            mProvider.setParameters(parameters);
-            mProvider.setCallback(new IdentityProviderCallback() {
-                @Override
-                public void onFailure(Dialog dialog) {
-                }
+        HashMap<String, Object> parameters = new HashMap<>();
+        parameters.put("scope", "openid offline_access");
+        parameters.put("device", Build.MODEL);
+        mProvider.setParameters(parameters);
+        mProvider.setCallback(new IdentityProviderCallback() {
+            @Override
+            public void onFailure(Dialog dialog) {
+            }
 
-                @Override
-                public void onFailure(int titleResource, int messageResource, Throwable cause) {
-                }
+            @Override
+            public void onFailure(int titleResource, int messageResource, Throwable cause) {
+            }
 
-                @Override
-                public void onSuccess(String serviceName, String accessToken) {
-                }
+            @Override
+            public void onSuccess(String serviceName, String accessToken) {
+            }
 
-                @Override
-                public void onSuccess(Token token) {
-                    client.tokenInfo(token.getIdToken())
-                            .start(new BaseCallback<UserProfile>() {
-                                @Override
-                                public void onSuccess(UserProfile payload) {
-                                    try {
-                                        URL url = new URL("http://192.168.1.4:5984/" + URLEncoder.encode(payload.getId(), "UTF-8"));
-                                        Replication push = App.getDatabase(getView().getContextCompat()).createPushReplication(url);
-                                        Replication pull = App.getDatabase(getView().getContextCompat()).createPullReplication(url);
-                                        pull.setContinuous(true);
-                                        push.setContinuous(true);
-                                        HashMap<String, Object> requestHeadersParam = new HashMap<>();
-                                        requestHeadersParam.put("Authorization", "Bearer " + token.getIdToken());
-                                        push.setHeaders(requestHeadersParam);
-                                        push.start();
-                                        pull.start();
-                                    } catch (CouchbaseLiteException | IOException e) {
-                                        e.printStackTrace();
-                                    }
-
-                                    Toast.makeText(getView().getContextCompat(), "profile acquired: " + payload.getName(), Toast.LENGTH_LONG).show();
+            @Override
+            public void onSuccess(Token token) {
+                client.tokenInfo(token.getIdToken())
+                        .start(new BaseCallback<UserProfile>() {
+                            @Override
+                            public void onSuccess(UserProfile payload) {
+                                try {
+                                    URL url = new URL(DATABASE_URL + URLEncoder.encode(payload.getId(), "UTF-8"));
+                                    Replication push = App.getDatabase(getView().getContextCompat()).createPushReplication(url);
+                                    Replication pull = App.getDatabase(getView().getContextCompat()).createPullReplication(url);
+                                    pull.setContinuous(true);
+                                    push.setContinuous(true);
+                                    HashMap<String, Object> requestHeadersParam = new HashMap<>();
+                                    requestHeadersParam.put("Authorization", "Bearer " + token.getIdToken());
+                                    push.setHeaders(requestHeadersParam);
+                                    push.start();
+                                    pull.start();
+                                } catch (CouchbaseLiteException | IOException e) {
+                                    e.printStackTrace();
                                 }
 
-                                @Override
-                                public void onFailure(Throwable error) {
+                                Toast.makeText(getView().getContextCompat(), "profile acquired: " + payload.getName(), Toast.LENGTH_LONG).show();
+                            }
 
-                                }
-                            });
+                            @Override
+                            public void onFailure(Throwable error) {
+
+                            }
+                        });
 
 
-                }
-            });
-            mProvider.start(getView().getContextCompat(), "WCA");
-        }
+            }
+        });
+        mProvider.start(getView().getContextCompat(), "WCA");
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        mProvider.authorize(getView().getContextCompat(), requestCode, resultCode, data);
+        if (isViewAttached())
+            mProvider.authorize(getView().getContextCompat(), requestCode, resultCode, data);
     }
 
     public void onNewIntent(Intent intent) {
-        mProvider.authorize(getView().getContextCompat(), IdentityProvider.WEBVIEW_AUTH_REQUEST_CODE, Activity.RESULT_OK, intent);
+        if (isViewAttached())
+            mProvider.authorize(getView().getContextCompat(), IdentityProvider.WEBVIEW_AUTH_REQUEST_CODE, Activity.RESULT_OK, intent);
     }
 
     @Override
@@ -124,5 +123,9 @@ public class DrawerPresenter<V extends DrawerView> extends Presenter<V> {
     @Override
     public void onDestroyed() {
         super.onDestroyed();
+    }
+
+    public void onNavDrawerHeaderClicked() {
+        signIn();
     }
 }

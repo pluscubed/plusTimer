@@ -7,13 +7,17 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.IdRes;
 import android.support.design.widget.NavigationView;
+import android.support.graphics.drawable.VectorDrawableCompat;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.pluscubed.plustimer.R;
@@ -38,6 +42,7 @@ public abstract class DrawerActivity<P extends DrawerPresenter<V>, V extends Dra
 
     private Handler mHandler;
     private Toolbar mToolbar;
+    private NavigationView mNavView;
 
     protected abstract int getSelfNavDrawerItem();
 
@@ -98,13 +103,29 @@ public abstract class DrawerActivity<P extends DrawerPresenter<V>, V extends Dra
             }
         });
 
-        NavigationView view = (NavigationView) findViewById(R.id.activity_drawer_drawer_navview);
-        view.setCheckedItem(getSelfNavDrawerItem());
-        view.setNavigationItemSelectedListener(item -> {
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, insets) -> {
+            View inset = mNavView.getHeaderView(0).findViewById(R.id.inset);
+            ViewGroup.LayoutParams params = inset.getLayoutParams();
+            params.height = insets.getSystemWindowInsetTop();
+            inset.setLayoutParams(params);
+            return insets;
+        });
+
+        mNavView = (NavigationView) findViewById(R.id.activity_drawer_drawer_navview);
+        mNavView.setCheckedItem(getSelfNavDrawerItem());
+        mNavView.setNavigationItemSelectedListener(item -> {
             onNavDrawerItemClicked(item.getItemId(), item.getGroupId());
 
             return isNormalItem(item.getItemId());
         });
+
+        ImageView profileImage = (ImageView) mNavView.getHeaderView(0).findViewById(R.id.drawer_header_profile_image);
+        VectorDrawableCompat drawable = VectorDrawableCompat.create(getResources(), R.drawable.profile_placeholder, getTheme());
+        profileImage.setImageDrawable(drawable);
+        profileImage.setOnClickListener(v -> presenter.onNavDrawerHeaderClicked());
+
+        View background = mNavView.getHeaderView(0).findViewById(R.id.drawer_header_background);
+        background.setOnClickListener(v -> presenter.onNavDrawerHeaderClicked());
 
         int actionBarSize = resources.getDimensionPixelSize(R.dimen
                 .navigation_drawer_margin);
@@ -114,9 +135,9 @@ public abstract class DrawerActivity<P extends DrawerPresenter<V>, V extends Dra
         if (navDrawerWidth > navDrawerWidthLimit) {
             navDrawerWidth = navDrawerWidthLimit;
         }
-        DrawerLayout.LayoutParams params = (DrawerLayout.LayoutParams) view.getLayoutParams();
+        DrawerLayout.LayoutParams params = (DrawerLayout.LayoutParams) mNavView.getLayoutParams();
         params.width = navDrawerWidth;
-        view.setLayoutParams(params);
+        mNavView.setLayoutParams(params);
 
         resetTitle();
 
@@ -188,14 +209,6 @@ public abstract class DrawerActivity<P extends DrawerPresenter<V>, V extends Dra
         super.onPostCreate(savedInstanceState);
 
         setupNavDrawer();
-
-        if (savedInstanceState == null && getIntent().getBooleanExtra(EXTRA_CLOSE_DRAWER, false)) {
-            mDrawerLayout.openDrawer(GravityCompat.START);
-
-            mDrawerLayout.post(() -> {
-                mDrawerLayout.closeDrawer(GravityCompat.START);
-            });
-        }
     }
 
     private void onNavDrawerItemClicked(@IdRes int itemId, @IdRes int groupId) {
@@ -204,7 +217,8 @@ public abstract class DrawerActivity<P extends DrawerPresenter<V>, V extends Dra
             return;
         }
 
-        goToNavDrawerItem(itemId);
+        mDrawerLayout.closeDrawer(GravityCompat.START);
+        mHandler.postDelayed(() -> goToNavDrawerItem(itemId), 250);
     }
 
     private boolean isNormalItem(@IdRes int itemId) {
@@ -249,8 +263,7 @@ public abstract class DrawerActivity<P extends DrawerPresenter<V>, V extends Dra
             overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
             finish();
         } else {
-            mHandler.postDelayed(() -> startActivity(i), 250);
-            mDrawerLayout.closeDrawer(GravityCompat.START);
+            startActivity(i);
         }
     }
 }

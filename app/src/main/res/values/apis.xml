@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="auth0_scheme" translatable="false">a0zripgzam2livuudnb4pohkuonpj1idkk</string>
+    <string name="auth0_client_id" translatable="false">zripgZam2liVuUDNb4pOHKUoNpj1IDKK</string>
+    <string name="auth0_domain_name" translatable="false">plustimer.auth0.com</string>
+</resources>

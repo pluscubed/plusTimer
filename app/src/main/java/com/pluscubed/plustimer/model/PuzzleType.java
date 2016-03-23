@@ -156,7 +156,7 @@ public class PuzzleType extends CbObject {
     }
 
     public static boolean isInitialized() {
-        return sInitialized;
+        return !sPuzzleTypes.isEmpty() && sInitialized;
     }
 
     public synchronized static Completable initialize(Context context) {
@@ -207,7 +207,7 @@ public class PuzzleType extends CbObject {
 
     @NonNull
     private static Completable initializePuzzleTypes(Database database) {
-        return Completable.fromAction(() -> {
+        return Completable.create(completableSubscriber -> {
             Query puzzleTypesQuery = database.getView(VIEW_PUZZLETYPES).createQuery();
             puzzleTypesQuery.runAsync((rows, error) -> {
                 for (QueryRow row : rows) {
@@ -217,6 +217,8 @@ public class PuzzleType extends CbObject {
                         sPuzzleTypes.add(type);
                     }
                 }
+
+                completableSubscriber.onCompleted();
             });
         }).subscribeOn(Schedulers.io());
     }
