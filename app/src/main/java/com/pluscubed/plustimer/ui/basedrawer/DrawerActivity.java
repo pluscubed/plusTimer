@@ -1,12 +1,22 @@
 package com.pluscubed.plustimer.ui.basedrawer;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.IdRes;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.graphics.drawable.VectorDrawableCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewCompat;
@@ -18,9 +28,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 import com.pluscubed.plustimer.R;
+import com.pluscubed.plustimer.base.PresenterFactory;
 import com.pluscubed.plustimer.ui.SettingsActivity;
 import com.pluscubed.plustimer.ui.about.AboutActivity;
 import com.pluscubed.plustimer.ui.currentsession.CurrentSessionActivity;
@@ -30,9 +45,7 @@ import com.pluscubed.plustimer.utils.PrefUtils;
 /**
  * Base Activity with the Navigation Drawer
  */
-public abstract class DrawerActivity<P extends DrawerPresenter<V>, V extends DrawerView> extends ThemableActivity<P, V> {
-
-    private static final String EXTRA_CLOSE_DRAWER = "com.pluscubed.plustimer.EXTRA_CLOSE_DRAWER";
+public abstract class DrawerActivity<P extends DrawerPresenter<V>, V extends DrawerView> extends ThemableActivity<P, V> implements DrawerView{
 
     private static final int[] NAVDRAWER_TOOLBAR_TITLE_RES_ID = new int[]{
             R.string.current,
@@ -43,6 +56,14 @@ public abstract class DrawerActivity<P extends DrawerPresenter<V>, V extends Dra
     private Handler mHandler;
     private Toolbar mToolbar;
     private NavigationView mNavView;
+    private ImageView mHeaderProfileImage;
+    private TextView mHeaderTitle;
+    private TextView mHeaderSubtitle;
+
+    @Override
+    public Activity getContextCompat() {
+        return this;
+    }
 
     protected abstract int getSelfNavDrawerItem();
 
@@ -69,6 +90,11 @@ public abstract class DrawerActivity<P extends DrawerPresenter<V>, V extends Dra
         presenter.onActivityResult(requestCode, resultCode, data);
     }
 
+    @Override
+    public void displayToast(String message){
+        Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_SHORT).show();
+    }
+
     protected Toolbar getToolbar() {
         if (mToolbar == null) {
             mToolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
@@ -77,6 +103,54 @@ public abstract class DrawerActivity<P extends DrawerPresenter<V>, V extends Dra
             }
         }
         return mToolbar;
+    }
+
+    private Bitmap getCircleBitmap(Bitmap bitmap) {
+        final Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
+                bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        final Canvas canvas = new Canvas(output);
+
+        final Paint paint = new Paint();
+        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+        final RectF rectF = new RectF(rect);
+
+        paint.setAntiAlias(true);
+        canvas.drawARGB(0, 0, 0, 0);
+        paint.setColor(Color.BLACK);
+        canvas.drawOval(rectF, paint);
+
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(bitmap, rect, rect, paint);
+
+        bitmap.recycle();
+
+        return output;
+    }
+
+    @Override
+    public void setProfileImage(String url){
+        Glide.with(this)
+                .load(url)
+                .asBitmap()
+                .centerCrop()
+                .transform(new BitmapTransformation(this) {
+                    @Override
+                    protected Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
+                        return getCircleBitmap(toTransform);
+                    }
+
+                    @Override
+                    public String getId() {
+                        return "circle";
+                    }
+                })
+                .into(mHeaderProfileImage);
+    }
+
+    @Override
+    public void setHeaderText(String title, String subtitle){
+        mHeaderTitle.setText(title);
+        mHeaderSubtitle.setText(subtitle);
     }
 
     /**
@@ -103,14 +177,6 @@ public abstract class DrawerActivity<P extends DrawerPresenter<V>, V extends Dra
             }
         });
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, insets) -> {
-            View inset = mNavView.getHeaderView(0).findViewById(R.id.inset);
-            ViewGroup.LayoutParams params = inset.getLayoutParams();
-            params.height = insets.getSystemWindowInsetTop();
-            inset.setLayoutParams(params);
-            return insets;
-        });
-
         mNavView = (NavigationView) findViewById(R.id.activity_drawer_drawer_navview);
         mNavView.setCheckedItem(getSelfNavDrawerItem());
         mNavView.setNavigationItemSelectedListener(item -> {
@@ -119,12 +185,26 @@ public abstract class DrawerActivity<P extends DrawerPresenter<V>, V extends Dra
             return isNormalItem(item.getItemId());
         });
 
-        ImageView profileImage = (ImageView) mNavView.getHeaderView(0).findViewById(R.id.drawer_header_profile_image);
-        VectorDrawableCompat drawable = VectorDrawableCompat.create(getResources(), R.drawable.profile_placeholder, getTheme());
-        profileImage.setImageDrawable(drawable);
-        profileImage.setOnClickListener(v -> presenter.onNavDrawerHeaderClicked());
 
-        View background = mNavView.getHeaderView(0).findViewById(R.id.drawer_header_background);
+
+        View headerView = mNavView.getHeaderView(0);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, insets) -> {
+            View inset = headerView.findViewById(R.id.inset);
+            ViewGroup.LayoutParams params = inset.getLayoutParams();
+            params.height = insets.getSystemWindowInsetTop();
+            inset.setLayoutParams(params);
+            return insets;
+        });
+
+        mHeaderProfileImage = (ImageView) headerView.findViewById(R.id.drawer_header_profile_image);
+        VectorDrawableCompat drawable = VectorDrawableCompat.create(getResources(), R.drawable.profile_placeholder, getTheme());
+        mHeaderProfileImage.setImageDrawable(drawable);
+        mHeaderProfileImage.setOnClickListener(v -> presenter.onNavDrawerHeaderClicked());
+
+        mHeaderTitle = (TextView) headerView.findViewById(R.id.drawer_header_title);
+        mHeaderSubtitle = (TextView) headerView.findViewById(R.id.drawer_header_subtitle);
+
+        View background = headerView.findViewById(R.id.drawer_header_background);
         background.setOnClickListener(v -> presenter.onNavDrawerHeaderClicked());
 
         int actionBarSize = resources.getDimensionPixelSize(R.dimen
@@ -145,6 +225,11 @@ public abstract class DrawerActivity<P extends DrawerPresenter<V>, V extends Dra
             PrefUtils.markWelcomeDone(this);
             mDrawerLayout.openDrawer(GravityCompat.START);
         }
+    }
+
+    @Override
+    protected PresenterFactory<P> getPresenterFactory() {
+        return new DrawerPresenter.Factory();
     }
 
     void resetTitle() {
@@ -240,11 +325,9 @@ public abstract class DrawerActivity<P extends DrawerPresenter<V>, V extends Dra
         switch (itemId) {
             case R.id.nav_current:
                 i = new Intent(this, CurrentSessionActivity.class);
-                i.putExtra(EXTRA_CLOSE_DRAWER, true);
                 break;
             case R.id.nav_history:
                 i = new Intent(this, HistorySessionsActivity.class);
-                i.putExtra(EXTRA_CLOSE_DRAWER, true);
                 break;
             case R.id.nav_settings:
                 i = new Intent(this, SettingsActivity.class);

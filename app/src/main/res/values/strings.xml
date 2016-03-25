@@ -142,5 +142,7 @@
     <string name="send_email">Send email to the developer using…</string>
     <string name="email_developer_history_data">Email History Data to Developer</string>
     <string name="undo">Undo</string>
+    <string name="sign_in">Sign In</string>
+    <string name="sign_in_subtitle">Sync your solves across devices</string>
 
 </resources>

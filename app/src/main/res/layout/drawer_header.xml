@@ -74,25 +74,24 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/title"
+            android:id="@+id/drawer_header_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fontFamily="@string/font_fontFamily_medium"
             android:gravity="center_vertical"
-            android:text="Sign In"
+            android:text="@string/sign_in"
             android:textColor="#fff"
             android:textSize="14sp"
             android:textStyle="@integer/font_textStyle_medium" />
 
         <TextView
-            android:id="@+id/subtitle"
+            android:id="@+id/drawer_header_subtitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:text="Sync your solves across devices"
+            android:text="@string/sign_in_subtitle"
             android:textColor="#fff"
             android:textSize="14sp"
-            tools:text="Device Folders"
             tools:visibility="visible" />
 
     </LinearLayout>

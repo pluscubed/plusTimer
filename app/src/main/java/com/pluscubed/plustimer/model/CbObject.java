@@ -7,7 +7,6 @@ import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Document;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pluscubed.plustimer.App;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -48,7 +47,7 @@ public abstract class CbObject {
             return (T) sUpdatingObjects.get(docId);
         }
 
-        Document doc = App.getDatabase(context).getDocument(docId);
+        Document doc = CouchbaseInstance.get(context).getDatabase().getDocument(docId);
         return fromDoc(doc, type);
     }
 
@@ -67,7 +66,7 @@ public abstract class CbObject {
     }
 
     protected void connectCb(Context context) throws CouchbaseLiteException, IOException {
-        Document doc = App.getDatabase(context).createDocument();
+        Document doc = CouchbaseInstance.get(context).getDatabase().createDocument();
         mId = doc.getId();
 
         updateCb(context);
@@ -96,7 +95,7 @@ public abstract class CbObject {
     }
 
     public Document getDocument(Context context) throws CouchbaseLiteException, IOException {
-        return App.getDatabase(context).getDocument(mId);
+        return CouchbaseInstance.get(context).getDatabase().getDocument(mId);
     }
 
     public Single<Document> getDocumentDeferred(Context context) {

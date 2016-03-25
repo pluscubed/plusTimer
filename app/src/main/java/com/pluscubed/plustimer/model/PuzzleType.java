@@ -15,7 +15,6 @@ import com.fernandocejas.frodo.annotation.RxLogObservable;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
-import com.pluscubed.plustimer.App;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.utils.PrefUtils;
 import com.pluscubed.plustimer.utils.Utils;
@@ -170,7 +169,7 @@ public class PuzzleType extends CbObject {
 
                 int savedVersionCode = PrefUtils.getVersionCode(context);
 
-                Database database = App.getDatabase(context);
+                Database database = CouchbaseInstance.get(context).getDatabase();
                 View puzzletypesView = database.getView(VIEW_PUZZLETYPES);
                 puzzletypesView.setMap((document, emitter) -> {
                     if (document.get("type").equals(TYPE_PUZZLETYPE)) {

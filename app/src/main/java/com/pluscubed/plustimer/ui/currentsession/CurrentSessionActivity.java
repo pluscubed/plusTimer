@@ -4,7 +4,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.graphics.Color;
@@ -243,11 +242,6 @@ public class CurrentSessionActivity extends DrawerActivity<CurrentSessionPresent
         return (SolveListFragment) getFragmentManager()
                 .findFragmentByTag(makeFragmentName(R.id
                         .activity_current_session_viewpager, 1));
-    }
-
-    @Override
-    public Activity getContextCompat() {
-        return this;
     }
 
     void queueInvalidateOptionsMenu() {
