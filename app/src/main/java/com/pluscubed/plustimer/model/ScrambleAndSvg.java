@@ -1,5 +1,6 @@
 package com.pluscubed.plustimer.model;
 
+import android.content.Context;
 import android.support.annotation.Nullable;
 
 import com.pluscubed.plustimer.utils.Utils;
@@ -23,8 +24,9 @@ public class ScrambleAndSvg {
         return mScramble;
     }
 
-    public void setScramble(String scramble, String puzzleTypeName) {
-        mScramble = Utils.signToWcaNotation(scramble, puzzleTypeName);
+    public void setScramble(Context context, String scramble, String puzzleTypeName) {
+        //TODO: Evaluate performance
+        mScramble = Utils.signToWcaNotation(context, scramble, puzzleTypeName).toBlocking().value();
     }
 
     public String getSvg() {

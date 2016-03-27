@@ -126,13 +126,13 @@ public class DrawerPresenter<V extends DrawerView> extends Presenter<V> {
 
     @SuppressWarnings("ConstantConditions")
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (isViewAttached())
+        if (isViewAttached() && mProvider != null)
             mProvider.authorize(getView().getContextCompat(), requestCode, resultCode, data);
     }
 
     @SuppressWarnings("ConstantConditions")
     public void onNewIntent(Intent intent) {
-        if (isViewAttached())
+        if (isViewAttached() && mProvider != null)
             mProvider.authorize(getView().getContextCompat(), IdentityProvider.WEBVIEW_AUTH_REQUEST_CODE, Activity.RESULT_OK, intent);
     }
 

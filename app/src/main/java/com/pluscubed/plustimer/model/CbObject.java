@@ -28,7 +28,6 @@ public abstract class CbObject {
     protected String mId;
 
     protected CbObject() {
-        mId = "";
     }
 
     /**
@@ -73,6 +72,10 @@ public abstract class CbObject {
     }
 
     protected void updateCb(Context context) {
+        if (mId == null) {
+            return;
+        }
+
         sUpdatingObjects.put(mId, this);
 
         Completable.fromCallable(() -> {

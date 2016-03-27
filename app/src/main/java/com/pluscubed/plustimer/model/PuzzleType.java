@@ -2,6 +2,7 @@ package com.pluscubed.plustimer.model;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
 
 import com.couchbase.lite.CouchbaseLiteException;
@@ -11,7 +12,6 @@ import com.couchbase.lite.QueryRow;
 import com.couchbase.lite.View;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fernandocejas.frodo.annotation.RxLogObservable;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
@@ -36,6 +36,8 @@ import java.util.Set;
 import rx.Completable;
 import rx.Observable;
 import rx.Single;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.exceptions.Exceptions;
 import rx.schedulers.Schedulers;
 
 /**
@@ -51,9 +53,10 @@ public class PuzzleType extends CbObject {
     public static final String TYPE_PUZZLETYPE = "puzzletype";
     public static final String VIEW_PUZZLETYPES = "puzzletypes";
 
-    private static String sCurrentTypeId;
+    @Nullable
+    private static Completable sInitialization;
+    @Nullable
     private static List<PuzzleType> sPuzzleTypes;
-    private static boolean sInitialized = false;
 
     private static Set<CurrentChangeListener> sCurrentChangeListeners;
 
@@ -118,55 +121,74 @@ public class PuzzleType extends CbObject {
     }
 
     private static void notifyChangeCurrentListeners() {
-        for (CurrentChangeListener listener : getListeners()) {
-            listener.notifyChange();
-        }
+        notifyChangeCurrentListenersDeferred().subscribe();
     }
 
-    public static List<PuzzleType> getPuzzleTypes() {
-        return sPuzzleTypes;
-    }
-
-    public static PuzzleType get(String id) {
-        for (PuzzleType type : sPuzzleTypes) {
-            if (type.getId().equals(id)) {
-                return type;
+    @NonNull
+    private static Completable notifyChangeCurrentListenersDeferred() {
+        return Completable.fromCallable(() -> {
+            for (CurrentChangeListener listener : getListeners()) {
+                listener.notifyChange();
             }
-        }
-        return sPuzzleTypes.get(0);
+            return null;
+        }).subscribeOn(AndroidSchedulers.mainThread());
     }
 
-    public static PuzzleType getCurrent() {
-        return get(sCurrentTypeId);
+    public static Observable<PuzzleType> getPuzzleTypes(Context context) {
+        return initialize(context)
+                .andThen(Observable.defer(() -> Observable.from(sPuzzleTypes)));
     }
 
-    public static String getCurrentId() {
-        return sCurrentTypeId;
+    public static Single<PuzzleType> get(Context context, String id) {
+        return initialize(context)
+                .andThen(getInternal(id).toObservable())
+                .toSingle();
     }
 
-    public static List<PuzzleType> getEnabledPuzzleTypes() {
-        List<PuzzleType> array = new ArrayList<>();
-        for (PuzzleType i : sPuzzleTypes) {
-            if (i.isEnabled()) {
-                array.add(i);
+    @NonNull
+    private static Single<PuzzleType> getInternal(String id) {
+        return Single.fromCallable(() -> {
+            for (PuzzleType type : sPuzzleTypes) {
+                if (type.getId().equals(id)) {
+                    return type;
+                }
             }
-        }
-        return array;
+            return sPuzzleTypes.get(0);
+        });
+    }
+
+    public static Single<PuzzleType> getCurrent(Context context) {
+        return initialize(context)
+                .andThen(getInternal(getCurrentId(context)).toObservable())
+                .toSingle();
+    }
+
+    public static String getCurrentId(Context context) {
+        return PrefUtils.getCurrentPuzzleType(context);
+    }
+
+    public static Observable<PuzzleType> getEnabledPuzzleTypes(Context context) {
+        return getPuzzleTypes(context)
+                .flatMap(puzzleType -> {
+                    if (puzzleType.isEnabled()) {
+                        return Observable.just(puzzleType);
+                    } else {
+                        return Observable.empty();
+                    }
+                });
     }
 
     public static boolean isInitialized() {
-        return !sPuzzleTypes.isEmpty() && sInitialized;
+        return sPuzzleTypes != null;
     }
 
-    public synchronized static Completable initialize(Context context) {
-        if (sInitialized) {
+    public static Completable initialize(Context context) {
+        if (isInitialized()) {
             return Completable.complete();
         }
 
-        try {
-            if (sPuzzleTypes == null) {
-                sPuzzleTypes = new ArrayList<>();
-
+        if (sInitialization == null) {
+            try {
                 int savedVersionCode = PrefUtils.getVersionCode(context);
 
                 Database database = CouchbaseInstance.get(context).getDatabase();
@@ -182,26 +204,26 @@ public class PuzzleType extends CbObject {
                     completable = initializeFirstRunAsync(context);
                 } else {
                     completable = initializePuzzleTypes(database);
-
-                    sCurrentTypeId = PrefUtils.getCurrentPuzzleType(context);
                 }
 
-                return completable.doOnComplete(() -> {
+                sInitialization = completable.doOnCompleted(() -> {
                     for (PuzzleType puzzleType : sPuzzleTypes) {
                         //TODO: upgrade database
                         //puzzleType.upgradeDatabase(context);
                     }
-
                     PrefUtils.saveVersionCode(context);
 
-                    sInitialized = true;
-                });
-            } else {
-                return Completable.complete();
+                    sInitialization = null;
+                }).toObservable()
+                        .publish().autoConnect()
+                        .toCompletable();
+
+            } catch (CouchbaseLiteException | IOException e) {
+                return Completable.error(e);
             }
-        } catch (CouchbaseLiteException | IOException e) {
-            return Completable.error(e);
         }
+
+        return sInitialization;
     }
 
     @NonNull
@@ -209,13 +231,13 @@ public class PuzzleType extends CbObject {
         return Completable.create(completableSubscriber -> {
             Query puzzleTypesQuery = database.getView(VIEW_PUZZLETYPES).createQuery();
             puzzleTypesQuery.runAsync((rows, error) -> {
+                List<PuzzleType> puzzleTypes = new ArrayList<>();
                 for (QueryRow row : rows) {
                     PuzzleType type = PuzzleType.fromDoc(row.getDocument(), PuzzleType.class);
-
-                    if (sPuzzleTypes != null) {
-                        sPuzzleTypes.add(type);
-                    }
+                    puzzleTypes.add(type);
                 }
+
+                sPuzzleTypes = puzzleTypes;
 
                 completableSubscriber.onCompleted();
             });
@@ -240,6 +262,7 @@ public class PuzzleType extends CbObject {
         //and the legacy names from this
         String[] legacyNames = context.getResources().getStringArray(R.array.legacy_names);
 
+        List<PuzzleType> puzzleTypes = new ArrayList<>();
 
         for (int i = 0; i < scramblers.length + defaultCustomPuzzleTypes.length; i++) {
             String scrambler;
@@ -280,29 +303,41 @@ public class PuzzleType extends CbObject {
 
             if (uiName.equals("3x3")) {
                 //Default current puzzle type
-                sCurrentTypeId = newPuzzleType.getId();
                 newPuzzleType.newSession(context);
 
-                PrefUtils.setCurrentPuzzleType(context, sCurrentTypeId);
+                PrefUtils.setCurrentPuzzleType(context, newPuzzleType.getId());
             }
 
-            sPuzzleTypes.add(newPuzzleType);
+            puzzleTypes.add(newPuzzleType);
         }
 
-        Collections.sort(sPuzzleTypes,
+        Collections.sort(puzzleTypes,
                 (lhs, rhs) -> Collator.getInstance().compare(lhs.getName(), rhs.getName()));
 
+        sPuzzleTypes = puzzleTypes;
     }
 
-    public static void setCurrent(Context context, String puzzleType) throws IOException, CouchbaseLiteException {
-        sCurrentTypeId = puzzleType;
-        PrefUtils.setCurrentPuzzleType(context, sCurrentTypeId);
+    public static Completable setCurrent(Context context, String puzzleTypeId) {
+        if (!puzzleTypeId.equals(getCurrentId(context))) {
 
-        if (get(sCurrentTypeId).getCurrentSessionId() == null) {
-            get(sCurrentTypeId).newSession(context);
+            PrefUtils.setCurrentPuzzleType(context, puzzleTypeId);
+
+            return get(context, puzzleTypeId)
+                    .doOnSuccess(puzzleType -> {
+                        if (puzzleType.getCurrentSessionId() == null) {
+                            try {
+                                puzzleType.newSession(context);
+                            } catch (IOException | CouchbaseLiteException e) {
+                                throw Exceptions.propagate(e);
+                            }
+                        }
+                    })
+                    .flatMapObservable(puzzleType ->
+                            notifyChangeCurrentListenersDeferred().toObservable())
+                    .toCompletable();
+        } else {
+            return Completable.complete();
         }
-
-        notifyChangeCurrentListeners();
     }
 
     private Session newSession(Context context) throws IOException, CouchbaseLiteException {
@@ -340,19 +375,22 @@ public class PuzzleType extends CbObject {
         return mEnabled;
     }
 
-    public void setEnabled(Context context, boolean enabled) throws CouchbaseLiteException, IOException {
+    public Completable setEnabled(Context context, boolean enabled) {
+        return initialize(context)
+                .concatWith(Completable.defer(() -> {
+                    mEnabled = enabled;
+                    if (mId.equals(getCurrentId(context)) && !mEnabled) {
+                        for (PuzzleType puzzleType : sPuzzleTypes) {
+                            if (puzzleType.mEnabled) {
+                                return setCurrent(context, puzzleType.getId())
+                                        .doOnCompleted(() -> updateCb(context));
+                            }
+                        }
+                    }
 
-        this.mEnabled = enabled;
-        if (mId.equals(sCurrentTypeId) && !this.mEnabled) {
-            for (PuzzleType puzzleType : sPuzzleTypes) {
-                if (puzzleType.mEnabled) {
-                    setCurrent(context, puzzleType.getId());
-                    break;
-                }
-            }
-        }
+                    return Completable.complete();
+                }));
 
-        updateCb(context);
     }
 
     public String getId() {
@@ -458,7 +496,6 @@ public class PuzzleType extends CbObject {
         return mPuzzle;
     }
 
-    @RxLogObservable
     public Single<Session> getCurrentSessionDeferred(Context context) {
         return getSessionDeferred(context, mCurrentSessionId);
     }
@@ -467,7 +504,6 @@ public class PuzzleType extends CbObject {
         return getSession(context, mCurrentSessionId);
     }
 
-    @RxLogObservable
     public Single<Session> getSessionDeferred(Context context, String id) {
         return Single.defer(() -> Single.just(getSession(context, id)))
                 .subscribeOn(Schedulers.io());

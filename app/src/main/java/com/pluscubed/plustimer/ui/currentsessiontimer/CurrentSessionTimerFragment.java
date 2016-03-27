@@ -22,7 +22,6 @@ import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.support.v4.view.animation.LinearOutSlowInInterpolator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.util.Property;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -145,6 +144,19 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
     private AnimatorSet mLastBarAnimationSet;
     private ValueAnimator mScrambleAnimator;
     private ObjectAnimator mScrambleElevationAnimator;
+    private int mGreen500;
+    //Runnables
+    private final Runnable holdTimerRunnable = new Runnable() {
+        @Override
+        public void run() {
+            setTextColor(mGreen500);
+            setTimerTextToPrefSize();
+            if (!mInspecting) {
+                playExitAnimations();
+                getActivityCallback().lockDrawerAndViewPager(true);
+            }
+        }
+    };
     private final Runnable inspectionRunnable = new Runnable() {
         @Override
         public void run() {
@@ -168,17 +180,19 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
 
                     playEnterAnimations();
 
-                    Solve s = null;
-                    try {
-                        s = PuzzleType.getCurrent().getCurrentSession(getActivity()).newSolve(getActivity())
-                                .setScramble(mRetainedFragment.getCurrentScrambleAndSvg().getScramble())
-                                .setRawTime(0)
-                                .setPenalty(Solve.PENALTY_DNF)
-                                .build();
-                    } catch (IOException | CouchbaseLiteException e) {
-                        e.printStackTrace();
-                    }
-
+                    PuzzleType.getCurrent(getContextCompat())
+                            .flatMap(puzzleType -> puzzleType.getCurrentSessionDeferred(getActivity()))
+                            .subscribe(session -> {
+                                try {
+                                    session.newSolve(getActivity())
+                                            .setScramble(mRetainedFragment.getCurrentScrambleAndSvg().getScramble())
+                                            .setRawTime(0)
+                                            .setPenalty(Solve.PENALTY_DNF)
+                                            .build();
+                                } catch (CouchbaseLiteException | IOException e) {
+                                    e.printStackTrace();
+                                }
+                            });
                     //Add the solve to the current session with the current
                     // scramble/scramble image and DNF
                     //mPresenter.onTimingFinished(s);
@@ -200,19 +214,6 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
             mUiHandler.postDelayed(this, REFRESH_RATE);
         }
     };
-    private int mGreen500;
-    //Runnables
-    private final Runnable holdTimerRunnable = new Runnable() {
-        @Override
-        public void run() {
-            setTextColor(mGreen500);
-            setTimerTextToPrefSize();
-            if (!mInspecting) {
-                playExitAnimations();
-                getActivityCallback().lockDrawerAndViewPager(true);
-            }
-        }
-    };
     private TimeBarRecyclerAdapter mTimeBarAdapter;
     private int mRed500;
 
@@ -228,7 +229,8 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
                                                     Integer... currentAverageSpecs) {
         Arrays.sort(currentAverageSpecs, Collections.reverseOrder());
 
-        return PuzzleType.getCurrent().getCurrentSessionDeferred(getActivity())
+        return PuzzleType.getCurrent(getActivity())
+                .flatMap(puzzleType -> puzzleType.getCurrentSessionDeferred(getActivity()))
                 .flatMapObservable(session -> session.getSortedSolves(getActivity())).toList().toSingle()
                 .map(solves -> {
                     String s = "";
@@ -348,9 +350,11 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
             }
             mScrambleImage.setImageDrawable(drawable);
 
-            setScrambleText(Utils.getUiScramble(
+            Utils.getUiScramble(getActivity(),
                     currentScrambleAndSvg.getScramble(), mSignEnabled,
-                    PuzzleType.getCurrentId()));
+                    PuzzleType.getCurrentId(getActivity()))
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::setScrambleText);
         } else {
             mRetainedFragment.generateNextScramble();
             mRetainedFragment.postSetScrambleViewsToCurrent();
@@ -360,7 +364,8 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
     @Override
     public void updateStatsAndTimerText(RecyclerViewUpdate mode, Solve solve) {
         //Update stats
-        PuzzleType.getCurrent().getCurrentSessionDeferred(getActivity())
+        PuzzleType.getCurrent(getActivity())
+                .flatMap(puzzleType -> puzzleType.getCurrentSessionDeferred(getActivity()))
                 .map(Session::getNumberOfSolves)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new SingleSubscriber<Integer>() {
@@ -460,7 +465,8 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
         mLastDeleteButton = (Button) v.findViewById(R.id.fragment_current_session_timer_last_delete_button);
 
         mLastDnfButton.setOnClickListener(view -> {
-            PuzzleType.getCurrent().getCurrentSessionDeferred(getActivity())
+            PuzzleType.getCurrent(getActivity())
+                    .flatMap(puzzleType -> puzzleType.getCurrentSessionDeferred(getActivity()))
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new SingleSubscriber<Session>() {
                         @Override
@@ -482,7 +488,8 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
         });
 
         mLastPlusTwoButton.setOnClickListener(view -> {
-            PuzzleType.getCurrent().getCurrentSessionDeferred(getActivity())
+            PuzzleType.getCurrent(getActivity())
+                    .flatMap(puzzleType -> puzzleType.getCurrentSessionDeferred(getActivity()))
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new SingleSubscriber<Session>() {
                         @Override
@@ -505,7 +512,9 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
         });
 
         mLastDeleteButton.setOnClickListener(v1 -> {
-            PuzzleType.getCurrent().getCurrentSessionDeferred(getActivity()).subscribe(new SingleSubscriber<Session>() {
+            PuzzleType.getCurrent(getActivity())
+                    .flatMap(puzzleType -> puzzleType.getCurrentSessionDeferred(getActivity()))
+                    .subscribe(new SingleSubscriber<Session>() {
                 @Override
                 public void onSuccess(Session session) {
                     try {
@@ -593,19 +602,19 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
         return v;
     }
 
-    @Override
-    public void setPuzzleTypeInitialized() {
+    public void setInitialized() {
         //TODO: Update bld mode when puzzle type changes
         updateBld();
         if (!mFromSavedInstanceState) {
-            mRetainedFragment.postSetScrambleViewsToCurrent();
             mRetainedFragment.generateNextScramble();
+            mRetainedFragment.postSetScrambleViewsToCurrent();
         }
     }
 
     @Override
     public void updateBld() {
-        mBldMode = PuzzleType.getCurrent().isBld();
+        PuzzleType.getCurrent(getActivity())
+                .subscribe(puzzleType -> mBldMode = puzzleType.isBld());
     }
 
     @Override
@@ -747,7 +756,8 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
      */
     void invalidateTimerText() {
 
-        PuzzleType.getCurrent().getCurrentSessionDeferred(getActivity())
+        PuzzleType.getCurrent(getActivity())
+                .flatMap(puzzleType -> puzzleType.getCurrentSessionDeferred(getActivity()))
                 .flatMapObservable(session -> session.getLastSolve(getActivity()))
                 .observeOn(AndroidSchedulers.mainThread())
                 .defaultIfEmpty(null)
@@ -824,12 +834,41 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
 
         //Currently Timing: User stopping timer
         if (mTiming) {
-            Solve s = null;
-            try {
-                Session.SolveBuilder builder = PuzzleType.getCurrent().getCurrentSession(getActivity())
-                        .newSolve(getActivity())
-                        .setScramble(mRetainedFragment.getCurrentScrambleAndSvg().getScramble())
-                        .setRawTime(System.nanoTime() - mTimingStartTimestamp);
+
+            PuzzleType.getCurrent(getActivity())
+                    .flatMap(puzzleType -> puzzleType.getCurrentSessionDeferred(getActivity()))
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(session -> {
+
+                        try {
+                            Solve s = null;
+
+                            Session.SolveBuilder builder = session.newSolve(getActivity())
+                                    .setScramble(mRetainedFragment.getCurrentScrambleAndSvg().getScramble())
+                                    .setRawTime(System.nanoTime() - mTimingStartTimestamp);
+                            if (mInspectionEnabled && mLateStartPenalty) {
+                                builder.setPenalty(Solve.PENALTY_PLUSTWO);
+                            }
+
+                            s = builder.build();
+
+                            setTimerTextFromSolve(s);
+                        } catch (CouchbaseLiteException | IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        playLastBarEnterAnimation();
+                        playEnterAnimations();
+                        getActivityCallback().lockDrawerAndViewPager(false);
+
+                        resetTimer();
+
+                        if (scrambling) {
+                            setScrambleText(getString(R.string.scrambling));
+                        }
+                        mRetainedFragment.postSetScrambleViewsToCurrent();
+                    });
+
 
                 //TODO: Blind mode
                 /*if (!mBldMode) {
@@ -839,39 +878,12 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
                             mInspectionStopTimestamp - mInspectionStartTimestamp);
                 }*/
 
-                if (mInspectionEnabled && mLateStartPenalty) {
-                    builder.setPenalty(Solve.PENALTY_PLUSTWO);
-                }
-
-                s = builder.build();
-
-            } catch (IOException | CouchbaseLiteException e) {
-                e.printStackTrace();
-                if (e instanceof CouchbaseLiteException) {
-                    Log.w(TAG, ((CouchbaseLiteException) e).getCBLStatus().toString());
-                }
-            }
-
 
             //Add the solve to the current session with the
             // current scramble/scramble image and time
             //g.onTimingFinished(s);
 
 
-            playLastBarEnterAnimation();
-            playEnterAnimations();
-            getActivityCallback().lockDrawerAndViewPager(false);
-
-            resetTimer();
-
-            setTimerTextFromSolve(s);
-
-
-            if (scrambling) {
-                setScrambleText(getString(R.string.scrambling));
-            }
-
-            mRetainedFragment.postSetScrambleViewsToCurrent();
             return false;
         }
 

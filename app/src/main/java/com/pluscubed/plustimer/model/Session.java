@@ -354,7 +354,8 @@ public class Session extends CbObject implements Parcelable {
 
         StringBuilder statsBuilder = new StringBuilder();
         if (displaySolves) {
-            statsBuilder.append(PuzzleType.get(puzzleTypeName).getName()).append("\n\n");
+            PuzzleType puzzleType = PuzzleType.get(context, puzzleTypeName).toBlocking().value();
+            statsBuilder.append(puzzleType.getName()).append("\n\n");
         }
 
         int numberOfSolves = getNumberOfSolves();
@@ -422,7 +423,7 @@ public class Session extends CbObject implements Parcelable {
                     statsBuilder.append(solve.getDescriptiveTimeString(milliseconds));
                 }
                 statsBuilder.append("\n     ").append(Utils.dateTimeSecondsStringFromTimestamp(context, solve.getTimestamp()))
-                        .append("\n     ").append(Utils.getUiScramble(solve.getScramble(), sign, puzzleTypeName))
+                        .append("\n     ").append(Utils.getUiScramble(context, solve.getScramble(), sign, puzzleTypeName).toBlocking().value())
                         .append("\n\n");
             }
         }
@@ -451,6 +452,7 @@ public class Session extends CbObject implements Parcelable {
         void notifyChange(RecyclerViewUpdate update, Solve solve);
     }
 
+    //TODO: Use rx builder pattern
     public class SolveBuilder extends Solve.Builder {
         public SolveBuilder(Context context) {
             super(context);

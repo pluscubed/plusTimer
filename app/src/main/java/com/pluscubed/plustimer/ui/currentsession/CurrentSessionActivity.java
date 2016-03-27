@@ -9,8 +9,6 @@ import android.app.FragmentManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v13.app.FragmentPagerAdapter;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.support.v7.widget.Toolbar;
@@ -18,15 +16,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 
-import com.couchbase.lite.CouchbaseLiteException;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.base.PresenterFactory;
 import com.pluscubed.plustimer.model.PuzzleType;
+import com.pluscubed.plustimer.ui.FragmentStatePagerAdapter;
 import com.pluscubed.plustimer.ui.SpinnerPuzzleTypeAdapter;
 import com.pluscubed.plustimer.ui.basedrawer.DrawerActivity;
 import com.pluscubed.plustimer.ui.currentsessiontimer.CurrentSessionTimerFragment;
@@ -38,7 +35,7 @@ import com.pluscubed.plustimer.ui.widget.SlidingTabLayout;
 import com.pluscubed.plustimer.utils.PrefUtils;
 import com.pluscubed.plustimer.utils.Utils;
 
-import java.io.IOException;
+import java.util.List;
 
 /**
  * Current Session Activity
@@ -57,9 +54,10 @@ public class CurrentSessionActivity extends DrawerActivity<CurrentSessionPresent
     private LockingViewPager mViewPager;
     private int mContentFrameLayoutHeight;
 
-    private static String makeFragmentName(int viewId, int index) {
-        return "android:switcher:" + viewId + ":" + index;
-    }
+    private SpinnerPuzzleTypeAdapter mPuzzleSpinnerAdapter;
+    private Spinner mPuzzleSpinner;
+    private int mPuzzleSpinnerPosition;
+    private List<PuzzleType> mPuzzleSpinnerList;
 
     public Toolbar getToolbar() {
         return super.getToolbar();
@@ -209,6 +207,16 @@ public class CurrentSessionActivity extends DrawerActivity<CurrentSessionPresent
         });
         mViewPager.setCurrentItem(0);
 
+        mPuzzleSpinner = (Spinner) findViewById(R.id.activity_current_session_puzzlespinner);
+        //noinspection ConstantConditions
+        mPuzzleSpinnerAdapter = new SpinnerPuzzleTypeAdapter(getLayoutInflater(), getSupportActionBar().getThemedContext());
+        mPuzzleSpinner.setAdapter(mPuzzleSpinnerAdapter);
+
+        if (mPuzzleSpinnerList != null) {
+            mPuzzleSpinnerAdapter.addAll(mPuzzleSpinnerList);
+            mPuzzleSpinner.setSelection(mPuzzleSpinnerPosition);
+        }
+
         //noinspection ConstantConditions
         getSupportActionBar().setElevation(0);
     }
@@ -234,14 +242,12 @@ public class CurrentSessionActivity extends DrawerActivity<CurrentSessionPresent
 
     public CurrentSessionTimerFragment getCurrentSessionTimerFragment() {
         return (CurrentSessionTimerFragment) getFragmentManager()
-                .findFragmentByTag(makeFragmentName(R.id
-                        .activity_current_session_viewpager, 0));
+                .findFragmentByTag(FragmentStatePagerAdapter.makeFragmentName(0));
     }
 
     public SolveListFragment getSolveListFragment() {
         return (SolveListFragment) getFragmentManager()
-                .findFragmentByTag(makeFragmentName(R.id
-                        .activity_current_session_viewpager, 1));
+                .findFragmentByTag(FragmentStatePagerAdapter.makeFragmentName(1));
     }
 
     void queueInvalidateOptionsMenu() {
@@ -281,6 +287,30 @@ public class CurrentSessionActivity extends DrawerActivity<CurrentSessionPresent
                 mScrambleImageActionEnable);
     }
 
+
+    @Override
+    public void initPuzzleSpinner(List<PuzzleType> list, int selectedPosition) {
+        mPuzzleSpinnerList = list;
+        mPuzzleSpinnerPosition = selectedPosition;
+
+        mPuzzleSpinnerAdapter.clear();
+        mPuzzleSpinnerAdapter.addAll(list);
+        mPuzzleSpinnerAdapter.notifyDataSetChanged();
+        mPuzzleSpinner.setSelection(selectedPosition, true);
+        mPuzzleSpinner.setOnItemSelectedListener(new AdapterView
+                .OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view,
+                                       int position, long id) {
+                presenter.onPuzzleSelected((PuzzleType) parent.getItemAtPosition(position));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         if (isNavDrawerOpen()) {
@@ -288,35 +318,17 @@ public class CurrentSessionActivity extends DrawerActivity<CurrentSessionPresent
         }
         getMenuInflater().inflate(R.menu.menu_current_session, menu);
 
-        if (PuzzleType.isInitialized()) {
-            final Spinner menuPuzzleSpinner = (Spinner) MenuItemCompat
-                    .getActionView(menu.findItem(R.id.menu_activity_current_session_puzzletype_spinner));
-            //noinspection ConstantConditions
-            ArrayAdapter<PuzzleType> puzzleTypeSpinnerAdapter = new
-                    SpinnerPuzzleTypeAdapter(getLayoutInflater(),
-                    getSupportActionBar().getThemedContext());
-            menuPuzzleSpinner.setAdapter(puzzleTypeSpinnerAdapter);
-            menuPuzzleSpinner.setSelection(puzzleTypeSpinnerAdapter.getPosition(
-                    PuzzleType.getCurrent()), true);
-            menuPuzzleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view,
-                                           int position, long id) {
-                    PuzzleType newPuzzleType = (PuzzleType) parent.getItemAtPosition(position);
-                    if (!newPuzzleType.equals(PuzzleType.getCurrent())) {
-                        try {
-                            PuzzleType.setCurrent(CurrentSessionActivity.this, newPuzzleType.getId());
-                        } catch (IOException | CouchbaseLiteException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
+        /*mPuzzleSpinner = (Spinner) MenuItemCompat
+                .getActionView(menu.findItem(R.id.menu_activity_current_session_puzzletype_spinner));
+        //noinspection ConstantConditions
+        mPuzzleSpinnerAdapter = new SpinnerPuzzleTypeAdapter(getLayoutInflater(), getSupportActionBar().getThemedContext());
+        mPuzzleSpinner.setAdapter(mPuzzleSpinnerAdapter);
 
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-                }
-            });
-        }
+        if(mPuzzleSpinnerList!=null){
+            mPuzzleSpinnerAdapter.addAll(mPuzzleSpinnerList);
+            mPuzzleSpinner.setSelection(mPuzzleSpinnerPosition);
+        }*/
+
 
         MenuItem displayScrambleImage = menu.findItem(
                 R.id.menu_activity_current_session_scramble_image_menuitem);
@@ -344,7 +356,7 @@ public class CurrentSessionActivity extends DrawerActivity<CurrentSessionPresent
         return super.onCreateOptionsMenu(menu);
     }
 
-    public class CurrentSessionPagerAdapter extends FragmentPagerAdapter {
+    public class CurrentSessionPagerAdapter extends FragmentStatePagerAdapter {
 
         private final String[] mPageTitles;
 

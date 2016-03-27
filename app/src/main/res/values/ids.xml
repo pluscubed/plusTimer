@@ -83,6 +83,8 @@
     <item name="history_sessions_recycler" type="id" />
     <item name="activity_drawer_drawer_navview" type="id" />
     <item name="activity_current_session_fab" type="id" />
+    <item name="activity_current_session_puzzlespinner" type="id" />
+    <item name="activity_history_sessions_puzzlespinner" type="id" />
 
 
 </resources>

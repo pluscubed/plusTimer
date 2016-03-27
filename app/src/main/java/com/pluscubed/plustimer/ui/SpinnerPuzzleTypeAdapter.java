@@ -20,22 +20,12 @@ import java.util.ArrayList;
 public class SpinnerPuzzleTypeAdapter extends ArrayAdapter<PuzzleType> {
 
     private LayoutInflater mLayoutInflater;
-
     private Context mContext;
 
     public SpinnerPuzzleTypeAdapter(LayoutInflater inflater, Context context) {
         super(context, 0, new ArrayList<>());
         mLayoutInflater = inflater;
         mContext = context;
-
-        update();
-    }
-
-    public void update() {
-        if (PuzzleType.isInitialized()) {
-            clear();
-            addAll(PuzzleType.getEnabledPuzzleTypes());
-        }
     }
 
     @Override

@@ -44,8 +44,8 @@ public abstract class BasePresenterActivity<P extends Presenter<V>, V> extends A
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
+    protected void onResume() {
+        super.onResume();
         if(presenter!=null)
             presenter.onViewAttached(getPresenterView());
     }

@@ -199,9 +199,7 @@ public class Solve extends CbObject implements Parcelable {
 
     @Override
     public void updateCb(Context context) {
-        if (mId != null) {
-            super.updateCb(context);
-        }
+        super.updateCb(context);
     }
 
     @Override

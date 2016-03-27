@@ -118,7 +118,7 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
                 holder.textView.setText(timeString);
             }
 
-            String uiScramble = Utils.getUiScramble(s.getScramble(), mSignEnabled, mPuzzleTypeId);
+            String uiScramble = Utils.getUiScramble(mContext, s.getScramble(), mSignEnabled, mPuzzleTypeId).toBlocking().value();
 
             holder.desc.setText(uiScramble);
 

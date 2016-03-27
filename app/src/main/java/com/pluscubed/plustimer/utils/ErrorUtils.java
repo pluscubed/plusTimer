@@ -1,21 +1,11 @@
 package com.pluscubed.plustimer.utils;
 
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.view.WindowManager;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.crashlytics.android.Crashlytics;
 import com.pluscubed.plustimer.BuildConfig;
-import com.pluscubed.plustimer.R;
-import com.pluscubed.plustimer.model.PuzzleType;
-
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 
 /**
  * Error Utility Methods
@@ -35,7 +25,7 @@ public class ErrorUtils {
             MaterialDialog.Builder builder = new MaterialDialog.Builder(context)
                     .title("Error")
                     .positiveText("Dismiss");
-            if (sendFileData) {
+            /*if (sendFileData) {
                 builder.negativeText(R.string.email_developer_history_data)
                         .callback(new MaterialDialog.ButtonCallback() {
                             @Override
@@ -44,7 +34,7 @@ public class ErrorUtils {
                                 sendFileDataEmail(context);
                             }
                         });
-            }
+            }*/
             if (!userReadableMessage.equals("")) {
                 builder.content(userReadableMessage + "\n" + e.getMessage());
             }
@@ -83,7 +73,7 @@ public class ErrorUtils {
     }
 
     public static void sendFileDataEmail(Context context) {
-        BufferedReader r = null;
+        /*BufferedReader r = null;
         StringBuilder total = new StringBuilder();
         for (PuzzleType p : PuzzleType.getPuzzleTypes()) {
             for (int i = 0; i < 2; i++) {
@@ -121,6 +111,6 @@ public class ErrorUtils {
         Intent intent = new Intent(Intent.ACTION_SENDTO,
                 Uri.fromParts("mailto", "plusCubed@gmail.com", null));
         intent.putExtra(Intent.EXTRA_TEXT, total.toString());
-        context.startActivity(Intent.createChooser(intent, context.getString(R.string.send_email)));
+        context.startActivity(Intent.createChooser(intent, context.getString(R.string.send_email)));*/
     }
 }

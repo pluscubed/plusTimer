@@ -97,7 +97,7 @@ public class SolveDialogFragment extends DialogFragment {
 
         if (!mAddMode) {
             timeString = mSolveCopy.getDescriptiveTimeString(mMillisecondsEnabled);
-            scramble = Utils.getUiScramble(mSolveCopy.getScramble(), signEnabled, mPuzzleTypeId);
+            scramble = Utils.getUiScramble(getActivity(), mSolveCopy.getScramble(), signEnabled, mPuzzleTypeId).toBlocking().value();
             penalty = mSolveCopy.getPenalty();
         }
 
@@ -272,7 +272,8 @@ public class SolveDialogFragment extends DialogFragment {
         /*if (ErrorUtils.isSolveNonexistent(getActivity(), mPuzzleTypeId, mSessionId, mSolveId)) {
             return;
         }*/
-        PuzzleType.get(mPuzzleTypeId).getSessionDeferred(getActivity(), mSessionId)
+        PuzzleType.get(getActivity(), mPuzzleTypeId)
+                .flatMap(puzzleType -> puzzleType.getSessionDeferred(getActivity(), mSessionId))
                 .flatMapObservable(session -> session.deleteSolveAsync(getActivity(), mSolve.getId()).toObservable())
                 .toCompletable()
                 .observeOn(AndroidSchedulers.mainThread())
@@ -284,34 +285,49 @@ public class SolveDialogFragment extends DialogFragment {
     }
 
     private void onOkPressed() {
+        if (mTimeEdit.getText().toString().equals("")) {
+            mTimeEdit.setText("0");
+        }
+        String scrambleText = Utils.signToWcaNotation(getActivity(), mScrambleEdit.getText().toString(), mPuzzleTypeId)
+                .toBlocking().value();
+        if (!scrambleText.equals(mSolveCopy.getScramble())) {
+            PuzzleType.get(getActivity(), mPuzzleTypeId)
+                    .map(puzzleType -> {
+                        try {
+                            return puzzleType.getPuzzle().getSolvedState().applyAlgorithm(scrambleText);
+                        } catch (InvalidScrambleException e) {
+                            return null;
+                        }
+                    })
+                    .subscribe(state -> {
+                        if (state == null) {
+                            mScrambleEdit.setError(getString(R.string.invalid_scramble));
+                        }
+                    });
+        }
         try {
-            if (mTimeEdit.getText().toString().equals("")) {
-                mTimeEdit.setText("0");
-            }
-            String scrambleText = Utils.signToWcaNotation
-                    (mScrambleEdit.getText().toString(),
-                            mPuzzleTypeId);
-            if (!scrambleText.equals(mSolveCopy.getScramble())) {
-                PuzzleType.get(mPuzzleTypeId).getPuzzle()
-                        .getSolvedState().applyAlgorithm(scrambleText);
-            }
             mSolveCopy.setScramble(null, scrambleText);
-            if (!mAddMode) {
+        } catch (CouchbaseLiteException | IOException ignore) {
+            //won't happen on disconnected solve
+        }
+        if (!mAddMode) {
                 mSolve.copy(mSolveCopy);
                 mSolve.updateCb(getActivity());
                 Session.notifyListeners(mSessionId, mSolve, RecyclerViewUpdate.SINGLE_CHANGE);
                 dismiss();
             } else {
-                PuzzleType.get(mPuzzleTypeId).getSession(getActivity(), mSessionId)
-                        .addDisconnectedSolve(getActivity(), mSolveCopy);
+            PuzzleType.get(getActivity(), mPuzzleTypeId)
+                    .flatMap(puzzleType -> puzzleType.getSessionDeferred(getActivity(), mSessionId))
+                    .subscribe(session -> {
+                        try {
+                            session.addDisconnectedSolve(getActivity(), mSolveCopy);
+                        } catch (CouchbaseLiteException | IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
                 dismiss();
             }
 
-        } catch (InvalidScrambleException e) {
-            mScrambleEdit.setError(getString(R.string.invalid_scramble));
-        } catch (CouchbaseLiteException | IOException e) {
-            e.printStackTrace();
-        }
     }
 
     void updateTitle() {

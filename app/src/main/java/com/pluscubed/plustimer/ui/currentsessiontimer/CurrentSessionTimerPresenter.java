@@ -41,10 +41,9 @@ public class CurrentSessionTimerPresenter extends Presenter<CurrentSessionTimerV
             getView().enableMenuItems(false);
             getView().showScrambleImage(false);
 
-            //mBldMode = PuzzleType.getCurrent().isBld();
+            getView().updateBld();
 
             getView().resetGenerateScramble();
-
             getView().resetTimer();
 
         };
@@ -89,13 +88,18 @@ public class CurrentSessionTimerPresenter extends Presenter<CurrentSessionTimerV
             return;
         }
 
-        SolveDialogUtils.createSolveDialog(
-                getView().getContextCompat(),
-                false,
-                PuzzleType.getCurrent().getId(),
-                PuzzleType.getCurrent().getCurrentSessionId(),
-                solve
-        );
+        PuzzleType.getCurrent(getView().getContextCompat())
+                .map(PuzzleType::getCurrentSessionId)
+                .subscribe(session ->
+                        SolveDialogUtils.createSolveDialog(
+                                getView().getContextCompat(),
+                                false,
+                                PuzzleType.getCurrentId(getView().getContextCompat()),
+                                session,
+                                solve
+                        )
+                );
+
     }
 
     @Override
@@ -111,7 +115,8 @@ public class CurrentSessionTimerPresenter extends Presenter<CurrentSessionTimerV
             return;
         }
 
-        PuzzleType.getCurrent().getCurrentSessionDeferred(getView().getContextCompat())
+        PuzzleType.getCurrent(getView().getContextCompat())
+                .flatMap(puzzleType -> puzzleType.getCurrentSessionDeferred(getView().getContextCompat()))
                 .subscribe(session -> {
                     session.removeListener(mSessionSolvesListener);
                 });
@@ -121,9 +126,7 @@ public class CurrentSessionTimerPresenter extends Presenter<CurrentSessionTimerV
     public void onViewAttached(CurrentSessionTimerView view) {
         super.onViewAttached(view);
 
-        if (PuzzleType.isInitialized()) {
-            setPuzzleTypeInitialized();
-        }
+        initializeView();
 
         view.getTimeBarAdapter().updateMillisecondsMode();
     }
@@ -139,7 +142,7 @@ public class CurrentSessionTimerPresenter extends Presenter<CurrentSessionTimerV
     }
 
 
-    public void setPuzzleTypeInitialized() {
+    public void initializeView() {
         if (!isViewAttached()) {
             return;
         }
@@ -151,7 +154,7 @@ public class CurrentSessionTimerPresenter extends Presenter<CurrentSessionTimerV
 
         if (!mViewInitialized) {
             //noinspection ConstantConditions
-            getView().setPuzzleTypeInitialized();
+            getView().setInitialized();
             updateView(RecyclerViewUpdate.DATA_RESET, null);
 
             mViewInitialized = true;
@@ -159,7 +162,8 @@ public class CurrentSessionTimerPresenter extends Presenter<CurrentSessionTimerV
     }
 
     private void reloadSolveList() {
-        PuzzleType.getCurrent().getCurrentSessionDeferred(getView().getContextCompat())
+        PuzzleType.getCurrent(getView().getContextCompat())
+                .flatMap(puzzleType -> puzzleType.getCurrentSessionDeferred(getView().getContextCompat()))
                 .doOnSuccess(session -> {
                     session.addListener(mSessionSolvesListener);
                 })

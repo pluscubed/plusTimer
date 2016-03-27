@@ -13,7 +13,7 @@ public interface CurrentSessionTimerView {
 
     void updateStatsAndTimerText(RecyclerViewUpdate mode, Solve solve);
 
-    void setPuzzleTypeInitialized();
+    void setInitialized();
 
     Activity getContextCompat();
 

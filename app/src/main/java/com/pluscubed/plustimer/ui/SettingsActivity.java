@@ -22,18 +22,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.couchbase.lite.CouchbaseLiteException;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.ui.basedrawer.ThemableActivity;
 import com.pluscubed.plustimer.utils.PrefUtils;
 import com.pluscubed.plustimer.utils.Utils;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import rx.android.schedulers.AndroidSchedulers;
 
 /**
  * Settings Activity and Fragment
@@ -118,34 +118,37 @@ public class SettingsActivity extends ThemableActivity {
 
 
             MultiSelectListPreference puzzleTypeMultiList =
-                    (MultiSelectListPreference) findPreference(PrefUtils
-                            .PREF_PUZZLETYPES_MULTISELECTLIST);
+                    (MultiSelectListPreference) findPreference(PrefUtils.PREF_PUZZLETYPES_MULTISELECTLIST);
 
-            if (puzzleTypeMultiList.getValues().size() == 0) {
-                Set<String> all = new HashSet<>();
-                for (PuzzleType p : PuzzleType.getPuzzleTypes()) {
-                    all.add(p.getId());
-                }
-                puzzleTypeMultiList.setValues(all);
-            }
+            PuzzleType.getPuzzleTypes(getActivity())
+                    .toList()
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(puzzleTypes -> {
+                        List<String> entries = new ArrayList<>();
 
-            List<String> entries = new ArrayList<>();
-            for (PuzzleType i : PuzzleType.getPuzzleTypes()) {
-                String uiName = i.getName();
-                if (!i.isScramblerOfficial()) {
-                    uiName += " - " + getString(R.string.unofficial);
-                }
-                entries.add(uiName);
-            }
-            puzzleTypeMultiList.setEntries(entries.toArray(new
-                    CharSequence[entries.size()]));
+                        List<String> entryValues = new ArrayList<>();
 
-            List<String> entryValues = new ArrayList<>();
-            for (PuzzleType p : PuzzleType.getPuzzleTypes()) {
-                entryValues.add(p.getId());
-            }
-            puzzleTypeMultiList.setEntryValues(entryValues.toArray(new
-                    CharSequence[entryValues.size()]));
+                        for (PuzzleType p : puzzleTypes) {
+                            String uiName = p.getName();
+                            if (!p.isScramblerOfficial()) {
+                                uiName += " - " + getString(R.string.unofficial);
+                            }
+                            entries.add(uiName);
+
+                            entryValues.add(p.getId());
+                        }
+
+                        if (puzzleTypeMultiList.getValues().isEmpty()) {
+                            Set<String> all = new HashSet<>();
+                            all.addAll(entryValues);
+                            //Initial selection - all puzzle types
+                            puzzleTypeMultiList.setValues(all);
+                        }
+
+                        puzzleTypeMultiList.setEntries(entries.toArray(new CharSequence[entries.size()]));
+                        puzzleTypeMultiList.setEntryValues(entryValues.toArray(new CharSequence[entryValues.size()]));
+                    });
+
 
             puzzleTypeMultiList.setOnPreferenceChangeListener((preference, newValue) -> {
                 Set selected = (Set) newValue;
@@ -156,13 +159,14 @@ public class SettingsActivity extends ThemableActivity {
                             Toast.LENGTH_SHORT).show();
                     return false;
                 }
-                for (PuzzleType p : PuzzleType.getPuzzleTypes()) {
-                    try {
-                        p.setEnabled(getActivity(), selected.contains(p.getId()));
-                    } catch (CouchbaseLiteException | IOException e) {
-                        e.printStackTrace();
-                    }
-                }
+                PuzzleType.getPuzzleTypes(getActivity())
+                        .flatMap(puzzleType ->
+                                puzzleType.setEnabled(
+                                        getActivity(),
+                                        selected.contains(puzzleType.getId())
+                                )
+                                        .toObservable()
+                        ).subscribe();
                 return true;
             });
         }

@@ -39,6 +39,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import rx.Single;
+
 /**
  * Utilities class
  */
@@ -375,24 +377,27 @@ public class Utils {
      * @param wca the sequence of moves in WCA notation
      * @return the converted sequence of moves in SiGN notation
      */
-    public static String wcaToSignNotation(String wca, String puzzleTypeId) {
-        if (Character.isDigit(PuzzleType.get(puzzleTypeId).getScrambler().charAt(0))) {
-            String[] moves = wca.split(" ");
-            for (int i = 0; i < moves.length; i++) {
-                if (moves[i].contains("w")) {
-                    moves[i] = moves[i].replace("w", "");
-                    moves[i] = moves[i].toLowerCase();
-                }
-            }
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < moves.length; i++) {
-                builder.append(moves[i]);
-                if (i != moves.length - 1) builder.append(" ");
-            }
-            return builder.toString();
-        } else {
-            return wca;
-        }
+    public static Single<String> wcaToSignNotation(Context context, String wca, String puzzleTypeId) {
+        return PuzzleType.get(context, puzzleTypeId)
+                .map(puzzleType -> {
+                    if (Character.isDigit(puzzleType.getScrambler().charAt(0))) {
+                        String[] moves = wca.split(" ");
+                        for (int i = 0; i < moves.length; i++) {
+                            if (moves[i].contains("w")) {
+                                moves[i] = moves[i].replace("w", "");
+                                moves[i] = moves[i].toLowerCase();
+                            }
+                        }
+                        StringBuilder builder = new StringBuilder();
+                        for (int i = 0; i < moves.length; i++) {
+                            builder.append(moves[i]);
+                            if (i != moves.length - 1) builder.append(" ");
+                        }
+                        return builder.toString();
+                    } else {
+                        return wca;
+                    }
+                });
     }
 
     /**
@@ -401,27 +406,30 @@ public class Utils {
      * @param sign the sequence of moves in SiGN notation
      * @return the converted sequence of moves in WCA notation
      */
-    public static String signToWcaNotation(String sign, String puzzleTypeId) {
-        if (Character.isDigit(PuzzleType.get(puzzleTypeId).getScrambler().charAt(0))) {
-            String[] moves = sign.split(" ");
-            for (int i = 0; i < moves.length; i++) {
-                if (!moves[i].equals(moves[i].toUpperCase())) {
-                    char[] possibleMoves = "udfrlb".toCharArray();
-                    for (char move : possibleMoves) {
-                        moves[i] = moves[i].replace(String.valueOf(move),
-                                Character.toUpperCase(move) + "w");
+    public static Single<String> signToWcaNotation(Context context, String sign, String puzzleTypeId) {
+        return PuzzleType.get(context, puzzleTypeId)
+                .map(puzzleType -> {
+                    if (Character.isDigit(puzzleType.getScrambler().charAt(0))) {
+                        String[] moves = sign.split(" ");
+                        for (int i = 0; i < moves.length; i++) {
+                            if (!moves[i].equals(moves[i].toUpperCase())) {
+                                char[] possibleMoves = "udfrlb".toCharArray();
+                                for (char move : possibleMoves) {
+                                    moves[i] = moves[i].replace(String.valueOf(move),
+                                            Character.toUpperCase(move) + "w");
+                                }
+                            }
+                        }
+                        StringBuilder builder = new StringBuilder();
+                        for (int i = 0; i < moves.length; i++) {
+                            builder.append(moves[i]);
+                            if (i != moves.length - 1) builder.append(" ");
+                        }
+                        return builder.toString();
+                    } else {
+                        return sign;
                     }
-                }
-            }
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < moves.length; i++) {
-                builder.append(moves[i]);
-                if (i != moves.length - 1) builder.append(" ");
-            }
-            return builder.toString();
-        } else {
-            return sign;
-        }
+                });
     }
 
     /**
@@ -478,20 +486,10 @@ public class Utils {
         return textView.getMeasuredHeight();
     }
 
-    //TODO fix
-    public static String getUiScramble(String scramble,
-                                       boolean signEnabled,
-                                       String puzzleTypeId) {
-        /*try {*/
-        return signEnabled ? Utils.wcaToSignNotation(scramble, puzzleTypeId) : scramble;
-        /*} catch (NullPointerException e) {
-            String positionString = String.valueOf(position);
-            if (position == -1) {
-                positionString = "CurrentScrambleAndSvg";
-            }
-            ErrorUtils.logCrashlytics(e);
-            ErrorUtils.showErrorDialog(c, "Solve #" + positionString + " UI scramble doesn't exist", e, false);
-        }*/
+    public static Single<String> getUiScramble(Context context, String scramble,
+                                               boolean signEnabled,
+                                               String puzzleTypeId) {
+        return signEnabled ? Utils.wcaToSignNotation(context, scramble, puzzleTypeId) : Single.just(scramble);
     }
 
 

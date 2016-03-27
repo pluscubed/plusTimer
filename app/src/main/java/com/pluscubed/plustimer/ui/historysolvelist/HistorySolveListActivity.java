@@ -37,7 +37,7 @@ public class HistorySolveListActivity extends ThemableActivity {
         setContentView(R.layout.activity_with_toolbar);
 
         String sessionId = getIntent().getStringExtra(EXTRA_HISTORY_SESSION_ID);
-        String puzzleType = getIntent().getStringExtra(EXTRA_HISTORY_PUZZLETYPE_ID);
+        String puzzleTypeId = getIntent().getStringExtra(EXTRA_HISTORY_PUZZLETYPE_ID);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
         setSupportActionBar(toolbar);
@@ -46,7 +46,7 @@ public class HistorySolveListActivity extends ThemableActivity {
         Fragment f = fm.findFragmentById(R.id
                 .activity_with_toolbar_content_framelayout);
         if (f == null) {
-            f = SolveListPresenter.newInstance(false, puzzleType, sessionId);
+            f = SolveListPresenter.newInstance(false, puzzleTypeId, sessionId);
             fm.beginTransaction()
                     .replace(R.id.activity_with_toolbar_content_framelayout, f)
                     .commit();
@@ -54,7 +54,8 @@ public class HistorySolveListActivity extends ThemableActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 
-        PuzzleType.get(puzzleType).getSessionDeferred(this, sessionId)
+        PuzzleType.get(this,puzzleTypeId)
+                .flatMap(puzzleType -> puzzleType.getSessionDeferred(this, sessionId))
                 .flatMap(session -> session.getTimestampString(this))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::setTitle);

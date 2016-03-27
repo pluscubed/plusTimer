@@ -36,12 +36,13 @@ public class HistorySessionsPresenter extends Presenter<HistorySessionsView> {
     private boolean mMillisecondsEnabled;
 
     public HistorySessionsPresenter() {
-        mPuzzleTypeId = PuzzleType.getCurrentId();
     }
 
     @Override
     public void onViewAttached(HistorySessionsView view) {
         super.onViewAttached(view);
+
+        mPuzzleTypeId = PuzzleType.getCurrentId(view.getContextCompat());
 
         updateSessionsAdapter();
     }
@@ -66,7 +67,8 @@ public class HistorySessionsPresenter extends Presenter<HistorySessionsView> {
 
         getView().getHistorySessionsAdapter().setMillisecondsEnabled(mMillisecondsEnabled);
 
-        PuzzleType.get(mPuzzleTypeId).getHistorySessionsSorted(getView().getContextCompat())
+        PuzzleType.get(getView().getContextCompat(), mPuzzleTypeId)
+                .flatMapObservable(puzzleType -> puzzleType.getHistorySessionsSorted(getView().getContextCompat()))
                 .toList()
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnNext(sessions -> {
@@ -386,8 +388,22 @@ public class HistorySessionsPresenter extends Presenter<HistorySessionsView> {
             return;
         }
 
-        getView().getPuzzleTypeSpinnerAdapter().update();
-        getView().initPuzzleSpinnerSelection(PuzzleType.get(mPuzzleTypeId));
+        PuzzleType.getEnabledPuzzleTypes(getView().getContextCompat())
+                .toList()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(list -> {
+                    String id = PuzzleType.getCurrentId(getView().getContextCompat());
+                    int position = 0;
+                    for (int i = 0; i < list.size(); i++) {
+                        PuzzleType type = list.get(i);
+                        if (type.getId().equals(id)) {
+                            position = i;
+                            break;
+                        }
+                    }
+                    getView().initPuzzleSpinner(list, position);
+                });
+
     }
 
     public static class Factory implements PresenterFactory<HistorySessionsPresenter> {

@@ -23,6 +23,8 @@ import com.pluscubed.plustimer.base.PresenterFactory;
 import com.pluscubed.plustimer.model.PuzzleType;
 import com.pluscubed.plustimer.ui.SpinnerPuzzleTypeAdapter;
 
+import java.util.List;
+
 /**
  * History SessionList Fragment
  */
@@ -33,8 +35,10 @@ public class HistorySessionsFragment extends BasePresenterFragment<HistorySessio
     private RecyclerView mRecyclerView;
     private HistorySessionsAdapter mAdapter;
     private TextView mEmptyView;
-    private SpinnerPuzzleTypeAdapter mPuzzleTypeSpinnerAdapter;
-    private Spinner mToolbarPuzzleSpinner;
+    private SpinnerPuzzleTypeAdapter mPuzzleSpinnerAdapter;
+    private Spinner mPuzzleSpinner;
+    private List<PuzzleType> mPuzzleSpinnerList;
+    private int mPuzzleSpinnerPosition;
 
 
     @Override
@@ -153,11 +157,6 @@ public class HistorySessionsFragment extends BasePresenterFragment<HistorySessio
         });
     }*/
 
-    @Override
-    public SpinnerPuzzleTypeAdapter getPuzzleTypeSpinnerAdapter() {
-        return mPuzzleTypeSpinnerAdapter;
-    }
-
 
     /*public void finishActionMode() {
         if (mActionMode != null) {
@@ -170,7 +169,7 @@ public class HistorySessionsFragment extends BasePresenterFragment<HistorySessio
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.menu_history_sessionlist, menu);
 
-        mToolbarPuzzleSpinner = (Spinner) MenuItemCompat.getActionView(
+        mPuzzleSpinner = (Spinner) MenuItemCompat.getActionView(
                 menu.findItem(R.id.menu_activity_history_sessionlist_puzzletype_spinner));
         AppCompatActivity activity = (AppCompatActivity) getActivity();
 
@@ -180,20 +179,29 @@ public class HistorySessionsFragment extends BasePresenterFragment<HistorySessio
         } else {
             themedContext = activity;
         }
-        mPuzzleTypeSpinnerAdapter = new SpinnerPuzzleTypeAdapter(
+        mPuzzleSpinnerAdapter = new SpinnerPuzzleTypeAdapter(
                 getActivity().getLayoutInflater(),
                 themedContext
         );
-        mToolbarPuzzleSpinner.setAdapter(mPuzzleTypeSpinnerAdapter);
+        mPuzzleSpinner.setAdapter(mPuzzleSpinnerAdapter);
+        if (mPuzzleSpinnerList != null) {
+            mPuzzleSpinnerAdapter.addAll(mPuzzleSpinnerList);
+            mPuzzleSpinner.setSelection(mPuzzleSpinnerPosition);
+        }
 
         presenter.onCreateOptionsMenu();
     }
 
     @Override
-    public void initPuzzleSpinnerSelection(PuzzleType type) {
-        mToolbarPuzzleSpinner.setSelection(
-                mPuzzleTypeSpinnerAdapter.getPosition(type), true);
-        mToolbarPuzzleSpinner.setOnItemSelectedListener(new AdapterView
+    public void initPuzzleSpinner(List<PuzzleType> puzzleTypes, int selectedPosition) {
+        mPuzzleSpinnerList = puzzleTypes;
+        mPuzzleSpinnerPosition = selectedPosition;
+
+        mPuzzleSpinnerAdapter.clear();
+        mPuzzleSpinnerAdapter.addAll(puzzleTypes);
+        mPuzzleSpinnerAdapter.notifyDataSetChanged();
+        mPuzzleSpinner.setSelection(selectedPosition, true);
+        mPuzzleSpinner.setOnItemSelectedListener(new AdapterView
                 .OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view,
@@ -205,11 +213,6 @@ public class HistorySessionsFragment extends BasePresenterFragment<HistorySessio
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
-    }
-
-    @Override
-    public void invalidateOptionsMenu() {
-        ((AppCompatActivity) getActivity()).supportInvalidateOptionsMenu();
     }
 
 }
