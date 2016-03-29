@@ -46,7 +46,8 @@ public abstract class BasePresenterFragment<P extends Presenter<V>, V> extends F
     @Override
     public void onResume() {
         super.onResume();
-        presenter.onViewAttached(getPresenterView());
+        if (presenter != null)
+            presenter.onViewAttached(getPresenterView());
     }
 
     @Override
@@ -57,7 +58,8 @@ public abstract class BasePresenterFragment<P extends Presenter<V>, V> extends F
 
     @Override
     public void onDestroy() {
-        presenter.onViewDetached();
+        if (presenter != null)
+            presenter.onViewDetached();
 
         super.onDestroy();
     }

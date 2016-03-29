@@ -464,28 +464,26 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
         mLastPlusTwoButton = (Button) v.findViewById(R.id.fragment_current_session_timer_last_plustwo_button);
         mLastDeleteButton = (Button) v.findViewById(R.id.fragment_current_session_timer_last_delete_button);
 
-        mLastDnfButton.setOnClickListener(view -> {
-            PuzzleType.getCurrent(getActivity())
-                    .flatMap(puzzleType -> puzzleType.getCurrentSessionDeferred(getActivity()))
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new SingleSubscriber<Session>() {
-                        @Override
-                        public void onSuccess(Session session) {
-                            try {
-                                Solve solve = session.getLastSolve(getActivity()).toBlocking().first();
-                                solve.setPenalty(getActivity(), Solve.PENALTY_DNF);
-                                Session.notifyListeners(session.getId(), solve, RecyclerViewUpdate.SINGLE_CHANGE);
-                            } catch (CouchbaseLiteException | IOException e) {
-                                e.printStackTrace();
-                            }
+        mLastDnfButton.setOnClickListener(view -> PuzzleType.getCurrent(getActivity())
+                .flatMap(puzzleType -> puzzleType.getCurrentSessionDeferred(getActivity()))
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new SingleSubscriber<Session>() {
+                    @Override
+                    public void onSuccess(Session session) {
+                        try {
+                            Solve solve = session.getLastSolve(getActivity()).toBlocking().first();
+                            solve.setPenalty(getActivity(), Solve.PENALTY_DNF);
+                            Session.notifyListeners(session.getId(), solve, RecyclerViewUpdate.SINGLE_CHANGE);
+                        } catch (CouchbaseLiteException | IOException e) {
+                            e.printStackTrace();
                         }
+                    }
 
-                        @Override
-                        public void onError(Throwable error) {
+                    @Override
+                    public void onError(Throwable error) {
 
-                        }
-                    });
-        });
+                    }
+                }));
 
         mLastPlusTwoButton.setOnClickListener(view -> {
             PuzzleType.getCurrent(getActivity())
@@ -594,8 +592,7 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
 
         //If the scramble image is currently displayed and it is not scrambling,
         // then make sure it is set to visible; otherwise, set to gone.
-        showScrambleImage(mScrambleImageDisplay && !mRetainedFragment
-                .isScrambling());
+        showScrambleImage(mScrambleImageDisplay && !mRetainedFragment.isScrambling());
 
         mScrambleImage.setOnClickListener(v1 -> toggleScrambleImage());
 

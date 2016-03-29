@@ -377,9 +377,10 @@ public class HistorySessionsPresenter extends Presenter<HistorySessionsView> {
             return;
         }
 
-        mPuzzleTypeId = puzzleType.getId();
-
-        updateSessionsAdapter();
+        if (!mPuzzleTypeId.equals(puzzleType.getId())) {
+            mPuzzleTypeId = puzzleType.getId();
+            updateSessionsAdapter();
+        }
     }
 
     @SuppressWarnings("ConstantConditions")

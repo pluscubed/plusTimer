@@ -16,6 +16,7 @@ public class CurrentSessionTimerPresenter extends Presenter<CurrentSessionTimerV
     private final Session.SolvesListener mSessionSolvesListener;
     private final PuzzleType.CurrentChangeListener mPuzzleTypeCurrentChangeListener;
 
+    private boolean mInitialized;
     private boolean mViewInitialized;
 
     @SuppressWarnings("ConstantConditions")
@@ -129,6 +130,16 @@ public class CurrentSessionTimerPresenter extends Presenter<CurrentSessionTimerV
         initializeView();
 
         view.getTimeBarAdapter().updateMillisecondsMode();
+
+        if (!mInitialized) {
+            PuzzleType.getCurrent(view.getContextCompat())
+                    .flatMap(puzzleType -> puzzleType.getCurrentSessionDeferred(getView().getContextCompat()))
+                    .subscribe(session -> {
+                        session.addListener(mSessionSolvesListener);
+                    });
+
+            mInitialized = true;
+        }
     }
 
     @Override
@@ -148,7 +159,7 @@ public class CurrentSessionTimerPresenter extends Presenter<CurrentSessionTimerV
         }
 
         //noinspection ConstantConditions
-        if (isViewAttached() && !getView().getTimeBarAdapter().isInitialized()) {
+        if (!getView().getTimeBarAdapter().isInitialized()) {
             reloadSolveList();
         }
 
@@ -164,9 +175,6 @@ public class CurrentSessionTimerPresenter extends Presenter<CurrentSessionTimerV
     private void reloadSolveList() {
         PuzzleType.getCurrent(getView().getContextCompat())
                 .flatMap(puzzleType -> puzzleType.getCurrentSessionDeferred(getView().getContextCompat()))
-                .doOnSuccess(session -> {
-                    session.addListener(mSessionSolvesListener);
-                })
                 .flatMapObservable(session ->
                         session.getSortedSolves(getView().getContextCompat())).toList()
                 .observeOn(AndroidSchedulers.mainThread())

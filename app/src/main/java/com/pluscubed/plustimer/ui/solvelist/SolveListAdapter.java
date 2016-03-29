@@ -73,6 +73,7 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
     public void setSolves(String puzzleTypeId, List<Solve> solves) {
         mPuzzleTypeId = puzzleTypeId;
         mSolves = solves;
+        mInitialized = true;
     }
 
     public void onPresenterPrepared(SolveListPresenter presenter) {
@@ -226,9 +227,7 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
                 textView = (TextView) v.findViewById(R.id.list_item_solvelist_title_textview);
                 desc = (TextView) v.findViewById(R.id.list_item_solvelist_desc_textview);
 
-                v.setOnClickListener(view -> {
-                    mPresenter.onSolveClicked(mSolves.get(getAdapterPosition() - 1));
-                });
+                v.setOnClickListener(view -> mPresenter.onSolveClicked(mSolves.get(getAdapterPosition() - 1)));
             }
         }
     }

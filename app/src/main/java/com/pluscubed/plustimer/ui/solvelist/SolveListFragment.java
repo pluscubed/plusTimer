@@ -106,18 +106,14 @@ public class SolveListFragment extends BasePresenterFragment<SolveListPresenter,
                 v.findViewById(R.id.fragment_solvelist_submit_reset_linearlayout);
 
         Button reset = (Button) v.findViewById(R.id.fragment_solvelist_reset_button);
-        reset.setOnClickListener(view -> {
-            getPresenter().onResetButtonClicked();
-        });
+        reset.setOnClickListener(view -> getPresenter().onResetButtonClicked());
         Button submit = (Button) v.findViewById(R.id.fragment_solvelist_submit_button);
         submit.setOnClickListener(view -> {
             MaterialDialog.Builder builder = new MaterialDialog.Builder(getActivity());
             builder.content(getString(R.string.submit_warning_message))
                     .positiveText(R.string.submit)
                     .negativeText(android.R.string.cancel)
-                    .onPositive((dialog, which) -> {
-                        getPresenter().onSubmitClicked();
-                    });
+                    .onPositive((dialog, which) -> getPresenter().onSubmitClicked());
             builder.show();
         });
 

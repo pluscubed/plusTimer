@@ -179,9 +179,7 @@ public class HistorySessionsAdapter extends RecyclerView.Adapter<HistorySessions
 
             } else {
                 textView = (TextView) v.findViewById(android.R.id.text1);
-                v.setOnClickListener(v1 -> {
-                    mPresenter.onSessionClicked(mSessions.get(getAdapterPosition() - 1));
-                });
+                v.setOnClickListener(v1 -> mPresenter.onSessionClicked(mSessions.get(getAdapterPosition() - 1)));
             }
 
         }

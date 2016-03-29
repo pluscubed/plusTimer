@@ -67,6 +67,7 @@ public class Session extends CbObject implements Parcelable {
     }
 
     protected Session(Parcel in) {
+        this.mId = in.readString();
         List<String> list = new ArrayList<>();
         in.readStringList(list);
         mSolves = new HashSet<>();
@@ -178,10 +179,6 @@ public class Session extends CbObject implements Parcelable {
 
     public String getId() {
         return mId;
-    }
-
-    public void setId(String id) {
-        mId = id;
     }
 
     public SolveBuilder newSolve(Context context) {
@@ -445,6 +442,7 @@ public class Session extends CbObject implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.mId);
         dest.writeStringList(new ArrayList<>(mSolves));
     }
 

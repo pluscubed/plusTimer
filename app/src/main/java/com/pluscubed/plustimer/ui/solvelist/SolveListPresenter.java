@@ -29,11 +29,16 @@ public class SolveListPresenter extends Presenter<SolveListView> {
     public static final String INIT_SESSION_ID = "history_session";
     public static final String INIT_PUZZLETYPE_ID = "history_puzzletype";
     private static final String INIT_CURRENT = "current";
+
     private final Session.SolvesListener mSessionSolvesListener;
     private final PuzzleType.CurrentChangeListener mPuzzleTypeCurrentChangeListener;
+
     private String mPuzzleTypeId;
     private String mSessionId;
+
     private boolean mIsCurrent;
+
+    private boolean mInitialized;
     private boolean mViewInitialized;
 
     public SolveListPresenter(Bundle arguments) {
@@ -89,15 +94,26 @@ public class SolveListPresenter extends Presenter<SolveListView> {
             PuzzleType.getCurrent(view.getContextCompat())
                     .map(PuzzleType::getCurrentSessionId)
                     .subscribe(currentSession -> {
-                        initialize(PuzzleType.getCurrentId(view.getContextCompat()),
-                                currentSession);
+                        initializeView(PuzzleType.getCurrentId(view.getContextCompat()), currentSession);
                     });
 
         } else if (mPuzzleTypeId != null && mSessionId != null) {
-            initialize(mPuzzleTypeId, mSessionId);
+            initializeView(mPuzzleTypeId, mSessionId);
+        } else {
+            throw new RuntimeException("Must be current or have specified puzzletype and session");
         }
 
         view.getSolveListAdapter().updateSignAndMillisecondsMode();
+
+        if (!mInitialized) {
+            PuzzleType.get(getView().getContextCompat(), mPuzzleTypeId)
+                    .flatMap(puzzleType -> puzzleType.getSessionDeferred(getView().getContextCompat(), mSessionId))
+                    .subscribe(session -> {
+                        session.addListener(mSessionSolvesListener);
+                    });
+
+            mInitialized = true;
+        }
     }
 
     @Override
@@ -120,16 +136,20 @@ public class SolveListPresenter extends Presenter<SolveListView> {
                 });
     }
 
-    public void initialize(String puzzleTypeId, String sessionId) {
+    public void initializeView(String puzzleTypeId, String sessionId) {
         mPuzzleTypeId = puzzleTypeId;
         mSessionId = sessionId;
 
+        if (!isViewAttached()) {
+            return;
+        }
+
         //noinspection ConstantConditions
-        if (isViewAttached() && !getView().getSolveListAdapter().isInitialized()) {
+        if (!getView().getSolveListAdapter().isInitialized()) {
             reloadSolveList();
         }
 
-        if (!mViewInitialized && isViewAttached()) {
+        if (!mViewInitialized) {
             //noinspection ConstantConditions
             getView().setInitialized();
             updateView();
@@ -141,9 +161,6 @@ public class SolveListPresenter extends Presenter<SolveListView> {
     private void reloadSolveList() {
         PuzzleType.get(getView().getContextCompat(), mPuzzleTypeId)
                 .flatMap(puzzleType -> puzzleType.getSessionDeferred(getView().getContextCompat(), mSessionId))
-                .doOnSuccess(session -> {
-                    session.addListener(mSessionSolvesListener);
-                })
                 .flatMapObservable(session ->
                         session.getSortedSolves(getView().getContextCompat())).toList()
                 .observeOn(AndroidSchedulers.mainThread())

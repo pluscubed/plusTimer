@@ -138,9 +138,7 @@ dependencies {
     testCompile 'org.mockito:mockito-all:1.10.19'
     testCompile "org.robolectric:robolectric:3.1-SNAPSHOT"
 
-    compile('com.github.cubing:tnoodle-android:0.8.9@aar') {
-        transitive = true;
-    }
+    compile 'com.github.pluscubed:tnoodle:582438f8e5'
     compile 'com.caverock:androidsvg:1.2.1'
 
     compile 'com.google.code.gson:gson:2.6.2'

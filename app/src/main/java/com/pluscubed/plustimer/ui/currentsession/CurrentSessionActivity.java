@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -50,18 +49,18 @@ public class CurrentSessionActivity extends DrawerActivity<CurrentSessionPresent
     private boolean mScrambleImageActionEnable;
     private int mSelectedPage;
     private boolean mInvalidateActionBarOnDrawerClosed;
+
     private SlidingTabLayout mSlidingTabLayout;
     private LockingViewPager mViewPager;
+    private LinearLayout mAppBar;
+    private FrameLayout mContentFrame;
+
     private int mContentFrameLayoutHeight;
 
     private SpinnerPuzzleTypeAdapter mPuzzleSpinnerAdapter;
     private Spinner mPuzzleSpinner;
     private int mPuzzleSpinnerPosition;
     private List<PuzzleType> mPuzzleSpinnerList;
-
-    public Toolbar getToolbar() {
-        return super.getToolbar();
-    }
 
     @Override
     public FrameLayout getContentFrameLayout() {
@@ -71,22 +70,20 @@ public class CurrentSessionActivity extends DrawerActivity<CurrentSessionPresent
 
     @Override
     public void playToolbarExitAnimation() {
-        final LinearLayout toolbar = (LinearLayout) findViewById(R.id.activity_current_session_headerbar);
-        final FrameLayout layout = (FrameLayout) findViewById(R.id.activity_current_session_framelayout);
-        mContentFrameLayoutHeight = layout.getHeight();
+        mContentFrameLayoutHeight = mContentFrame.getHeight();
 
-        ObjectAnimator exit = ObjectAnimator.ofFloat(toolbar, View.TRANSLATION_Y,
-                -toolbar.getHeight() - Utils.convertDpToPx(this, 8));
+        ObjectAnimator exit = ObjectAnimator.ofFloat(mAppBar, View.TRANSLATION_Y,
+                -mAppBar.getHeight() - Utils.convertDpToPx(this, 8));
         exit.setDuration(300);
         exit.setInterpolator(new FastOutSlowInInterpolator());
         exit.addUpdateListener(animation -> {
             LinearLayout.LayoutParams params =
-                    (LinearLayout.LayoutParams) layout.getLayoutParams();
+                    (LinearLayout.LayoutParams) mContentFrame.getLayoutParams();
             params.height =
                     mContentFrameLayoutHeight - (int) (float) animation.getAnimatedValue();
             params.weight = 0;
-            layout.setLayoutParams(params);
-            layout.setTranslationY((int) (float) animation.getAnimatedValue());
+            mContentFrame.setLayoutParams(params);
+            mContentFrame.setTranslationY((int) (float) animation.getAnimatedValue());
         });
 
         AnimatorSet scrambleAnimatorSet = new AnimatorSet();
@@ -96,36 +93,31 @@ public class CurrentSessionActivity extends DrawerActivity<CurrentSessionPresent
 
     @Override
     public void playToolbarEnterAnimation() {
-        final LinearLayout toolbar = (LinearLayout) findViewById(R.id
-                .activity_current_session_headerbar);
-        final FrameLayout layout = (FrameLayout) findViewById(R.id
-                .activity_current_session_framelayout);
-
-        ObjectAnimator exit = ObjectAnimator.ofFloat(toolbar, View.TRANSLATION_Y, 0f);
+        ObjectAnimator exit = ObjectAnimator.ofFloat(mAppBar, View.TRANSLATION_Y, 0f);
         exit.setDuration(300);
         exit.setInterpolator(new FastOutSlowInInterpolator());
         exit.addUpdateListener(animation -> {
             LinearLayout.LayoutParams params =
-                    (LinearLayout.LayoutParams) layout.getLayoutParams();
+                    (LinearLayout.LayoutParams) mContentFrame.getLayoutParams();
             params.height =
                     mContentFrameLayoutHeight - (int) (float) animation.getAnimatedValue();
             params.weight = 0;
-            layout.setLayoutParams(params);
-            layout.setTranslationY((int) (float) animation.getAnimatedValue());
+            mContentFrame.setLayoutParams(params);
+            mContentFrame.setTranslationY((int) (float) animation.getAnimatedValue());
         });
 
         AnimatorSet scrambleAnimatorSet = new AnimatorSet();
         scrambleAnimatorSet.play(exit);
-        toolbar.setVisibility(View.VISIBLE);
+        mAppBar.setVisibility(View.VISIBLE);
         scrambleAnimatorSet.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                if (toolbar.getTranslationY() == 0) {
+                if (mAppBar.getTranslationY() == 0) {
                     LinearLayout.LayoutParams params =
-                            (LinearLayout.LayoutParams) layout.getLayoutParams();
+                            (LinearLayout.LayoutParams) mContentFrame.getLayoutParams();
                     params.height = 0;
                     params.weight = 1;
-                    layout.setLayoutParams(params);
+                    mContentFrame.setLayoutParams(params);
                 }
             }
         });
@@ -170,6 +162,9 @@ public class CurrentSessionActivity extends DrawerActivity<CurrentSessionPresent
             getFragmentManager().beginTransaction().add(retainedFragment,
                     CURRENT_SESSION_TIMER_RETAINED_TAG).commit();
         }
+
+        mAppBar = (LinearLayout) findViewById(R.id.activity_current_session_appbar);
+        mContentFrame = (FrameLayout) findViewById(R.id.activity_current_session_framelayout);
 
         //Set up ViewPager with CurrentSessionAdapter
         mViewPager = (LockingViewPager) findViewById(R.id.activity_current_session_viewpager);
@@ -283,8 +278,7 @@ public class CurrentSessionActivity extends DrawerActivity<CurrentSessionPresent
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean(STATE_MENU_ITEMS_ENABLE_BOOLEAN,
-                mScrambleImageActionEnable);
+        outState.putBoolean(STATE_MENU_ITEMS_ENABLE_BOOLEAN, mScrambleImageActionEnable);
     }
 
 
@@ -317,18 +311,6 @@ public class CurrentSessionActivity extends DrawerActivity<CurrentSessionPresent
             return true;
         }
         getMenuInflater().inflate(R.menu.menu_current_session, menu);
-
-        /*mPuzzleSpinner = (Spinner) MenuItemCompat
-                .getActionView(menu.findItem(R.id.menu_activity_current_session_puzzletype_spinner));
-        //noinspection ConstantConditions
-        mPuzzleSpinnerAdapter = new SpinnerPuzzleTypeAdapter(getLayoutInflater(), getSupportActionBar().getThemedContext());
-        mPuzzleSpinner.setAdapter(mPuzzleSpinnerAdapter);
-
-        if(mPuzzleSpinnerList!=null){
-            mPuzzleSpinnerAdapter.addAll(mPuzzleSpinnerList);
-            mPuzzleSpinner.setSelection(mPuzzleSpinnerPosition);
-        }*/
-
 
         MenuItem displayScrambleImage = menu.findItem(
                 R.id.menu_activity_current_session_scramble_image_menuitem);

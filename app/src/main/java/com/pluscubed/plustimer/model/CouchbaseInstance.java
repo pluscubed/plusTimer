@@ -132,9 +132,7 @@ public class CouchbaseInstance {
                         singleSubscriber.onError(error);
                     }
                 })).subscribeOn(Schedulers.io())
-                .doOnSuccess(userProfile -> {
-                    mUser = userProfile;
-                });
+                .doOnSuccess(userProfile -> mUser = userProfile);
     }
 
     public Auth0 getAuth0() {

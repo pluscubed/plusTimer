@@ -67,13 +67,10 @@ public class AboutActivity extends ThemableActivity {
                     false);
             Button licenses = (Button) view.findViewById(R.id
                     .fragment_about_licenses_button);
-            licenses.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(getActivity(),
-                            LicensesActivity.class);
-                    startActivity(intent);
-                }
+            licenses.setOnClickListener(v -> {
+                Intent intent = new Intent(getActivity(),
+                        LicensesActivity.class);
+                startActivity(intent);
             });
             TextView appName = (TextView) view.findViewById(R.id
                     .fragment_about_appname_textview);
@@ -111,11 +108,8 @@ public class AboutActivity extends ThemableActivity {
             });
 
             Button send = (Button) view.findViewById(R.id.fragment_about_email_history_button);
-            send.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    //ErrorUtils.sendFileDataEmail(getActivity());
-                }
+            send.setOnClickListener(v -> {
+                //ErrorUtils.sendFileDataEmail(getActivity());
             });
 
             return view;

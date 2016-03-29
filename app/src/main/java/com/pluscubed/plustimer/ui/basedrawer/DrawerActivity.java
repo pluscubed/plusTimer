@@ -157,13 +157,11 @@ public abstract class DrawerActivity<P extends DrawerPresenter<V>, V extends Dra
      * Sets up the navigation drawer as appropriate.
      */
     private void setupNavDrawer() {
-        mDrawerLayout = (DrawerLayout) findViewById(R.id
-                .activity_drawer_drawerlayout);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.activity_drawer_drawerlayout);
         Resources resources = getResources();
 
         mToolbar.setNavigationIcon(R.drawable.ic_drawer);
-        mToolbar.setNavigationOnClickListener(view ->
-                mDrawerLayout.openDrawer(GravityCompat.START));
+        mToolbar.setNavigationOnClickListener(view -> mDrawerLayout.openDrawer(GravityCompat.START));
 
         mDrawerLayout.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
             @Override

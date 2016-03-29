@@ -74,7 +74,7 @@
     <item name="fragment_current_session_timer_dynamic_status_frame" type="id" />
     <item name="fragment_current_session_timer_dynamic_status_text" type="id" />
     <item name="fragment_about_email_history_button" type="id" />
-    <item name="activity_current_session_headerbar" type="id" />
+    <item name="activity_current_session_appbar" type="id" />
     <item name="activity_current_session_framelayout" type="id" />
     <item name="fragment_current_session_timer_scramble_shadow" type="id" />
     <item name="fragment_solvelist_recyclerview" type="id" />
