@@ -34,8 +34,10 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
+import com.pluscubed.plustimer.BuildConfig;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.base.PresenterFactory;
+import com.pluscubed.plustimer.ui.ChangelogDialog;
 import com.pluscubed.plustimer.ui.SettingsActivity;
 import com.pluscubed.plustimer.ui.about.AboutActivity;
 import com.pluscubed.plustimer.ui.currentsession.CurrentSessionActivity;
@@ -218,11 +220,6 @@ public abstract class DrawerActivity<P extends DrawerPresenter<V>, V extends Dra
         mNavView.setLayoutParams(params);
 
         resetTitle();
-
-        if (!PrefUtils.isWelcomeDone(this)) {
-            PrefUtils.markWelcomeDone(this);
-            mDrawerLayout.openDrawer(GravityCompat.START);
-        }
     }
 
     @Override
@@ -292,6 +289,17 @@ public abstract class DrawerActivity<P extends DrawerPresenter<V>, V extends Dra
         super.onPostCreate(savedInstanceState);
 
         setupNavDrawer();
+
+        if (!PrefUtils.isWelcomeDone(this)) {
+            PrefUtils.markWelcomeDone(this);
+            mDrawerLayout.openDrawer(GravityCompat.START);
+
+            PrefUtils.saveVersionCode(this);
+        }
+
+        if (BuildConfig.VERSION_CODE > PrefUtils.getVersionCode(this)) {
+            showChangelog();
+        }
     }
 
     private void onNavDrawerItemClicked(@IdRes int itemId, @IdRes int groupId) {
@@ -305,7 +313,7 @@ public abstract class DrawerActivity<P extends DrawerPresenter<V>, V extends Dra
     }
 
     private boolean isNormalItem(@IdRes int itemId) {
-        return itemId != R.id.nav_settings && itemId != R.id.nav_about;
+        return itemId != R.id.nav_settings && itemId != R.id.nav_changelog && itemId != R.id.nav_about;
     }
 
     protected boolean isNavDrawerOpen() {
@@ -333,6 +341,9 @@ public abstract class DrawerActivity<P extends DrawerPresenter<V>, V extends Dra
             case R.id.nav_about:
                 i = new Intent(this, AboutActivity.class);
                 break;
+            case R.id.nav_changelog:
+                showChangelog();
+                return;
             default:
                 Toast.makeText(getApplicationContext(), "Work in Progress",
                         Toast.LENGTH_SHORT).show();
@@ -346,5 +357,9 @@ public abstract class DrawerActivity<P extends DrawerPresenter<V>, V extends Dra
         } else {
             startActivity(i);
         }
+    }
+
+    private void showChangelog() {
+        ChangelogDialog.newInstance().show(getFragmentManager(), "CHANGELOG_DIALOG");
     }
 }

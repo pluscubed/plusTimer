@@ -21,6 +21,10 @@
             android:icon="@drawable/ic_settings_black_24dp"
             android:title="@string/settings" />
         <item
+            android:id="@+id/nav_changelog"
+            android:icon="@drawable/ic_new_releases_black_24dp"
+            android:title="@string/changelog" />
+        <item
             android:id="@+id/nav_about"
             android:icon="@drawable/ic_info_black_24dp"
             android:title="@string/about" />

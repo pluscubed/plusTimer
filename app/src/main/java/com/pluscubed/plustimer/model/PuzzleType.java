@@ -211,7 +211,6 @@ public class PuzzleType extends CbObject {
                         //TODO: upgrade database
                         //puzzleType.upgradeDatabase(context);
                     }
-                    PrefUtils.saveVersionCode(context);
 
                     sInitialization = null;
                 }).toObservable()

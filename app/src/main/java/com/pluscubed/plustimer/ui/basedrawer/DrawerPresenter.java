@@ -161,7 +161,7 @@ public class DrawerPresenter<V extends DrawerView> extends Presenter<V> {
     }
 
     public void onNavDrawerHeaderClicked() {
-        if (mDisplayedUser == null) {
+        /*if (mDisplayedUser == null) {
             try {
                 signIn();
             } catch (CouchbaseLiteException | IOException e) {
@@ -171,7 +171,9 @@ public class DrawerPresenter<V extends DrawerView> extends Presenter<V> {
             }
         } else {
             //signOutFlow();
-        }
+        }*/
+
+        getView().displayToast("Coming very soon!");
     }
 
     public static class Factory<V extends DrawerView> implements PresenterFactory<DrawerPresenter<V>> {

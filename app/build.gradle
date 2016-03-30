@@ -73,6 +73,10 @@ android {
             } else {
                 signingConfig signingConfigs.debug
             }
+
+            lintOptions {
+                disable 'MissingTranslation'
+            }
         }
         debug {
             applicationIdSuffix '.debug'

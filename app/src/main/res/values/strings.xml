@@ -114,7 +114,7 @@
     <string name="pref_monospace_scrambles_title">Monospace scramble font</string>
 
     <string name="pref_lock_swiping_title">Lock swiping between tabs</string>
-    <string name="pref_lock_swiping_summary">This means you can switch between Timer and Session Details only by pressing the actual tabs at the top.</string>
+    <string name="pref_lock_swiping_summary">Switch only by pressing the tabs at the top</string>
 
     <!--Titles-->
     <string name="current_session">Current Session</string>
@@ -144,5 +144,6 @@
     <string name="undo">Undo</string>
     <string name="sign_in">Sign In</string>
     <string name="sign_in_subtitle">Sync your solves across devices</string>
+    <string name="changelog">Changelog</string>
 
 </resources>
