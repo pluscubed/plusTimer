@@ -58,7 +58,7 @@ public class PuzzleType extends CbObject {
     @Nullable
     private static List<PuzzleType> sPuzzleTypes;
 
-    private static Set<CurrentChangeListener> sCurrentChangeListeners;
+    private static Set<CurrentSessionChangeListener> sCurrentChangeListeners;
 
     private Puzzle mPuzzle;
 
@@ -105,30 +105,30 @@ public class PuzzleType extends CbObject {
         updateCb(context);
     }
 
-    public static void addCurrentChangeListener(CurrentChangeListener listener) {
+    public static void addCurrentChangeListener(CurrentSessionChangeListener listener) {
         getListeners().add(listener);
     }
 
-    public static void removeCurrentChangeListener(CurrentChangeListener listener) {
+    public static void removeCurrentChangeListener(CurrentSessionChangeListener listener) {
         getListeners().remove(listener);
     }
 
-    private static Set<CurrentChangeListener> getListeners() {
+    private static Set<CurrentSessionChangeListener> getListeners() {
         if (sCurrentChangeListeners == null) {
             sCurrentChangeListeners = new HashSet<>();
         }
         return sCurrentChangeListeners;
     }
 
-    private static void notifyChangeCurrentListeners() {
-        notifyChangeCurrentListenersDeferred().subscribe();
+    private static void notifyChangeCurrentListeners(String oldType) {
+        notifyChangeCurrentListenersDeferred(oldType).subscribe();
     }
 
     @NonNull
-    private static Completable notifyChangeCurrentListenersDeferred() {
+    private static Completable notifyChangeCurrentListenersDeferred(String oldType) {
         return Completable.fromCallable(() -> {
-            for (CurrentChangeListener listener : getListeners()) {
-                listener.notifyChange();
+            for (CurrentSessionChangeListener listener : getListeners()) {
+                listener.notifyChange(oldType);
             }
             return null;
         }).subscribeOn(AndroidSchedulers.mainThread());
@@ -313,7 +313,8 @@ public class PuzzleType extends CbObject {
     }
 
     public static Completable setCurrent(Context context, String puzzleTypeId) {
-        if (!puzzleTypeId.equals(getCurrentId(context))) {
+        String oldId = getCurrentId(context);
+        if (!puzzleTypeId.equals(oldId)) {
 
             PrefUtils.setCurrentPuzzleType(context, puzzleTypeId);
 
@@ -328,7 +329,7 @@ public class PuzzleType extends CbObject {
                         }
                     })
                     .flatMapObservable(puzzleType ->
-                            notifyChangeCurrentListenersDeferred().toObservable())
+                            notifyChangeCurrentListenersDeferred(oldId).toObservable())
                     .toCompletable();
         } else {
             return Completable.complete();
@@ -474,7 +475,7 @@ public class PuzzleType extends CbObject {
     public void submitCurrentSession(Context context) throws IOException, CouchbaseLiteException {
         newSession(context);
 
-        notifyChangeCurrentListeners();
+        notifyChangeCurrentListeners(getCurrentId(context));
     }
 
     public Puzzle getPuzzle() {
@@ -539,7 +540,7 @@ public class PuzzleType extends CbObject {
         return TYPE_PUZZLETYPE;
     }
 
-    public interface CurrentChangeListener {
-        void notifyChange();
+    public interface CurrentSessionChangeListener {
+        void notifyChange(String oldType);
     }
 }

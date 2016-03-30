@@ -14,7 +14,7 @@ import rx.android.schedulers.AndroidSchedulers;
 public class CurrentSessionTimerPresenter extends Presenter<CurrentSessionTimerView> {
 
     private final Session.SolvesListener mSessionSolvesListener;
-    private final PuzzleType.CurrentChangeListener mPuzzleTypeCurrentChangeListener;
+    private final PuzzleType.CurrentSessionChangeListener mCurrentSessionChangeListener;
 
     private boolean mInitialized;
     private boolean mViewInitialized;
@@ -26,10 +26,12 @@ public class CurrentSessionTimerPresenter extends Presenter<CurrentSessionTimerV
             updateAdapter(update, solve);
         };
 
-        mPuzzleTypeCurrentChangeListener = () -> {
+        mCurrentSessionChangeListener = oldType -> {
             if (!isViewAttached()) {
                 return;
             }
+
+            removeSessionSolvesListener(oldType);
 
             reloadSolveList();
             updateView(RecyclerViewUpdate.DATA_RESET, null);
@@ -47,8 +49,9 @@ public class CurrentSessionTimerPresenter extends Presenter<CurrentSessionTimerV
             getView().resetGenerateScramble();
             getView().resetTimer();
 
+            attachSessionSolvesListener(getView());
         };
-        PuzzleType.addCurrentChangeListener(mPuzzleTypeCurrentChangeListener);
+        PuzzleType.addCurrentChangeListener(mCurrentSessionChangeListener);
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -105,18 +108,32 @@ public class CurrentSessionTimerPresenter extends Presenter<CurrentSessionTimerV
 
     @Override
     public void onDestroyed() {
-        removeSessionSolvesListener();
+        removeSessionSolvesListener(null);
 
-        PuzzleType.removeCurrentChangeListener(mPuzzleTypeCurrentChangeListener);
+        PuzzleType.removeCurrentChangeListener(mCurrentSessionChangeListener);
     }
 
     @SuppressWarnings("ConstantConditions")
-    private void removeSessionSolvesListener() {
+    private void attachSessionSolvesListener(CurrentSessionTimerView view) {
         if (!isViewAttached()) {
             return;
         }
 
-        PuzzleType.getCurrent(getView().getContextCompat())
+        PuzzleType.getCurrent(view.getContextCompat())
+                .flatMap(puzzleType -> puzzleType.getCurrentSessionDeferred(getView().getContextCompat()))
+                .subscribe(session -> {
+                    session.addListener(mSessionSolvesListener);
+                });
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    private void removeSessionSolvesListener(String puzzleTypeId) {
+        if (!isViewAttached()) {
+            return;
+        }
+
+        String id = puzzleTypeId == null ? PuzzleType.getCurrentId(getView().getContextCompat()) : puzzleTypeId;
+        PuzzleType.get(getView().getContextCompat(), id)
                 .flatMap(puzzleType -> puzzleType.getCurrentSessionDeferred(getView().getContextCompat()))
                 .subscribe(session -> {
                     session.removeListener(mSessionSolvesListener);
@@ -132,11 +149,7 @@ public class CurrentSessionTimerPresenter extends Presenter<CurrentSessionTimerV
         view.getTimeBarAdapter().updateMillisecondsMode();
 
         if (!mInitialized) {
-            PuzzleType.getCurrent(view.getContextCompat())
-                    .flatMap(puzzleType -> puzzleType.getCurrentSessionDeferred(getView().getContextCompat()))
-                    .subscribe(session -> {
-                        session.addListener(mSessionSolvesListener);
-                    });
+            attachSessionSolvesListener(view);
 
             mInitialized = true;
         }
