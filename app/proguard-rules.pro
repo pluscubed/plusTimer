@@ -81,3 +81,4 @@
 
 #Jackson
 -dontwarn org.w3c.**
+-dontwarn java.beans.**
