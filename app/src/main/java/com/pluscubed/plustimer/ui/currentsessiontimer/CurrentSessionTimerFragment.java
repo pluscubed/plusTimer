@@ -15,7 +15,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.animation.FastOutLinearInInterpolator;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
@@ -144,19 +143,6 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
     private AnimatorSet mLastBarAnimationSet;
     private ValueAnimator mScrambleAnimator;
     private ObjectAnimator mScrambleElevationAnimator;
-    private int mGreen500;
-    //Runnables
-    private final Runnable holdTimerRunnable = new Runnable() {
-        @Override
-        public void run() {
-            setTextColor(mGreen500);
-            setTimerTextToPrefSize();
-            if (!mInspecting) {
-                playExitAnimations();
-                getActivityCallback().lockDrawerAndViewPager(true);
-            }
-        }
-    };
     private final Runnable inspectionRunnable = new Runnable() {
         @Override
         public void run() {
@@ -212,6 +198,19 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
             //If proceeding normally or +2
             setTimerTextToPrefSize();
             mUiHandler.postDelayed(this, REFRESH_RATE);
+        }
+    };
+    private int mGreen500;
+    //Runnables
+    private final Runnable holdTimerRunnable = new Runnable() {
+        @Override
+        public void run() {
+            setTextColor(mGreen500);
+            setTimerTextToPrefSize();
+            if (!mInspecting) {
+                playExitAnimations();
+                getActivityCallback().lockDrawerAndViewPager(true);
+            }
         }
     };
     private TimeBarRecyclerAdapter mTimeBarAdapter;
@@ -423,7 +422,6 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
         //Set up UIHandler
         mUiHandler = new Handler(Looper.getMainLooper());
 
-        PreferenceManager.setDefaultValues(getActivity(), R.xml.preferences, false);
         initSharedPrefs();
 
         if (savedInstanceState != null) {

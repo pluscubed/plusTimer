@@ -2,6 +2,7 @@ package com.pluscubed.plustimer;
 
 import android.app.Application;
 import android.os.StrictMode;
+import android.support.v7.preference.PreferenceManager;
 
 import com.crashlytics.android.Crashlytics;
 import com.squareup.leakcanary.LeakCanary;
@@ -30,6 +31,8 @@ public class App extends Application {
         if (BuildConfig.USE_CRASHLYTICS) {
             Fabric.with(this, new Crashlytics());
         }
+
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
         LeakCanary.install(this);
 

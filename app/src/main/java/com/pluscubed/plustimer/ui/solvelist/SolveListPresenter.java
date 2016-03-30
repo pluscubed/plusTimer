@@ -31,7 +31,7 @@ public class SolveListPresenter extends Presenter<SolveListView> {
     private static final String INIT_CURRENT = "current";
 
     private final Session.SolvesListener mSessionSolvesListener;
-    private final PuzzleType.CurrentChangeListener mPuzzleTypeCurrentChangeListener;
+    private final PuzzleType.CurrentSessionChangeListener mPuzzleTypeCurrentChangeListener;
 
     private String mPuzzleTypeId;
     private String mSessionId;
@@ -51,10 +51,12 @@ public class SolveListPresenter extends Presenter<SolveListView> {
             updateAdapter(update, solve);
         };
 
-        mPuzzleTypeCurrentChangeListener = () -> {
+        mPuzzleTypeCurrentChangeListener = oldType -> {
             if (!isViewAttached()) {
                 return;
             }
+
+            removeSessionSolvesListener(oldType);
 
             //noinspection ConstantConditions
             PuzzleType.getCurrent(getView().getContextCompat())
@@ -65,6 +67,8 @@ public class SolveListPresenter extends Presenter<SolveListView> {
 
                         reloadSolveList();
                         updateView();
+
+                        attachSessionSolvesListener(getView());
                     });
         };
 
@@ -106,11 +110,7 @@ public class SolveListPresenter extends Presenter<SolveListView> {
         view.getSolveListAdapter().updateSignAndMillisecondsMode();
 
         if (!mInitialized) {
-            PuzzleType.get(getView().getContextCompat(), mPuzzleTypeId)
-                    .flatMap(puzzleType -> puzzleType.getSessionDeferred(getView().getContextCompat(), mSessionId))
-                    .subscribe(session -> {
-                        session.addListener(mSessionSolvesListener);
-                    });
+            attachSessionSolvesListener(getView());
 
             mInitialized = true;
         }
@@ -124,12 +124,26 @@ public class SolveListPresenter extends Presenter<SolveListView> {
     }
 
     @SuppressWarnings("ConstantConditions")
-    private void removeSessionSolvesListener() {
+    private void attachSessionSolvesListener(SolveListView view) {
         if (!isViewAttached()) {
             return;
         }
 
-        PuzzleType.get(getView().getContextCompat(), mPuzzleTypeId)
+        PuzzleType.getCurrent(view.getContextCompat())
+                .flatMap(puzzleType -> puzzleType.getCurrentSessionDeferred(getView().getContextCompat()))
+                .subscribe(session -> {
+                    session.addListener(mSessionSolvesListener);
+                });
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    private void removeSessionSolvesListener(String puzzleTypeId) {
+        if (!isViewAttached()) {
+            return;
+        }
+
+        String id = puzzleTypeId == null ? PuzzleType.getCurrentId(getView().getContextCompat()) : puzzleTypeId;
+        PuzzleType.get(getView().getContextCompat(), id)
                 .flatMap(puzzleType -> puzzleType.getCurrentSessionDeferred(getView().getContextCompat()))
                 .subscribe(session -> {
                     session.removeListener(mSessionSolvesListener);
@@ -173,7 +187,7 @@ public class SolveListPresenter extends Presenter<SolveListView> {
 
     @Override
     public void onDestroyed() {
-        removeSessionSolvesListener();
+        removeSessionSolvesListener(null);
 
         if (mIsCurrent)
             PuzzleType.removeCurrentChangeListener(mPuzzleTypeCurrentChangeListener);

@@ -1,79 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <MultiSelectListPreference
+<android.support.v7.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <android.support.v14.preference.MultiSelectListPreference
         android:key="pref_puzzletypes_multiselectlist"
         android:title="@string/puzzle_types_setup" />
 
-    <SwitchPreference
+    <android.support.v7.preference.SwitchPreferenceCompat
         android:defaultValue="true"
         android:key="pref_milliseconds_checkbox"
         android:title="@string/pref_milliseconds_title" />
 
-    <ListPreference
+    <android.support.v7.preference.ListPreference
         android:defaultValue="0"
         android:entries="@array/pref_theme_list_entries"
         android:key="pref_theme_list"
         android:summary="%s"
         android:title="@string/pref_theme_title" />
 
-    <SwitchPreference
+    <android.support.v7.preference.SwitchPreferenceCompat
         android:defaultValue="true"
         android:key="pref_keepscreenon_checkbox"
         android:summary="@string/pref_keepscreenon_summary"
         android:title="@string/pref_keepscreenon_title" />
 
-    <SwitchPreference
+    <android.support.v7.preference.SwitchPreferenceCompat
         android:defaultValue="false"
         android:key="pref_lock_swiping_checkbox"
         android:summary="@string/pref_lock_swiping_summary"
         android:title="@string/pref_lock_swiping_title" />
 
-    <PreferenceCategory android:title="@string/pref_timer_category_title">
-        <SwitchPreference
+    <android.support.v7.preference.PreferenceCategory android:title="@string/pref_timer_category_title">
+        <android.support.v7.preference.SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="pref_inspection_checkbox"
             android:summary="@string/pref_inspection_summary"
             android:title="@string/pref_inspection_title" />
-        <SwitchPreference
+        <android.support.v7.preference.SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="pref_holdtostart_checkbox"
             android:summary="@string/pref_holdtostart_summary"
             android:title="@string/pref_holdtostart_title" />
-        <SwitchPreference
+        <android.support.v7.preference.SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="pref_two_row_time_checkbox"
             android:summary="@string/pref_two_row_time_summary"
             android:title="@string/pref_two_row_time_title" />
-        <EditTextPreference
+        <android.support.v7.preference.EditTextPreference
             android:defaultValue="100"
             android:dialogTitle="@string/pref_time_text_size_dialog_title"
             android:inputType="number"
             android:key="pref_time_display_size_edittext"
             android:title="@string/pref_text_size_title" />
-        <ListPreference
+        <android.support.v7.preference.ListPreference
             android:defaultValue="0"
             android:entries="@array/pref_update_time_list_entries"
             android:key="pref_update_time_list"
             android:summary="%s"
             android:title="@string/pref_update_time_title" />
-    </PreferenceCategory>
+    </android.support.v7.preference.PreferenceCategory>
 
-    <PreferenceCategory android:title="@string/pref_scrambles_category_title">
-        <EditTextPreference
+    <android.support.v7.preference.PreferenceCategory android:title="@string/pref_scrambles_category_title">
+        <android.support.v7.preference.EditTextPreference
             android:defaultValue="18"
             android:dialogTitle="@string/pref_scramble_text_size_dialog_title"
             android:inputType="number"
             android:key="pref_scramble_display_size_edittext"
             android:title="@string/pref_text_size_title" />
-        <SwitchPreference
+        <android.support.v7.preference.SwitchPreferenceCompat
             android:defaultValue="false"
             android:key="pref_sign_checkbox"
             android:title="@string/pref_sign_title" />
-        <SwitchPreference
+        <android.support.v7.preference.SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="pref_monospace_scrambles_checkbox"
             android:title="@string/pref_monospace_scrambles_title" />
-    </PreferenceCategory>
+    </android.support.v7.preference.PreferenceCategory>
 
-</PreferenceScreen>
+</android.support.v7.preference.PreferenceScreen>

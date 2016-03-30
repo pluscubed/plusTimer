@@ -45,7 +45,7 @@ public class CouchbaseInstance {
 
         DatabaseOptions options = new DatabaseOptions();
         options.setCreate(true);
-        options.setStorageType(Manager.FORESTDB_STORAGE);
+        //options.setStorageType(Manager.FORESTDB_STORAGE);
         Manager manager = new Manager(new AndroidContext(mContext), Manager.DEFAULT_OPTIONS);
         mDatabase = manager.openDatabase(DB_SOLVES, options);
 

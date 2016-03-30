@@ -16,7 +16,7 @@
 #   public *;
 #}
 
--keepattributes SourceFile,LineNumberTable
+-keepattributes SourceFile,LineNumberTable,*Annotation*
 -dontwarn com.caverock.androidsvg.**
 -keep class net.gnehzr.tnoodle.** { *; }
 -keep interface net.gnehzr.tnoodle.** { *; }
@@ -42,5 +42,43 @@
 
 ##---------------End: proguard configuration for Gson  ----------
 
+#Crashlytics
+-keep class com.crashlytics.** { *; }
+-keep class com.crashlytics.android.**
+
 #retrolambda
 -dontwarn java.lang.invoke.*
+
+#Glide
+-keep public class * implements com.bumptech.glide.module.GlideModule
+-keep public enum com.bumptech.glide.load.resource.bitmap.ImageHeaderParser$** {
+    **[] $VALUES;
+    public *;
+}
+
+#okio
+-dontwarn java.nio.file.*
+-dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
+
+#RxAndroid/RxJava
+-dontwarn sun.misc.**
+
+-keepclassmembers class rx.internal.util.unsafe.*ArrayQueue*Field* {
+   long producerIndex;
+   long consumerIndex;
+}
+
+-keepclassmembers class rx.internal.util.unsafe.BaseLinkedQueueProducerNodeRef {
+    rx.internal.util.atomic.LinkedQueueNode producerNode;
+}
+
+-keepclassmembers class rx.internal.util.unsafe.BaseLinkedQueueConsumerNodeRef {
+    rx.internal.util.atomic.LinkedQueueNode consumerNode;
+}
+
+#MPAndroidChart
+-dontwarn io.realm.**
+
+#Jackson
+-dontwarn org.w3c.**
+-dontwarn java.beans.**
