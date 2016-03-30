@@ -4,14 +4,14 @@ Open Source Android Cubing Timer with WCA TNoodle Scrambles
 
 SpeedSolving thread: http://www.speedsolving.com/forum/showthread.php?46893
 
-[![Get it on Google Play](http://developer.android.com/images/brand/en_generic_rgb_wo_60.png)](https://play.google.com/store/apps/details?id=com.pluscubed.plustimer)
+[![Get it on Google Play](http://i.imgur.com/MIXbzVC.png)](https://play.google.com/store/apps/details?id=com.pluscubed.plustimer)
 
 Thanks to the TNoodle team for permission to use the [tnoodle-android](https://github.com/cubing/tnoodle/tree/master/tnoodle-android) library!
 
 [Open Source Licenses](./app/src/main/res/raw/open_source_licenses)
 
 
-    Copyright (C) 2014  Daniel Ciao
+    Copyright (C) 2016  Daniel Ciao
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

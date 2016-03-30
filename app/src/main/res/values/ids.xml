@@ -74,9 +74,17 @@
     <item name="fragment_current_session_timer_dynamic_status_frame" type="id" />
     <item name="fragment_current_session_timer_dynamic_status_text" type="id" />
     <item name="fragment_about_email_history_button" type="id" />
-    <item name="activity_current_session_headerbar" type="id" />
+    <item name="activity_current_session_appbar" type="id" />
     <item name="activity_current_session_framelayout" type="id" />
     <item name="fragment_current_session_timer_scramble_shadow" type="id" />
+    <item name="fragment_solvelist_recyclerview" type="id" />
+    <item name="history_sessions_stats" type="id" />
+    <item name="history_sessions_linechart" type="id" />
+    <item name="history_sessions_recycler" type="id" />
+    <item name="activity_drawer_drawer_navview" type="id" />
+    <item name="activity_current_session_fab" type="id" />
+    <item name="activity_current_session_puzzlespinner" type="id" />
+    <item name="activity_history_sessions_puzzlespinner" type="id" />
 
 
 </resources>

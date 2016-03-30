@@ -3,12 +3,9 @@ package com.pluscubed.plustimer.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 
 import com.pluscubed.plustimer.BuildConfig;
-import com.pluscubed.plustimer.model.PuzzleType;
-
-import java.util.HashSet;
-import java.util.Set;
 
 public class PrefUtils {
     public static final String PREF_SCRAMBLE_TEXT_SIZE_EDITTEXT =
@@ -38,117 +35,99 @@ public class PrefUtils {
     private static final String PREF_MONOSPACE_SCRAMBLES_CHECKBOX =
             "pref_monospace_scrambles_checkbox";
 
-
+    private static final String PREF_LOG_IN =
+            "pref_login_data";
     private static final String PREF_VERSION_CODE =
             "pref_version_code";
-    private static final String PREF_CURRENT_PUZZLETYPE =
-            "current_puzzletype";
-    private static final String PREF_CURRENT_SESSION_INDEX_PREFIX =
-            "current_session";
     private static final String PREF_WELCOME_DONE =
-            "welcome_done";
+            "pref_welcome_done";
+    private static final String PREF_CURRENT_PUZZLETYPE =
+            "pref_current_puzzle_type";
+
+    private static SharedPreferences.Editor edit(Context context) {
+        return getSp(context).edit();
+    }
+
+    private static SharedPreferences getSp(Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context);
+    }
+
+    public static void setLoginData(final Context context, String loginData) {
+        edit(context).putString(PREF_LOG_IN, loginData).apply();
+    }
+
+    @Nullable
+    public static String getLoginData(final Context context) {
+        return getSp(context).getString(PREF_LOG_IN, null);
+    }
+
+    public static void setCurrentPuzzleType(final Context context, String puzzletype) {
+        edit(context).putString(PREF_CURRENT_PUZZLETYPE, puzzletype).apply();
+    }
+
+    @Nullable
+    public static String getCurrentPuzzleType(final Context context) {
+        return getSp(context).getString(PREF_CURRENT_PUZZLETYPE, null);
+    }
 
     public static boolean isInspectionEnabled(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREF_INSPECTION_CHECKBOX, true);
+        return getSp(context).getBoolean(PREF_INSPECTION_CHECKBOX, true);
     }
 
     public static boolean isHoldToStartEnabled(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREF_HOLDTOSTART_CHECKBOX, true);
+        return getSp(context).getBoolean(PREF_HOLDTOSTART_CHECKBOX, true);
     }
 
     public static boolean isTwoRowTimeEnabled(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREF_TWO_ROW_TIME_CHECKBOX, true);
+        return getSp(context).getBoolean(PREF_TWO_ROW_TIME_CHECKBOX, true);
     }
 
     public static boolean isDisplayMillisecondsEnabled(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREF_MILLISECONDS_CHECKBOX, true);
+        return getSp(context).getBoolean(PREF_MILLISECONDS_CHECKBOX, true);
     }
 
     public static boolean isKeepScreenOnEnabled(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREF_KEEPSCREENON_CHECKBOX, true);
+        return getSp(context).getBoolean(PREF_KEEPSCREENON_CHECKBOX, true);
     }
 
     public static boolean isSignEnabled(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREF_SIGN_CHECKBOX, true);
+        return getSp(context).getBoolean(PREF_SIGN_CHECKBOX, true);
     }
 
     public static boolean isMonospaceScrambleFontEnabled(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREF_MONOSPACE_SCRAMBLES_CHECKBOX, true);
+        return getSp(context).getBoolean(PREF_MONOSPACE_SCRAMBLES_CHECKBOX, true);
     }
 
     public static boolean isWelcomeDone(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREF_WELCOME_DONE, false);
+        return getSp(context).getBoolean(PREF_WELCOME_DONE, false);
     }
 
     public static boolean isLockSwipingEnabled(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREF_LOCK_SWIPING_CHECKBOX, false);
+        return getSp(context).getBoolean(PREF_LOCK_SWIPING_CHECKBOX, false);
     }
 
     public static void markWelcomeDone(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putBoolean(PREF_WELCOME_DONE, true).apply();
-    }
-
-    public static Set<String> getSelectedPuzzleTypeNames(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getStringSet(PREF_PUZZLETYPES_MULTISELECTLIST,
-                new HashSet<String>());
+        edit(context).putBoolean(PREF_WELCOME_DONE, true).apply();
     }
 
     public static int getTimerTextSize(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return Integer.parseInt(sp.getString(PREF_TIME_TEXT_SIZE_EDITTEXT, "100"));
+        return Integer.parseInt(getSp(context).getString(PREF_TIME_TEXT_SIZE_EDITTEXT, "100"));
     }
 
     public static int getScrambleTextSize(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return Integer.parseInt(sp.getString(PREF_SCRAMBLE_TEXT_SIZE_EDITTEXT, "18"));
+        return Integer.parseInt(getSp(context).getString(PREF_SCRAMBLE_TEXT_SIZE_EDITTEXT, "18"));
     }
 
     public static void saveVersionCode(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putInt(PrefUtils.PREF_VERSION_CODE, BuildConfig.VERSION_CODE).apply();
+        edit(context).putInt(PrefUtils.PREF_VERSION_CODE, BuildConfig.VERSION_CODE).apply();
     }
 
     public static int getVersionCode(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getInt(PREF_VERSION_CODE, 10);
-    }
-
-    public static PuzzleType getCurrentPuzzleType(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return PuzzleType.valueOf(sp.getString(
-                PrefUtils.PREF_CURRENT_PUZZLETYPE, PuzzleType.THREE.name()
-        ));
-    }
-
-    public static void saveCurrentPuzzleType(final Context context, String name) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putString(PrefUtils.PREF_CURRENT_PUZZLETYPE, name).apply();
-    }
-
-    public static int getCurrentSessionIndex(PuzzleType type, final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getInt(PrefUtils.PREF_CURRENT_SESSION_INDEX_PREFIX + type.name(), 0);
-    }
-
-    public static void saveCurrentSessionIndex(PuzzleType type, final Context context, int index) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putInt(PrefUtils.PREF_CURRENT_SESSION_INDEX_PREFIX + type.name(), index).apply();
+        return getSp(context).getInt(PREF_VERSION_CODE, 10);
     }
 
     public static TimerUpdate getTimerUpdateMode(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        switch (Integer.parseInt(sp.getString(PREF_UPDATE_TIME_LIST, "0"))) {
+        switch (Integer.parseInt(getSp(context).getString(PREF_UPDATE_TIME_LIST, "0"))) {
             case 0:
                 return TimerUpdate.ON;
             case 1:
@@ -161,8 +140,7 @@ public class PrefUtils {
     }
 
     public static Theme getTheme(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        switch (Integer.parseInt(sp.getString(PREF_THEME_LIST, "0"))) {
+        switch (Integer.parseInt(getSp(context).getString(PREF_THEME_LIST, "0"))) {
             case 0:
                 return Theme.LIGHT;
             case 1:

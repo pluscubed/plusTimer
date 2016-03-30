@@ -27,7 +27,7 @@
     <string name="scramble_image">Náhled zamíchání</string>
     <string name="session_no_solves">Žádná složení</string>
     <string name="timing">Časovač běží</string>
-    <string name="solves">"Počet složení"</string>
+    <string name="solves_colon">"Počet složení"</string>
     <string name="cao">Vážený průměr%1$d</string>
     <string name="lao">Poslesní vážený průměr%1$d</string>
     <string name="bao">Nejlepší vážený průměr%1$d</string>

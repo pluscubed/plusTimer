@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.pluscubed.plustimer.R;
+import com.pluscubed.plustimer.ui.basedrawer.ThemableActivity;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -39,6 +40,7 @@ public class LicensesActivity extends ThemableActivity {
                             new LicensesFragment())
                     .commit();
         }
+        //noinspection ConstantConditions
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle(R.string.open_source_licenses);
     }

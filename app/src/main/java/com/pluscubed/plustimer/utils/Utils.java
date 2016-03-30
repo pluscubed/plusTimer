@@ -4,13 +4,18 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Point;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.view.Display;
 import android.view.Surface;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.pluscubed.plustimer.model.PuzzleType;
@@ -34,6 +39,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import rx.Single;
+
 /**
  * Utilities class
  */
@@ -44,7 +51,14 @@ public class Utils {
 
     static {
         gson = new GsonBuilder()
-                .registerTypeAdapter(Session.class, new Session.Deserializer())
+                .registerTypeAdapter(Session.class, (JsonDeserializer<Session>) (json, typeOfT, context) -> {
+                    Session s = new Gson().fromJson(json, typeOfT);
+                    //TODO: Something something legacy
+                    /*for (final Solve solve : s.mSolves) {
+                        solve.attachSession(s);
+                    }*/
+                    return s;
+                })
                 .create();
         SESSION_LIST_TYPE = new TypeToken<List<Session>>() {
         }.getType();
@@ -53,6 +67,10 @@ public class Utils {
     public static int convertDpToPx(Context context, float dp) {
         return (int) (dp * context.getResources().getDisplayMetrics().density
                 + 0.5f);
+    }
+
+    public static int compare(long lhs, long rhs) {
+        return lhs < rhs ? -1 : (lhs == rhs ? 0 : 1);
     }
 
     public static void lockOrientation(Activity activity) {
@@ -169,20 +187,16 @@ public class Utils {
      * settings and locale from
      * the timestamp
      *
-     * @param applicationContext the application context
-     * @param timestamp          the timestamp to convert into a date & time
-     *                           String
+     * @param context   the context
+     * @param timestamp the timestamp to convert into a date & time
+     *                  String
      * @return the String converted from the timestamp
      * @see android.text.format.DateFormat
      * @see java.text.DateFormat
      */
-    public static String timeDateStringFromTimestamp(Context applicationContext, long timestamp) {
+    public static String dateTimeSecondsStringFromTimestamp(Context context, long timestamp) {
         String timeDate;
-        String androidDateTime = android.text.format.DateFormat.getDateFormat
-                (applicationContext)
-                .format(new Date(timestamp)) + " " +
-                android.text.format.DateFormat.getTimeFormat(applicationContext)
-                        .format(new Date(timestamp));
+        String androidDateTime = dateTimeStringFromTimestamp(context, timestamp);
         String javaDateTime = DateFormat.getDateTimeInstance().format(new
                 Date(timestamp));
         String AmPm = "";
@@ -211,6 +225,13 @@ public class Utils {
         javaDateTime = javaDateTime.substring(javaDateTime.length() - 3);
         timeDate = androidDateTime.concat(javaDateTime);
         return timeDate.concat(AmPm);
+    }
+
+    @NonNull
+    public static String dateTimeStringFromTimestamp(Context context, long timestamp) {
+        return android.text.format.DateFormat.getDateFormat(context).format(new Date(timestamp))
+                + " " +
+                android.text.format.DateFormat.getTimeFormat(context).format(new Date(timestamp));
     }
 
     /**
@@ -283,7 +304,7 @@ public class Utils {
     private static List<Long> getListTimeTwoNoDnf(List<Solve> list) {
         ArrayList<Long> timeTwo = new ArrayList<>();
         for (Solve i : list) {
-            if (!(i.getPenalty() == Solve.Penalty.DNF)) {
+            if (!(i.getPenalty() == Solve.PENALTY_DNF)) {
                 timeTwo.add(i.getTimeTwo());
             }
         }
@@ -292,7 +313,7 @@ public class Utils {
 
     /**
      * Gets the best {@code Solve} out of the list (lowest time).
-     * <p/>
+     * <p>
      * If the list contains no solves, null is returned. If the list contains
      * only DNFs, the last DNF solve is returned.
      *
@@ -307,7 +328,7 @@ public class Utils {
             if (times.size() > 0) {
                 long bestTimeTwo = Collections.min(times);
                 for (Solve i : solveList) {
-                    if (!(i.getPenalty() == Solve.Penalty.DNF) && i
+                    if (!(i.getPenalty() == Solve.PENALTY_DNF) && i
                             .getTimeTwo() == bestTimeTwo) {
                         return i;
                     }
@@ -321,7 +342,7 @@ public class Utils {
 
     /**
      * Gets the worst {@code Solve} out of the list (highest time).
-     * <p/>
+     * <p>
      * If the list contains DNFs, the last DNF solve is returned.
      * If the list contains no solves, null is returned.
      *
@@ -333,7 +354,7 @@ public class Utils {
         if (solveList.size() > 0) {
             Collections.reverse(solveList);
             for (Solve i : solveList) {
-                if (i.getPenalty() == Solve.Penalty.DNF) {
+                if (i.getPenalty() == Solve.PENALTY_DNF) {
                     return i;
                 }
             }
@@ -356,25 +377,27 @@ public class Utils {
      * @param wca the sequence of moves in WCA notation
      * @return the converted sequence of moves in SiGN notation
      */
-    public static String wcaToSignNotation(String wca, String puzzleTypeName) {
-        if (Character.isDigit(PuzzleType.valueOf(puzzleTypeName)
-                .scramblerSpec.charAt(0))) {
-            String[] moves = wca.split(" ");
-            for (int i = 0; i < moves.length; i++) {
-                if (moves[i].contains("w")) {
-                    moves[i] = moves[i].replace("w", "");
-                    moves[i] = moves[i].toLowerCase();
-                }
-            }
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < moves.length; i++) {
-                builder.append(moves[i]);
-                if (i != moves.length - 1) builder.append(" ");
-            }
-            return builder.toString();
-        } else {
-            return wca;
-        }
+    public static Single<String> wcaToSignNotation(Context context, String wca, String puzzleTypeId) {
+        return PuzzleType.get(context, puzzleTypeId)
+                .map(puzzleType -> {
+                    if (Character.isDigit(puzzleType.getScrambler().charAt(0))) {
+                        String[] moves = wca.split(" ");
+                        for (int i = 0; i < moves.length; i++) {
+                            if (moves[i].contains("w")) {
+                                moves[i] = moves[i].replace("w", "");
+                                moves[i] = moves[i].toLowerCase();
+                            }
+                        }
+                        StringBuilder builder = new StringBuilder();
+                        for (int i = 0; i < moves.length; i++) {
+                            builder.append(moves[i]);
+                            if (i != moves.length - 1) builder.append(" ");
+                        }
+                        return builder.toString();
+                    } else {
+                        return wca;
+                    }
+                });
     }
 
     /**
@@ -383,28 +406,30 @@ public class Utils {
      * @param sign the sequence of moves in SiGN notation
      * @return the converted sequence of moves in WCA notation
      */
-    public static String signToWcaNotation(String sign, String puzzleTypeName) {
-        if (Character.isDigit(PuzzleType.valueOf(puzzleTypeName)
-                .scramblerSpec.charAt(0))) {
-            String[] moves = sign.split(" ");
-            for (int i = 0; i < moves.length; i++) {
-                if (!moves[i].equals(moves[i].toUpperCase())) {
-                    char[] possibleMoves = "udfrlb".toCharArray();
-                    for (char move : possibleMoves) {
-                        moves[i] = moves[i].replace(String.valueOf(move),
-                                Character.toUpperCase(move) + "w");
+    public static Single<String> signToWcaNotation(Context context, String sign, String puzzleTypeId) {
+        return PuzzleType.get(context, puzzleTypeId)
+                .map(puzzleType -> {
+                    if (Character.isDigit(puzzleType.getScrambler().charAt(0))) {
+                        String[] moves = sign.split(" ");
+                        for (int i = 0; i < moves.length; i++) {
+                            if (!moves[i].equals(moves[i].toUpperCase())) {
+                                char[] possibleMoves = "udfrlb".toCharArray();
+                                for (char move : possibleMoves) {
+                                    moves[i] = moves[i].replace(String.valueOf(move),
+                                            Character.toUpperCase(move) + "w");
+                                }
+                            }
+                        }
+                        StringBuilder builder = new StringBuilder();
+                        for (int i = 0; i < moves.length; i++) {
+                            builder.append(moves[i]);
+                            if (i != moves.length - 1) builder.append(" ");
+                        }
+                        return builder.toString();
+                    } else {
+                        return sign;
                     }
-                }
-            }
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < moves.length; i++) {
-                builder.append(moves[i]);
-                if (i != moves.length - 1) builder.append(" ");
-            }
-            return builder.toString();
-        } else {
-            return sign;
-        }
+                });
     }
 
     /**
@@ -424,7 +449,7 @@ public class Utils {
 
             int dnfCount = 0;
             for (Solve i : list) {
-                if (i.getPenalty() == Solve.Penalty.DNF) dnfCount++;
+                if (i.getPenalty() == Solve.PENALTY_DNF) dnfCount++;
             }
 
             //If the number of DNFs can be cut off by the trim
@@ -441,4 +466,31 @@ public class Utils {
         }
         return Session.GET_AVERAGE_INVALID_NOT_ENOUGH;
     }
+
+    //Taken from http://stackoverflow.com/questions/19908003
+    public static int getTextViewHeight(TextView textView) {
+        WindowManager wm =
+                (WindowManager) textView.getContext().getSystemService(Context.WINDOW_SERVICE);
+        Display display = wm.getDefaultDisplay();
+
+        int deviceWidth;
+
+        Point size = new Point();
+        display.getSize(size);
+        deviceWidth = size.x;
+
+        int widthMeasureSpec =
+                View.MeasureSpec.makeMeasureSpec(deviceWidth, View.MeasureSpec.AT_MOST);
+        int heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+        textView.measure(widthMeasureSpec, heightMeasureSpec);
+        return textView.getMeasuredHeight();
+    }
+
+    public static Single<String> getUiScramble(Context context, String scramble,
+                                               boolean signEnabled,
+                                               String puzzleTypeId) {
+        return signEnabled ? Utils.wcaToSignNotation(context, scramble, puzzleTypeId) : Single.just(scramble);
+    }
+
+
 }

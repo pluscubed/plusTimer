@@ -1,17 +1,19 @@
 <resources>
 
+    <style name="Theme.PlusTimer.Launch" parent="Base.Theme.PlusTimer">
+        <item name="android:windowBackground">@drawable/window_background_statusbar_toolbar_tab
+        </item>
+    </style>
+    
     <style name="Theme.PlusTimer" parent="Base.Theme.PlusTimer">
-        <item name="android:windowContentOverlay">@null</item>
         <item name="toolbarShadow">@drawable/shadow</item>
     </style>
 
     <style name="Theme.PlusTimer.Dark" parent="Base.Theme.PlusTimer.Dark">
-        <item name="android:windowContentOverlay">@null</item>
         <item name="toolbarShadow">@drawable/shadow</item>
     </style>
 
     <style name="Theme.PlusTimer.Black" parent="Base.Theme.PlusTimer.Black">
-        <item name="android:windowContentOverlay">@null</item>
         <item name="toolbarShadow">@drawable/shadow</item>
     </style>
 
@@ -32,17 +34,19 @@
         <item name="android:textColor">?android:textColorPrimary</item>
 
         <item name="android:windowBackground">@color/background_material_light</item>
+        <item name="android:windowContentOverlay">@null</item>
 
         <item name="actionModeBackground">?colorPrimary</item>
 
-        <item name="android:buttonBarButtonStyle">@style/ButtonBarButtonStyle
-        </item>
+        <item name="android:buttonBarButtonStyle">@style/ButtonBarButtonStyle</item>
 
         <item name="windowActionModeOverlay">true</item>
 
         <item name="listDividerColor">@color/list_divider_light</item>
         <item name="activatedBackground">@drawable/activated_background_light</item>
         <item name="editTextLabelColor">@color/hint_light</item>
+
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
     </style>
 
     <style name="Base.Theme.PlusTimer.Dark" parent="@style/Theme.AppCompat.NoActionBar">
@@ -56,6 +60,7 @@
         <item name="android:textColor">?android:textColorPrimary</item>
 
         <item name="android:windowBackground">@color/background_material_dark</item>
+        <item name="android:windowContentOverlay">@null</item>
 
         <item name="actionModeBackground">?colorPrimary</item>
 
@@ -66,6 +71,8 @@
         <item name="listDividerColor">@color/list_divider_dark</item>
         <item name="activatedBackground">@drawable/activated_background_dark</item>
         <item name="editTextLabelColor">@color/hint_dark</item>
+
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
     </style>
 
     <style name="Base.Theme.PlusTimer.Black" parent="@style/Base.Theme.PlusTimer.Dark">

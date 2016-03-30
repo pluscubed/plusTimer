@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:theme="@style/Theme.AppCompat"
+    tools:layout_height="189dp"
+    tools:layout_width="320dp">
+
+    <ImageView
+        android:id="@+id/drawer_header_background"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:contentDescription="@null"
+        android:foreground="?selectableItemBackground"
+        android:scaleType="centerCrop"
+        android:src="@drawable/drawer_header"
+        android:tint="#4000" />
+
+    <Space
+        android:id="@+id/inset"
+        android:layout_width="match_parent"
+        android:layout_height="0dp" />
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/drawer_header_background"
+        android:background="?listDividerColor" />
+
+    <ImageView
+        android:id="@+id/drawer_header_profile_image"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_below="@id/inset"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/circle"
+        android:clickable="true"
+        android:elevation="2dp"
+        android:focusable="true"
+        android:foreground="@drawable/circle_ripple_dark"
+        android:scaleType="centerCrop"
+        android:stateListAnimator="@anim/profile_elevation_state" />
+
+    <ImageButton
+        android:id="@+id/dropdown"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_alignBottom="@id/drawer_header_background"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:background="?selectableItemBackground"
+        android:tint="#b3ffffff"
+        android:visibility="invisible"
+        app:srcCompat="@drawable/spinner_triangle"
+        tools:ignore="ContentDescription" />
+
+    <LinearLayout
+        android:id="@+id/titleFrame"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_alignBottom="@id/drawer_header_background"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_toLeftOf="@id/dropdown"
+        android:layout_toStartOf="@id/dropdown"
+        android:gravity="center_vertical"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/drawer_header_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@string/font_fontFamily_medium"
+            android:gravity="center_vertical"
+            android:text="@string/sign_in"
+            android:textColor="#fff"
+            android:textSize="14sp"
+            android:textStyle="@integer/font_textStyle_medium" />
+
+        <TextView
+            android:id="@+id/drawer_header_subtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:text="@string/sign_in_subtitle"
+            android:textColor="#fff"
+            android:textSize="14sp"
+            tools:visibility="visible" />
+
+    </LinearLayout>
+
+
+</RelativeLayout>

@@ -12,7 +12,7 @@
     <string name="oh">OH</string>
     <string name="bld">BLD</string>
     <string name="feet">Feet</string>
-    <string-array name="puzzles">
+    <string-array name="scrambler_names">
         <item>Square-1</item>
         <item>Skewb</item>
         <item>Pyraminx</item>
@@ -38,7 +38,7 @@
     <string name="timing">Timing…</string>
 
     <!--Stats-->
-    <string name="solves">"Solves: "</string>
+    <string name="solves_colon">"Solves: "</string>
     <string name="cao">Current Ao%1$d</string>
     <string name="lao">Last Ao%1$d</string>
     <string name="bao">Best Ao%1$d</string>
@@ -47,8 +47,9 @@
     <string name="best">"Best: "</string>
     <string name="worst">"Worst: "</string>
     <string name="average">"Average: "</string>
-    <string name="pb">PB</string>
+    <string name="pb">PB: %1$s</string>
     <string name="ao">Ao%1$d</string>
+    <string name="pb_ao">PB Ao%1$d: %2$s</string>
     <string name="best_times">Best Times</string>
 
     <!--Dialog-->
@@ -113,7 +114,7 @@
     <string name="pref_monospace_scrambles_title">Monospace scramble font</string>
 
     <string name="pref_lock_swiping_title">Lock swiping between tabs</string>
-    <string name="pref_lock_swiping_summary">This means you can switch between Timer and Session Details only by pressing the actual tabs at the top.</string>
+    <string name="pref_lock_swiping_summary">Switch only by pressing the tabs at the top</string>
 
     <!--Titles-->
     <string name="current_session">Current Session</string>
@@ -140,5 +141,9 @@
     <string name="share_dialog_title">Share times via…</string>
     <string name="send_email">Send email to the developer using…</string>
     <string name="email_developer_history_data">Email History Data to Developer</string>
+    <string name="undo">Undo</string>
+    <string name="sign_in">Sign In</string>
+    <string name="sign_in_subtitle">Sync your solves across devices</string>
+    <string name="changelog">Changelog</string>
 
 </resources>

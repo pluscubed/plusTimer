@@ -2,8 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ui.CurrentSessionTimerFragment">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -23,7 +22,6 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:includeFontPadding="false"
-            android:text="@string/ready"
             android:textSize="100sp" />
 
         <TextView
@@ -63,7 +61,7 @@
         android:paddingBottom="5dp"
         android:paddingLeft="5dp"
         android:paddingRight="7dp"
-        android:text="@string/solves"
+        android:text="@string/solves_colon"
         android:textSize="16sp"
         tools:ignore="RtlHardcoded" />
 
@@ -98,7 +96,8 @@
         android:layout_alignParentBottom="true"
         android:background="?colorPrimary"
         android:elevation="2dp"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:theme="@style/Theme.PlusTimer.Dark">
 
         <Button
             android:id="@id/fragment_current_session_timer_last_delete_button"
@@ -106,7 +105,6 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@drawable/item_background_dark"
             android:text="@string/delete" />
 
         <Button
@@ -115,7 +113,6 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@drawable/item_background_dark"
             android:text="DNF"
             tools:ignore="HardcodedText" />
 
@@ -125,7 +122,6 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@drawable/item_background_dark"
             android:text="+2"
             tools:ignore="HardcodedText" />
     </LinearLayout>

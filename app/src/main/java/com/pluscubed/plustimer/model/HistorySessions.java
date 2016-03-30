@@ -6,8 +6,6 @@ import android.support.annotation.Nullable;
 import com.pluscubed.plustimer.utils.Utils;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -57,8 +55,8 @@ public class HistorySessions {
      * Adds the Session to the history list and save.
      */
     public void addSession(Session session, Context context) {
-        mHistorySessionsList.add(new Session(session));
-        Utils.saveSessionListToFile(context, mFilename, mHistorySessionsList);
+        /*mHistorySessionsList.add(new Session(session));
+        Utils.saveSessionListToFile(context, mFilename, mHistorySessionsList);*/
     }
 
     /**
@@ -88,7 +86,7 @@ public class HistorySessions {
     }
 
     public void sort() {
-        Collections.sort(mHistorySessionsList, new Comparator<Session>() {
+        /*Collections.sort(mHistorySessionsList, new Comparator<Session>() {
             @Override
             public int compare(Session lhs, Session rhs) {
                 if (lhs.getTimestamp() > rhs.getTimestamp()) {
@@ -99,6 +97,6 @@ public class HistorySessions {
                     return 0;
                 }
             }
-        });
+        });*/
     }
 }

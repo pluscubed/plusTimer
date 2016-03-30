@@ -1,5 +1,6 @@
 package com.pluscubed.plustimer.model;
 
+import android.content.Context;
 import android.support.annotation.Nullable;
 
 import com.pluscubed.plustimer.utils.Utils;
@@ -11,7 +12,7 @@ import com.pluscubed.plustimer.utils.Utils;
 public class ScrambleAndSvg {
 
     @Nullable
-    private transient String mSvg;
+    private String mSvg;
     private String mScramble;
 
     public ScrambleAndSvg(String scramble, @Nullable String svg) {
@@ -19,17 +20,13 @@ public class ScrambleAndSvg {
         mSvg = svg;
     }
 
-    public String getUiScramble(boolean sign, String puzzleTypeName) {
-        return sign ? Utils.wcaToSignNotation(mScramble,
-                puzzleTypeName) : mScramble;
-    }
-
     public String getScramble() {
         return mScramble;
     }
 
-    public void setScramble(String scramble, String puzzleTypeName) {
-        mScramble = Utils.signToWcaNotation(scramble, puzzleTypeName);
+    public void setScramble(Context context, String scramble, String puzzleTypeName) {
+        //TODO: Evaluate performance
+        mScramble = Utils.signToWcaNotation(context, scramble, puzzleTypeName).toBlocking().value();
     }
 
     public String getSvg() {

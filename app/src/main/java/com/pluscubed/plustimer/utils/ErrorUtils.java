@@ -1,23 +1,11 @@
 package com.pluscubed.plustimer.utils;
 
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
-import android.util.Log;
 import android.view.WindowManager;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.crashlytics.android.Crashlytics;
 import com.pluscubed.plustimer.BuildConfig;
-import com.pluscubed.plustimer.R;
-import com.pluscubed.plustimer.model.PuzzleType;
-import com.pluscubed.plustimer.model.ScrambleAndSvg;
-
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 
 /**
  * Error Utility Methods
@@ -37,7 +25,7 @@ public class ErrorUtils {
             MaterialDialog.Builder builder = new MaterialDialog.Builder(context)
                     .title("Error")
                     .positiveText("Dismiss");
-            if (sendFileData) {
+            /*if (sendFileData) {
                 builder.negativeText(R.string.email_developer_history_data)
                         .callback(new MaterialDialog.ButtonCallback() {
                             @Override
@@ -46,7 +34,7 @@ public class ErrorUtils {
                                 sendFileDataEmail(context);
                             }
                         });
-            }
+            }*/
             if (!userReadableMessage.equals("")) {
                 builder.content(userReadableMessage + "\n" + e.getMessage());
             }
@@ -62,27 +50,11 @@ public class ErrorUtils {
         showErrorDialog(c, "History/current data can't be read from storage.", e, true);
     }
 
-    public static String getUiScramble(Context c, int position, ScrambleAndSvg scrambleAndSvg,
-                                       boolean signEnabled,
-                                       String puzzleTypeName) {
-        String uiScramble = "";
-        try {
-            uiScramble = scrambleAndSvg.getUiScramble(signEnabled, puzzleTypeName);
-        } catch (NullPointerException e) {
-            String positionString = String.valueOf(position);
-            if (position == -1) {
-                positionString = "CurrentScrambleAndSvg";
-            }
-            logCrashlytics(e);
-            showErrorDialog(c, "Solve #" + positionString + " UI scramble doesn't exist", e, false);
-        }
-        return uiScramble;
-    }
-
-    public static boolean isSolveNonexistent(Context c, String puzzleTypeName, int sessionId,
+    public static boolean isSolveNonexistent(Context c, String puzzleTypeId, String sessionId,
                                              int solveIndex) {
-        try {
-            PuzzleType.valueOf(puzzleTypeName).getSession(sessionId).getSolveByPosition(solveIndex);
+        //TODO
+        /*try {
+            PuzzleType.get(puzzleTypeId).getSession(sessionId).getSolveByPosition(solveIndex);
             return false;
         } catch (IndexOutOfBoundsException e) {
             if (BuildConfig.USE_CRASHLYTICS) {
@@ -90,20 +62,20 @@ public class ErrorUtils {
                         "Solve #" + solveIndex + " nonexistent",
                         PuzzleType.getCurrent()
                                 .getSession(sessionId)
-                                .toString(c, PuzzleType.getCurrent().name(), true, true, true,
-                                        false)
+                                .toString(c, PuzzleType.getCurrentId(), true, true, true, false)
                 );
             }
             showErrorDialog(c, "Solve #" + solveIndex + " doesn't exist", e, false);
             logCrashlytics(e);
             return true;
-        }
+        }*/
+        return false;
     }
 
     public static void sendFileDataEmail(Context context) {
-        BufferedReader r = null;
+        /*BufferedReader r = null;
         StringBuilder total = new StringBuilder();
-        for (PuzzleType p : PuzzleType.values()) {
+        for (PuzzleType p : PuzzleType.getPuzzleTypes()) {
             for (int i = 0; i < 2; i++) {
                 try {
                     String fileName;
@@ -139,6 +111,6 @@ public class ErrorUtils {
         Intent intent = new Intent(Intent.ACTION_SENDTO,
                 Uri.fromParts("mailto", "plusCubed@gmail.com", null));
         intent.putExtra(Intent.EXTRA_TEXT, total.toString());
-        context.startActivity(Intent.createChooser(intent, context.getString(R.string.send_email)));
+        context.startActivity(Intent.createChooser(intent, context.getString(R.string.send_email)));*/
     }
 }

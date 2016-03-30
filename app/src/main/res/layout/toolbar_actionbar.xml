@@ -5,5 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="?actionBarSize"
     android:background="@null"
-    app:contentInsetStart="72dp"
-    app:theme="@style/ToolbarThemeOverlayDark" />
+    android:theme="@style/ToolbarThemeOverlayDark"
+    android:transitionName="@string/toolbar_shared_element"
+    app:contentInsetStart="72dp" />

@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.pluscubed.plustimer">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+        android:name="com.pluscubed.plustimer.App"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="${appName}"
@@ -13,22 +15,32 @@
         android:theme="@style/Theme.PlusTimer"
         tools:replace="android:theme, android:icon, android:label">
         <activity
-            android:name="com.pluscubed.plustimer.ui.CurrentSessionActivity"
-            android:theme="@style/Theme.PlusTimer.WithNavDrawer">
+            android:name=".ui.currentsession.CurrentSessionActivity"
+            android:launchMode="singleTop"
+            android:theme="@style/Theme.PlusTimer.Launch">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:host="@string/auth0_domain_name" android:scheme="@string/auth0_scheme"/>
+            </intent-filter>
         </activity>
+
         <activity
-            android:name="com.pluscubed.plustimer.ui.HistorySessionListActivity"
+            android:name=".ui.historysessions.HistorySessionsActivity"
+            android:launchMode="singleTop"
             android:theme="@style/Theme.PlusTimer.WithNavDrawer" />
 
-        <activity android:name="com.pluscubed.plustimer.ui.HistorySolveListActivity" />
+        <activity android:name=".ui.historysolvelist.HistorySolveListActivity" />
 
         <activity android:name="com.pluscubed.plustimer.ui.SettingsActivity" />
         <activity
-            android:name="com.pluscubed.plustimer.ui.AboutActivity"
+            android:name=".ui.about.AboutActivity"
             android:launchMode="singleTop" />
         <activity android:name="com.pluscubed.plustimer.ui.LicensesActivity" />
     </application>

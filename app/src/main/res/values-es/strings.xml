@@ -27,7 +27,7 @@
     <string name="scramble_image">Imagen del Scramble</string>
     <string name="session_no_solves">¡La sesión está vacía!\n¡Ve a hacer algunos tiempos!</string>
     <string name="timing">Corriendo</string>
-    <string name="solves">"Tiempos: "</string>
+    <string name="solves_colon">"Tiempos: "</string>
     <string name="cao">Actual Ao%1$d</string>
     <string name="lao">Último Ao%1$d</string>
     <string name="bao">Mejor Ao%1$d</string>

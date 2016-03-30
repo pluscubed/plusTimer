@@ -3,15 +3,19 @@ package com.pluscubed.plustimer.model;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.WorkerThread;
 
+import com.couchbase.lite.CouchbaseLiteException;
+import com.couchbase.lite.Database;
+import com.couchbase.lite.Query;
+import com.couchbase.lite.QueryRow;
+import com.couchbase.lite.View;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
 import com.pluscubed.plustimer.R;
-import com.pluscubed.plustimer.sql.SolveDataSource;
 import com.pluscubed.plustimer.utils.PrefUtils;
 import com.pluscubed.plustimer.utils.Utils;
 
@@ -22,211 +26,420 @@ import net.gnehzr.tnoodle.utils.LazyInstantiatorException;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Type;
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import rx.Completable;
+import rx.Observable;
+import rx.Single;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.exceptions.Exceptions;
+import rx.schedulers.Schedulers;
+
 /**
- * Enum for puzzle
+ * Puzzle Type object
  */
-public enum PuzzleType {
-    SQ1FAST("sq1fast", 0),
-    SKEWB("skewb", 1),
-    PYRAMINX("pyram", 2),
-    MINX("minx", 3),
-    CLOCK("clock", 4),
-    SEVEN("777"),
-    SIX("666"),
-    FIVE("555"),
-    FIVE_BLD("555ni"),
-    FOUR("444"),
-    FOUR_BLD("444ni"),
-    FOURFAST("444fast"),
-    THREE("333"),
-    THREE_OH("333"),
-    THREE_FEET("333"),
-    THREE_BLD("333ni"),
-    TWO("222");
+@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE,
+        fieldVisibility = JsonAutoDetect.Visibility.NONE,
+        getterVisibility = JsonAutoDetect.Visibility.NONE,
+        isGetterVisibility = JsonAutoDetect.Visibility.NONE,
+        setterVisibility = JsonAutoDetect.Visibility.NONE
+)
+public class PuzzleType extends CbObject {
+    public static final String TYPE_PUZZLETYPE = "puzzletype";
+    public static final String VIEW_PUZZLETYPES = "puzzletypes";
 
-    private static final int NOT_SPECIAL_STRING_INDEX = -1;
-
-    private static PuzzleType sCurrentPuzzleType;
-    private static List<Observer> mObservers;
-
-    private static SolveDataSource mDataSource;
-
-    static {
-        mObservers = new ArrayList<>();
-    }
-
-    public final String scramblerSpec;
-    public final boolean official;
-    private final int mStringIndex;
-    //Pre-SQL legacy code
-    @Deprecated
-    private final String currentSessionFileName;
-    @Deprecated
-    private final String historyFileName;
-    private int mCurrentSessionId;
-    @Deprecated
-    private HistorySessions mHistorySessionsLegacy;
-
-
-    private Session mCurrentSession;
     @Nullable
-    private Set<Session> mAllSessions;
+    private static Completable sInitialization;
+    @Nullable
+    private static List<PuzzleType> sPuzzleTypes;
 
-    private boolean mEnabled;
+    private static Set<CurrentSessionChangeListener> sCurrentChangeListeners;
+
     private Puzzle mPuzzle;
 
-    PuzzleType(String scramblerSpec, int stringIndex) {
-        this.scramblerSpec = scramblerSpec;
-        mStringIndex = stringIndex;
-        official = !this.scramblerSpec.contains("fast");
-        historyFileName = name() + ".json";
-        currentSessionFileName = name() + "-current.json";
-        mHistorySessionsLegacy = new HistorySessions(historyFileName);
+    @JsonProperty("scrambler")
+    private String mScrambler;
+    @JsonProperty("currentSessionId")
+    private String mCurrentSessionId;
+    @JsonProperty("enabled")
+    private boolean mEnabled;
+    @JsonProperty("inspection")
+    private boolean mInspectionOn;
+    @JsonProperty("name")
+    private String mName;
+    @JsonProperty("sessions")
+    @NonNull
+    private List<String> mSessions;
+
+    //Pre-SQL legacy code
+    @Deprecated
+    private String mCurrentSessionFileName;
+    @Deprecated
+    private String mHistoryFileName;
+    @Deprecated
+    private HistorySessions mHistorySessionsLegacy;
+    @Deprecated
+    private String mLegacyName;
+
+    public PuzzleType() {
+        mSessions = new ArrayList<>();
     }
 
-    PuzzleType(String scramblerSpec) {
-        this(scramblerSpec, NOT_SPECIAL_STRING_INDEX);
+    @WorkerThread
+    public PuzzleType(Context context, String scrambler, String name,
+                      String currentSessionId, boolean inspectionOn) throws CouchbaseLiteException, IOException {
+        super(context);
+
+        mScrambler = scrambler;
+        mName = name;
+        mEnabled = true;
+        mCurrentSessionId = currentSessionId;
+        mInspectionOn = inspectionOn;
+        mSessions = new ArrayList<>();
+
+        updateCb(context);
     }
 
-    public static void registerObserver(Observer observer) {
-        mObservers.add(observer);
+    public static void addCurrentChangeListener(CurrentSessionChangeListener listener) {
+        getListeners().add(listener);
     }
 
-    public static void unregisterObserver(Observer observer) {
-        mObservers.remove(observer);
+    public static void removeCurrentChangeListener(CurrentSessionChangeListener listener) {
+        getListeners().remove(listener);
     }
 
-    public static void unregisterAllObservers() {
-        mObservers.clear();
-    }
-
-    private static void notifyPuzzleTypeChanged() {
-        for (Observer o : mObservers) {
-            o.onPuzzleTypeChanged();
+    private static Set<CurrentSessionChangeListener> getListeners() {
+        if (sCurrentChangeListeners == null) {
+            sCurrentChangeListeners = new HashSet<>();
         }
+        return sCurrentChangeListeners;
     }
 
-    public static PuzzleType getCurrent() {
-        return sCurrentPuzzleType;
-    }
-
-    public static void setCurrent(PuzzleType type, Context context) {
-        PrefUtils.saveCurrentPuzzleType(context, type.name());
-        if (type != sCurrentPuzzleType) {
-            sCurrentPuzzleType = type;
-            sCurrentPuzzleType.initializeCurrentSessionData();
-            notifyPuzzleTypeChanged();
-        }
-    }
-
-    public static List<PuzzleType> valuesExcludingDisabled() {
-        List<PuzzleType> array = new ArrayList<>();
-        for (PuzzleType i : values()) {
-            if (i.isEnabled()) {
-                array.add(i);
-            }
-        }
-        return array;
-    }
-
-    public synchronized static void initialize(Context context) {
-        if (sCurrentPuzzleType == null)
-            sCurrentPuzzleType = PrefUtils.getCurrentPuzzleType(context);
-        mDataSource = new SolveDataSource(context);
-
-        for (PuzzleType puzzleType : values()) {
-            puzzleType.init(context);
-            puzzleType.upgradeDatabase(context);
-        }
-        PrefUtils.saveVersionCode(context);
+    private static void notifyChangeCurrentListeners(String oldType) {
+        notifyChangeCurrentListenersDeferred(oldType).subscribe();
     }
 
     @NonNull
-    public static SolveDataSource getDataSource() {
-        return mDataSource;
+    private static Completable notifyChangeCurrentListenersDeferred(String oldType) {
+        return Completable.fromCallable(() -> {
+            for (CurrentSessionChangeListener listener : getListeners()) {
+                listener.notifyChange(oldType);
+            }
+            return null;
+        }).subscribeOn(AndroidSchedulers.mainThread());
+    }
+
+    public static Observable<PuzzleType> getPuzzleTypes(Context context) {
+        return initialize(context)
+                .andThen(Observable.defer(() -> Observable.from(sPuzzleTypes)));
+    }
+
+    public static Single<PuzzleType> get(Context context, String id) {
+        return initialize(context)
+                .andThen(getInternal(id).toObservable())
+                .toSingle();
+    }
+
+    @NonNull
+    private static Single<PuzzleType> getInternal(String id) {
+        return Single.fromCallable(() -> {
+            for (PuzzleType type : sPuzzleTypes) {
+                if (type.getId().equals(id)) {
+                    return type;
+                }
+            }
+            return sPuzzleTypes.get(0);
+        });
+    }
+
+    public static Single<PuzzleType> getCurrent(Context context) {
+        return initialize(context)
+                .andThen(getInternal(getCurrentId(context)).toObservable())
+                .toSingle();
+    }
+
+    public static String getCurrentId(Context context) {
+        return PrefUtils.getCurrentPuzzleType(context);
+    }
+
+    public static Observable<PuzzleType> getEnabledPuzzleTypes(Context context) {
+        return getPuzzleTypes(context)
+                .flatMap(puzzleType -> {
+                    if (puzzleType.isEnabled()) {
+                        return Observable.just(puzzleType);
+                    } else {
+                        return Observable.empty();
+                    }
+                });
+    }
+
+    public static boolean isInitialized() {
+        return sPuzzleTypes != null;
+    }
+
+    public static Completable initialize(Context context) {
+        if (isInitialized()) {
+            return Completable.complete();
+        }
+
+        if (sInitialization == null) {
+            try {
+                int savedVersionCode = PrefUtils.getVersionCode(context);
+
+                Database database = CouchbaseInstance.get(context).getDatabase();
+                View puzzletypesView = database.getView(VIEW_PUZZLETYPES);
+                puzzletypesView.setMap((document, emitter) -> {
+                    if (document.get("type").equals(TYPE_PUZZLETYPE)) {
+                        emitter.emit(document.get("name"), document.get("scrambler"));
+                    }
+                }, "1");
+
+                sInitialization = initializePuzzleTypes(context, database)
+                        .doOnCompleted(() -> {
+                    for (PuzzleType puzzleType : sPuzzleTypes) {
+                        //TODO: upgrade database
+                        //puzzleType.upgradeDatabase(context);
+                    }
+
+                    sInitialization = null;
+                }).toObservable()
+                        .publish().autoConnect()
+                        .toCompletable();
+
+            } catch (CouchbaseLiteException | IOException e) {
+                return Completable.error(e);
+            }
+        }
+
+        return sInitialization;
+    }
+
+    @NonNull
+    private static Completable initializePuzzleTypes(Context context, Database database) {
+        return Completable.create(completableSubscriber -> {
+            Query puzzleTypesQuery = database.getView(VIEW_PUZZLETYPES).createQuery();
+            puzzleTypesQuery.runAsync((rows, error) -> {
+                if (!rows.hasNext()) {
+                    try {
+                        initializeFirstRun(context);
+                        completableSubscriber.onCompleted();
+                    } catch (CouchbaseLiteException | IOException e) {
+                        completableSubscriber.onError(e);
+                    }
+                } else {
+                    List<PuzzleType> puzzleTypes = new ArrayList<>();
+                    for (QueryRow row : rows) {
+                        PuzzleType type = PuzzleType.fromDoc(row.getDocument(), PuzzleType.class);
+                        puzzleTypes.add(type);
+                    }
+
+                    sPuzzleTypes = puzzleTypes;
+
+                    completableSubscriber.onCompleted();
+                }
+            });
+        }).subscribeOn(Schedulers.io());
+    }
+
+    private static void initializeFirstRun(Context context) throws CouchbaseLiteException, IOException {
+        //Generate default puzzle types from this...
+        String[] scramblers = context.getResources().getStringArray(R.array.scramblers);
+        //and this, with the appropriate UI names...
+        String[] defaultCustomPuzzleTypes = context.getResources()
+                .getStringArray(R.array.default_custom_puzzletypes);
+        //from this
+        String[] puzzles = context.getResources().getStringArray(R.array.scrambler_names);
+        //and the legacy names from this
+        String[] legacyNames = context.getResources().getStringArray(R.array.legacy_names);
+
+        List<PuzzleType> puzzleTypes = new ArrayList<>();
+
+        for (int i = 0; i < scramblers.length + defaultCustomPuzzleTypes.length; i++) {
+            String scrambler;
+            String defaultCustomType = null;
+            String uiName;
+
+            if (scramblers.length > i) {
+                scrambler = scramblers[i];
+            } else {
+                defaultCustomType = defaultCustomPuzzleTypes[i - scramblers.length];
+                scrambler = defaultCustomType.substring(0, defaultCustomType.indexOf(","));
+            }
+
+
+            if (puzzles.length > i) {
+                uiName = puzzles[i];
+            } else {
+                int order = Integer.parseInt(scrambler.substring(0, 1));
+                String addon = null;
+                if (scrambler.contains("ni")) {
+                    addon = context.getString(R.string.bld);
+                }
+                if (defaultCustomType != null) {
+                    if (defaultCustomType.contains("feet")) {
+                        addon = context.getString(R.string.feet);
+                    } else if (defaultCustomType.contains("oh")) {
+                        addon = context.getString(R.string.oh);
+                    }
+                }
+                if (addon != null) {
+                    uiName = order + "x" + order + "-" + addon;
+                } else {
+                    uiName = order + "x" + order;
+                }
+            }
+
+            PuzzleType newPuzzleType = new PuzzleType(context, scrambler, uiName, null, true/*, legacyNames[i]*/);
+
+            if (uiName.equals("3x3")) {
+                //Default current puzzle type
+                newPuzzleType.newSession(context);
+
+                PrefUtils.setCurrentPuzzleType(context, newPuzzleType.getId());
+            }
+
+            puzzleTypes.add(newPuzzleType);
+        }
+
+        Collections.sort(puzzleTypes,
+                (lhs, rhs) -> Collator.getInstance().compare(lhs.getName(), rhs.getName()));
+
+        sPuzzleTypes = puzzleTypes;
+    }
+
+    public static Completable setCurrent(Context context, String puzzleTypeId) {
+        String oldId = getCurrentId(context);
+        if (!puzzleTypeId.equals(oldId)) {
+
+            PrefUtils.setCurrentPuzzleType(context, puzzleTypeId);
+
+            return get(context, puzzleTypeId)
+                    .doOnSuccess(puzzleType -> {
+                        if (puzzleType.getCurrentSessionId() == null) {
+                            try {
+                                puzzleType.newSession(context);
+                            } catch (IOException | CouchbaseLiteException e) {
+                                throw Exceptions.propagate(e);
+                            }
+                        }
+                    })
+                    .flatMapObservable(puzzleType ->
+                            notifyChangeCurrentListenersDeferred(oldId).toObservable())
+                    .toCompletable();
+        } else {
+            return Completable.complete();
+        }
+    }
+
+    private Session newSession(Context context) throws IOException, CouchbaseLiteException {
+        Session session = new Session(context);
+
+        mCurrentSessionId = session.getId();
+        mSessions.add(session.getId());
+
+        updateCb(context);
+
+        return session;
+    }
+
+    public String getCurrentSessionId() {
+        return mCurrentSessionId;
+    }
+
+    public boolean isBld() {
+        return mScrambler.contains("ni");
+    }
+
+    public boolean isScramblerOfficial() {
+        return !mScrambler.contains("fast");
+    }
+
+    public String getScrambler() {
+        return mScrambler;
+    }
+
+    public String getName() {
+        return mName;
+    }
+
+    boolean isEnabled() {
+        return mEnabled;
+    }
+
+    public Completable setEnabled(Context context, boolean enabled) {
+        return initialize(context)
+                .concatWith(Completable.defer(() -> {
+                    mEnabled = enabled;
+                    if (mId.equals(getCurrentId(context)) && !mEnabled) {
+                        for (PuzzleType puzzleType : sPuzzleTypes) {
+                            if (puzzleType.mEnabled) {
+                                return setCurrent(context, puzzleType.getId())
+                                        .doOnCompleted(() -> updateCb(context));
+                            }
+                        }
+                    }
+
+                    return Completable.complete();
+                }));
+
+    }
+
+    public String getId() {
+        return mId;
     }
 
     @Deprecated
     public String getHistoryFileName() {
-        return historyFileName;
+        return mHistoryFileName;
     }
 
     @Deprecated
     public String getCurrentSessionFileName() {
-        return currentSessionFileName;
+        return mCurrentSessionFileName;
     }
 
+    //TODO
     /*@Deprecated
-    public HistorySessions getHistorySessions() {
+    public HistorySessions getHistorySessionsSorted() {
         return mHistorySessionsLegacy;
     }*/
 
-    public void deleteSession(Session session) {
-        mDataSource.deleteSession(this, session.getId());
-    }
+    public void deleteSession(Context context, String sessionId) throws CouchbaseLiteException, IOException {
+        getSession(context, sessionId)
+                .getDocument(context)
+                .delete();
 
-    public List<Session> getSortedHistorySessions() {
-        List<Session> sessions = new ArrayList<>(mAllSessions);
-        if (sessions.size() > 0) {
-            sessions.remove(getSession(mCurrentSessionId));
-            Collections.sort(sessions, new Comparator<Session>() {
-                @Override
-                public int compare(Session lhs, Session rhs) {
-                    if (lhs.getTimestamp() > rhs.getTimestamp()) {
-                        return 1;
-                    } else if (lhs.getTimestamp() < rhs.getTimestamp()) {
-                        return -1;
-                    } else {
-                        return 0;
-                    }
-                }
-            });
-        }
-        return sessions;
-    }
+        mSessions.remove(sessionId);
 
-
-    public int getCurrentSessionId() {
-        return mCurrentSessionId;
-    }
-
-    private synchronized void init(Context context) {
-        Set<String> selected = PrefUtils.getSelectedPuzzleTypeNames(context);
-        mEnabled = (selected.size() == 0 || selected.contains(name()));
-        mCurrentSessionId = PrefUtils.getCurrentSessionIndex(this, context);
-    }
-
-    public synchronized void initializeAllSessionData() {
-        mAllSessions = mDataSource.loadHistorySessionsForPuzzleType(this);
-    }
-
-    public synchronized void initializeCurrentSessionData() {
-        mCurrentSession = mDataSource.loadSessionForPuzzleType(this, mCurrentSessionId);
+        updateCb(context);
     }
 
     private void upgradeDatabase(Context context) {
+        mHistoryFileName = mLegacyName + ".json";
+        mCurrentSessionFileName = mLegacyName + "-current.json";
+        mHistorySessionsLegacy = new HistorySessions(mHistoryFileName);
+
+        //TODO
         //AFTER UPDATING APP////////////
         int savedVersionCode = PrefUtils.getVersionCode(context);
 
         if (savedVersionCode <= 10) {
             //Version <=10: Set up history sessions with old
             // name first
-            if (!scramblerSpec.equals("333") || name().equals("THREE")) {
-                mHistorySessionsLegacy.setFilename(scramblerSpec + ".json");
+            if (!mScrambler.equals("333") || mLegacyName.equals("THREE")) {
+                mHistorySessionsLegacy.setFilename(mScrambler + ".json");
                 mHistorySessionsLegacy.init(context);
-                mHistorySessionsLegacy.setFilename(historyFileName);
+                mHistorySessionsLegacy.setFilename(mHistoryFileName);
                 if (mHistorySessionsLegacy.getList().size() > 0) {
                     mHistorySessionsLegacy.save(context);
                 }
                 File oldFile = new File(context.getFilesDir(),
-                        scramblerSpec + ".json");
+                        mScrambler + ".json");
                 oldFile.delete();
             }
         }
@@ -234,130 +447,100 @@ public enum PuzzleType {
         if (savedVersionCode <= 13) {
             //Version <=13: ScrambleAndSvg json structure changes
             Gson gson = new GsonBuilder()
-                    .registerTypeAdapter(Session.class, new JsonDeserializer<Session>() {
-                        @Override
-                        public Session deserialize(JsonElement json, Type typeOfT,
-                                                   JsonDeserializationContext context)
-                                throws JsonParseException {
+                    .registerTypeAdapter(Session.class,
+                            (JsonDeserializer<Session>) (json, typeOfT, sessionJsonDeserializer) -> {
 
-                            Gson gson = new GsonBuilder()
-                                    .registerTypeAdapter(ScrambleAndSvg.class, new
-                                            JsonDeserializer<ScrambleAndSvg>() {
-                                                @Override
-                                                public ScrambleAndSvg deserialize(JsonElement json,
-                                                                                  Type typeOfT,
-                                                                                  JsonDeserializationContext context)
-                                                        throws JsonParseException {
-                                                    return new ScrambleAndSvg(json.getAsJsonPrimitive
-                                                            ().getAsString(), null);
-                                                }
-                                            }).create();
+                                Gson gson1 = new GsonBuilder()
+                                        .registerTypeAdapter(ScrambleAndSvg.class,
+                                                (JsonDeserializer<ScrambleAndSvg>) (json1, typeOfT1, context1) ->
+                                                        new ScrambleAndSvg(json1.getAsJsonPrimitive().getAsString(), null))
+                                        .create();
 
-                            Session s = gson.fromJson(json, typeOfT);
-                            for (final Solve solve : s.getSolves()) {
-                                solve.attachSession(s);
-                            }
-                            return s;
-                        }
-                    })
+                                Session s = gson1.fromJson(json, typeOfT);
+                                /*for (final Solve solve : s.getSolves()) {
+                                    //TODO: Legacy
+                                    //solve.attachSession(s);
+                                }*/
+                                return s;
+                            })
                     .create();
-            Utils.updateData(context, historyFileName, gson);
-            Utils.updateData(context, currentSessionFileName, gson);
+            Utils.updateData(context, mHistoryFileName, gson);
+            Utils.updateData(context, mCurrentSessionFileName, gson);
         }
 
         mHistorySessionsLegacy.setFilename(null);
         ////////////////////////////
     }
 
-    public void submitCurrentSession(Context context) {
-        //Insert a copy of the current session in the second to last position. The "new" current session
-        //will be at the last position.
-        if (mAllSessions != null)
-            mAllSessions.add(new Session(mCurrentSession));
-        mCurrentSession.newSession();
-        mCurrentSessionId = mCurrentSession.getId();
-        PrefUtils.saveCurrentSessionIndex(this, context, mCurrentSessionId);
+    public void submitCurrentSession(Context context) throws IOException, CouchbaseLiteException {
+        newSession(context);
+
+        notifyChangeCurrentListeners(getCurrentId(context));
     }
 
     public Puzzle getPuzzle() {
         if (mPuzzle == null) {
             try {
-                mPuzzle = PuzzlePlugins.getScramblers().get(scramblerSpec)
+                mPuzzle = PuzzlePlugins.getScramblers().get(mScrambler)
                         .cachedInstance();
             } catch (LazyInstantiatorException |
-                    BadLazyClassDescriptionException | IOException e) {
+                    BadLazyClassDescriptionException |
+                    IOException e) {
                 e.printStackTrace();
             }
         }
         return mPuzzle;
     }
 
-    public String getUiName(Context context) {
-        if (mStringIndex == NOT_SPECIAL_STRING_INDEX) {
-            int order = Integer.parseInt(scramblerSpec.substring(0, 1));
-            String addon = null;
-            if (name().contains("BLD")) {
-                addon = context.getString(R.string.bld);
-            }
-            if (name().contains("FEET")) {
-                addon = context.getString(R.string.feet);
-            }
-            if (name().contains("OH")) {
-                addon = context.getString(R.string.oh);
-            }
-            if (addon != null) {
-                return order + "x" + order + "-" + addon;
-            } else {
-                return order + "x" + order;
-            }
-        }
-        return context.getResources().getStringArray(R.array.puzzles)
-                [mStringIndex];
+    public Single<Session> getCurrentSessionDeferred(Context context) {
+        return getSessionDeferred(context, mCurrentSessionId);
     }
 
-    public Session getCurrentSession() {
-        return getSession(mCurrentSessionId);
+    public Session getCurrentSession(Context context) throws CouchbaseLiteException, IOException {
+        return getSession(context, mCurrentSessionId);
     }
 
-    @Nullable
-    public Session getSession(int id) {
-        if (id == mCurrentSessionId) {
-            //Check that if the current session is null (from reset or
-            // initializing)
-            return mCurrentSession;
-        } else if (mAllSessions != null) {
-            for (Session session : mAllSessions) {
-                if (session.getId() == id) {
-                    return session;
-                }
-            }
-        }
-        return null;
+    public Single<Session> getSessionDeferred(Context context, String id) {
+        return Single.defer(() -> Single.just(getSession(context, id)))
+                .subscribeOn(Schedulers.io());
     }
 
-    public void resetCurrentSession() {
-        mCurrentSession.newSession();
+    public Session getSession(Context context, String id) throws CouchbaseLiteException, IOException {
+        return fromDocId(context, id, Session.class);
     }
 
-    boolean isEnabled() {
-        return mEnabled;
+    public Observable<Session> getHistorySessionsSorted(Context context) {
+        return getHistorySessions(context)
+                .toSortedList((session, session2) -> {
+                    return Utils.compare(session.getLastSolve(context).toBlocking().first().getTimestamp(),
+                            session2.getLastSolve(context).toBlocking().first().getTimestamp());
+                }).flatMap(Observable::from);
     }
 
-    public void setEnabled(boolean enabled) {
-        mEnabled = enabled;
-        if (this == sCurrentPuzzleType && !mEnabled) {
-            for (PuzzleType i : PuzzleType.values()) {
-                if (i.mEnabled) {
-                    sCurrentPuzzleType = i;
-                    notifyPuzzleTypeChanged();
-                    break;
-                }
-            }
-        }
+    public Observable<Session> getHistorySessions(Context context) {
+        return Observable.from(new ArrayList<>(mSessions))
+                .filter(id -> !id.equals(mCurrentSessionId))
+                .subscribeOn(Schedulers.io())
+                .flatMap(id -> {
+                    try {
+                        return Observable.just(getSession(context, id));
+                    } catch (CouchbaseLiteException | IOException e) {
+                        return Observable.error(e);
+                    }
+                });
     }
 
-    public static class Observer {
-        public void onPuzzleTypeChanged() {
-        }
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof PuzzleType && ((PuzzleType) o).getId().equals(mId);
+    }
+
+    @Override
+    protected String getType() {
+        return TYPE_PUZZLETYPE;
+    }
+
+    public interface CurrentSessionChangeListener {
+        void notifyChange(String oldType);
     }
 }
