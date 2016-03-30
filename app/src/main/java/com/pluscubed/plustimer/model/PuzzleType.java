@@ -199,14 +199,8 @@ public class PuzzleType extends CbObject {
                     }
                 }, "1");
 
-                Completable completable;
-                if (savedVersionCode < 24) {
-                    completable = initializeFirstRunAsync(context);
-                } else {
-                    completable = initializePuzzleTypes(database);
-                }
-
-                sInitialization = completable.doOnCompleted(() -> {
+                sInitialization = initializePuzzleTypes(context, database)
+                        .doOnCompleted(() -> {
                     for (PuzzleType puzzleType : sPuzzleTypes) {
                         //TODO: upgrade database
                         //puzzleType.upgradeDatabase(context);
@@ -226,27 +220,29 @@ public class PuzzleType extends CbObject {
     }
 
     @NonNull
-    private static Completable initializePuzzleTypes(Database database) {
+    private static Completable initializePuzzleTypes(Context context, Database database) {
         return Completable.create(completableSubscriber -> {
             Query puzzleTypesQuery = database.getView(VIEW_PUZZLETYPES).createQuery();
             puzzleTypesQuery.runAsync((rows, error) -> {
-                List<PuzzleType> puzzleTypes = new ArrayList<>();
-                for (QueryRow row : rows) {
-                    PuzzleType type = PuzzleType.fromDoc(row.getDocument(), PuzzleType.class);
-                    puzzleTypes.add(type);
+                if (!rows.hasNext()) {
+                    try {
+                        initializeFirstRun(context);
+                        completableSubscriber.onCompleted();
+                    } catch (CouchbaseLiteException | IOException e) {
+                        completableSubscriber.onError(e);
+                    }
+                } else {
+                    List<PuzzleType> puzzleTypes = new ArrayList<>();
+                    for (QueryRow row : rows) {
+                        PuzzleType type = PuzzleType.fromDoc(row.getDocument(), PuzzleType.class);
+                        puzzleTypes.add(type);
+                    }
+
+                    sPuzzleTypes = puzzleTypes;
+
+                    completableSubscriber.onCompleted();
                 }
-
-                sPuzzleTypes = puzzleTypes;
-
-                completableSubscriber.onCompleted();
             });
-        }).subscribeOn(Schedulers.io());
-    }
-
-    private static Completable initializeFirstRunAsync(Context context) {
-        return Completable.fromCallable(() -> {
-            initializeFirstRun(context);
-            return null;
         }).subscribeOn(Schedulers.io());
     }
 

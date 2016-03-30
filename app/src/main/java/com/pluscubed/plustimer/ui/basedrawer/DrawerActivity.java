@@ -17,7 +17,7 @@ import android.os.Handler;
 import android.support.annotation.IdRes;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
-import android.support.graphics.drawable.VectorDrawableCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -197,8 +197,7 @@ public abstract class DrawerActivity<P extends DrawerPresenter<V>, V extends Dra
         });
 
         mHeaderProfileImage = (ImageView) headerView.findViewById(R.id.drawer_header_profile_image);
-        VectorDrawableCompat drawable = VectorDrawableCompat.create(getResources(), R.drawable.profile_placeholder, getTheme());
-        mHeaderProfileImage.setImageDrawable(drawable);
+        mHeaderProfileImage.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.profile_placeholder));
         mHeaderProfileImage.setOnClickListener(v -> presenter.onNavDrawerHeaderClicked());
 
         mHeaderTitle = (TextView) headerView.findViewById(R.id.drawer_header_title);
