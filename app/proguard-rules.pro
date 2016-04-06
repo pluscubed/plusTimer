@@ -36,15 +36,15 @@
 -keep class sun.misc.Unsafe { *; }
 #-keep class com.google.gson.stream.** { *; }
 
--keep class com.pluscubed.plustimer.model.Session { *; }
--keep class com.pluscubed.plustimer.model.Solve { *; }
--keep class com.pluscubed.plustimer.model.ScrambleAndSvg { *; }
+#-keep class com.pluscubed.plustimer.model.Session { *; }
+#-keep class com.pluscubed.plustimer.model.Solve { *; }
+#-keep class com.pluscubed.plustimer.model.ScrambleAndSvg { *; }
 
 ##---------------End: proguard configuration for Gson  ----------
 
 #Crashlytics
 -keep class com.crashlytics.** { *; }
--keep class com.crashlytics.android.**
+-dontwarn com.crashlytics.**
 
 #retrolambda
 -dontwarn java.lang.invoke.*
@@ -82,3 +82,6 @@
 #Jackson
 -dontwarn org.w3c.**
 -dontwarn java.beans.**
+
+#Couchbase
+-keep class com.couchbase.** { *; }
