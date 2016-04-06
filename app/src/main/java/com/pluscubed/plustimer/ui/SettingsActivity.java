@@ -147,28 +147,26 @@ public class SettingsActivity extends ThemableActivity {
 
                         puzzleTypeMultiList.setEntries(entries.toArray(new CharSequence[entries.size()]));
                         puzzleTypeMultiList.setEntryValues(entryValues.toArray(new CharSequence[entryValues.size()]));
+
+                        puzzleTypeMultiList.setOnPreferenceChangeListener((preference, newValue) -> {
+                            Set selected = (Set) newValue;
+                            if (selected.size() == 0) {
+                                Toast.makeText(getActivity(),
+                                        getString(R.string.no_disable_all_puzzletypes),
+                                        Toast.LENGTH_SHORT).show();
+                                return false;
+                            }
+                            PuzzleType.getPuzzleTypes(getActivity())
+                                    .flatMap(puzzleType ->
+                                            puzzleType.setEnabled(
+                                                    getActivity(),
+                                                    selected.contains(puzzleType.getId())
+                                            ).toObservable()
+                                    ).subscribe();
+                            return true;
+                        });
                     });
 
-
-            puzzleTypeMultiList.setOnPreferenceChangeListener((preference, newValue) -> {
-                Set selected = (Set) newValue;
-                if (selected.size() == 0) {
-                    Toast.makeText(getActivity(),
-                            getString(R.string
-                                    .no_disable_all_puzzletypes),
-                            Toast.LENGTH_SHORT).show();
-                    return false;
-                }
-                PuzzleType.getPuzzleTypes(getActivity())
-                        .flatMap(puzzleType ->
-                                puzzleType.setEnabled(
-                                        getActivity(),
-                                        selected.contains(puzzleType.getId())
-                                )
-                                        .toObservable()
-                        ).subscribe();
-                return true;
-            });
         }
 
         @Override

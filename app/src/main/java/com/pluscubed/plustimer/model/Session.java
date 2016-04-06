@@ -142,10 +142,12 @@ public class Session extends CbObject implements Parcelable {
     }
 
     public void removeListener(SolvesListener listener) {
-        Set<SolvesListener> solvesListeners = getListenerMap().get(mId);
-        solvesListeners.remove(listener);
-        if (solvesListeners.size() == 0) {
-            getListenerMap().remove(mId);
+        if (getListenerMap().containsKey(mId)) {
+            Set<SolvesListener> solvesListeners = getListenerMap().get(mId);
+            solvesListeners.remove(listener);
+            if (solvesListeners.size() == 0) {
+                getListenerMap().remove(mId);
+            }
         }
     }
 

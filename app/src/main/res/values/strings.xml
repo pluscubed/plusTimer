@@ -121,7 +121,7 @@
     <string name="history">History</string>
     <string name="current">Current</string>
     <string name="help">Help</string>
-    <string name="about">About</string>
+    <string name="about">About &amp; Feedback</string>
 
     <string-array name="current_session_page_titles">
         <item>Timer</item>
