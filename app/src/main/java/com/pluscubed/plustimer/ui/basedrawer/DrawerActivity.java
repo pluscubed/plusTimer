@@ -135,6 +135,7 @@ public abstract class DrawerActivity<P extends DrawerPresenter<V>, V extends Dra
                 .load(url)
                 .asBitmap()
                 .centerCrop()
+                .placeholder(R.drawable.profile_placeholder)
                 .transform(new BitmapTransformation(this) {
                     @Override
                     protected Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {

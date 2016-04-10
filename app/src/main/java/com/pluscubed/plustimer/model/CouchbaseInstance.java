@@ -15,6 +15,10 @@ import com.couchbase.lite.android.AndroidContext;
 import com.couchbase.lite.replicator.Replication;
 import com.pluscubed.plustimer.R;
 import com.pluscubed.plustimer.utils.PrefUtils;
+import com.squareup.okhttp.Callback;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
 import java.io.IOException;
 import java.net.URL;
@@ -93,8 +97,10 @@ public class CouchbaseInstance {
         });
     }
 
-    public Single<UserProfile> signIn(String idToken) {
+    public Single<UserProfile> signIn(String idToken, String refreshToken) {
         mIdToken = idToken;
+        //Get expiration time and save tokens
+        getIdTokenFromRefreshToken(refreshToken).subscribe();
         return loadUserFromIdToken(idToken);
     }
 
@@ -123,8 +129,6 @@ public class CouchbaseInstance {
                     @Override
                     public void onSuccess(UserProfile payload) {
                         singleSubscriber.onSuccess(payload);
-
-                        //updateView();
                     }
 
                     @Override
@@ -157,22 +161,40 @@ public class CouchbaseInstance {
     public void startReplication() {
         stopReplication();
 
-        try {
-            URL url = new URL(DATABASE_URL + mUser.getId().replace("|", "-").toLowerCase());
-            mPush = getDatabase().createPushReplication(url);
-            mPull = getDatabase().createPullReplication(url);
-            mPull.setContinuous(true);
-            mPush.setContinuous(true);
-            HashMap<String, Object> requestHeadersParam = new HashMap<>();
-            requestHeadersParam.put("Authorization", "Bearer " + mIdToken);
-            mPush.setCreateTarget(true);
-            mPush.setHeaders(requestHeadersParam);
-            mPull.setHeaders(requestHeadersParam);
-            mPush.start();
-            mPull.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        String userId = mUser.getId();
+        String database = userId.replace("|", "-").toLowerCase();
+
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url(DATABASE_URL + "_peruser_provision?database=" + database + "&username=" + userId)
+                .build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Request request, IOException e) {
+
+            }
+
+            @Override
+            public void onResponse(Response response) throws IOException {
+                URL url = new URL(DATABASE_URL + database);
+                mPush = getDatabase().createPushReplication(url);
+                mPull = getDatabase().createPullReplication(url);
+                mPush.setContinuous(true);
+                mPull.setContinuous(true);
+                HashMap<String, Object> requestHeadersParam = new HashMap<>();
+                requestHeadersParam.put("Authorization", "Bearer " + mIdToken);
+                mPush.setHeaders(requestHeadersParam);
+                mPull.setHeaders(requestHeadersParam);
+                mPush.start();
+                mPull.start();
+                mPush.addChangeListener(new Replication.ChangeListener() {
+                    @Override
+                    public void changed(Replication.ChangeEvent event) {
+
+                    }
+                });
+            }
+        });
     }
 
     public void stopReplication() {

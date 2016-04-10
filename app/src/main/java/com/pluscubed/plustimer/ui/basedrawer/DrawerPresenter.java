@@ -106,7 +106,7 @@ public class DrawerPresenter<V extends DrawerView> extends Presenter<V> {
 
             @Override
             public void onSuccess(Token token) {
-                instance.signIn(token.getIdToken())
+                instance.signIn(token.getIdToken(), token.getRefreshToken())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(onUserLoaded(instance));
             }
@@ -161,7 +161,7 @@ public class DrawerPresenter<V extends DrawerView> extends Presenter<V> {
     }
 
     public void onNavDrawerHeaderClicked() {
-        /*if (mDisplayedUser == null) {
+        if (mDisplayedUser == null) {
             try {
                 signIn();
             } catch (CouchbaseLiteException | IOException e) {
@@ -171,9 +171,9 @@ public class DrawerPresenter<V extends DrawerView> extends Presenter<V> {
             }
         } else {
             //signOutFlow();
-        }*/
+        }
 
-        getView().displayToast("Coming very soon!");
+        //getView().displayToast("Coming very soon!");
     }
 
     public static class Factory<V extends DrawerView> implements PresenterFactory<DrawerPresenter<V>> {
