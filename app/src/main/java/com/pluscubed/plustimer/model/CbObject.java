@@ -41,6 +41,13 @@ public abstract class CbObject {
         connectCb(context);
     }
 
+    @WorkerThread
+    protected CbObject(Context context, String id) throws CouchbaseLiteException, IOException {
+        mId = id;
+        CouchbaseInstance.get(context).getDatabase().getDocument(id);
+        updateCb(context);
+    }
+
     static <T extends CbObject> T fromDocId(Context context, String docId, Class<T> type) throws CouchbaseLiteException, IOException {
         if (sUpdatingObjects.containsKey(docId)) {
             return (T) sUpdatingObjects.get(docId);

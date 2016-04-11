@@ -92,7 +92,8 @@ public class PuzzleType extends CbObject {
 
     @WorkerThread
     public PuzzleType(Context context, String scrambler, String name,
-                      String currentSessionId, boolean inspectionOn) throws CouchbaseLiteException, IOException {
+                      String currentSessionId, boolean inspectionOn,
+                      String id) throws CouchbaseLiteException, IOException {
         super(context);
 
         mScrambler = scrambler;
@@ -271,6 +272,7 @@ public class PuzzleType extends CbObject {
                 scrambler = defaultCustomType.substring(0, defaultCustomType.indexOf(","));
             }
 
+            String id = scrambler;
 
             if (puzzles.length > i) {
                 uiName = puzzles[i];
@@ -283,8 +285,10 @@ public class PuzzleType extends CbObject {
                 if (defaultCustomType != null) {
                     if (defaultCustomType.contains("feet")) {
                         addon = context.getString(R.string.feet);
+                        id += "-feet";
                     } else if (defaultCustomType.contains("oh")) {
                         addon = context.getString(R.string.oh);
+                        id += "-oh";
                     }
                 }
                 if (addon != null) {
@@ -294,7 +298,7 @@ public class PuzzleType extends CbObject {
                 }
             }
 
-            PuzzleType newPuzzleType = new PuzzleType(context, scrambler, uiName, null, true/*, legacyNames[i]*/);
+            PuzzleType newPuzzleType = new PuzzleType(context, scrambler, uiName, null, true, id/*, legacyNames[i]*/);
 
             if (uiName.equals("3x3")) {
                 //Default current puzzle type

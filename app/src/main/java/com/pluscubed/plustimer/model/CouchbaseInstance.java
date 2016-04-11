@@ -187,11 +187,8 @@ public class CouchbaseInstance {
                 mPull.setHeaders(requestHeadersParam);
                 mPush.start();
                 mPull.start();
-                mPush.addChangeListener(new Replication.ChangeListener() {
-                    @Override
-                    public void changed(Replication.ChangeEvent event) {
+                mPull.addChangeListener(event -> {
 
-                    }
                 });
             }
         });
