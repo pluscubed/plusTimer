@@ -89,7 +89,7 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
         outState.putParcelableArrayList(STATE_SOLVES, (ArrayList<Solve>) mSolves);
         outState.putString(STATE_STATS, mStats);
         outState.putParcelable(STATE_BEST, mBest);
-        outState.putParcelable(STATE_WORST, mBest);
+        outState.putParcelable(STATE_WORST, mWorst);
         outState.putBoolean(STATE_INITIALIZED, mInitialized);
     }
 
@@ -179,7 +179,7 @@ public class SolveListAdapter extends RecyclerView.Adapter<SolveListAdapter.View
                 break;
         }
 
-        if (mode != RecyclerViewUpdate.DATA_RESET && mode != RecyclerViewUpdate.REMOVE_ALL) {
+        if (mode != RecyclerViewUpdate.REMOVE_ALL) {
             Solve oldBest = mBest;
             Solve oldWorst = mWorst;
             mBest = Utils.getBestSolveOfList(mSolves);

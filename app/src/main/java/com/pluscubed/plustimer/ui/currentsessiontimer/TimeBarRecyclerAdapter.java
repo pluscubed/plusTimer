@@ -115,7 +115,7 @@ public class TimeBarRecyclerAdapter extends RecyclerView.Adapter<TimeBarRecycler
                 break;
         }
 
-        if (mode != RecyclerViewUpdate.DATA_RESET && mode != RecyclerViewUpdate.REMOVE_ALL) {
+        if (mode != RecyclerViewUpdate.REMOVE_ALL) {
             Solve oldBest = mBest;
             Solve oldWorst = mWorst;
             mBest = Utils.getBestSolveOfList(mSolves);
@@ -152,7 +152,7 @@ public class TimeBarRecyclerAdapter extends RecyclerView.Adapter<TimeBarRecycler
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putParcelable(STATE_BEST, mBest);
-        outState.putParcelable(STATE_WORST, mBest);
+        outState.putParcelable(STATE_WORST, mWorst);
         outState.putParcelableArrayList(STATE_SOLVES, (ArrayList<Solve>) mSolves);
         outState.putBoolean(STATE_INITIALIZED, mInitialized);
     }

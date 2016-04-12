@@ -143,6 +143,19 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
     private AnimatorSet mLastBarAnimationSet;
     private ValueAnimator mScrambleAnimator;
     private ObjectAnimator mScrambleElevationAnimator;
+    private int mGreen500;
+    //Runnables
+    private final Runnable holdTimerRunnable = new Runnable() {
+        @Override
+        public void run() {
+            setTextColor(mGreen500);
+            setTimerTextToPrefSize();
+            if (!mInspecting) {
+                playExitAnimations();
+                getActivityCallback().lockDrawerAndViewPager(true);
+            }
+        }
+    };
     private final Runnable inspectionRunnable = new Runnable() {
         @Override
         public void run() {
@@ -200,28 +213,8 @@ public class CurrentSessionTimerFragment extends BasePresenterFragment<CurrentSe
             mUiHandler.postDelayed(this, REFRESH_RATE);
         }
     };
-    private int mGreen500;
-    //Runnables
-    private final Runnable holdTimerRunnable = new Runnable() {
-        @Override
-        public void run() {
-            setTextColor(mGreen500);
-            setTimerTextToPrefSize();
-            if (!mInspecting) {
-                playExitAnimations();
-                getActivityCallback().lockDrawerAndViewPager(true);
-            }
-        }
-    };
     private TimeBarRecyclerAdapter mTimeBarAdapter;
     private int mRed500;
-
-    //TODO
-    public void onNewSession() {
-        updateStatsAndTimerText(RecyclerViewUpdate.DATA_RESET, null);
-        TimeBarRecyclerAdapter adapter = (TimeBarRecyclerAdapter) mTimeBarRecycler.getAdapter();
-        adapter.notifyChange(RecyclerViewUpdate.REMOVE_ALL, null);
-    }
 
     //Generate string with specified current averages and mean of current session
     private Single<String> buildStatsWithAveragesOf(Context context,

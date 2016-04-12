@@ -39,6 +39,8 @@ import rx.schedulers.Schedulers;
 public class Session extends CbObject implements Parcelable {
     public static final String TYPE_SESSION = "session";
 
+    public static final String ID_CURRENT_PREFIX = "current-";
+
     public static final int GET_AVERAGE_INVALID_NOT_ENOUGH = -1;
     public static final long TIMESTAMP_NO_SOLVES = Long.MIN_VALUE;
     public static final Parcelable.Creator<Session> CREATOR = new Parcelable.Creator<Session>() {
@@ -62,7 +64,12 @@ public class Session extends CbObject implements Parcelable {
     public Session(Context context) throws CouchbaseLiteException, IOException {
         super(context);
         mSolves = new HashSet<>();
+        updateCb(context);
+    }
 
+    public Session(Context context, String id) throws CouchbaseLiteException, IOException {
+        super(context, id);
+        mSolves = new HashSet<>();
         updateCb(context);
     }
 
@@ -116,8 +123,6 @@ public class Session extends CbObject implements Parcelable {
         }
     }
 
-    //TODO
-
     public static String getStringMean(List<Solve> solves, boolean milliseconds) {
         long sum = 0;
         for (Solve i : solves) {
@@ -129,6 +134,8 @@ public class Session extends CbObject implements Parcelable {
         }
         return Utils.timeStringFromNs(sum / solves.size(), milliseconds);
     }
+
+    //TODO
 
     public void addListener(SolvesListener listener) {
         if (getListenerMap().containsKey(mId)) {
@@ -181,6 +188,10 @@ public class Session extends CbObject implements Parcelable {
 
     public String getId() {
         return mId;
+    }
+
+    protected void setId(String id) {
+        mId = id;
     }
 
     public SolveBuilder newSolve(Context context) {

@@ -7,6 +7,7 @@ import android.support.annotation.WorkerThread;
 
 import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;
+import com.couchbase.lite.Document;
 import com.couchbase.lite.Query;
 import com.couchbase.lite.QueryRow;
 import com.couchbase.lite.View;
@@ -94,7 +95,7 @@ public class PuzzleType extends CbObject {
     public PuzzleType(Context context, String scrambler, String name,
                       String currentSessionId, boolean inspectionOn,
                       String id) throws CouchbaseLiteException, IOException {
-        super(context);
+        super(context, id);
 
         mScrambler = scrambler;
         mName = name;
@@ -341,9 +342,9 @@ public class PuzzleType extends CbObject {
     }
 
     private Session newSession(Context context) throws IOException, CouchbaseLiteException {
-        Session session = new Session(context);
+        mCurrentSessionId = getId() + "-" + Session.ID_CURRENT_PREFIX + "default";
 
-        mCurrentSessionId = session.getId();
+        Session session = new Session(context, mCurrentSessionId);
         mSessions.add(session.getId());
 
         updateCb(context);
@@ -477,9 +478,24 @@ public class PuzzleType extends CbObject {
     }
 
     public void submitCurrentSession(Context context) throws IOException, CouchbaseLiteException {
-        newSession(context);
+        //newSession(context);
 
-        notifyChangeCurrentListeners(getCurrentId(context));
+        getSessionDeferred(context, mCurrentSessionId)
+                .subscribe(session -> {
+                    try {
+                        Document doc = CouchbaseInstance.get(context).getDatabase().createDocument();
+
+                        session.setId(doc.getId());
+                        session.updateCb(context);
+                        mSessions.add(doc.getId());
+
+                        newSession(context);
+                        notifyChangeCurrentListeners(getCurrentId(context));
+                    } catch (CouchbaseLiteException | IOException e) {
+                        e.printStackTrace();
+                    }
+
+                });
     }
 
     public Puzzle getPuzzle() {
