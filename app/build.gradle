@@ -10,7 +10,6 @@ buildscript {
         classpath 'me.tatarka:gradle-retrolambda:3.3.0-beta4'
         classpath 'com.fernandocejas.frodo:frodo-plugin:0.8.2'
         classpath 'com.jakewharton.hugo:hugo-plugin:1.2.1'
-        classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.5.0'
     }
 }
 apply plugin: 'com.android.application'
@@ -18,7 +17,6 @@ apply plugin: 'io.fabric'
 apply plugin: 'me.tatarka.retrolambda'
 apply plugin: 'com.fernandocejas.frodo'
 apply plugin: 'com.jakewharton.hugo'
-apply plugin: 'com.getkeepsafe.dexcount'
 
 repositories {
     maven { url 'https://maven.fabric.io/public' }
@@ -114,23 +112,26 @@ retrolambda {
 
 dependencies {
 
+    retrolambdaConfig 'net.orfjackal.retrolambda:retrolambda:2.3.0'
+
     compile 'com.github.bumptech.glide:glide:3.7.0'
 
     compile 'com.pluscubed:insets-dispatcher:0.1.3'
-    compile 'com.auth0.android:identity-core:1.15.0'
+    compile 'com.auth0.android:identity-core:1.16.1'
 
-    debugCompile 'im.dino:dbinspector:3.2.3@aar'
+    debugCompile 'im.dino:dbinspector:3.2.4@aar'
 
     //compile 'com.firebase:firebase-client-android:2.5.2'
     //compile 'com.firebaseui:firebase-ui:0.3.1'
 
-    compile 'com.couchbase.lite:couchbase-lite-android:1.2.1-14'
-    compile 'com.couchbase.lite:couchbase-lite-android-forestdb:1.2.1-14'
+    compile 'com.couchbase.lite:couchbase-lite-android:0.0.0-738'
+    compile 'com.couchbase.lite:couchbase-lite-android-forestdb:0.0.0-738'
+    compile 'com.github.oxo42:stateless4j:2.5.0'
 
-    compile 'io.reactivex:rxandroid:1.1.0'
-    compile 'io.reactivex:rxjava:1.1.3'
+    compile 'io.reactivex:rxandroid:1.2.0'
+    compile 'io.reactivex:rxjava:1.1.5'
 
-    compile 'com.github.PhilJay:MPAndroidChart:v2.2.4'
+    compile 'com.github.PhilJay:MPAndroidChart:v2.2.5'
 
     compile 'com.android.support:appcompat-v7:23.3.0'
     compile 'com.android.support:support-v13:23.3.0'
@@ -144,7 +145,7 @@ dependencies {
 
     testCompile 'junit:junit:4.12'
     testCompile 'org.mockito:mockito-all:1.10.19'
-    testCompile "org.robolectric:robolectric:3.1-SNAPSHOT"
+    testCompile "org.robolectric:robolectric:3.1"
 
     compile 'com.github.cubing:tnoodle:v0.11.1'
     compile 'com.caverock:androidsvg:1.2.1'
@@ -156,11 +157,11 @@ dependencies {
         transitive = true;
     }
 
-    compile 'com.fasterxml.jackson.core:jackson-core:2.7.3'
-    compile 'com.fasterxml.jackson.core:jackson-databind:2.7.3'
-    compile 'com.fasterxml.jackson.core:jackson-annotations:2.7.3'
+    compile 'com.fasterxml.jackson.core:jackson-core:2.7.4'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.7.4'
+    compile 'com.fasterxml.jackson.core:jackson-annotations:2.7.4'
 
-    compile 'com.squareup.okhttp:okhttp:2.7.5'
+    compile 'com.squareup.okhttp3:okhttp:3.3.1'
 
     debugCompile 'com.squareup.leakcanary:leakcanary-android:1.4-beta2'
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
